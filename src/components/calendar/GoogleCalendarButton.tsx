@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Check, Loader, Trash2 } from 'lucide-react';
+import { Calendar, Check, Loader, Trash2, User } from 'lucide-react';
 import { useGoogleCalendar } from '../../contexts/GoogleCalendarContext';
 import { useTenant } from '../../contexts/TenantContext';
 import { format } from 'date-fns';
@@ -10,6 +10,18 @@ export const GoogleCalendarButton: React.FC = () => {
   const { isConnected, lastSyncTime, isSyncing, connectToGoogle, deleteAllSyncedEvents } = useGoogleCalendar();
   const { currentTenant } = useTenant();
   const [showConfirm, setShowConfirm] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [calendarName, setCalendarName] = useState<string>('Primary');
+
+  useEffect(() => {
+    if (isConnected && window.gapi && window.gapi.client) {
+      window.gapi.client.load('oauth2', 'v2', () => {
+        window.gapi.client.oauth2.userinfo.get().execute((resp: any) => {
+          if (resp.email) setUserEmail(resp.email);
+        });
+      });
+    }
+  }, [isConnected]);
 
   const handleConnect = () => {
     // Call connectToGoogle synchronously from user click event
@@ -37,8 +49,17 @@ export const GoogleCalendarButton: React.FC = () => {
           <Check className="w-5 h-5 text-green-600" />
           <div className="text-sm flex-1">
             <div className="font-medium text-green-900">{t('googleCalendar.connected')}</div>
+            {userEmail && (
+              <div className="flex items-center gap-1 text-green-700">
+                <User className="w-3 h-3" />
+                <span className="text-xs">{userEmail}</span>
+              </div>
+            )}
+            <div className="text-green-700 text-xs">
+              יומן: {calendarName}
+            </div>
             {lastSyncTime && (
-              <div className="text-green-700">
+              <div className="text-green-700 text-xs">
                 {t('googleCalendar.lastSync')}: {format(lastSyncTime, 'dd/MM/yyyy HH:mm')}
               </div>
             )}
