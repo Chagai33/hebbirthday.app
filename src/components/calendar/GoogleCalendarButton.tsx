@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Check, Loader, Trash2, User } from 'lucide-react';
+import { Calendar, Check, Loader, Trash2, User, LogOut } from 'lucide-react';
 import { useGoogleCalendar } from '../../contexts/GoogleCalendarContext';
 import { useTenant } from '../../contexts/TenantContext';
 import { format } from 'date-fns';
+import { googleCalendarService } from '../../services/googleCalendar.service';
 
 export const GoogleCalendarButton: React.FC = () => {
   const { t } = useTranslation();
-  const { isConnected, lastSyncTime, isSyncing, connectToGoogle, deleteAllSyncedEvents } = useGoogleCalendar();
+  const { isConnected, lastSyncTime, isSyncing, connectToGoogle, deleteAllSyncedEvents, checkConnectionStatus } = useGoogleCalendar();
   const { currentTenant } = useTenant();
   const [showConfirm, setShowConfirm] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -42,6 +43,15 @@ export const GoogleCalendarButton: React.FC = () => {
     }
   };
 
+  const handleDisconnect = async () => {
+    try {
+      await googleCalendarService.disconnectGoogleCalendar();
+      await checkConnectionStatus();
+    } catch (error) {
+      console.error('Error disconnecting:', error);
+    }
+  };
+
   if (isConnected) {
     return (
       <div className="space-y-2">
@@ -64,15 +74,25 @@ export const GoogleCalendarButton: React.FC = () => {
               </div>
             )}
           </div>
-          <button
-            onClick={() => setShowConfirm(true)}
-            disabled={isSyncing}
-            className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-            title="מחק את כל האירועים המסונכרנים"
-          >
-            <Trash2 className="w-4 h-4" />
-            <span>מחק הכל</span>
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowConfirm(true)}
+              disabled={isSyncing}
+              className="flex items-center gap-1 px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+              title="מחק את כל האירועים המסונכרנים"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>מחק הכל</span>
+            </button>
+            <button
+              onClick={handleDisconnect}
+              disabled={isSyncing}
+              className="flex items-center gap-1 px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+              title="נתק מיומן Google"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {showConfirm && (
