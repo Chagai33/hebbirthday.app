@@ -14,10 +14,10 @@ export const GoogleCalendarButton: React.FC = () => {
   const [calendarName, setCalendarName] = useState<string>('Primary');
 
   useEffect(() => {
-    if (isConnected && window.gapi && window.gapi.client) {
-      window.gapi.client.load('oauth2', 'v2', () => {
-        window.gapi.client.oauth2.userinfo.get().execute((resp: any) => {
-          if (resp.email) setUserEmail(resp.email);
+    if (isConnected) {
+      import('../../services/googleCalendar.service').then(({ googleCalendarService }) => {
+        googleCalendarService.getGoogleAccountInfo().then((info) => {
+          if (info?.email) setUserEmail(info.email);
         });
       });
     }

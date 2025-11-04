@@ -1295,3 +1295,34 @@ export const disconnectGoogleCalendar = functions.https.onCall(async (data, cont
     throw new functions.https.HttpsError('internal', 'שגיאה בניתוק החיבור ליומן Google');
   }
 });
+
+export const getGoogleAccountInfo = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'חובה להיות מחובר למערכת');
+  }
+
+  try {
+    const accessToken = await getValidAccessToken(context.auth.uid);
+
+    const oauth2Client = new google.auth.OAuth2();
+    oauth2Client.setCredentials({ access_token: accessToken });
+
+    const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
+    const userInfo = await oauth2.userinfo.get();
+
+    return {
+      success: true,
+      email: userInfo.data.email,
+      name: userInfo.data.name,
+      picture: userInfo.data.picture
+    };
+  } catch (error: any) {
+    functions.logger.error('Error getting Google account info:', error);
+
+    if (error.code === 401 || error.code === 403) {
+      throw new functions.https.HttpsError('permission-denied', 'אין הרשאת גישה. אנא התחבר מחדש');
+    }
+
+    throw new functions.https.HttpsError('internal', 'שגיאה בקבלת מידע על חשבון Google');
+  }
+});

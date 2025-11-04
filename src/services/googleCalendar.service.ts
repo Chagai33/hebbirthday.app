@@ -226,5 +226,29 @@ export const googleCalendarService = {
         syncedBirthdaysCount: 0
       };
     }
+  },
+
+  async getGoogleAccountInfo(): Promise<{ email: string; name: string; picture: string } | null> {
+    try {
+      const getInfoFunction = httpsCallable<
+        void,
+        { success: boolean; email: string; name: string; picture: string }
+      >(functions, 'getGoogleAccountInfo');
+
+      const result = await getInfoFunction();
+
+      if (!result.data.success) {
+        return null;
+      }
+
+      return {
+        email: result.data.email || '',
+        name: result.data.name || '',
+        picture: result.data.picture || ''
+      };
+    } catch (error: any) {
+      logger.error('Error getting Google account info:', error);
+      return null;
+    }
   }
 };
