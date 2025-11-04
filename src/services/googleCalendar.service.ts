@@ -1,31 +1,13 @@
 import { httpsCallable } from 'firebase/functions';
-import { doc, getDoc } from 'firebase/firestore';
-import { functions, db } from '../config/firebase';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { functions, db, auth } from '../config/firebase';
 import { SyncResult, BulkSyncResult, GoogleCalendarSyncStatus } from '../types';
 import { logger } from '../utils/logger';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 export const googleCalendarService = {
-  _oauthClient: null as any,
-
-  initOAuthClient(): void {
-    if (this._oauthClient) return;
-
-    if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
-      throw new Error('Google API טרם נטען. אנא רענן את הדף ונסה שוב');
-    }
-
-    this._oauthClient = window.google.accounts.oauth2.initCodeClient({
-      client_id: GOOGLE_CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/calendar.events',
-      ux_mode: 'popup',
-      callback: () => {},
-      error_callback: () => {}
-    });
-  },
-
-  initiateGoogleOAuth(): Promise<string> {
+  initiateGoogleOAuth(): Promise<{ accessToken: string; expiresIn: number }> {
     return new Promise((resolve, reject) => {
       try {
         if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
@@ -33,17 +15,19 @@ export const googleCalendarService = {
           return;
         }
 
-        const client = window.google.accounts.oauth2.initCodeClient({
+        const client = window.google.accounts.oauth2.initTokenClient({
           client_id: GOOGLE_CLIENT_ID,
           scope: 'https://www.googleapis.com/auth/calendar.events',
-          ux_mode: 'popup',
           callback: (response: any) => {
-            if (response.code) {
-              resolve(response.code);
+            if (response.access_token) {
+              resolve({
+                accessToken: response.access_token,
+                expiresIn: response.expires_in || 3600
+              });
             } else if (response.error) {
               reject(new Error(`שגיאת Google: ${response.error}`));
             } else {
-              reject(new Error('לא התקבל קוד אימות מ-Google'));
+              reject(new Error('לא התקבל טוקן גישה מ-Google'));
             }
           },
           error_callback: (error: any) => {
@@ -52,8 +36,8 @@ export const googleCalendarService = {
           }
         });
 
-        // Call requestCode synchronously, immediately after user interaction
-        client.requestCode();
+        // Request access token synchronously, immediately after user interaction
+        client.requestAccessToken();
       } catch (error) {
         logger.error('Error initiating Google OAuth:', error);
         reject(error);
@@ -61,23 +45,28 @@ export const googleCalendarService = {
     });
   },
 
-  async exchangeAuthCode(code: string): Promise<void> {
+  async saveAccessToken(accessToken: string, expiresIn: number): Promise<void> {
     try {
-      const exchangeFunction = httpsCallable<{ code: string }, { success: boolean; message: string }>(
-        functions,
-        'exchangeGoogleAuthCode'
-      );
-
-      const result = await exchangeFunction({ code });
-
-      if (!result.data.success) {
-        throw new Error(result.data.message || 'שגיאה בחיבור ליומן Google');
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('משתמש לא מחובר');
       }
 
-      logger.log('Successfully connected to Google Calendar');
+      const expiresAt = Date.now() + (expiresIn * 1000);
+
+      await setDoc(doc(db, 'googleCalendarTokens', user.uid), {
+        userId: user.uid,
+        accessToken: accessToken,
+        expiresAt: expiresAt,
+        scope: 'https://www.googleapis.com/auth/calendar.events',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+      logger.log('Successfully saved access token to Firestore');
     } catch (error: any) {
-      logger.error('Error exchanging auth code:', error);
-      throw new Error(error.message || 'שגיאה בחיבור ליומן Google');
+      logger.error('Error saving access token:', error);
+      throw new Error(error.message || 'שגיאה בשמירת הטוקן');
     }
   },
 
@@ -192,6 +181,16 @@ export const googleCalendarService = {
 
       const tokenData = tokenDoc.data();
       const createdAt = tokenData.createdAt?.toDate?.()?.toISOString() || null;
+      const expiresAt = tokenData.expiresAt || 0;
+      const now = Date.now();
+
+      if (now >= expiresAt) {
+        return {
+          isConnected: false,
+          lastSyncTime: null,
+          syncedBirthdaysCount: 0
+        };
+      }
 
       return {
         isConnected: true,

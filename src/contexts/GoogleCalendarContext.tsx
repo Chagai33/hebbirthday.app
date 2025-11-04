@@ -62,14 +62,13 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
     setIsSyncing(true);
 
     try {
-      // Call initiateGoogleOAuth immediately (synchronously from user click)
-      const code = await googleCalendarService.initiateGoogleOAuth();
+      const tokenResponse = await googleCalendarService.initiateGoogleOAuth();
 
-      if (!code) {
-        throw new Error('לא התקבל קוד אימות מ-Google');
+      if (!tokenResponse.accessToken) {
+        throw new Error('לא התקבל טוקן גישה מ-Google');
       }
 
-      await googleCalendarService.exchangeAuthCode(code);
+      await googleCalendarService.saveAccessToken(tokenResponse.accessToken, tokenResponse.expiresIn);
 
       await refreshStatus();
 

@@ -1,8 +1,10 @@
 # Google Calendar Integration - Setup Guide
 
-## פיצ'ר חדש: סנכרון אוטומטי ליומן Google
+## פיצ'ר: סנכרון אוטומטי ליומן Google
 
-המערכת כעת תומכת בסנכרון אוטומטי של ימי הולדת עבריים ליומן Google האישי של המשתמש.
+המערכת תומכת בסנכרון אוטומטי של ימי הולדת עבריים ליומן Google האישי של המשתמש.
+
+**שיטת Authentication:** Token Flow (OAuth 2.0 Implicit Grant)
 
 ---
 
@@ -23,7 +25,7 @@
 3. בחלק **Scopes**, הוסף:
    - `https://www.googleapis.com/auth/calendar.events`
 
-### 3. הגדרת Authorized Origins & Redirect URIs
+### 3. הגדרת Authorized JavaScript Origins
 
 1. עבור ל-**APIs & Services** > **Credentials**
 2. בחר ב-OAuth 2.0 Client ID הקיים
@@ -32,10 +34,7 @@
    - `http://localhost:5173`
    - `https://hebbirthday2026.firebaseapp.com`
 
-4. הוסף **Authorized redirect URIs**:
-   - `https://hebbirthday2026v3c.netlify.app`
-   - `http://localhost:5173`
-   - `https://hebbirthday2026.firebaseapp.com`
+4. **שים לב:** עם Token Flow, אין צורך ב-Authorized redirect URIs!
 
 5. שמור את השינויים
 
@@ -50,26 +49,19 @@ cd functions
 npm install
 ```
 
-### 2. הגדרת Environment Variables
-
-הקובץ `functions/.env` כבר מכיל את המשתנים הנדרשים:
-- `GOOGLE_CLIENT_ID`
-- `GOOGLE_CLIENT_SECRET`
-
-**חשוב:** אל תעלה קובץ זה ל-Git!
-
-### 3. Deploy של Cloud Functions
+### 2. Deploy של Cloud Functions
 
 ```bash
 firebase deploy --only functions
 ```
 
 הפונקציות הבאות ייפרסו:
-- `exchangeGoogleAuthCode` - החלפת קוד OAuth ב-tokens
 - `syncBirthdayToGoogleCalendar` - סנכרון יום הולדת בודד
 - `syncMultipleBirthdaysToGoogleCalendar` - סנכרון מרובה
 - `removeBirthdayFromGoogleCalendar` - הסרת יום הולדת
 - `disconnectGoogleCalendar` - ניתוק חיבור
+
+**שים לב:** עם Token Flow, אין צורך יותר בפונקציה `exchangeGoogleAuthCode`. הטוקן נשמר ישירות מה-Frontend ל-Firestore!
 
 ---
 
@@ -114,7 +106,6 @@ firebase deploy --only hosting
 
 | פונקציה | מגבלה | חלון זמן |
 |---------|-------|----------|
-| `exchangeGoogleAuthCode` | 5 בקשות | דקה |
 | `syncBirthdayToGoogleCalendar` | 30 בקשות | דקה |
 | `syncMultipleBirthdaysToGoogleCalendar` | 3 בקשות | 5 דקות |
 | `removeBirthdayFromGoogleCalendar` | 20 בקשות | דקה |
@@ -122,8 +113,8 @@ firebase deploy --only hosting
 ### הודעות שגיאה למשתמש
 
 כל השגיאות מוחזרות בעברית ללא חשיפת מידע פנימי:
-- "יותר מדי ניסיונות. אנא המתן דקה"
-- "שגיאה בחיבור ליומן Google. אנא נסה שנית"
+- "הטוקן פג תוקף. אנא התחבר מחדש ליומן Google"
+- "שגיאה בסנכרון ליומן Google. אנא נסה שנית"
 - "אין הרשאת גישה ליומן Google. אנא התחבר מחדש"
 
 ---
@@ -163,13 +154,14 @@ firebase deploy --only hosting
 {
   userId: string,
   accessToken: string,
-  refreshToken: string,
   expiresAt: number (timestamp),
   scope: string,
   createdAt: timestamp,
   updatedAt: timestamp
 }
 ```
+
+**שים לב:** עם Token Flow, אין `refreshToken`. הטוקן תקף לשעה אחת בלבד, ואז המשתמש צריך להתחבר מחדש.
 
 ### שדות חדשים ב-`birthdays`
 
@@ -191,10 +183,10 @@ firebase deploy --only hosting
 - בדוק שה-Client ID נכון ב-`.env`
 - נסה לרענן את הדפדפן
 
-### "Token expired"
+### "הטוקן פג תוקף"
 
-המערכת מרעננת אוטומטית את ה-token.
-אם זה נכשל - המשתמש יתבקש להתחבר מחדש.
+עם Token Flow, הטוקן תקף לשעה אחת בלבד.
+כשהוא פג תוקף, המשתמש צריך ללחוץ שוב על "התחבר ליומן Google".
 
 ### "אין הרשאת גישה"
 
@@ -212,10 +204,11 @@ firebase functions:log --only exchangeGoogleAuthCode
 
 ## אבטחה
 
-1. **Client Secret** - מאוחסן רק ב-Cloud Functions (לא ב-Frontend)
-2. **Tokens** - מאוחסנים ב-Firestore עם Rules מחמירים
-3. **Rate Limiting** - למניעת שימוש לרעה
-4. **הודעות שגיאה** - ללא חשיפת מידע טכני
+1. **Token Flow** - אין צורך ב-Client Secret כלל (רק Client ID)
+2. **Access Token** - מאוחסן ב-Firestore עם Rules מחמירים (רק המשתמש יכול לגשת לטוקן שלו)
+3. **תוקף מוגבל** - הטוקן תקף רק לשעה אחת
+4. **Rate Limiting** - למניעת שימוש לרעה
+5. **הודעות שגיאה** - ללא חשיפת מידע טכני
 
 ---
 
@@ -225,8 +218,17 @@ firebase functions:log --only exchangeGoogleAuthCode
 - האירועים ביומן הם "all-day events" (כל היום)
 - האירועים כוללים תזכורות: 24 שעות ו-60 דקות לפני
 - ניתן להסיר אירועים מהיומן דרך האפליקציה
+- **חשוב:** עם Token Flow, הטוקן תקף לשעה בלבד - משתמשים צריכים להתחבר מחדש בכל פעם
+
+## יתרונות המעבר ל-Token Flow
+
+✅ **פשוט יותר** - אין צורך ב-redirect URIs מורכבים
+✅ **בטוח יותר** - אין צורך לחשוף Client Secret
+✅ **מהיר יותר** - אין round-trip לשרת
+✅ **פחות שגיאות** - אין בעיות עם callback URLs
+✅ **עובד טוב עם Popup** - תוכנן במיוחד ל-popup mode
 
 ---
 
 **תאריך עדכון:** נובמבר 2025
-**גרסה:** 2.1.0
+**גרסה:** 2.2.0 (Token Flow Migration)

@@ -716,33 +716,6 @@ export const onUserCreate = functions.auth.user().onCreate(async (user) => {
   }
 });
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
-const REDIRECT_URI = 'postmessage';
-
-async function refreshGoogleToken(refreshToken: string): Promise<{ accessToken: string; expiresAt: number }> {
-  const oauth2Client = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIRECT_URI);
-  oauth2Client.setCredentials({ refresh_token: refreshToken });
-
-  try {
-    const { credentials } = await oauth2Client.refreshAccessToken();
-    const accessToken = credentials.access_token;
-    const expiryDate = credentials.expiry_date;
-
-    if (!accessToken || !expiryDate) {
-      throw new Error('Failed to refresh token');
-    }
-
-    return {
-      accessToken,
-      expiresAt: expiryDate
-    };
-  } catch (error) {
-    functions.logger.error('Error refreshing Google token:', error);
-    throw new functions.https.HttpsError('internal', 'שגיאה ברענון הגישה ליומן Google');
-  }
-}
-
 async function getValidAccessToken(userId: string): Promise<string> {
   const tokenDoc = await db.collection('googleCalendarTokens').doc(userId).get();
 
@@ -758,80 +731,13 @@ async function getValidAccessToken(userId: string): Promise<string> {
   const now = Date.now();
   const expiresAt = tokenData.expiresAt || 0;
 
-  if (now >= expiresAt - 60000) {
-    functions.logger.log('Token expired, refreshing...');
-    const refreshed = await refreshGoogleToken(tokenData.refreshToken);
-
-    await db.collection('googleCalendarTokens').doc(userId).update({
-      accessToken: refreshed.accessToken,
-      expiresAt: refreshed.expiresAt,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
-    });
-
-    return refreshed.accessToken;
+  if (now >= expiresAt) {
+    throw new functions.https.HttpsError('permission-denied', 'הטוקן פג תוקף. אנא התחבר מחדש ליומן Google');
   }
 
   return tokenData.accessToken;
 }
 
-export const exchangeGoogleAuthCode = functions.https.onCall(async (data, context) => {
-  if (!context.auth) {
-    throw new functions.https.HttpsError('unauthenticated', 'חובה להיות מחובר למערכת');
-  }
-
-  const { code } = data;
-  if (!code) {
-    throw new functions.https.HttpsError('invalid-argument', 'קוד אימות חסר');
-  }
-
-  const rateLimitRef = db.collection('rate_limits').doc(`${context.auth.uid}_google_auth`);
-  const rateLimitDoc = await rateLimitRef.get();
-
-  const now = Date.now();
-  const windowMs = 60000;
-  const maxRequests = 5;
-
-  if (rateLimitDoc.exists) {
-    const rateLimitData = rateLimitDoc.data();
-    const requests = rateLimitData?.requests || [];
-    const recentRequests = requests.filter((timestamp: number) => now - timestamp < windowMs);
-
-    if (recentRequests.length >= maxRequests) {
-      throw new functions.https.HttpsError('resource-exhausted', 'יותר מדי ניסיונות. אנא המתן דקה');
-    }
-
-    await rateLimitRef.update({ requests: [...recentRequests, now] });
-  } else {
-    await rateLimitRef.set({ requests: [now] });
-  }
-
-  try {
-    const oauth2Client = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIRECT_URI);
-
-    const { tokens } = await oauth2Client.getToken(code);
-
-    if (!tokens.access_token || !tokens.refresh_token || !tokens.expiry_date) {
-      throw new Error('Missing required tokens');
-    }
-
-    await db.collection('googleCalendarTokens').doc(context.auth.uid).set({
-      userId: context.auth.uid,
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token,
-      expiresAt: tokens.expiry_date,
-      scope: tokens.scope || '',
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp()
-    });
-
-    functions.logger.log(`Google Calendar connected for user ${context.auth.uid}`);
-
-    return { success: true, message: 'החיבור ליומן Google הושלם בהצלחה' };
-  } catch (error: any) {
-    functions.logger.error('Error exchanging Google auth code:', error);
-    throw new functions.https.HttpsError('internal', 'שגיאה בחיבור ליומן Google. אנא נסה שנית');
-  }
-});
 
 export const syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
