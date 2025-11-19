@@ -187,63 +187,45 @@ export const CSVImportPreviewModal = ({
           </button>
         </div>
 
-        <div className="p-6 border-b border-gray-200 bg-gray-50">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
-              <div className="flex items-center gap-2 mb-1">
-                <FileText className="w-4 h-4 text-blue-600" />
-                <p className="text-xs text-gray-600 font-medium">
-                  {t('csvImport.totalRows', 'סך הכל שורות')}
-                </p>
-              </div>
-              <p className="text-2xl font-bold text-gray-900">{data.length}</p>
+        <div className="px-6 py-3 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-blue-600" />
+              <span className="text-gray-600">{t('csvImport.totalRows', 'סך הכל שורות')}:</span>
+              <span className="font-semibold text-gray-900">{data.length}</span>
             </div>
-
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-green-200">
-              <div className="flex items-center gap-2 mb-1">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-                <p className="text-xs text-gray-600 font-medium">
-                  {t('csvImport.validRows', 'שורות תקינות')}
-                </p>
-              </div>
-              <p className="text-2xl font-bold text-green-700">{validCount}</p>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle className="w-3.5 h-3.5 text-green-600" />
+              <span className="text-gray-600">{t('csvImport.validRows', 'שורות תקינות')}:</span>
+              <span className="font-semibold text-green-700">{validCount}</span>
             </div>
-
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-red-200">
-              <div className="flex items-center gap-2 mb-1">
-                <AlertCircle className="w-4 h-4 text-red-600" />
-                <p className="text-xs text-gray-600 font-medium">
-                  {t('csvImport.invalidRows', 'שורות לא תקינות')}
-                </p>
-              </div>
-              <p className="text-2xl font-bold text-red-700">{invalidCount}</p>
+            <div className="flex items-center gap-1.5">
+              <AlertCircle className="w-3.5 h-3.5 text-red-600" />
+              <span className="text-gray-600">{t('csvImport.invalidRows', 'שורות לא תקינות')}:</span>
+              <span className="font-semibold text-red-700">{invalidCount}</span>
             </div>
-
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-yellow-200">
-              <div className="flex items-center gap-2 mb-1">
-                <AlertCircle className="w-4 h-4 text-yellow-600" />
-                <p className="text-xs text-gray-600 font-medium">
-                  {t('csvImport.duplicates', 'כפילויות אפשריות')}
-                </p>
+            {duplicateCount > 0 && (
+              <div className="flex items-center gap-1.5">
+                <AlertCircle className="w-3.5 h-3.5 text-yellow-600" />
+                <span className="text-gray-600">{t('csvImport.duplicates', 'כפילויות אפשריות')}:</span>
+                <span className="font-semibold text-yellow-700">{duplicateCount}</span>
               </div>
-              <p className="text-2xl font-bold text-yellow-700">{duplicateCount}</p>
-            </div>
+            )}
           </div>
         </div>
 
-        <div className="p-6 border-b border-gray-200 bg-blue-50 space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm flex-shrink-0">
-              <Users className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('csvImport.defaultGroup', 'קבוצת ברירת מחדל לכל הרשומות')}
+        <div className="px-6 py-3 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+              <Users className="w-4 h-4 text-gray-600 flex-shrink-0" />
+              <label className="text-xs text-gray-600 whitespace-nowrap">
+                {t('csvImport.defaultGroup', 'קבוצת ברירת מחדל')}:
               </label>
               <select
                 value={defaultGroupId}
                 onChange={(e) => setDefaultGroupId(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                className="flex-1 min-w-0 px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                title={t('csvImport.groupNote', 'קבוצה זו תוחל על כל הרשומות שלא הוגדרה להן קבוצה בקובץ')}
               >
                 <option value="">
                   {t('csvImport.noDefaultGroup', 'ללא קבוצת ברירת מחדל')}
@@ -261,33 +243,27 @@ export const CSVImportPreviewModal = ({
                   );
                 })}
               </select>
-              <p className="text-xs text-gray-600 mt-1">
-                {t('csvImport.groupNote', 'קבוצה זו תוחל על כל הרשומות שלא הוגדרה להן קבוצה בקובץ')}
-              </p>
             </div>
             <button
               onClick={() => setShowGroupCreator(!showGroupCreator)}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-2 text-sm font-medium whitespace-nowrap"
+              className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-medium flex items-center gap-1.5 whitespace-nowrap"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
               {t('csvImport.createGroup', 'צור קבוצה')}
             </button>
           </div>
 
           {showGroupCreator && (
-            <div className="bg-white rounded-lg p-4 border border-gray-300 space-y-3">
-              <div className="flex items-center gap-2 mb-2">
-                <FolderPlus className="w-5 h-5 text-green-600" />
-                <h3 className="font-semibold text-gray-900">
+            <div className="mt-3 bg-white rounded-lg p-3 border border-gray-300 space-y-2">
+              <div className="flex items-center gap-2 mb-1">
+                <FolderPlus className="w-4 h-4 text-green-600" />
+                <h3 className="text-sm font-semibold text-gray-900">
                   {t('csvImport.createSubgroupTitle', 'צור תת-קבוצה')}
                 </h3>
               </div>
-              <p className="text-xs text-gray-600 mb-3">
-                {t('csvImport.createSubgroupHint', 'צור תת-קבוצה תחת משפחה/חברים/עבודה, למשל: "יחיאל" תחת "משפחה"')}
-              </p>
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     {t('csvImport.subgroupNameLabel', 'שם התת-קבוצה')} *
                   </label>
                   <input
@@ -300,18 +276,18 @@ export const CSVImportPreviewModal = ({
                       }
                     }}
                     placeholder={t('csvImport.subgroupPlaceholder', 'למשל: יחיאל, עמיתי צוות, וכו...')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-green-500 focus:border-green-500"
                     autoFocus
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">
                     {t('csvImport.underWhichGroup', 'תחת איזו קבוצה ראשית?')} *
                   </label>
                   <select
                     value={selectedParentGroup}
                     onChange={(e) => setSelectedParentGroup(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white"
+                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-green-500 focus:border-green-500 bg-white"
                   >
                     <option value="">{t('birthday.selectGroup')}</option>
                     {rootGroups.map((root) => (
@@ -322,14 +298,14 @@ export const CSVImportPreviewModal = ({
                   </select>
                 </div>
               </div>
-              <div className="flex items-center gap-2 pt-2">
+              <div className="flex items-center gap-2 pt-1">
                 <button
                   type="button"
                   onClick={handleCreateGroup}
                   disabled={!newGroupName.trim() || !selectedParentGroup || createGroup.isPending}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 text-sm font-medium flex items-center gap-2"
+                  className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded transition-colors disabled:opacity-50 text-xs font-medium flex items-center gap-1.5"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3.5 h-3.5" />
                   {createGroup.isPending ? t('common.loading', 'טוען...') : t('csvImport.addSubgroup', 'הוסף תת-קבוצה')}
                 </button>
                 <button
@@ -339,7 +315,7 @@ export const CSVImportPreviewModal = ({
                     setNewGroupName('');
                     setSelectedParentGroup('');
                   }}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                  className="px-3 py-1.5 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors text-xs font-medium"
                 >
                   {t('common.close', 'סגור')}
                 </button>
@@ -348,7 +324,7 @@ export const CSVImportPreviewModal = ({
           )}
         </div>
 
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-6 min-h-0">
           <div className="mb-4 flex items-center justify-between">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -504,7 +480,7 @@ export const CSVImportPreviewModal = ({
           </div>
         </div>
 
-        <div className="p-6 border-t border-gray-200 bg-gray-50 flex items-center justify-between">
+        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex items-center justify-between flex-shrink-0">
           <button
             onClick={onClose}
             disabled={isImporting}

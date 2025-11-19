@@ -12,6 +12,7 @@ import { Toast } from '../common/Toast';
 import { useToast } from '../../hooks/useToast';
 import { DeleteGroupModal } from '../modals/DeleteGroupModal';
 import { useTranslatedRootGroupName } from '../../utils/groupNameTranslator';
+import { FloatingBackButton } from '../common/FloatingBackButton';
 
 interface RootGroupButtonProps {
   rootGroup: Group;
@@ -26,10 +27,10 @@ const RootGroupButton: React.FC<RootGroupButtonProps> = ({ rootGroup, isActive, 
   return (
     <button
       onClick={onClick}
-      className={`flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl border transition-all shadow-sm ${
+      className={`group relative flex flex-col items-center justify-center gap-1 p-3 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all shadow-sm hover:shadow-lg ${
         isActive
-          ? 'border-transparent text-white shadow-lg scale-[1.02]'
-          : 'border-gray-200 text-gray-700 hover:border-gray-300'
+          ? 'border-transparent text-white shadow-lg scale-105'
+          : 'border-gray-200 text-gray-700 hover:border-gray-300 bg-white/80 backdrop-blur-sm'
       }`}
       style={{
         background: isActive
@@ -37,8 +38,21 @@ const RootGroupButton: React.FC<RootGroupButtonProps> = ({ rootGroup, isActive, 
           : `${rootGroup.color}10`,
       }}
     >
-      <span className="font-semibold text-sm sm:text-base md:text-lg">{translatedName}</span>
-      <span className={`text-[10px] sm:text-xs ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
+      <div 
+        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${
+          isActive ? 'bg-white/20' : 'bg-white'
+        }`}
+        style={isActive ? {} : { backgroundColor: `${rootGroup.color}20` }}
+      >
+        <div
+          className="w-4 h-4 sm:w-5 sm:h-5 rounded-full"
+          style={{ backgroundColor: rootGroup.color }}
+        />
+      </div>
+      <span className={`font-semibold text-xs sm:text-sm text-center leading-tight ${isActive ? 'text-white' : 'text-gray-900'}`}>
+        {translatedName}
+      </span>
+      <span className={`text-[9px] sm:text-[10px] ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
         ({childGroupsCount})
       </span>
     </button>
@@ -267,19 +281,15 @@ export const GroupsPanel = () => {
         </div>
 
         {/* Mobile Floating Back Button */}
-        <div className="fixed bottom-6 left-6 z-40 sm:hidden">
-          <button
-            onClick={() => navigate('/')}
-            className="p-4 bg-white/20 backdrop-blur-md border border-white/30 text-gray-700 rounded-full shadow-xl hover:bg-white/40 transition-all active:scale-95 ring-1 ring-black/5"
-            aria-label={t('common.back')}
-          >
-            {i18n.language === 'he' ? <ArrowRight className="w-6 h-6" /> : <ArrowLeft className="w-6 h-6" />}
-          </button>
-        </div>
+        <FloatingBackButton 
+          onClick={() => navigate('/')} 
+          position="bottom-left"
+        />
 
         {rootGroups.length > 0 ? (
           <Fragment>
-            <div className="flex flex-wrap gap-3">
+            {/* קבוצות העל - במובייל: grid קטן, בדסקטופ: flex */}
+            <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-2 sm:gap-3">
               {rootGroups.map((rootGroup) => {
                 const isActive = rootGroup.id === activeRootId;
                 const childGroups = childGroupsMap.get(rootGroup.id) ?? [];
@@ -296,17 +306,34 @@ export const GroupsPanel = () => {
             </div>
 
             {activeRootId && (
-              <CategorySection
-                key={activeRootId}
-                rootGroup={rootGroups.find(group => group.id === activeRootId)!}
-                childGroups={childGroupsMap.get(activeRootId) ?? []}
-                isLoading={isLoading}
-                isCountsLoading={isBirthdaysLoading}
-                countsByGroup={countsByGroup}
-                onAddGroup={() => handleOpenForm(activeRootId)}
-                onEditGroup={(group) => handleOpenForm(activeRootId, group)}
-                onDeleteGroup={handleDeleteClick}
-              />
+              <>
+                <CategorySection
+                  key={activeRootId}
+                  rootGroup={rootGroups.find(group => group.id === activeRootId)!}
+                  childGroups={childGroupsMap.get(activeRootId) ?? []}
+                  isLoading={isLoading}
+                  isCountsLoading={isBirthdaysLoading}
+                  countsByGroup={countsByGroup}
+                  onAddGroup={() => handleOpenForm(activeRootId)}
+                  onEditGroup={(group) => handleOpenForm(activeRootId, group)}
+                  onDeleteGroup={handleDeleteClick}
+                />
+                
+                {/* כפתור הוספה במובייל - FloatingDock style */}
+                <div className="fixed bottom-6 right-6 z-40 sm:hidden">
+                  <button
+                    onClick={() => handleOpenForm(activeRootId)}
+                    className="p-4 bg-white/80 backdrop-blur-md border border-white/30 rounded-full shadow-xl hover:bg-white/90 transition-all active:scale-95 ring-1 ring-black/5"
+                    style={{ 
+                      backgroundColor: rootGroups.find(g => g.id === activeRootId)?.color + 'CC' || 'rgba(59, 130, 246, 0.8)',
+                      borderColor: rootGroups.find(g => g.id === activeRootId)?.color || '#3b82f6'
+                    }}
+                    aria-label={t('groups.addGroup')}
+                  >
+                    <Plus className="w-6 h-6 text-white" />
+                  </button>
+                </div>
+              </>
             )}
           </Fragment>
         ) : (

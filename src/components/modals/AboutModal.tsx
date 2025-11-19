@@ -3,6 +3,7 @@ import { X, Globe, Trash2, MessageSquare, LogOut } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { FloatingBackButton } from '../common/FloatingBackButton';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -109,6 +110,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
       </div>
+      <FloatingBackButton onClick={onClose} position="bottom-left" />
     </div>
   );
 };

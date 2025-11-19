@@ -1,5 +1,5 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, ArrowLeft, ArrowRight } from 'lucide-react';
 import { GoogleCalendarButton } from '../calendar/GoogleCalendarButton';
 import { useTranslation } from 'react-i18next';
 
@@ -9,7 +9,7 @@ interface GoogleCalendarModalProps {
 }
 
 export const GoogleCalendarModal: React.FC<GoogleCalendarModalProps> = ({ isOpen, onClose }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   if (!isOpen) return null;
 
@@ -26,7 +26,7 @@ export const GoogleCalendarModal: React.FC<GoogleCalendarModalProps> = ({ isOpen
           </button>
         </div>
         
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4 pb-20 sm:pb-4">
           <p className="text-sm text-gray-600 text-center">
             {t('googleCalendar.modalDescription')}
           </p>
@@ -34,6 +34,26 @@ export const GoogleCalendarModal: React.FC<GoogleCalendarModalProps> = ({ isOpen
              <GoogleCalendarButton />
           </div>
         </div>
+      </div>
+      
+      {/* כפתור סגירה/חזרה בתחתית המסך במובייל */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 sm:hidden">
+        <button
+          onClick={onClose}
+          className="px-6 py-3 bg-white/90 backdrop-blur-md border border-white/30 text-gray-700 rounded-full shadow-xl hover:bg-white transition-all active:scale-95 ring-1 ring-black/5 flex items-center gap-2"
+        >
+          {i18n.language === 'he' ? (
+            <>
+              <span className="text-sm font-medium">{t('common.close', 'סגור')}</span>
+              <ArrowRight className="w-5 h-5" />
+            </>
+          ) : (
+            <>
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-sm font-medium">{t('common.close', 'Close')}</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
   );
