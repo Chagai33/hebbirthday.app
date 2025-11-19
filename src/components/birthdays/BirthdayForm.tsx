@@ -225,55 +225,55 @@ export const BirthdayForm = ({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start sm:items-center justify-center z-50 p-4 pt-6 pb-24 sm:pt-4 sm:pb-4 overflow-hidden">
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full p-4 sm:p-6 max-h-[calc(100vh-3rem)] sm:max-h-[90vh] overflow-y-auto overscroll-contain touch-pan-y">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start sm:items-center justify-center z-50 p-2 sm:p-4 pt-3 sm:pt-4 pb-20 sm:pb-4 overflow-hidden">
+        <div className="bg-white rounded-lg sm:rounded-2xl shadow-2xl max-w-2xl w-full p-3 sm:p-6 max-h-[calc(100vh-1.5rem)] sm:max-h-[90vh] sm:overflow-y-auto">
+          <div className="flex items-center justify-between mb-2 sm:mb-6">
+            <h2 className="text-base sm:text-2xl font-bold text-gray-900">
               {editBirthday ? t('birthday.editBirthday') : t('birthday.addBirthday')}
             </h2>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors p-1"
             >
-              <X className="w-5 h-5 sm:w-6 sm:h-6" />
+              <X className="w-4 h-4 sm:w-6 sm:h-6" />
             </button>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 sm:space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">
                   {t('birthday.firstName')} *
                 </label>
                 <input
                   {...register('firstName', {
                     required: t('validation.required'),
                   })}
-                  className="w-full px-3 sm:px-4 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-2 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 {errors.firstName && (
-                  <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.firstName.message}</p>
+                  <p className="text-red-500 text-xs mt-0.5 sm:mt-1">{errors.firstName.message}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">
                   {t('birthday.lastName')} *
                 </label>
                 <input
                   {...register('lastName', {
                     required: t('validation.required'),
                   })}
-                  className="w-full px-3 sm:px-4 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-2 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
                 {errors.lastName && (
-                  <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.lastName.message}</p>
+                  <p className="text-red-500 text-xs mt-0.5 sm:mt-1">{errors.lastName.message}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">
                 {t('birthday.birthDate')} *
               </label>
               <input
@@ -283,23 +283,23 @@ export const BirthdayForm = ({
                   required: t('validation.required'),
                   valueAsDate: true,
                 })}
-                className="w-full px-3 sm:px-4 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-2 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               {errors.birthDateGregorian && (
-                <p className="text-red-500 text-xs sm:text-sm mt-1">
+                <p className="text-red-500 text-xs mt-0.5 sm:mt-1">
                   {errors.birthDateGregorian.message}
                 </p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">
                 {t('birthday.group')} *
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5 sm:gap-2">
                 <select
                   {...register('groupId', { required: t('validation.required') })}
-                  className="flex-1 px-3 sm:px-4 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 px-2 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">{t('birthday.selectGroup')}</option>
                   {rootGroups.map((root) => {
@@ -318,50 +318,50 @@ export const BirthdayForm = ({
                 <button
                   type="button"
                   onClick={() => setShowCreateGroupModal(true)}
-                  className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-1 text-sm font-medium"
+                  className="px-2 sm:px-3 py-1.5 sm:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-1 text-xs sm:text-sm font-medium"
                   title={t('groups.createSubgroup', 'Create subgroup')}
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
               </div>
               {errors.groupId && (
-                <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.groupId.message}</p>
+                <p className="text-red-500 text-xs mt-0.5 sm:mt-1">{errors.groupId.message}</p>
               )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                   {t('birthday.gender')}
                 </label>
-                <div className="flex gap-3">
-                  <label className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                <div className="flex gap-1.5 sm:gap-3">
+                  <label className="flex-1 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors">
                     <input
                       type="radio"
                       value="male"
                       {...register('gender')}
-                      className="w-4 h-4 text-blue-600"
+                      className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600"
                     />
-                    <span className="font-medium">{t('common.male')}</span>
+                    <span className="text-xs sm:text-base font-medium">{t('common.male')}</span>
                   </label>
-                  <label className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors">
+                  <label className="flex-1 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors">
                     <input
                       type="radio"
                       value="female"
                       {...register('gender')}
-                      className="w-4 h-4 text-blue-600"
+                      className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600"
                     />
-                    <span className="font-medium">{t('common.female')}</span>
+                    <span className="text-xs sm:text-base font-medium">{t('common.female')}</span>
                   </label>
                 </div>
               </div>
 
-              <div className="flex items-end pb-2">
-                <label className="flex items-center gap-2 cursor-pointer">
+              <div className="flex items-end pb-0 sm:pb-2">
+                <label className="flex items-center gap-1.5 sm:gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     {...register('afterSunset')}
-                    className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-3 h-3 sm:w-5 sm:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   />
                   <span className="text-xs sm:text-sm font-medium text-gray-700">
                     {t('birthday.afterSunset')}
@@ -371,55 +371,55 @@ export const BirthdayForm = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                 {t('birthday.calendarPreference')}
               </label>
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 {selectedGroup && selectedGroup.calendar_preference && (
-                  <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                  <div className="text-xs text-gray-600 bg-gray-50 p-1.5 sm:p-2 rounded">
                     {t('birthday.groupPreference', 'Group preference')}: <span className="font-semibold">{t(`birthday.${selectedGroup.calendar_preference}`)}</span>
                   </div>
                 )}
                 <select
                   {...register('calendarPreferenceOverride')}
-                  className="w-full px-3 sm:px-4 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-2 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">{t('birthday.useGroupDefault', 'Use group default')}</option>
                   <option value="gregorian">{t('birthday.gregorianOnly')}</option>
                   <option value="hebrew">{t('birthday.hebrewOnly')}</option>
                   <option value="both">{t('birthday.both')}</option>
                 </select>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 leading-tight">
                   {t('birthday.preferenceExplanation', 'This setting overrides the group preference for this person only')}
                 </p>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">
                 {t('birthday.notes')}
               </label>
               <textarea
                 {...register('notes')}
-                rows={2}
-                className="w-full px-3 sm:px-4 py-2 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                rows={1}
+                className="w-full px-2 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               />
             </div>
 
-            <div className="flex gap-2 sm:gap-3 pt-2 sm:pt-4">
+            <div className="flex gap-2 sm:gap-3 pt-1 sm:pt-4">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-3 sm:px-4 py-2 text-base border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                className="flex-1 px-2 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
               >
                 {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={createBirthday.isPending || updateBirthday.isPending}
-                className="flex-1 px-3 sm:px-4 py-2 text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                className="flex-1 px-2 sm:px-4 py-2 text-sm sm:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center justify-center gap-1.5 sm:gap-2 disabled:opacity-50"
               >
-                <Save className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Save className="w-3 h-3 sm:w-5 sm:h-5" />
                 {createBirthday.isPending || updateBirthday.isPending
                   ? t('common.loading')
                   : t('common.save')}
