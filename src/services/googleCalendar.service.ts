@@ -6,7 +6,55 @@ import { logger } from '../utils/logger';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
+import { CleanupOrphansResult, PreviewDeletionResult } from '../types';
+
+// ... existing imports
+
 export const googleCalendarService = {
+  // ... existing methods
+
+  async cleanupOrphanEvents(tenantId: string): Promise<CleanupOrphansResult> {
+    try {
+      const cleanupFunction = httpsCallable<
+        { tenantId: string },
+        CleanupOrphansResult
+      >(functions, 'cleanupOrphanEvents');
+
+      const result = await cleanupFunction({ tenantId });
+
+      if (!result.data.success) {
+        throw new Error(result.data.message || 'שגיאה בניקוי אירועים יתומים');
+      }
+
+      logger.log(`Successfully cleaned up ${result.data.deletedCount} orphan events`);
+      return result.data;
+    } catch (error: any) {
+      logger.error('Error cleaning up orphan events:', error);
+      throw new Error(error.message || 'שגיאה בניקוי אירועים יתומים');
+    }
+  },
+
+  async previewDeletion(tenantId: string): Promise<PreviewDeletionResult> {
+    try {
+      const previewFunction = httpsCallable<
+        { tenantId: string },
+        PreviewDeletionResult
+      >(functions, 'previewDeletion');
+
+      const result = await previewFunction({ tenantId });
+
+      if (!result.data.success) {
+         throw new Error('שגיאה בטעינת תצוגה מקדימה למחיקה');
+      }
+
+      logger.log(`Deletion preview loaded: ${result.data.totalCount} events`);
+      return result.data;
+    } catch (error: any) {
+      logger.error('Error loading deletion preview:', error);
+      throw new Error(error.message || 'שגיאה בטעינת תצוגה מקדימה');
+    }
+  },
+
   initiateGoogleOAuth(): Promise<{ accessToken: string; expiresIn: number }> {
     return new Promise((resolve, reject) => {
       try {
@@ -370,6 +418,47 @@ export const googleCalendarService = {
     } catch (error: any) {
       logger.error('Error deleting calendar:', error);
       throw new Error(error.message || 'שגיאה במחיקת יומן Google');
+    }
+  },
+
+  async cleanupOrphanEvents(tenantId: string): Promise<{ success: boolean; deletedCount: number; failedCount: number; message: string }> {
+    try {
+      const cleanupFunction = httpsCallable<
+        { tenantId: string },
+        { success: boolean; deletedCount: number; failedCount: number; message: string }
+      >(functions, 'cleanupOrphanEvents');
+
+      const result = await cleanupFunction({ tenantId });
+      
+      if (!result.data.success) {
+        throw new Error(result.data.message || 'שגיאה בניקוי אירועים');
+      }
+      
+      logger.log(`Cleanup orphans: Deleted ${result.data.deletedCount}, Failed ${result.data.failedCount}`);
+      return result.data;
+    } catch (error: any) {
+      logger.error('Error cleaning orphan events:', error);
+      throw new Error(error.message || 'שגיאה בניקוי אירועים יתומים');
+    }
+  },
+
+  async previewDeletion(tenantId: string): Promise<{ success: boolean; summary: any[]; totalCount: number }> {
+    try {
+      const previewFunction = httpsCallable<
+        { tenantId: string },
+        { success: boolean; summary: any[]; totalCount: number }
+      >(functions, 'previewDeletion');
+
+      const result = await previewFunction({ tenantId });
+      
+      if (!result.data.success) {
+        throw new Error('שגיאה בטעינת תצוגה מקדימה');
+      }
+      
+      return result.data;
+    } catch (error: any) {
+      logger.error('Error previewing deletion:', error);
+      throw new Error(error.message || 'שגיאה בטעינת נתונים למחיקה');
     }
   }
 };

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { googleCalendarService } from '../services/googleCalendar.service';
 import { useAuth } from './AuthContext';
-import { GoogleCalendarContextType, SyncResult, BulkSyncResult } from '../types';
+import { GoogleCalendarContextType, SyncResult, BulkSyncResult, CleanupOrphansResult, PreviewDeletionResult } from '../types';
 import { logger } from '../utils/logger';
 import { useToast } from './ToastContext';
 
@@ -205,18 +205,97 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
 
     try {
       setIsSyncing(true);
-      const result = await googleCalendarService.syncMultipleBirthdays(birthdayIds);
+      
+      // Chunk processing to chunks of 5
+      const chunkSize = 5;
+      const results: SyncResult[] = [];
+      let successCount = 0;
+      let failureCount = 0;
+      
+      for (let i = 0; i < birthdayIds.length; i += chunkSize) {
+        const chunk = birthdayIds.slice(i, i + chunkSize);
+        
+        try {
+             // Process chunk
+             const chunkResult = await googleCalendarService.syncMultipleBirthdays(chunk);
+             if (chunkResult.results) {
+                 results.push(...chunkResult.results);
+             }
+             successCount += chunkResult.successCount;
+             failureCount += chunkResult.failureCount;
+             
+             // Add small delay between chunks if needed, or just continue
+        } catch (chunkError) {
+            logger.error(`Error syncing chunk ${i/chunkSize}:`, chunkError);
+            // Mark all in chunk as failed if the bulk call itself failed completely
+            failureCount += chunk.length;
+            chunk.forEach(id => {
+                results.push({
+                    success: false,
+                    birthdayId: id,
+                    error: 'Batch sync failed'
+                });
+            });
+        }
+      }
 
       setLastSyncTime(new Date());
-      showToast(`סונכרנו ${result.successCount} ימי הולדת בהצלחה`, 'success');
+      
+      const finalResult: BulkSyncResult = {
+          totalAttempted: birthdayIds.length,
+          successCount,
+          failureCount,
+          results
+      };
 
-      return result;
+      showToast(`סונכרנו ${successCount} ימי הולדת בהצלחה`, 'success');
+
+      return finalResult;
     } catch (error: any) {
       logger.error('Error syncing multiple birthdays:', error);
       showToast(error.message || 'שגיאה בסנכרון מרובה', 'error');
       throw error;
     } finally {
       setIsSyncing(false);
+    }
+  };
+
+  const cleanupOrphanEvents = async (tenantId: string): Promise<CleanupOrphansResult> => {
+    if (!isConnected) {
+      showToast('יש להתחבר ליומן Google תחילה', 'error');
+      throw new Error('לא מחובר ליומן Google');
+    }
+
+    try {
+      setIsSyncing(true);
+      const result = await googleCalendarService.cleanupOrphanEvents(tenantId);
+      showToast(result.message || `נמחקו ${result.deletedCount} אירועים יתומים`, 'success');
+      return result;
+    } catch (error: any) {
+      logger.error('Error cleaning orphans:', error);
+      showToast(error.message || 'שגיאה בניקוי יתומים', 'error');
+      throw error;
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const previewDeletion = async (tenantId: string): Promise<PreviewDeletionResult> => {
+     if (!isConnected) {
+      showToast('יש להתחבר ליומן Google תחילה', 'error');
+      throw new Error('לא מחובר ליומן Google');
+    }
+    
+    try {
+        setIsSyncing(true);
+        const result = await googleCalendarService.previewDeletion(tenantId);
+        return result;
+    } catch (error: any) {
+        logger.error('Error previewing deletion:', error);
+        showToast(error.message || 'שגיאה בתצוגה מקדימה', 'error');
+        throw error;
+    } finally {
+        setIsSyncing(false);
     }
   };
 
@@ -384,7 +463,9 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
     createCalendar,
     updateCalendarSelection,
     listCalendars,
-    deleteCalendar
+    deleteCalendar,
+    cleanupOrphanEvents,
+    previewDeletion
   };
 
   return (

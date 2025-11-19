@@ -252,6 +252,25 @@ export interface BulkSyncResult {
   results: SyncResult[];
 }
 
+export interface PreviewDeletionSummary {
+  name: string;
+  hebrewEvents: number;
+  gregorianEvents: number;
+}
+
+export interface PreviewDeletionResult {
+  success: boolean;
+  summary: PreviewDeletionSummary[];
+  totalCount: number;
+}
+
+export interface CleanupOrphansResult {
+  success: boolean;
+  deletedCount: number;
+  failedCount: number;
+  message: string;
+}
+
 export interface GoogleCalendarContextType {
   isConnected: boolean;
   lastSyncTime: Date | null;
@@ -270,4 +289,6 @@ export interface GoogleCalendarContextType {
   updateCalendarSelection: (calendarId: string, calendarName: string) => Promise<void>;
   listCalendars: () => Promise<Array<{ id: string; summary: string; description: string; primary: boolean }>>;
   deleteCalendar: (calendarId: string) => Promise<void>;
+  cleanupOrphanEvents: (tenantId: string) => Promise<CleanupOrphansResult>;
+  previewDeletion: (tenantId: string) => Promise<PreviewDeletionResult>;
 }

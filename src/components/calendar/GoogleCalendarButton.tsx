@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Calendar, Check, Loader, Trash2, User, LogOut, Plus, Settings, ChevronDown } from 'lucide-react';
+import { Calendar, Check, Loader, Trash2, User, LogOut, Plus, Settings, ChevronDown, ShieldAlert, RefreshCw } from 'lucide-react';
 import { useGoogleCalendar } from '../../contexts/GoogleCalendarContext';
 import { useTenant } from '../../contexts/TenantContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { format } from 'date-fns';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-import { CreatedCalendar } from '../../types';
+import { CreatedCalendar, PreviewDeletionResult } from '../../types';
 
 interface CalendarOption {
   id: string;
@@ -31,7 +31,9 @@ export const GoogleCalendarButton: React.FC = () => {
     createCalendar,
     updateCalendarSelection,
     listCalendars,
-    deleteCalendar
+    deleteCalendar,
+    cleanupOrphanEvents,
+    previewDeletion
   } = useGoogleCalendar();
   const { currentTenant } = useTenant();
   const { user } = useAuth();
@@ -45,13 +47,29 @@ export const GoogleCalendarButton: React.FC = () => {
   const [calendarToDelete, setCalendarToDelete] = useState<string | null>(null);
   const [calendarToDeleteName, setCalendarToDeleteName] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  
+  const [previewData, setPreviewData] = useState<PreviewDeletionResult | null>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
 
   const handleConnect = () => {
-    // Call connectToGoogle synchronously from user click event
-    // This ensures the popup is opened immediately in response to user interaction
     connectToGoogle().catch((error) => {
       console.error('Error connecting:', error);
     });
+  };
+
+  const handlePreviewDeletion = async () => {
+    if (!currentTenant) return;
+    try {
+        setLoadingPreview(true);
+        setShowConfirm(true);
+        const result = await previewDeletion(currentTenant.id);
+        setPreviewData(result);
+    } catch (error) {
+        console.error('Error previewing deletion:', error);
+        setShowConfirm(false); // Close on error
+    } finally {
+        setLoadingPreview(false);
+    }
   };
 
   const handleDeleteAll = async () => {
@@ -60,10 +78,21 @@ export const GoogleCalendarButton: React.FC = () => {
     try {
       await deleteAllSyncedEvents(currentTenant.id);
       setShowConfirm(false);
+      setPreviewData(null);
     } catch (error) {
       console.error('Error deleting all events:', error);
     }
   };
+
+  const handleCleanupOrphans = async () => {
+      if (!currentTenant) return;
+      try {
+          await cleanupOrphanEvents(currentTenant.id);
+      } catch (error) {
+          console.error('Error cleaning orphans:', error);
+      }
+  };
+
 
   const handleDisconnect = async () => {
     try {
@@ -198,18 +227,18 @@ export const GoogleCalendarButton: React.FC = () => {
                   {t('googleCalendar.connected')}
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 text-xs sm:text-sm">
-                  <div className="flex items-center gap-1.5 text-green-700">
+                  <div className="flex items-center gap-1.5 text-green-700 bg-green-100/50 px-2 py-1 rounded-md">
                     <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
-                    <span className="truncate">
+                    <span className="truncate font-medium">
                       {userEmail || (isSyncing ? 'טוען...' : 'לא זמין')}
                     </span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-green-700">
+                  <div className="flex items-center gap-1.5 text-green-700 bg-green-100/50 px-2 py-1 rounded-md">
                     <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                     <button
                       onClick={() => setShowCalendarSelector(!showCalendarSelector)}
                       disabled={isSyncing}
-                      className="flex items-center gap-1 hover:underline disabled:opacity-50 truncate max-w-[200px] sm:max-w-none"
+                      className="flex items-center gap-1 hover:underline disabled:opacity-50 truncate max-w-[200px] sm:max-w-none font-medium"
                       title={t('googleCalendar.selectCalendar')}
                     >
                       <span className="truncate">{calendarName || t('googleCalendar.primaryCalendar')}</span>
@@ -217,7 +246,7 @@ export const GoogleCalendarButton: React.FC = () => {
                     </button>
                   </div>
                   {lastSyncTime && (
-                    <div className="text-green-600 text-xs">
+                    <div className="text-green-600 text-xs px-2">
                       {t('googleCalendar.lastSync')}: {format(lastSyncTime, 'dd/MM/yyyy HH:mm')}
                     </div>
                   )}
@@ -248,7 +277,17 @@ export const GoogleCalendarButton: React.FC = () => {
                 <span className="sm:hidden">בחר יומן</span>
               </button>
               <button
-                onClick={() => setShowConfirm(true)}
+                onClick={handleCleanupOrphans}
+                disabled={isSyncing}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors disabled:opacity-50 font-medium"
+                title="ניקוי אירועים יתומים (תיקון סנכרון)"
+              >
+                <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">ניקוי יתומים</span>
+                <span className="sm:hidden">נקה</span>
+              </button>
+              <button
+                onClick={handlePreviewDeletion}
                 disabled={isSyncing}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50 font-medium"
                 title="מחק את כל האירועים המסונכרנים"
@@ -469,34 +508,65 @@ export const GoogleCalendarButton: React.FC = () => {
           <div className="mt-2 w-full sm:w-96 sm:ml-auto bg-gradient-to-br from-red-50 to-orange-50 border border-red-200 rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
-                <Trash2 className="w-4 h-4 text-white" />
+                <ShieldAlert className="w-4 h-4 text-white" />
               </div>
               <h3 className="text-sm sm:text-base font-semibold text-red-900">
                 מחיקת כל האירועים
               </h3>
             </div>
-            <p className="text-sm text-red-800 font-medium mb-2">
-              האם אתה בטוח שברצונך למחוק את <strong>כל האירועים</strong> המסונכרנים מיומן Google?
-            </p>
-            <p className="text-xs sm:text-sm text-red-700 mb-4 leading-relaxed">
-              פעולה זו תמחק את כל ימי ההולדת שנוצרו דרך האפליקציה (עשרות או מאות אירועים). פעולה זו אינה ניתנת לביטול.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <button
-                onClick={handleDeleteAll}
-                disabled={isSyncing}
-                className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors shadow-sm"
-              >
-                {isSyncing ? 'מוחק...' : 'כן, מחק הכל'}
-              </button>
-              <button
-                onClick={() => setShowConfirm(false)}
-                disabled={isSyncing}
-                className="flex-1 sm:flex-initial px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-sm font-medium transition-colors"
-              >
-                ביטול
-              </button>
-            </div>
+            
+            {loadingPreview ? (
+                 <div className="flex items-center justify-center py-4">
+                    <Loader className="w-6 h-6 animate-spin text-red-600" />
+                    <span className="mr-2 text-red-700 text-sm">מחשב נתונים למחיקה...</span>
+                 </div>
+            ) : (
+                <>
+                    <p className="text-sm text-red-800 font-medium mb-2">
+                    האם אתה בטוח שברצונך למחוק את <strong>כל האירועים</strong> המסונכרנים מיומן Google?
+                    </p>
+                    
+                    {previewData && previewData.summary.length > 0 ? (
+                        <div className="mb-4 bg-white/50 rounded-lg p-3 max-h-40 overflow-y-auto text-xs border border-red-100">
+                             <p className="font-bold text-red-900 mb-1">סיכום מחיקה ({previewData.totalCount} אירועים):</p>
+                             <ul className="list-disc list-inside space-y-0.5 text-red-800">
+                                {previewData.summary.map((item, idx) => (
+                                    <li key={idx}>
+                                        {item.name}: {item.hebrewEvents + item.gregorianEvents} אירועים
+                                    </li>
+                                ))}
+                             </ul>
+                        </div>
+                    ) : (
+                        <p className="text-xs sm:text-sm text-red-700 mb-4 leading-relaxed">
+                        לא נמצאו אירועים למחיקה או שהנתונים בטעינה.
+                        </p>
+                    )}
+
+                    <p className="text-xs sm:text-sm text-red-700 mb-4 leading-relaxed">
+                    פעולה זו תמחק את כל ימי ההולדת שנוצרו דרך האפליקציה. פעולה זו אינה ניתנת לביטול.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                        onClick={handleDeleteAll}
+                        disabled={isSyncing || loadingPreview || (previewData?.totalCount === 0)}
+                        className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors shadow-sm"
+                    >
+                        {isSyncing ? 'מוחק...' : 'כן, מחק הכל'}
+                    </button>
+                    <button
+                        onClick={() => {
+                             setShowConfirm(false);
+                             setPreviewData(null);
+                        }}
+                        disabled={isSyncing}
+                        className="flex-1 sm:flex-initial px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-sm font-medium transition-colors"
+                    >
+                        ביטול
+                    </button>
+                    </div>
+                </>
+            )}
           </div>
         )}
       </>
