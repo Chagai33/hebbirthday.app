@@ -8,6 +8,7 @@ interface FloatingDockProps {
   onCalendar: () => void;
   onGroups: () => void;
   onAbout: () => void;
+  hidden?: boolean;
 }
 
 export const FloatingDock: React.FC<FloatingDockProps> = ({
@@ -16,6 +17,7 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
   onCalendar,
   onGroups,
   onAbout,
+  hidden = false,
 }) => {
   const { t } = useTranslation();
 
@@ -26,6 +28,10 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
     { icon: Users, label: t('groups.title'), onClick: onGroups, color: 'text-orange-600' },
     { icon: Info, label: t('common.about', 'About'), onClick: onAbout, color: 'text-gray-600' },
   ];
+
+  if (hidden) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 sm:hidden">

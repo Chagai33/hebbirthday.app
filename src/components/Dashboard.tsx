@@ -455,6 +455,7 @@ export const Dashboard = () => {
         onCalendar={() => setShowCalendarModal(true)}
         onGroups={() => navigate('/groups')}
         onAbout={() => setShowAboutModal(true)}
+        hidden={showForm || showCSVPreview || showCalendarModal || showAboutModal || showZodiacStats}
       />
 
       <GoogleCalendarModal 
