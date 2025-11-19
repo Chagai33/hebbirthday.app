@@ -111,17 +111,20 @@ export const useCheckDuplicates = () => {
       groupId,
       firstName,
       lastName,
+      birthDate,
     }: {
       groupId: string;
       firstName: string;
       lastName: string;
+      birthDate: string | Date;
     }) => {
       if (!currentTenant) throw new Error('No tenant');
       return await birthdayService.checkDuplicates(
         currentTenant.id,
         groupId,
         firstName,
-        lastName
+        lastName,
+        birthDate
       );
     },
   });

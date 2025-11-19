@@ -1,4 +1,5 @@
 import { Birthday, BirthdayCalculations } from '../types';
+import { zodiacService } from './zodiac.service';
 
 export const birthdayCalculationsService = {
   calculateAll(
@@ -46,6 +47,8 @@ export const birthdayCalculationsService = {
         ? Math.ceil((nextHeb.getTime() - referenceDate.getTime()) / (1000 * 60 * 60 * 24))
         : null,
       nextBirthdayType: this.determineNextBirthdayType(nextGreg.date, nextHeb),
+      gregorianSign: zodiacService.getGregorianSign(new Date(birthday.birth_date_gregorian)),
+      hebrewSign: birthday.hebrew_month ? zodiacService.getHebrewSign(birthday.hebrew_month) : undefined,
     };
   },
 
@@ -124,7 +127,7 @@ export const birthdayCalculationsService = {
 
     const hasPassed =
       currentMonth > birthMonth ||
-      (currentMonth === birthMonth && currentDay >= birthDay);
+      (currentMonth === birthMonth && currentDay > birthDay);
 
     const nextYear = hasPassed ? currentYear + 1 : currentYear;
     const nextDate = new Date(nextYear, birthMonth - 1, birthDay);

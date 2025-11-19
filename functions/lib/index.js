@@ -1242,7 +1242,7 @@ exports.createGoogleCalendar = functions.https.onCall(async (data, context) => {
         const newCalendarEntry = {
             calendarId: calendarId,
             calendarName: calendarName,
-            createdAt: admin.firestore.FieldValue.serverTimestamp()
+            createdAt: new Date().toISOString()
         };
         const updatedCreatedCalendars = [...existingCreatedCalendars, newCalendarEntry];
         // עדכון הטוקן עם פרטי היומן החדש והוספה ל-createdCalendars

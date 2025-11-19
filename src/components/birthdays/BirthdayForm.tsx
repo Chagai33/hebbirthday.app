@@ -113,6 +113,7 @@ export const BirthdayForm = ({
         groupId: data.groupId,
         firstName: data.firstName,
         lastName: data.lastName,
+        birthDate: data.birthDateGregorian,
       });
 
       if (result && result.length > 0) {

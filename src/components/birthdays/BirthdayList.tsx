@@ -9,7 +9,7 @@ import { useGroups } from '../../hooks/useGroups';
 import { useGroupFilter } from '../../contexts/GroupFilterContext';
 import { useTenant } from '../../contexts/TenantContext';
 import { useGoogleCalendar } from '../../contexts/GoogleCalendarContext';
-import { Edit, Trash2, Calendar, Search, CalendarDays, RefreshCw, Filter, Gift, Download, Users, X, UploadCloud, CloudOff } from 'lucide-react';
+import { Edit, Trash2, Calendar, Search, CalendarDays, RefreshCw, Filter, Gift, Download, Users, X, UploadCloud, CloudOff, Sparkles, Copy } from 'lucide-react';
 import { FutureBirthdaysModal } from '../modals/FutureBirthdaysModal';
 import { UpcomingGregorianBirthdaysModal } from '../modals/UpcomingGregorianBirthdaysModal';
 import { WishlistModal } from '../modals/WishlistModal';
@@ -22,12 +22,14 @@ interface BirthdayListProps {
   birthdays: Birthday[];
   onEdit: (birthday: Birthday) => void;
   onAddToCalendar?: (birthday: Birthday) => void;
+  duplicateIds?: Set<string>;
 }
 
 export const BirthdayList: React.FC<BirthdayListProps> = ({
   birthdays,
   onEdit,
   onAddToCalendar,
+  duplicateIds,
 }) => {
   const { t, i18n } = useTranslation();
   const deleteBirthday = useDeleteBirthday();
@@ -641,6 +643,14 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                             </div>
                           )}
                           <span className="text-xs sm:text-sm font-medium text-gray-900">{birthday.first_name}</span>
+                          {duplicateIds?.has(birthday.id) && (
+                            <div className="relative group/tooltip">
+                              <Copy className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500" />
+                              <div className="absolute bottom-full start-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded whitespace-nowrap opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-50">
+                                {t('birthday.possibleDuplicate', 'כפילות אפשרית')}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </td>
                     <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-medium text-gray-900">
@@ -656,14 +666,30 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     </td>
                     <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-semibold">
                       {showGregorian ? (
-                        <span className="text-blue-600">{birthday.calculations.currentGregorianAge}</span>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-blue-600">{birthday.calculations.currentGregorianAge}</span>
+                          {birthday.calculations.gregorianSign && (
+                            <span className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1 font-normal">
+                              <Sparkles className="w-2.5 h-2.5 text-blue-400" />
+                              {t(`zodiac.${birthday.calculations.gregorianSign}`)}
+                            </span>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-gray-400">-</span>
                       )}
                     </td>
                     <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-semibold">
                       {showHebrew ? (
-                        <span className="text-purple-600">{birthday.calculations.currentHebrewAge}</span>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-purple-600">{birthday.calculations.currentHebrewAge}</span>
+                          {birthday.calculations.hebrewSign && (
+                            <span className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1 font-normal">
+                              <Sparkles className="w-2.5 h-2.5 text-purple-400" />
+                              {t(`zodiac.${birthday.calculations.hebrewSign}`)}
+                            </span>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-gray-400">-</span>
                       )}

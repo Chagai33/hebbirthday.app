@@ -155,6 +155,25 @@
     "next": "הבא",
     "past": "עבר"
   },
+  "zodiac": {
+    "aries": "טלה",
+    "taurus": "שור",
+    "gemini": "תאומים",
+    "cancer": "סרטן",
+    "leo": "אריה",
+    "virgo": "בתולה",
+    "libra": "מאזניים",
+    "scorpio": "עקרב",
+    "sagittarius": "קשת",
+    "capricorn": "גדי",
+    "aquarius": "דלי",
+    "pisces": "דגים",
+    "statsTitle": "סטטיסטיקת מזלות",
+    "mismatchTitle": "פער בין מזלות",
+    "mismatchDesc": "ישנם {{count}} אנשים שהמזל העברי שלהם שונה מהמזל הלועזי.",
+    "gregorianDistribution": "התפלגות לועזית",
+    "hebrewDistribution": "התפלגות עברית"
+  },
   "groups": {
     "groups": "קבוצות",
     "manageGroups": "ניהול קבוצות",

@@ -11,7 +11,7 @@ import { useGroupFilter } from '../contexts/GroupFilterContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useRootGroups, useInitializeRootGroups } from '../hooks/useGroups';
 import { Birthday, DashboardStats } from '../types';
-import { Plus, Users, Calendar, TrendingUp, Cake, Upload } from 'lucide-react';
+import { Plus, Users, Calendar, TrendingUp, Cake, Upload, Info } from 'lucide-react';
 import { isWithinInterval, addWeeks, addMonths } from 'date-fns';
 import { openGoogleCalendarForBirthday } from '../utils/googleCalendar';
 import { wishlistService } from '../services/wishlist.service';
@@ -19,6 +19,7 @@ import { parseCSVFile } from '../utils/csvExport';
 import { birthdayService } from '../services/birthday.service';
 import { validateAndEnrichCSVData } from '../utils/csvValidation';
 import { CSVImportPreviewModal } from './modals/CSVImportPreviewModal';
+import { ZodiacStatsModal } from './modals/ZodiacStatsModal';
 import { CSVBirthdayRow } from '../types';
 import { logger } from '../utils/logger';
 import { useToast } from '../contexts/ToastContext';
@@ -38,11 +39,29 @@ export const Dashboard = () => {
   const [editBirthday, setEditBirthday] = useState<Birthday | null>(null);
   const [showCSVPreview, setShowCSVPreview] = useState(false);
   const [csvData, setCsvData] = useState<CSVBirthdayRow[]>([]);
+  const [showZodiacStats, setShowZodiacStats] = useState(false);
 
   const birthdays = useMemo(() => {
     if (selectedGroupIds.length === 0) return allBirthdays;
     return allBirthdays.filter(b => b.group_id && selectedGroupIds.includes(b.group_id));
   }, [allBirthdays, selectedGroupIds]);
+
+  const duplicateIds = useMemo(() => {
+    const map = new Map<string, string[]>();
+    allBirthdays.forEach(b => {
+      const key = `${b.first_name.trim().toLowerCase()}|${b.last_name.trim().toLowerCase()}|${b.birth_date_gregorian}`;
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(b.id);
+    });
+    
+    const duplicates = new Set<string>();
+    map.forEach(ids => {
+      if (ids.length > 1) {
+        ids.forEach(id => duplicates.add(id));
+      }
+    });
+    return duplicates;
+  }, [allBirthdays]);
 
   useEffect(() => {
     if (currentTenant && user && !isLoadingGroups && rootGroups.length === 0 && !initializeRootGroups.isPending) {
@@ -244,7 +263,14 @@ export const Dashboard = () => {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg sm:rounded-xl shadow-sm sm:shadow-md border border-pink-200 p-2 sm:p-4 hover:shadow-xl transition-all hover:scale-105">
+          <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg sm:rounded-xl shadow-sm sm:shadow-md border border-pink-200 p-2 sm:p-4 hover:shadow-xl transition-all hover:scale-105 relative group">
+            <button
+              onClick={() => setShowZodiacStats(true)}
+              className="absolute top-2 left-2 p-1 text-pink-400 hover:text-pink-600 hover:bg-pink-200 rounded-full transition-colors"
+              title={t('zodiac.statsTitle', 'סטטיסטיקת מזלות')}
+            >
+              <Info className="w-4 h-4" />
+            </button>
             <div className="flex flex-row items-center justify-between gap-1 sm:gap-2">
               <div className="w-7 h-7 sm:w-12 sm:h-12 bg-pink-600 rounded-md sm:rounded-lg flex items-center justify-center shadow-lg flex-shrink-0">
                 <Cake className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
@@ -326,6 +352,7 @@ export const Dashboard = () => {
               birthdays={birthdays}
               onEdit={handleEdit}
               onAddToCalendar={handleAddToCalendar}
+              duplicateIds={duplicateIds}
             />
           )}
         </div>
@@ -344,6 +371,12 @@ export const Dashboard = () => {
         onClose={() => setShowCSVPreview(false)}
         data={csvData}
         onConfirm={handleConfirmImport}
+      />
+
+      <ZodiacStatsModal
+        isOpen={showZodiacStats}
+        onClose={() => setShowZodiacStats(false)}
+        birthdays={birthdays}
       />
     </Layout>
   );

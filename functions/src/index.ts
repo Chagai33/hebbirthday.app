@@ -1471,7 +1471,7 @@ export const createGoogleCalendar = functions.https.onCall(async (data: any, con
     const newCalendarEntry = {
       calendarId: calendarId,
       calendarName: calendarName,
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
+      createdAt: new Date().toISOString()
     };
 
     const updatedCreatedCalendars = [...existingCreatedCalendars, newCalendarEntry];

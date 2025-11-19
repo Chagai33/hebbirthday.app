@@ -180,22 +180,33 @@ export const birthdayService = {
     tenantId: string,
     groupId: string,
     firstName: string,
-    lastName: string
+    lastName: string,
+    birthDate: string | Date
   ): Promise<Birthday[]> {
+    // Normalize date to string YYYY-MM-DD
+    let birthDateString: string;
+    if (typeof birthDate === 'string') {
+      birthDateString = birthDate;
+    } else {
+      birthDateString = birthDate.toISOString().split('T')[0];
+    }
+
+    // Check all birthdays in the tenant, not just the specific group
+    // This ensures we find duplicates even if they are in a different group
     const q = query(
       collection(db, 'birthdays'),
       where('tenant_id', '==', tenantId),
-      where('group_id', '==', groupId),
       where('archived', '==', false)
     );
 
     const snapshot = await getDocs(q);
-    const groupBirthdays = snapshot.docs.map((doc) => this.docToBirthday(doc.id, doc.data()));
+    const tenantBirthdays = snapshot.docs.map((doc) => this.docToBirthday(doc.id, doc.data()));
 
-    return groupBirthdays.filter(
+    return tenantBirthdays.filter(
       (birthday) =>
-        birthday.first_name.toLowerCase() === firstName.toLowerCase() &&
-        birthday.last_name.toLowerCase() === lastName.toLowerCase()
+        birthday.first_name.toLowerCase().trim() === firstName.toLowerCase().trim() &&
+        birthday.last_name.toLowerCase().trim() === lastName.toLowerCase().trim() &&
+        birthday.birth_date_gregorian === birthDateString
     );
   },
 

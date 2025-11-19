@@ -176,6 +176,8 @@ export interface BirthdayCalculations {
   daysUntilGregorianBirthday: number;
   daysUntilHebrewBirthday: number | null;
   nextBirthdayType: 'gregorian' | 'hebrew' | 'same';
+  gregorianSign?: string;
+  hebrewSign?: string;
 }
 
 export interface EnrichedBirthday extends Birthday {
