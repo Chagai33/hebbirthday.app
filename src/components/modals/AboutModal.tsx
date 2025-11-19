@@ -1,0 +1,114 @@
+import React from 'react';
+import { X, Globe, Trash2, MessageSquare, LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+
+interface AboutModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
+  const { t, i18n } = useTranslation();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    onClose();
+    navigate('/login');
+  };
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'he' ? 'en' : 'he';
+    i18n.changeLanguage(newLang);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 animate-slide-in">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-gray-900">{t('common.about', 'About & Settings')}</h2>
+          <button
+            onClick={onClose}
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
+            <p className="font-medium text-gray-900">HebBirthday v3.0</p>
+            <p className="text-sm text-gray-500">
+              {t('common.developedBy')} {i18n.language === 'he' ? 'חגי יחיאל' : 'Chagai Yechiel'}
+            </p>
+            <a
+              href="https://www.linkedin.com/in/chagai-yechiel/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium block mt-1"
+            >
+              {t('common.linkedInProfile')}
+            </a>
+          </div>
+
+          <div className="flex flex-col gap-2 pt-4 border-t border-gray-100">
+             <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full text-start"
+            >
+              <Globe className="w-5 h-5 text-blue-600" />
+              <span className="text-sm font-medium">{t('common.switchLanguage')}</span>
+            </button>
+
+            <Link
+              to="/terms"
+              onClick={onClose}
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+            >
+              <Globe className="w-5 h-5 text-gray-500" />
+              <span className="text-sm font-medium">{t('footer.termsOfUse', 'Terms of Use')}</span>
+            </Link>
+            
+            <Link
+              to="/privacy"
+              onClick={onClose}
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+            >
+              <Globe className="w-5 h-5 text-gray-500" />
+              <span className="text-sm font-medium">{t('footer.privacyPolicy', 'Privacy Policy')}</span>
+            </Link>
+
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSf4M-3ytbYRAOIh9B7Bavgaw2WyGgDFP3PT7zgTmTMnUFXMrg/viewform"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+            >
+              <MessageSquare className="w-5 h-5 text-green-600" />
+              <span className="text-sm font-medium">{t('footer.feedback', 'Feedback')}</span>
+            </a>
+
+            {user && (
+              <button
+                onClick={handleSignOut}
+                className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors w-full text-start mt-2"
+              >
+                <LogOut className="w-5 h-5" />
+                <span className="text-sm font-medium">{t('auth.signOut')}</span>
+              </button>
+            )}
+          </div>
+
+          <div className="pt-4 border-t border-gray-100 text-center text-xs text-gray-400">
+            © {new Date().getFullYear()} All rights reserved
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

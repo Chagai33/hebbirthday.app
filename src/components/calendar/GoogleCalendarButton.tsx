@@ -118,7 +118,7 @@ export const GoogleCalendarButton: React.FC = () => {
 
   const handleSwitchToPrimary = async () => {
     try {
-      await updateCalendarSelection('primary', 'יומן ראשי');
+      await updateCalendarSelection('primary', t('googleCalendar.primaryCalendarName'));
     } catch (error) {
       console.error('Error switching to primary:', error);
     }
@@ -230,7 +230,7 @@ export const GoogleCalendarButton: React.FC = () => {
                   <div className="flex items-center gap-1.5 text-green-700 bg-green-100/50 px-2 py-1 rounded-md">
                     <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" />
                     <span className="truncate font-medium">
-                      {userEmail || (isSyncing ? 'טוען...' : 'לא זמין')}
+                      {userEmail || (isSyncing ? t('common.loading') : t('googleCalendar.notAvailable'))}
                     </span>
                   </div>
                   <div className="flex items-center gap-1.5 text-green-700 bg-green-100/50 px-2 py-1 rounded-md">
@@ -264,7 +264,7 @@ export const GoogleCalendarButton: React.FC = () => {
               >
                 <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">{t('googleCalendar.createCalendar')}</span>
-                <span className="sm:hidden">צור יומן</span>
+                <span className="sm:hidden">{t('googleCalendar.createCalendar')}</span>
               </button>
               <button
                 onClick={() => setShowCalendarSelector(!showCalendarSelector)}
@@ -274,37 +274,37 @@ export const GoogleCalendarButton: React.FC = () => {
               >
                 <Settings className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">{t('googleCalendar.selectCalendar')}</span>
-                <span className="sm:hidden">בחר יומן</span>
+                <span className="sm:hidden">{t('googleCalendar.selectCalendar')}</span>
               </button>
               <button
                 onClick={handleCleanupOrphans}
                 disabled={isSyncing}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors disabled:opacity-50 font-medium"
-                title="ניקוי אירועים יתומים (תיקון סנכרון)"
+                title={t('googleCalendar.cleanupOrphans')}
               >
                 <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">ניקוי יתומים</span>
-                <span className="sm:hidden">נקה</span>
+                <span className="hidden sm:inline">{t('googleCalendar.cleanupOrphansShort')}</span>
+                <span className="sm:hidden">{t('googleCalendar.cleanupOrphansShortMobile')}</span>
               </button>
               <button
                 onClick={handlePreviewDeletion}
                 disabled={isSyncing}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50 font-medium"
-                title="מחק את כל האירועים המסונכרנים"
+                title={t('googleCalendar.deleteAllEvents')}
               >
                 <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">מחק הכל</span>
-                <span className="sm:hidden">מחק</span>
+                <span className="hidden sm:inline">{t('googleCalendar.deleteAllEventsShort')}</span>
+                <span className="sm:hidden">{t('googleCalendar.deleteAllEventsShortMobile')}</span>
               </button>
               <button
                 onClick={handleDisconnect}
                 disabled={isSyncing}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 font-medium"
-                title="נתק מיומן Google"
+                title={t('googleCalendar.disconnectCalendar')}
               >
                 <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">נתק</span>
-                <span className="sm:hidden">נתק</span>
+                <span className="hidden sm:inline">{t('googleCalendar.disconnectCalendarShort')}</span>
+                <span className="sm:hidden">{t('googleCalendar.disconnectCalendarShort')}</span>
               </button>
             </div>
           </div>
@@ -319,14 +319,14 @@ export const GoogleCalendarButton: React.FC = () => {
                 <Trash2 className="w-4 h-4 text-white" />
               </div>
               <h3 className="text-sm sm:text-base font-semibold text-red-900">
-                מחיקת יומן
+                {t('googleCalendar.deleteCalendar')}
               </h3>
             </div>
             <p className="text-sm text-red-800 font-medium mb-2">
-              האם אתה בטוח שברצונך למחוק את היומן <strong>"{calendarToDeleteName || 'זה'}"</strong>?
+              {t('googleCalendar.deleteCalendarConfirm')} <strong>"{calendarToDeleteName || t('common.this')}"</strong>?
             </p>
             <p className="text-xs sm:text-sm text-red-700 mb-4 leading-relaxed">
-              פעולה זו תמחק את היומן מ-Google Calendar. ניתן למחוק רק יומנים שנוצרו על ידי האפליקציה, שאינם נוכחיים, וללא אירועים. פעולה זו אינה ניתנת לביטול.
+              {t('googleCalendar.deleteCalendarWarning')}
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
               <button
@@ -334,7 +334,7 @@ export const GoogleCalendarButton: React.FC = () => {
                 disabled={isSyncing}
                 className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors shadow-sm"
               >
-                {isSyncing ? 'מוחק...' : 'כן, מחק'}
+                {isSyncing ? t('googleCalendar.deleting') : t('googleCalendar.yesDelete')}
               </button>
               <button
                 onClick={() => {
@@ -345,7 +345,7 @@ export const GoogleCalendarButton: React.FC = () => {
                 disabled={isSyncing}
                 className="flex-1 sm:flex-initial px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-sm font-medium transition-colors"
               >
-                ביטול
+                {t('common.cancel')}
               </button>
             </div>
           </div>
@@ -362,7 +362,7 @@ export const GoogleCalendarButton: React.FC = () => {
               </h3>
             </div>
             <p className="text-xs sm:text-sm text-blue-700 mb-4 leading-relaxed">
-              יומן מותאם אישית מאפשר לך לשתף את ימי ההולדת עם משפחה וחברים מבלי לחשוף את היומן האישי שלך.
+              {t('googleCalendar.customCalendarDescription')}
             </p>
             <div className="mb-4">
               <input
@@ -413,13 +413,13 @@ export const GoogleCalendarButton: React.FC = () => {
             {loadingCalendars ? (
               <div className="flex items-center justify-center gap-2 py-8 text-purple-700">
                 <Loader className="w-5 h-5 animate-spin" />
-                <span className="text-sm">טוען יומנים...</span>
+                <span className="text-sm">{t('googleCalendar.loadingCalendars')}</span>
               </div>
             ) : (
               <div className="space-y-2 max-h-60 overflow-y-auto mb-4">
                 {/* יומן ראשי */}
                 <button
-                  onClick={() => handleSelectCalendar({ id: 'primary', summary: 'יומן ראשי', description: '', primary: true })}
+                  onClick={() => handleSelectCalendar({ id: 'primary', summary: t('googleCalendar.primaryCalendarName'), description: '', primary: true })}
                   disabled={isSyncing || calendarId === 'primary'}
                   className={`w-full text-right px-3 py-2.5 rounded-lg text-sm transition-all ${
                     calendarId === 'primary'
@@ -428,7 +428,7 @@ export const GoogleCalendarButton: React.FC = () => {
                   } disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">יומן ראשי</span>
+                    <span className="font-medium">{t('googleCalendar.primaryCalendarName')}</span>
                     {calendarId === 'primary' && <Check className="w-4 h-4 text-purple-600" />}
                   </div>
                 </button>
@@ -481,7 +481,7 @@ export const GoogleCalendarButton: React.FC = () => {
                             }}
                             disabled={isSyncing}
                             className="flex-shrink-0 p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                            title="מחק יומן"
+                            title={t('googleCalendar.deleteCalendar')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -511,40 +511,40 @@ export const GoogleCalendarButton: React.FC = () => {
                 <ShieldAlert className="w-4 h-4 text-white" />
               </div>
               <h3 className="text-sm sm:text-base font-semibold text-red-900">
-                מחיקת כל האירועים
+                {t('googleCalendar.deleteAllEvents')}
               </h3>
             </div>
             
             {loadingPreview ? (
                  <div className="flex items-center justify-center py-4">
                     <Loader className="w-6 h-6 animate-spin text-red-600" />
-                    <span className="mr-2 text-red-700 text-sm">מחשב נתונים למחיקה...</span>
+                    <span className="mr-2 text-red-700 text-sm">{t('googleCalendar.calculatingDeletion')}</span>
                  </div>
             ) : (
                 <>
                     <p className="text-sm text-red-800 font-medium mb-2">
-                    האם אתה בטוח שברצונך למחוק את <strong>כל האירועים</strong> המסונכרנים מיומן Google?
+                    {t('googleCalendar.deleteAllConfirm')}
                     </p>
                     
                     {previewData && previewData.summary.length > 0 ? (
                         <div className="mb-4 bg-white/50 rounded-lg p-3 max-h-40 overflow-y-auto text-xs border border-red-100">
-                             <p className="font-bold text-red-900 mb-1">סיכום מחיקה ({previewData.totalCount} אירועים):</p>
+                             <p className="font-bold text-red-900 mb-1">{t('googleCalendar.deleteAllSummary', { count: previewData.totalCount })}</p>
                              <ul className="list-disc list-inside space-y-0.5 text-red-800">
                                 {previewData.summary.map((item, idx) => (
                                     <li key={idx}>
-                                        {item.name}: {item.hebrewEvents + item.gregorianEvents} אירועים
+                                        {item.name}: {item.hebrewEvents + item.gregorianEvents} {t('common.events')}
                                     </li>
                                 ))}
                              </ul>
                         </div>
                     ) : (
                         <p className="text-xs sm:text-sm text-red-700 mb-4 leading-relaxed">
-                        לא נמצאו אירועים למחיקה או שהנתונים בטעינה.
+                        {t('googleCalendar.noEventsToDelete')}
                         </p>
                     )}
 
                     <p className="text-xs sm:text-sm text-red-700 mb-4 leading-relaxed">
-                    פעולה זו תמחק את כל ימי ההולדת שנוצרו דרך האפליקציה. פעולה זו אינה ניתנת לביטול.
+                    {t('googleCalendar.deleteAllWarning')}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-2">
                     <button
@@ -552,7 +552,7 @@ export const GoogleCalendarButton: React.FC = () => {
                         disabled={isSyncing || loadingPreview || (previewData?.totalCount === 0)}
                         className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors shadow-sm"
                     >
-                        {isSyncing ? 'מוחק...' : 'כן, מחק הכל'}
+                        {isSyncing ? t('googleCalendar.deleting') : t('googleCalendar.yesDeleteAll')}
                     </button>
                     <button
                         onClick={() => {
@@ -562,7 +562,7 @@ export const GoogleCalendarButton: React.FC = () => {
                         disabled={isSyncing}
                         className="flex-1 sm:flex-initial px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 text-sm font-medium transition-colors"
                     >
-                        ביטול
+                        {t('common.cancel')}
                     </button>
                     </div>
                 </>

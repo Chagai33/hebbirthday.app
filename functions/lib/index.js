@@ -706,10 +706,18 @@ exports.syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, conte
         const tenant = tenantDoc.data();
         let groupDoc = null;
         let group = null;
+        let parentGroup = null;
         if (birthday.group_id) {
             groupDoc = await db.collection('groups').doc(birthday.group_id).get();
             if (groupDoc.exists) {
                 group = groupDoc.data();
+                // טעינת קבוצת העל אם קיימת
+                if (group?.parent_id) {
+                    const parentGroupDoc = await db.collection('groups').doc(group.parent_id).get();
+                    if (parentGroupDoc.exists) {
+                        parentGroup = parentGroupDoc.data();
+                    }
+                }
             }
         }
         const calendarPreference = birthday.calendar_preference_override ||
@@ -746,8 +754,17 @@ exports.syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, conte
         if (birthday.after_sunset) {
             description += '⚠️ לאחר השקיעה\n';
         }
+        // הוספת מידע על הקבוצה
+        if (group) {
+            if (parentGroup) {
+                description += `\n(${parentGroup.name}: ${group.name})`;
+            }
+            else {
+                description += `\n(${group.name})`;
+            }
+        }
         if (birthday.notes) {
-            description += `\nהערות: ${birthday.notes}`;
+            description += `\n\nהערות: ${birthday.notes}`;
         }
         const extendedProperties = {
             private: {

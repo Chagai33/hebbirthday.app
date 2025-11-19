@@ -1,5 +1,5 @@
 import { logger } from "../../utils/logger";
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { BirthdayFormData, Gender, Birthday } from '../../types';
@@ -13,6 +13,7 @@ import { GenderVerificationModal } from '../modals/GenderVerificationModal';
 import { X, Save, Plus } from 'lucide-react';
 import { Toast } from '../common/Toast';
 import { useToast } from '../../hooks/useToast';
+import { useTranslatedRootGroupName } from '../../utils/groupNameTranslator';
 
 interface BirthdayFormProps {
   onClose: () => void;
@@ -81,6 +82,27 @@ export const BirthdayForm = ({
 
   const rootGroups = allGroups.filter(g => g.is_root);
   const childGroups = allGroups.filter(g => !g.is_root);
+  
+  // Helper function to get translated root group name
+  const getTranslatedRootName = (group: any): string => {
+    if (!group.is_root || !group.type) return group.name;
+    const translationKeys: Record<string, string> = {
+      family: 'groups.family',
+      friends: 'groups.friends',
+      work: 'groups.work',
+    };
+    const key = translationKeys[group.type];
+    return key ? t(key) : group.name;
+  };
+  
+  // Create a map of root group IDs to translated names for optgroup labels
+  const translatedRootNamesMap = useMemo(() => {
+    const map = new Map<string, string>();
+    rootGroups.forEach(root => {
+      map.set(root.id, getTranslatedRootName(root));
+    });
+    return map;
+  }, [rootGroups, t]);
 
   const finalSubmit = async (data: BirthdayFormData) => {
     try {
@@ -283,7 +305,7 @@ export const BirthdayForm = ({
                   {rootGroups.map((root) => {
                     const children = childGroups.filter(c => c.parent_id === root.id);
                     return (
-                      <optgroup key={root.id} label={root.name}>
+                      <optgroup key={root.id} label={translatedRootNamesMap.get(root.id) || root.name}>
                         {children.map((group) => (
                           <option key={group.id} value={group.id}>
                             {group.name}
@@ -443,9 +465,9 @@ export const BirthdayForm = ({
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">{t('common.select', 'Select')}</option>
-                  {rootGroups.map((group) => (
-                    <option key={group.id} value={group.id}>
-                      {group.name}
+                  {rootGroups.map((root) => (
+                    <option key={root.id} value={root.id}>
+                      {translatedRootNamesMap.get(root.id) || root.name}
                     </option>
                   ))}
                 </select>

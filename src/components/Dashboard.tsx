@@ -1,20 +1,25 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Layout } from './layout/Layout';
 import { BirthdayList } from './birthdays/BirthdayList';
 import { BirthdayForm } from './birthdays/BirthdayForm';
 import { GoogleCalendarButton } from './calendar/GoogleCalendarButton';
+import { FloatingDock } from './layout/FloatingDock';
+import { GoogleCalendarModal } from './modals/GoogleCalendarModal';
+import { AboutModal } from './modals/AboutModal';
 import { useBirthdays } from '../hooks/useBirthdays';
 import { useTenant } from '../contexts/TenantContext';
 import { useGroupFilter } from '../contexts/GroupFilterContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useRootGroups, useInitializeRootGroups } from '../hooks/useGroups';
 import { Birthday, DashboardStats } from '../types';
-import { Plus, Users, Calendar, TrendingUp, Cake, Upload, Info } from 'lucide-react';
+import { Plus, Users, Calendar, TrendingUp, Cake, Upload, Info, ChevronDown, ChevronUp, BarChart3 } from 'lucide-react';
 import { isWithinInterval, addWeeks, addMonths } from 'date-fns';
 import { openGoogleCalendarForBirthday } from '../utils/googleCalendar';
 import { wishlistService } from '../services/wishlist.service';
+import { groupService } from '../services/group.service';
 import { parseCSVFile } from '../utils/csvExport';
 import { birthdayService } from '../services/birthday.service';
 import { validateAndEnrichCSVData } from '../utils/csvValidation';
@@ -27,6 +32,7 @@ import { useToast } from '../contexts/ToastContext';
 export const Dashboard = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { currentTenant } = useTenant();
   const { data: allBirthdays = [], isLoading } = useBirthdays();
   const { selectedGroupIds } = useGroupFilter();
@@ -34,12 +40,26 @@ export const Dashboard = () => {
   const initializeRootGroups = useInitializeRootGroups();
   const queryClient = useQueryClient();
   const { success, error: showError } = useToast();
+  
+  // Ref for the hidden file input
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [showForm, setShowForm] = useState(false);
   const [editBirthday, setEditBirthday] = useState<Birthday | null>(null);
   const [showCSVPreview, setShowCSVPreview] = useState(false);
   const [csvData, setCsvData] = useState<CSVBirthdayRow[]>([]);
   const [showZodiacStats, setShowZodiacStats] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
+  
+  const [isStatsExpanded, setIsStatsExpanded] = useState(() => {
+    const saved = localStorage.getItem('stats-expanded');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('stats-expanded', JSON.stringify(isStatsExpanded));
+  }, [isStatsExpanded]);
 
   const birthdays = useMemo(() => {
     if (selectedGroupIds.length === 0) return allBirthdays;
@@ -111,8 +131,37 @@ export const Dashboard = () => {
         logger.warn('Could not load wishlist, continuing without it:', wishlistError);
       }
 
+      // טעינת מידע על הקבוצה
+      let groupInfo: { parentName?: string; groupName: string } | undefined;
+      if (birthday.group_id) {
+        try {
+          const group = await groupService.getGroup(birthday.group_id);
+          if (group) {
+            if (group.parent_id) {
+              const parentGroup = await groupService.getGroup(group.parent_id);
+              if (parentGroup) {
+                groupInfo = {
+                  parentName: parentGroup.name,
+                  groupName: group.name
+                };
+              } else {
+                groupInfo = {
+                  groupName: group.name
+                };
+              }
+            } else {
+              groupInfo = {
+                groupName: group.name
+              };
+            }
+          }
+        } catch (groupError) {
+          logger.warn('Could not load group info, continuing without it:', groupError);
+        }
+      }
+
       const language = currentTenant?.default_language || 'he';
-      openGoogleCalendarForBirthday(birthday, language, wishlist);
+      openGoogleCalendarForBirthday(birthday, language, wishlist, groupInfo);
     } catch (error) {
       logger.error('Error opening Google Calendar:', error);
       showError(t('messages.calendarError'));
@@ -216,7 +265,26 @@ export const Dashboard = () => {
   return (
     <Layout>
       <div className="space-y-3 sm:space-y-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+        <button
+          onClick={() => setIsStatsExpanded(!isStatsExpanded)}
+          className="w-full flex items-center justify-between px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-all duration-200 group"
+        >
+          <div className="flex items-center gap-2 text-gray-700 group-hover:text-blue-600 transition-colors">
+            <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-sm font-medium">{t('dashboard.statistics', 'סטטיסטיקה')}</span>
+          </div>
+          {isStatsExpanded ? (
+            <ChevronUp className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+          )}
+        </button>
+
+        <div
+          className={`grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 transition-all duration-300 ease-in-out overflow-hidden ${
+            isStatsExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0 !m-0'
+          }`}
+        >
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg sm:rounded-xl shadow-sm sm:shadow-md border border-blue-200 p-2 sm:p-4 hover:shadow-xl transition-all hover:scale-105">
             <div className="flex flex-row items-center justify-between gap-1 sm:gap-2">
               <div className="w-7 h-7 sm:w-12 sm:h-12 bg-blue-600 rounded-md sm:rounded-lg flex items-center justify-center shadow-lg flex-shrink-0">
@@ -286,8 +354,8 @@ export const Dashboard = () => {
         </div>
 
         <div className="space-y-3 sm:space-y-4">
-          {/* שורת כפתורים ראשית */}
-          <div className="flex flex-col sm:flex-row w-full gap-2 sm:gap-2.5 items-start">
+          {/* שורת כפתורים ראשית - מוסתרת במובייל, מוצגת בדסקטופ */}
+          <div className="hidden sm:flex flex-col sm:flex-row w-full gap-2 sm:gap-2.5 items-start">
             {i18n.language === 'he' ? (
               <>
                 <button
@@ -305,6 +373,7 @@ export const Dashboard = () => {
                     accept=".csv"
                     onChange={handleCSVImport}
                     className="hidden"
+                    ref={fileInputRef}
                   />
                   <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline">{t('birthday.importCSV', 'Import CSV')}</span>
@@ -325,6 +394,7 @@ export const Dashboard = () => {
                     accept=".csv"
                     onChange={handleCSVImport}
                     className="hidden"
+                    ref={fileInputRef}
                   />
                   <Upload className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span className="hidden sm:inline">{t('birthday.importCSV', 'Import CSV')}</span>
@@ -377,6 +447,24 @@ export const Dashboard = () => {
         isOpen={showZodiacStats}
         onClose={() => setShowZodiacStats(false)}
         birthdays={birthdays}
+      />
+
+      <FloatingDock
+        onAdd={() => setShowForm(true)}
+        onImport={() => fileInputRef.current?.click()}
+        onCalendar={() => setShowCalendarModal(true)}
+        onGroups={() => navigate('/groups')}
+        onAbout={() => setShowAboutModal(true)}
+      />
+
+      <GoogleCalendarModal 
+        isOpen={showCalendarModal} 
+        onClose={() => setShowCalendarModal(false)} 
+      />
+      
+      <AboutModal 
+        isOpen={showAboutModal} 
+        onClose={() => setShowAboutModal(false)} 
       />
     </Layout>
   );

@@ -11,6 +11,39 @@ import { Plus, Edit, Trash2, X, ArrowRight, ArrowLeft } from 'lucide-react';
 import { Toast } from '../common/Toast';
 import { useToast } from '../../hooks/useToast';
 import { DeleteGroupModal } from '../modals/DeleteGroupModal';
+import { useTranslatedRootGroupName } from '../../utils/groupNameTranslator';
+
+interface RootGroupButtonProps {
+  rootGroup: Group;
+  isActive: boolean;
+  childGroupsCount: number;
+  onClick: () => void;
+}
+
+const RootGroupButton: React.FC<RootGroupButtonProps> = ({ rootGroup, isActive, childGroupsCount, onClick }) => {
+  const translatedName = useTranslatedRootGroupName(rootGroup);
+  
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all shadow-sm ${
+        isActive
+          ? 'border-transparent text-white shadow-lg scale-[1.02]'
+          : 'border-gray-200 text-gray-700 hover:border-gray-300'
+      }`}
+      style={{
+        background: isActive
+          ? `linear-gradient(135deg, ${rootGroup.color}, ${rootGroup.color}e6)`
+          : `${rootGroup.color}10`,
+      }}
+    >
+      <span className="font-semibold text-lg">{translatedName}</span>
+      <span className={`text-xs ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
+        ({childGroupsCount})
+      </span>
+    </button>
+  );
+};
 
 const GROUP_COLORS = [
   '#ef4444', '#f97316', '#f59e0b', '#84cc16',
@@ -217,18 +250,30 @@ export const GroupsPanel = () => {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-6 pb-24 sm:pb-0">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">{t('groups.manageGroups')}</h2>
-            <p className="text-gray-600 mt-2">{t('groups.manageDescription', 'ארגן את הרשומות שלך בקבוצות')}</p>
+            <p className="text-gray-600 mt-2">{t('groups.manageDescription')}</p>
           </div>
+          {/* Desktop Back Button */}
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm"
+            className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm"
           >
             {i18n.language === 'he' ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
-            <span className="hidden sm:inline">{t('common.back', 'חזור')}</span>
+            <span className="hidden sm:inline">{t('common.back')}</span>
+          </button>
+        </div>
+
+        {/* Mobile Floating Back Button */}
+        <div className="fixed bottom-6 left-6 z-40 sm:hidden">
+          <button
+            onClick={() => navigate('/')}
+            className="p-4 bg-white/20 backdrop-blur-md border border-white/30 text-gray-700 rounded-full shadow-xl hover:bg-white/40 transition-all active:scale-95 ring-1 ring-black/5"
+            aria-label={t('common.back')}
+          >
+            {i18n.language === 'he' ? <ArrowRight className="w-6 h-6" /> : <ArrowLeft className="w-6 h-6" />}
           </button>
         </div>
 
@@ -239,25 +284,13 @@ export const GroupsPanel = () => {
                 const isActive = rootGroup.id === activeRootId;
                 const childGroups = childGroupsMap.get(rootGroup.id) ?? [];
                 return (
-                  <button
+                  <RootGroupButton
                     key={rootGroup.id}
+                    rootGroup={rootGroup}
+                    isActive={isActive}
+                    childGroupsCount={childGroups.length}
                     onClick={() => setActiveRootId(rootGroup.id)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all shadow-sm ${
-                      isActive
-                        ? 'border-transparent text-white shadow-lg scale-[1.02]'
-                        : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                    }`}
-                    style={{
-                      background: isActive
-                        ? `linear-gradient(135deg, ${rootGroup.color}, ${rootGroup.color}e6)`
-                        : `${rootGroup.color}10`,
-                    }}
-                  >
-                    <span className="font-semibold text-lg">{rootGroup.name}</span>
-                    <span className={`text-xs ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
-                      ({childGroups.length})
-                    </span>
-                  </button>
+                  />
                 );
               })}
             </div>
@@ -278,7 +311,7 @@ export const GroupsPanel = () => {
           </Fragment>
         ) : (
           <div className="bg-white rounded-xl border border-dashed border-gray-300 p-8 text-center text-gray-600">
-            {t('groups.noRootGroups', 'לא נמצאו קבוצות על')}
+            {t('groups.noRootGroups')}
           </div>
         )}
 
@@ -348,7 +381,7 @@ export const GroupsPanel = () => {
                     <option value="hebrew">{t('birthday.hebrewOnly')}</option>
                   </select>
                   <p className="text-xs text-gray-500 mt-1">
-                    {t('groups.preferenceExplanation', 'זה ישפיע על אופן הצגת ימי ההולדת בקבוצה זו')}
+                    {t('groups.preferenceExplanation')}
                   </p>
                 </div>
 
@@ -418,6 +451,7 @@ const CategorySection = ({
   onDeleteGroup,
 }: CategorySectionProps) => {
   const { t } = useTranslation();
+  const translatedRootName = useTranslatedRootGroupName(rootGroup);
   const totalRecords = childGroups.reduce((sum, group) => {
     return sum + (countsByGroup.get(group.id) ?? 0);
   }, 0);
@@ -425,7 +459,7 @@ const CategorySection = ({
   const childGroupsText = `(${childGroups.length})`;
 
   const recordCountText = isCountsLoading
-    ? t('common.loading', 'טוען...')
+    ? t('common.loading')
     : `(${totalRecords})`;
 
   return (
@@ -450,9 +484,9 @@ const CategorySection = ({
             />
           </div>
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold text-gray-900">{rootGroup.name}</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{translatedRootName}</h3>
             <span className="text-sm text-gray-500">
-              {isCountsLoading ? t('common.loading', 'טוען...') : `${t('groups.totalRecords', 'סה"כ רשומות')}: (${totalRecords})`}
+              {isCountsLoading ? t('common.loading') : `${t('groups.totalRecords')}: (${totalRecords})`}
             </span>
           </div>
         </div>
@@ -477,7 +511,7 @@ const CategorySection = ({
               <Plus className="w-8 h-8 text-gray-400" />
             </div>
             <p className="text-sm text-gray-600 mb-4">
-              {t('groups.noGroups', { category: rootGroup.name })}
+              {t('groups.noGroups', { category: translatedRootName })}
             </p>
             <button
               onClick={onAddGroup}
@@ -515,7 +549,7 @@ const CategorySection = ({
                   </div>
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-1 rounded-lg">
-                    {isCountsLoading ? t('common.loading', 'טוען...') : `(${groupCount})`}
+                    {isCountsLoading ? t('common.loading') : `(${groupCount})`}
                   </span>
                   <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button

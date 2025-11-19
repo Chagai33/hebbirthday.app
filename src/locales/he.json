@@ -1,5 +1,6 @@
 {
   "googleCalendar": {
+    "title": "יומן Google",
     "connect": "התחבר ליומן Google",
     "connected": "מחובר ליומן Google",
     "disconnect": "נתק חיבור",
@@ -23,7 +24,31 @@
     "selectCalendar": "בחר יומן",
     "connectedAs": "מחובר כ",
     "switchToPrimary": "עבור ליומן ראשי",
-    "switchToCustom": "עבור ליומן מותאם אישית"
+    "switchToCustom": "עבור ליומן מותאם אישית",
+    "modalDescription": "התחבר ליומן Google כדי לסנכרן ימי הולדת אוטומטית.",
+    "cleanupOrphans": "ניקוי אירועים יתומים (תיקון סנכרון)",
+    "cleanupOrphansShort": "ניקוי יתומים",
+    "cleanupOrphansShortMobile": "נקה",
+    "deleteAllEvents": "מחק את כל האירועים המסונכרנים",
+    "deleteAllEventsShort": "מחק הכל",
+    "deleteAllEventsShortMobile": "מחק",
+    "disconnectCalendar": "נתק מיומן Google",
+    "disconnectCalendarShort": "נתק",
+    "deleteCalendar": "מחיקת יומן",
+    "deleteCalendarConfirm": "האם אתה בטוח שברצונך למחוק את היומן",
+    "deleteCalendarWarning": "פעולה זו תמחק את היומן מ-Google Calendar. ניתן למחוק רק יומנים שנוצרו על ידי האפליקציה, שאינם נוכחיים, וללא אירועים. פעולה זו אינה ניתנת לביטול.",
+    "deleting": "מוחק...",
+    "yesDelete": "כן, מחק",
+    "customCalendarDescription": "יומן מותאם אישית מאפשר לך לשתף את ימי ההולדת עם משפחה וחברים מבלי לחשוף את היומן האישי שלך.",
+    "loadingCalendars": "טוען יומנים...",
+    "deleteAllConfirm": "האם אתה בטוח שברצונך למחוק את כל האירועים המסונכרנים מיומן Google?",
+    "deleteAllWarning": "פעולה זו תמחק את כל ימי ההולדת שנוצרו דרך האפליקציה. פעולה זו אינה ניתנת לביטול.",
+    "deleteAllSummary": "סיכום מחיקה ({count} אירועים):",
+    "noEventsToDelete": "לא נמצאו אירועים למחיקה או שהנתונים בטעינה.",
+    "calculatingDeletion": "מחשב נתונים למחיקה...",
+    "yesDeleteAll": "כן, מחק הכל",
+    "notAvailable": "לא זמין",
+    "primaryCalendarName": "יומן ראשי"
   },
   "common": {
     "save": "שמור",
@@ -56,7 +81,13 @@
     "create": "צור",
     "developedBy": "פותח על ידי",
     "back": "חזור",
-    "version": "גרסה"
+    "version": "גרסה",
+    "this": "זה",
+    "events": "אירועים",
+    "switchLanguage": "החלף לאנגלית",
+    "switchToEnglish": "English",
+    "switchToHebrew": "עברית",
+    "linkedInProfile": "פרופיל LinkedIn"
   },
   "auth": {
     "signIn": "התחבר",
@@ -175,6 +206,7 @@
     "hebrewDistribution": "התפלגות עברית"
   },
   "groups": {
+    "title": "קבוצות",
     "groups": "קבוצות",
     "manageGroups": "ניהול קבוצות",
     "addGroup": "הוסף קבוצה",
@@ -198,6 +230,9 @@
     "groupCreated": "הקבוצה נוצרה בהצלחה",
     "groupUpdated": "הקבוצה עודכנה בהצלחה",
     "preferenceExplanation": "זה ישפיע על אופן הצגת ימי ההולדת בקבוצה זו",
+    "manageDescription": "ארגן את הרשומות שלך בקבוצות",
+    "noRootGroups": "לא נמצאו קבוצות על",
+    "totalRecords": "סה\"כ רשומות",
     "addGroupUnder": "הוסף קבוצה תחת {{category}}",
     "selectCategory": "בחר קטגוריה",
     "createSubgroup": "צור תת-קבוצה",

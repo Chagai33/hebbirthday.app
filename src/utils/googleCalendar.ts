@@ -44,7 +44,8 @@ export function formatDateForGoogleCalendar(date: Date, allDay: boolean = false)
 export function createBirthdayCalendarEvent(
   birthday: Birthday,
   language: 'he' | 'en' = 'he',
-  wishlist?: WishlistItem[]
+  wishlist?: WishlistItem[],
+  groupInfo?: { parentName?: string; groupName: string }
 ): GoogleCalendarEvent {
   const hebrewDate = birthday.next_upcoming_hebrew_birthday;
   const gregorianDate = birthday.calculations?.nextGregorianBirthday;
@@ -100,6 +101,15 @@ export function createBirthdayCalendarEvent(
     description += language === 'he' ? '\n⚠️ לאחר השקיעה' : '\n⚠️ After Sunset';
   }
 
+  // הוספת מידע על הקבוצה
+  if (groupInfo) {
+    if (groupInfo.parentName) {
+      description += `\n(${groupInfo.parentName}: ${groupInfo.groupName})`;
+    } else {
+      description += `\n(${groupInfo.groupName})`;
+    }
+  }
+
   if (birthday.notes) {
     description += language === 'he' ? `\n\nהערות: ${birthday.notes}` : `\n\nNotes: ${birthday.notes}`;
   }
@@ -115,10 +125,11 @@ export function createBirthdayCalendarEvent(
 export function openGoogleCalendarForBirthday(
   birthday: Birthday,
   language: 'he' | 'en' = 'he',
-  wishlist?: WishlistItem[]
+  wishlist?: WishlistItem[],
+  groupInfo?: { parentName?: string; groupName: string }
 ): void {
   try {
-    const event = createBirthdayCalendarEvent(birthday, language, wishlist);
+    const event = createBirthdayCalendarEvent(birthday, language, wishlist, groupInfo);
     const link = generateGoogleCalendarLink(event);
     window.open(link, '_blank', 'noopener,noreferrer');
   } catch (error) {

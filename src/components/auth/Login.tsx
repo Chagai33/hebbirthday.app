@@ -51,7 +51,7 @@ export const Login: React.FC = () => {
         <button
           onClick={toggleLanguage}
           className="absolute top-4 end-4 p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-          title={i18n.language === 'he' ? 'English' : 'עברית'}
+          title={i18n.language === 'he' ? t('common.switchToEnglish') : t('common.switchToHebrew')}
         >
           <Globe className="w-5 h-5" />
         </button>

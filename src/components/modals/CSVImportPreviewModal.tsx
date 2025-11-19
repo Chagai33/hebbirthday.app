@@ -2,6 +2,7 @@ import { logger } from "../../utils/logger";
 import { useState, useEffect } from 'react';
 import { X, AlertCircle, CheckCircle, Upload, FileText, Users, Plus, FolderPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useMemo } from 'react';
 import { CSVBirthdayRow, ValidationResult } from '../../types';
 import { useGroups, useCreateGroup } from '../../hooks/useGroups';
 import { useAuth } from '../../contexts/AuthContext';
@@ -64,6 +65,27 @@ export const CSVImportPreviewModal = ({
 
   const rootGroups = allGroups.filter(g => g.is_root);
   const childGroups = allGroups.filter(g => !g.is_root);
+  
+  // Helper function to get translated root group name
+  const getTranslatedRootName = (group: any): string => {
+    if (!group.is_root || !group.type) return group.name;
+    const translationKeys: Record<string, string> = {
+      family: 'groups.family',
+      friends: 'groups.friends',
+      work: 'groups.work',
+    };
+    const key = translationKeys[group.type];
+    return key ? t(key) : group.name;
+  };
+  
+  // Create a map of root group IDs to translated names for optgroup labels
+  const translatedRootNamesMap = useMemo(() => {
+    const map = new Map<string, string>();
+    rootGroups.forEach(root => {
+      map.set(root.id, getTranslatedRootName(root));
+    });
+    return map;
+  }, [rootGroups, t]);
 
   if (!isOpen) return null;
 
@@ -229,7 +251,7 @@ export const CSVImportPreviewModal = ({
                 {rootGroups.map((root) => {
                   const children = childGroups.filter(c => c.parent_id === root.id);
                   return (
-                    <optgroup key={root.id} label={root.name}>
+                    <optgroup key={root.id} label={translatedRootNamesMap.get(root.id) || root.name}>
                       {children.map((group) => (
                         <option key={group.id} value={group.id}>
                           {group.name}
@@ -294,7 +316,7 @@ export const CSVImportPreviewModal = ({
                     <option value="">{t('birthday.selectGroup')}</option>
                     {rootGroups.map((root) => (
                       <option key={root.id} value={root.id}>
-                        {root.name}
+                        {translatedRootNamesMap.get(root.id) || root.name}
                       </option>
                     ))}
                   </select>
@@ -438,7 +460,7 @@ export const CSVImportPreviewModal = ({
                           {rootGroups.map((root) => {
                             const children = childGroups.filter(c => c.parent_id === root.id);
                             return (
-                              <optgroup key={root.id} label={root.name}>
+                              <optgroup key={root.id} label={translatedRootNamesMap.get(root.id) || root.name}>
                                 {children.map((group) => (
                                   <option key={group.id} value={group.id}>
                                     {group.name}
