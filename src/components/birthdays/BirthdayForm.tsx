@@ -1,5 +1,5 @@
 import { logger } from "../../utils/logger";
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { BirthdayFormData, Gender, Birthday } from '../../types';
@@ -28,7 +28,7 @@ export const BirthdayForm = ({
   editBirthday,
   defaultGroupId,
 }: BirthdayFormProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { currentTenant } = useTenant();
   const createBirthday = useCreateBirthday();
@@ -55,10 +55,85 @@ export const BirthdayForm = ({
     return `${year}-${month}-${day}`;
   };
 
+  const parseDateString = (dateString: string | undefined): { day: number; month: number; year: number } | null => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return null;
+    return {
+      day: date.getDate(),
+      month: date.getMonth() + 1,
+      year: date.getFullYear(),
+    };
+  };
+
+  const getDaysInMonth = (month: number, year: number): number => {
+    return new Date(year, month, 0).getDate();
+  };
+
+  // יצירת תאריך בפורמט YYYY-MM-DD
+  const getDateString = (day: number, month: number, year: number): string => {
+    const date = new Date(year, month - 1, day);
+    const formattedYear = date.getFullYear();
+    const formattedMonth = String(date.getMonth() + 1).padStart(2, '0');
+    const formattedDay = String(date.getDate()).padStart(2, '0');
+    return `${formattedYear}-${formattedMonth}-${formattedDay}`;
+  };
+
+  const [selectedDay, setSelectedDay] = useState<number>(() => {
+    const parsed = parseDateString(editBirthday?.birth_date_gregorian);
+    return parsed?.day || new Date().getDate();
+  });
+  const [selectedMonth, setSelectedMonth] = useState<number>(() => {
+    const parsed = parseDateString(editBirthday?.birth_date_gregorian);
+    return parsed?.month || new Date().getMonth() + 1;
+  });
+  const [selectedYear, setSelectedYear] = useState<number>(() => {
+    const parsed = parseDateString(editBirthday?.birth_date_gregorian);
+    return parsed?.year || new Date().getFullYear();
+  });
+
+  // עדכון מספר הימים כאשר משנים חודש או שנה
+  useEffect(() => {
+    const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
+    if (selectedDay > daysInMonth) {
+      setSelectedDay(daysInMonth);
+    }
+  }, [selectedMonth, selectedYear]);
+
+  // יצירת רשימת שנים (משנת 1900 עד השנה הנוכחית + 1)
+  const years = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    const yearsList: number[] = [];
+    for (let year = 1900; year <= currentYear + 1; year++) {
+      yearsList.push(year);
+    }
+    return yearsList.reverse(); // מהחדש לישן
+  }, []);
+
+  // יצירת רשימת חודשים
+  const months = useMemo(() => {
+    return Array.from({ length: 12 }, (_, i) => i + 1);
+  }, []);
+
+  // יצירת רשימת ימים לפי החודש והשנה הנבחרים
+  const days = useMemo(() => {
+    const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
+    return Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  }, [selectedMonth, selectedYear]);
+
+  // חישוב הערך הראשוני של התאריך
+  const initialDateString = useMemo(() => {
+    if (editBirthday) {
+      return formatDateForInput(editBirthday.birth_date_gregorian);
+    }
+    return getDateString(selectedDay, selectedMonth, selectedYear);
+  }, [editBirthday, selectedDay, selectedMonth, selectedYear]);
+
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<BirthdayFormData>({
     defaultValues: editBirthday
@@ -74,8 +149,15 @@ export const BirthdayForm = ({
         }
       : {
           groupId: defaultGroupId || '',
+          birthDateGregorian: initialDateString as any,
         },
   });
+
+  // עדכון הערך ב-form כאשר משנים תאריך (רק אחרי שה-form מוכן)
+  useEffect(() => {
+    const dateString = getDateString(selectedDay, selectedMonth, selectedYear);
+    setValue('birthDateGregorian', dateString as any, { shouldValidate: false });
+  }, [selectedDay, selectedMonth, selectedYear, setValue]);
 
   const selectedGroupId = watch('groupId');
   const selectedGroup = allGroups.find(g => g.id === selectedGroupId);
@@ -276,14 +358,89 @@ export const BirthdayForm = ({
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">
                 {t('birthday.birthDate')} *
               </label>
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <div>
+                  <select
+                    value={selectedDay}
+                    onChange={(e) => {
+                      const day = parseInt(e.target.value);
+                      setSelectedDay(day);
+                      const dateString = getDateString(day, selectedMonth, selectedYear);
+                      setValue('birthDateGregorian', dateString as any, { shouldValidate: true });
+                    }}
+                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  >
+                    {days.map((day) => (
+                      <option key={day} value={day}>
+                        {day}
+                      </option>
+                    ))}
+                  </select>
+                  <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
+                    {t('common.day', 'יום')}
+                  </label>
+                </div>
+                <div>
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => {
+                      const month = parseInt(e.target.value);
+                      setSelectedMonth(month);
+                      const daysInMonth = getDaysInMonth(month, selectedYear);
+                      const day = Math.min(selectedDay, daysInMonth);
+                      setSelectedDay(day);
+                      const dateString = getDateString(day, month, selectedYear);
+                      setValue('birthDateGregorian', dateString as any, { shouldValidate: true });
+                    }}
+                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  >
+                    {months.map((month) => {
+                      const date = new Date(2000, month - 1, 1);
+                      const monthName = date.toLocaleDateString(i18n.language === 'he' ? 'he-IL' : 'en-US', { month: 'long' });
+                      return (
+                        <option key={month} value={month}>
+                          {monthName}
+                        </option>
+                      );
+                    })}
+                  </select>
+                  <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
+                    {t('common.month', 'חודש')}
+                  </label>
+                </div>
+                <div>
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => {
+                      const year = parseInt(e.target.value);
+                      setSelectedYear(year);
+                      const daysInMonth = getDaysInMonth(selectedMonth, year);
+                      const day = Math.min(selectedDay, daysInMonth);
+                      setSelectedDay(day);
+                      const dateString = getDateString(day, selectedMonth, year);
+                      setValue('birthDateGregorian', dateString as any, { shouldValidate: true });
+                    }}
+                    className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  >
+                    {years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                  <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
+                    {t('common.year', 'שנה')}
+                  </label>
+                </div>
+              </div>
+              {/* שדה נסתר עבור react-hook-form */}
               <input
-                type="date"
-                defaultValue={editBirthday ? formatDateForInput(editBirthday.birth_date_gregorian) : undefined}
+                type="hidden"
+                value={getDateString(selectedDay, selectedMonth, selectedYear)}
                 {...register('birthDateGregorian', {
                   required: t('validation.required'),
                   valueAsDate: true,
                 })}
-                className="w-full px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               {errors.birthDateGregorian && (
                 <p className="text-red-500 text-xs mt-0.5 sm:mt-1">
