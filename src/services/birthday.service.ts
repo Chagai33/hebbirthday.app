@@ -85,26 +85,42 @@ export const birthdayService = {
     if (data.firstName !== undefined) updateData.first_name = data.firstName;
     if (data.lastName !== undefined) updateData.last_name = data.lastName;
     if (data.birthDateGregorian !== undefined) {
-      const birthDate = data.birthDateGregorian;
-
-      if (typeof birthDate === 'string') {
-        // Already in YYYY-MM-DD format
-        updateData.birth_date_gregorian = birthDate;
-        const [y, m, d] = birthDate.split('-').map(Number);
-        updateData.gregorian_year = y;
-        updateData.gregorian_month = m;
-        updateData.gregorian_day = d;
+      // בדיקה אם התאריך הלועזי באמת השתנה
+      const currentDoc = await getDoc(doc(db, 'birthdays', birthdayId));
+      const currentData = currentDoc.data();
+      const currentBirthDate = currentData?.birth_date_gregorian;
+      
+      let newBirthDateString: string;
+      if (typeof data.birthDateGregorian === 'string') {
+        newBirthDateString = data.birthDateGregorian;
       } else {
-        // Date object from form
-        updateData.birth_date_gregorian = birthDate.toISOString().split('T')[0];
-        updateData.gregorian_year = birthDate.getFullYear();
-        updateData.gregorian_month = birthDate.getMonth() + 1;
-        updateData.gregorian_day = birthDate.getDate();
+        newBirthDateString = data.birthDateGregorian.toISOString().split('T')[0];
       }
 
-      updateData.birth_date_hebrew_string = null;
-      updateData.next_upcoming_hebrew_birthday = null;
-      updateData.future_hebrew_birthdays = [];
+      // אם התאריך השתנה, עדכן ואפס את הנתונים העבריים
+      if (currentBirthDate !== newBirthDateString) {
+        const birthDate = data.birthDateGregorian;
+
+        if (typeof birthDate === 'string') {
+          // Already in YYYY-MM-DD format
+          updateData.birth_date_gregorian = birthDate;
+          const [y, m, d] = birthDate.split('-').map(Number);
+          updateData.gregorian_year = y;
+          updateData.gregorian_month = m;
+          updateData.gregorian_day = d;
+        } else {
+          // Date object from form
+          updateData.birth_date_gregorian = birthDate.toISOString().split('T')[0];
+          updateData.gregorian_year = birthDate.getFullYear();
+          updateData.gregorian_month = birthDate.getMonth() + 1;
+          updateData.gregorian_day = birthDate.getDate();
+        }
+
+        updateData.birth_date_hebrew_string = null;
+        updateData.next_upcoming_hebrew_birthday = null;
+        updateData.future_hebrew_birthdays = [];
+      }
+      // אם התאריך לא השתנה, לא נעשה כלום - הנתונים העבריים נשמרים
     }
     if (data.afterSunset !== undefined) updateData.after_sunset = data.afterSunset;
     if (data.gender !== undefined) updateData.gender = data.gender;
