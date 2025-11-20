@@ -9,7 +9,7 @@ import { useGroups } from '../../hooks/useGroups';
 import { useGroupFilter } from '../../contexts/GroupFilterContext';
 import { useTenant } from '../../contexts/TenantContext';
 import { useGoogleCalendar } from '../../contexts/GoogleCalendarContext';
-import { Edit, Trash2, Calendar, Search, CalendarDays, RefreshCw, Filter, Gift, Download, Users, X, UploadCloud, CloudOff, Sparkles, Copy } from 'lucide-react';
+import { Edit, Trash2, Calendar, Search, CalendarDays, RefreshCw, Filter, Gift, Download, Users, X, UploadCloud, CloudOff, Sparkles, Copy, AlertCircle } from 'lucide-react';
 import { FutureBirthdaysModal } from '../modals/FutureBirthdaysModal';
 import { UpcomingGregorianBirthdaysModal } from '../modals/UpcomingGregorianBirthdaysModal';
 import { WishlistModal } from '../modals/WishlistModal';
@@ -63,6 +63,24 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
   }, [genderFilter]);
 
   const locale = i18n.language === 'he' ? he : enUS;
+
+  // חישוב hasUnsyncedChanges לכל הרשומות
+  const [unsyncedMap, setUnsyncedMap] = useState<Map<string, boolean>>(new Map());
+
+  useEffect(() => {
+    const checkUnsynced = async () => {
+      const newMap = new Map<string, boolean>();
+      for (const birthday of birthdays) {
+        if (birthday.syncedDataHash && birthday.googleCalendarEventIds) {
+          const { hasUnsyncedChanges } = await import('../../utils/syncStatus');
+          const hasUnsynced = await hasUnsyncedChanges(birthday);
+          newMap.set(birthday.id, hasUnsynced);
+        }
+      }
+      setUnsyncedMap(newMap);
+    };
+    checkUnsynced();
+  }, [birthdays]);
 
   const enrichedBirthdays = useMemo(() => {
     return birthdays.map((birthday) => {
@@ -770,14 +788,31 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                         </button>
                         {isConnected && (
                           (birthday.googleCalendarEventId || birthday.googleCalendarEventIds) ? (
-                            <button
-                              onClick={() => handleRemoveFromCalendar(birthday.id)}
-                              disabled={isSyncing}
-                              className="p-1 sm:p-2 text-red-600 hover:bg-red-100 rounded-lg transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
-                              title="הסר מיומן Google"
-                            >
-                              <CloudOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                            </button>
+                            <>
+                              {unsyncedMap.get(birthday.id) && (
+                                <div className="relative">
+                                  <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600" title="יש שינויים שלא עודכנו ליומן Google" />
+                                </div>
+                              )}
+                              <button
+                                onClick={() => handleRemoveFromCalendar(birthday.id)}
+                                disabled={isSyncing}
+                                className="p-1 sm:p-2 text-red-600 hover:bg-red-100 rounded-lg transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="הסר מיומן Google"
+                              >
+                                <CloudOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                              </button>
+                              {unsyncedMap.get(birthday.id) && (
+                                <button
+                                  onClick={() => handleSyncToCalendar(birthday.id)}
+                                  disabled={isSyncing}
+                                  className="p-1 sm:p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title="עדכן ליומן Google (יש שינויים)"
+                                >
+                                  <UploadCloud className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                </button>
+                              )}
+                            </>
                           ) : (
                             <button
                               onClick={() => handleSyncToCalendar(birthday.id)}

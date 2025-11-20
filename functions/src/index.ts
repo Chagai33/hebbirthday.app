@@ -2,6 +2,7 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import fetch from 'node-fetch';
 import { google } from 'googleapis';
+import * as crypto from 'crypto';
 
 admin.initializeApp();
 
@@ -82,6 +83,86 @@ async function getCurrentHebrewYear(): Promise<number> {
     functions.logger.error('Error getting current Hebrew year:', error);
     throw error;
   }
+}
+
+function getGregorianZodiacSign(date: Date): string | null {
+  const month = date.getMonth() + 1; // 1-12
+  const day = date.getDate();
+
+  if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return 'aries';
+  if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return 'taurus';
+  if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return 'gemini';
+  if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return 'cancer';
+  if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return 'leo';
+  if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return 'virgo';
+  if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return 'libra';
+  if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return 'scorpio';
+  if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return 'sagittarius';
+  if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return 'capricorn';
+  if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return 'aquarius';
+  if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return 'pisces';
+
+  return null;
+}
+
+function getHebrewZodiacSign(hebrewMonth: string): string | null {
+  if (!hebrewMonth) return null;
+  
+  // Hebrew months from Hebcal: Nisan, Iyyar, Sivan, Tamuz, Av, Elul, Tishrei, Cheshvan, Kislev, Tevet, Sh'vat, Adar, Adar I, Adar II
+  switch (hebrewMonth) {
+    case 'Nisan': return 'aries';
+    case 'Iyyar': return 'taurus';
+    case 'Sivan': return 'gemini';
+    case 'Tamuz': return 'cancer';
+    case 'Av': return 'leo';
+    case 'Elul': return 'virgo';
+    case 'Tishrei': return 'libra';
+    case 'Cheshvan': return 'scorpio';
+    case 'Kislev': return 'sagittarius';
+    case 'Tevet': return 'capricorn';
+    case 'Sh\'vat': return 'aquarius';
+    case 'Adar':
+    case 'Adar I':
+    case 'Adar II':
+      return 'pisces';
+    default: return null;
+  }
+}
+
+function getZodiacSignNameEn(sign: string): string {
+  const signNames: { [key: string]: string } = {
+    'aries': 'Aries',
+    'taurus': 'Taurus',
+    'gemini': 'Gemini',
+    'cancer': 'Cancer',
+    'leo': 'Leo',
+    'virgo': 'Virgo',
+    'libra': 'Libra',
+    'scorpio': 'Scorpio',
+    'sagittarius': 'Sagittarius',
+    'capricorn': 'Capricorn',
+    'aquarius': 'Aquarius',
+    'pisces': 'Pisces'
+  };
+  return signNames[sign] || sign;
+}
+
+function getZodiacSignNameHe(sign: string): string {
+  const signNames: { [key: string]: string } = {
+    'aries': 'טלה',
+    'taurus': 'שור',
+    'gemini': 'תאומים',
+    'cancer': 'סרטן',
+    'leo': 'אריה',
+    'virgo': 'בתולה',
+    'libra': 'מאזניים',
+    'scorpio': 'עקרב',
+    'sagittarius': 'קשת',
+    'capricorn': 'גדי',
+    'aquarius': 'דלי',
+    'pisces': 'דגים'
+  };
+  return signNames[sign] || sign;
 }
 
 interface HebrewBirthdayDate {
@@ -833,6 +914,7 @@ export const syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, 
     // --- Phase 2: Determine Preferences & Calculate Data ---
     const tenantDoc = await db.collection('tenants').doc(birthday.tenant_id).get();
     const tenant = tenantDoc.data();
+    const language = (tenant?.default_language || 'he') as 'he' | 'en';
 
     let groupDoc = null;
     let group = null;
@@ -858,6 +940,29 @@ export const syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, 
 
     const shouldSyncHebrew = calendarPreference === 'hebrew' || calendarPreference === 'both';
     const shouldSyncGregorian = calendarPreference === 'gregorian' || calendarPreference === 'both';
+
+    // טעינת wishlist items
+    const wishlistSnapshot = await db.collection('wishlist_items')
+      .where('birthday_id', '==', birthdayId)
+      .where('tenant_id', '==', birthday.tenant_id)
+      .get();
+    
+    const wishlistItems = wishlistSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        item_name: data.item_name,
+        description: data.description || '',
+        priority: data.priority
+      };
+    });
+
+    // מיון לפי priority
+    const priorityOrder: { [key: string]: number } = { high: 1, medium: 2, low: 3 };
+    wishlistItems.sort((a, b) => {
+      const priorityDiff = (priorityOrder[a.priority] || 99) - (priorityOrder[b.priority] || 99);
+      if (priorityDiff !== 0) return priorityDiff;
+      return 0;
+    });
 
     let futureHebrewBirthdays = birthday.future_hebrew_birthdays || [];
 
@@ -894,10 +999,40 @@ export const syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, 
     const eventsToCreate: any[] = [];
     const currentYear = new Date().getFullYear();
     
-    let description = `תאריך לידה לועזי: ${birthday.birth_date_gregorian}\n`;
-    description += `תאריך לידה עברי: ${birthday.birth_date_hebrew_string || ''}\n`;
+    let description = '';
+    
+    // הוספת wishlist אם יש
+    if (wishlistItems.length > 0) {
+      if (language === 'en') {
+        description += 'Wishlist:\n';
+      } else {
+        description += 'רשימת משאלות:\n';
+      }
+      wishlistItems.forEach((item, index) => {
+        description += `${index + 1}. ${item.item_name}`;
+        if (item.description) {
+          description += ` - ${item.description}`;
+        }
+        description += '\n';
+      });
+      description += '\n';
+    }
+    
+    // תיאור תאריכי לידה
+    if (language === 'en') {
+      description += `Gregorian Birth Date: ${birthday.birth_date_gregorian}\n`;
+      description += `Hebrew Birth Date: ${birthday.birth_date_hebrew_string || ''}\n`;
+    } else {
+      description += `תאריך לידה לועזי: ${birthday.birth_date_gregorian}\n`;
+      description += `תאריך לידה עברי: ${birthday.birth_date_hebrew_string || ''}\n`;
+    }
+    
     if (birthday.after_sunset) {
-      description += '⚠️ לאחר השקיעה\n';
+      if (language === 'en') {
+        description += '⚠️ After Sunset\n';
+      } else {
+        description += '⚠️ לאחר השקיעה\n';
+      }
     }
     
     // הוספת מידע על הקבוצה
@@ -910,7 +1045,11 @@ export const syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, 
     }
     
     if (birthday.notes) {
-      description += `\n\nהערות: ${birthday.notes}`;
+      if (language === 'en') {
+        description += `\n\nNotes: ${birthday.notes}`;
+      } else {
+        description += `\n\nהערות: ${birthday.notes}`;
+      }
     }
 
     const extendedProperties = {
@@ -921,9 +1060,29 @@ export const syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, 
         }
     };
 
+    // חישוב מזלות
+    const gregorianSign = getGregorianZodiacSign(new Date(birthday.birth_date_gregorian));
+    const hebrewSign = birthday.hebrew_month ? getHebrewZodiacSign(birthday.hebrew_month) : null;
+
+    // תיאור בסיסי לכל האירועים
+    const baseDescription = description;
+
     if (shouldSyncGregorian) {
       const birthDate = new Date(birthday.birth_date_gregorian);
       const birthYear = birthDate.getFullYear();
+
+      // תיאור לאירוע לועזי - כולל מזל לועזי
+      let gregorianDescription = baseDescription;
+      if (gregorianSign) {
+        const signName = language === 'en' 
+          ? getZodiacSignNameEn(gregorianSign)
+          : getZodiacSignNameHe(gregorianSign);
+        if (language === 'en') {
+          gregorianDescription += `\n\nZodiac Sign: ${signName}`;
+        } else {
+          gregorianDescription += `\n\nמזל: ${signName}`;
+        }
+      }
 
       for (let year = currentYear; year <= currentYear + 10; year++) {
         const eventDate = new Date(year, birthDate.getMonth(), birthDate.getDate());
@@ -934,11 +1093,13 @@ export const syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, 
         const endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + 1);
 
-        const title = `${birthday.first_name} ${birthday.last_name} | ${age} | יום הולדת 🎂`;
+        const title = language === 'en'
+          ? `${birthday.first_name} ${birthday.last_name} | ${age} | Birthday 🎂`
+          : `${birthday.first_name} ${birthday.last_name} | ${age} | יום הולדת לועזי 🎂`;
 
         eventsToCreate.push({
             summary: title,
-            description,
+            description: gregorianDescription,
             start: { date: startDate.toISOString().split('T')[0] },
             end: { date: endDate.toISOString().split('T')[0] },
             extendedProperties,
@@ -955,6 +1116,19 @@ export const syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, 
     }
 
     if (shouldSyncHebrew) {
+        // תיאור לאירוע עברי - כולל מזל עברי
+        let hebrewDescription = baseDescription;
+        if (hebrewSign) {
+          const signName = language === 'en' 
+            ? getZodiacSignNameEn(hebrewSign)
+            : getZodiacSignNameHe(hebrewSign);
+          if (language === 'en') {
+            hebrewDescription += `\n\nZodiac Sign: ${signName}`;
+          } else {
+            hebrewDescription += `\n\nמזל: ${signName}`;
+          }
+        }
+
         const slicedFuture = futureHebrewBirthdays.slice(0, 10);
         for (const item of slicedFuture) {
              let hebrewDate: string;
@@ -974,11 +1148,13 @@ export const syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, 
              endDate.setDate(endDate.getDate() + 1);
 
              const age = hebrewYear && birthday.hebrew_year ? hebrewYear - birthday.hebrew_year : 0;
-             const title = `${birthday.first_name} ${birthday.last_name} | ${age} | יום הולדת עברי 🎂`;
+             const title = language === 'en'
+               ? `${birthday.first_name} ${birthday.last_name} | ${age} | Hebrew Birthday 🎂`
+               : `${birthday.first_name} ${birthday.last_name} | ${age} | יום הולדת עברי 🎂`;
 
              eventsToCreate.push({
                  summary: title,
-                 description,
+                 description: hebrewDescription,
                  start: { date: startDate.toISOString().split('T')[0] },
                  end: { date: endDate.toISOString().split('T')[0] },
                  extendedProperties,
@@ -1034,10 +1210,15 @@ export const syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, 
     if (gregorianIds.length > 0) eventIds.gregorian = gregorianIds;
     if (hebrewIds.length > 0) eventIds.hebrew = hebrewIds;
 
+    // חישוב hash של הנתונים המסונכרנים
+    const hashData = `${birthday.first_name}|${birthday.last_name}|${birthday.notes || ''}|${birthday.group_id || ''}|${birthday.calendar_preference_override || ''}`;
+    const syncedDataHash = crypto.createHash('sha256').update(hashData).digest('hex');
+
     const updateData: any = {
       googleCalendarEventIds: eventIds,
       googleCalendarEventId: admin.firestore.FieldValue.delete(),
-      lastSyncedAt: admin.firestore.FieldValue.serverTimestamp()
+      lastSyncedAt: admin.firestore.FieldValue.serverTimestamp(),
+      syncedDataHash: syncedDataHash
     };
 
     if (shouldSyncHebrew && (!birthday.future_hebrew_birthdays || birthday.future_hebrew_birthdays.length === 0)) {
@@ -1192,6 +1373,7 @@ export const removeBirthdayFromGoogleCalendar = functions.https.onCall(async (da
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
     let deletedCount = 0;
+    const deletedEventIds = new Set<string>();
 
     // מחיקה רק של אירועים שנוצרו על ידי האפליקציה (שנשמרו ב-Firestore)
     if (birthday.googleCalendarEventIds) {
@@ -1202,6 +1384,7 @@ export const removeBirthdayFromGoogleCalendar = functions.https.onCall(async (da
           try {
             await calendar.events.delete({ calendarId: calendarId, eventId });
             deletedCount++;
+            deletedEventIds.add(eventId);
             functions.logger.log(`Deleted gregorian event ${eventId} from calendar ${calendarId}`);
           } catch (err: any) {
             if (err.code !== 404) {
@@ -1216,6 +1399,7 @@ export const removeBirthdayFromGoogleCalendar = functions.https.onCall(async (da
           try {
             await calendar.events.delete({ calendarId: calendarId, eventId });
             deletedCount++;
+            deletedEventIds.add(eventId);
             functions.logger.log(`Deleted hebrew event ${eventId} from calendar ${calendarId}`);
           } catch (err: any) {
             if (err.code !== 404) {
@@ -1229,6 +1413,7 @@ export const removeBirthdayFromGoogleCalendar = functions.https.onCall(async (da
       try {
         await calendar.events.delete({ calendarId: calendarId, eventId: birthday.googleCalendarEventId });
         deletedCount++;
+        deletedEventIds.add(birthday.googleCalendarEventId);
         functions.logger.log(`Deleted event ${birthday.googleCalendarEventId} from calendar ${calendarId}`);
       } catch (err: any) {
         if (err.code !== 404) {
@@ -1236,6 +1421,45 @@ export const removeBirthdayFromGoogleCalendar = functions.https.onCall(async (da
         }
       }
     }
+
+    // חיפוש נוסף לפי privateExtendedProperty למציאת אירועים שלא נשמרו ב-Firestore
+    let pageToken: string | undefined = undefined;
+    do {
+      try {
+        const response: any = await calendar.events.list({
+          calendarId,
+          privateExtendedProperty: [
+            'createdByApp=hebbirthday',
+            `birthdayId=${birthdayId}`
+          ],
+          maxResults: 250,
+          pageToken,
+          singleEvents: true
+        });
+
+        const events = response.data.items || [];
+        
+        for (const event of events) {
+          if (event.id && !deletedEventIds.has(event.id)) {
+            try {
+              await calendar.events.delete({ calendarId, eventId: event.id });
+              deletedCount++;
+              deletedEventIds.add(event.id);
+              functions.logger.log(`Deleted orphan event ${event.id} from calendar ${calendarId}`);
+            } catch (err: any) {
+              if (err.code !== 404 && err.code !== 410) {
+                functions.logger.warn(`Failed to delete orphan event ${event.id}:`, err);
+              }
+            }
+          }
+        }
+
+        pageToken = response.data.nextPageToken || undefined;
+      } catch (err: any) {
+        functions.logger.warn(`Error searching for orphan events:`, err);
+        break;
+      }
+    } while (pageToken);
 
     await db.collection('birthdays').doc(birthdayId).update({
       googleCalendarEventId: admin.firestore.FieldValue.delete(),
@@ -1292,6 +1516,7 @@ export const deleteAllSyncedEventsFromGoogleCalendar = functions.https.onCall(as
 
     let totalDeleted = 0;
     let failedCount = 0;
+    const deletedEventIds = new Set<string>();
 
     const batch = db.batch();
 
@@ -1307,6 +1532,7 @@ export const deleteAllSyncedEventsFromGoogleCalendar = functions.https.onCall(as
             try {
               await calendar.events.delete({ calendarId: calendarId, eventId });
               totalDeleted++;
+              deletedEventIds.add(eventId);
               functions.logger.log(`Deleted gregorian event ${eventId} from calendar ${calendarId}`);
             } catch (err: any) {
               if (err.code !== 404) {
@@ -1322,6 +1548,7 @@ export const deleteAllSyncedEventsFromGoogleCalendar = functions.https.onCall(as
             try {
               await calendar.events.delete({ calendarId: calendarId, eventId });
               totalDeleted++;
+              deletedEventIds.add(eventId);
               functions.logger.log(`Deleted hebrew event ${eventId} from calendar ${calendarId}`);
             } catch (err: any) {
               if (err.code !== 404) {
@@ -1342,6 +1569,7 @@ export const deleteAllSyncedEventsFromGoogleCalendar = functions.https.onCall(as
         try {
           await calendar.events.delete({ calendarId: calendarId, eventId: birthday.googleCalendarEventId });
           totalDeleted++;
+          deletedEventIds.add(birthday.googleCalendarEventId);
           functions.logger.log(`Deleted event ${birthday.googleCalendarEventId} from calendar ${calendarId}`);
         } catch (err: any) {
           if (err.code !== 404) {
@@ -1358,6 +1586,45 @@ export const deleteAllSyncedEventsFromGoogleCalendar = functions.https.onCall(as
     }
 
     await batch.commit();
+
+    // חיפוש נוסף לפי privateExtendedProperty למציאת כל האירועים שנוצרו על ידי האפליקציה
+    let pageToken: string | undefined = undefined;
+    do {
+      try {
+        const response: any = await calendar.events.list({
+          calendarId,
+          privateExtendedProperty: [
+            'createdByApp=hebbirthday'
+          ],
+          maxResults: 250,
+          pageToken,
+          singleEvents: true
+        });
+
+        const events = response.data.items || [];
+        
+        for (const event of events) {
+          if (event.id && !deletedEventIds.has(event.id)) {
+            try {
+              await calendar.events.delete({ calendarId, eventId: event.id });
+              totalDeleted++;
+              deletedEventIds.add(event.id);
+              functions.logger.log(`Deleted orphan event ${event.id} from calendar ${calendarId}`);
+            } catch (err: any) {
+              if (err.code !== 404 && err.code !== 410) {
+                failedCount++;
+                functions.logger.warn(`Failed to delete orphan event ${event.id}:`, err);
+              }
+            }
+          }
+        }
+
+        pageToken = response.data.nextPageToken || undefined;
+      } catch (err: any) {
+        functions.logger.warn(`Error searching for orphan events:`, err);
+        break;
+      }
+    } while (pageToken);
 
     functions.logger.log(`Deleted ${totalDeleted} events from Google Calendar for tenant ${tenantId}. Failed: ${failedCount}`);
 

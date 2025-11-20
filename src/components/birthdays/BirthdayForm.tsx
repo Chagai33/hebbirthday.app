@@ -14,6 +14,7 @@ import { X, Save, Plus } from 'lucide-react';
 import { Toast } from '../common/Toast';
 import { useToast } from '../../hooks/useToast';
 import { useTranslatedRootGroupName } from '../../utils/groupNameTranslator';
+import { AlertCircle } from 'lucide-react';
 
 interface BirthdayFormProps {
   onClose: () => void;
@@ -46,6 +47,18 @@ export const BirthdayForm = ({
   const [selectedParentGroup, setSelectedParentGroup] = useState('');
   const [duplicates, setDuplicates] = useState<Birthday[]>([]);
   const [pendingData, setPendingData] = useState<BirthdayFormData | null>(null);
+  const [hasUnsyncedChanges, setHasUnsyncedChanges] = useState(false);
+
+  // בדיקת שינויים לא מסונכרנים
+  useEffect(() => {
+    if (editBirthday && (editBirthday.googleCalendarEventIds || editBirthday.googleCalendarEventId)) {
+      import('../../utils/syncStatus').then(({ hasUnsyncedChanges: checkUnsynced }) => {
+        checkUnsynced(editBirthday).then(setHasUnsyncedChanges);
+      });
+    } else {
+      setHasUnsyncedChanges(false);
+    }
+  }, [editBirthday?.syncedDataHash, editBirthday?.googleCalendarEventIds, editBirthday?.first_name, editBirthday?.last_name, editBirthday?.notes, editBirthday?.group_id, editBirthday?.calendar_preference_override]);
 
   const formatDateForInput = (dateString: string): string => {
     const date = new Date(dateString);
@@ -322,6 +335,14 @@ export const BirthdayForm = ({
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 sm:space-y-4">
+            {editBirthday && (editBirthday.googleCalendarEventIds || editBirthday.googleCalendarEventId) && hasUnsyncedChanges && (
+              <div className="flex items-center gap-2 p-2 sm:p-3 bg-orange-50 border border-orange-200 rounded-lg mb-2 sm:mb-4">
+                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 flex-shrink-0" />
+                <p className="text-xs sm:text-sm text-orange-800">
+                  {t('birthday.unsyncedChanges', 'יש שינויים שלא עודכנו ליומן Google')}
+                </p>
+              </div>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">
@@ -561,6 +582,9 @@ export const BirthdayForm = ({
                 rows={1}
                 className="w-full px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                {t('birthday.notesSyncHint', 'הערות יוצגו בתיאור האירוע ביומן Google אם תבחר לסנכרן')}
+              </p>
             </div>
 
             <div className="flex gap-2 sm:gap-3 pt-1 sm:pt-4">
