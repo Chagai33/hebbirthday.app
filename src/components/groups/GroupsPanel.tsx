@@ -27,9 +27,9 @@ const RootGroupButton: React.FC<RootGroupButtonProps> = ({ rootGroup, isActive, 
   return (
     <button
       onClick={onClick}
-      className={`group relative flex flex-col items-center justify-center gap-1 p-3 sm:p-4 rounded-xl sm:rounded-2xl border-2 transition-all shadow-sm hover:shadow-lg ${
+      className={`group relative flex flex-col items-center justify-center gap-0.5 p-1 sm:p-1.5 rounded-lg border-2 transition-all shadow-sm hover:shadow-md ${
         isActive
-          ? 'border-transparent text-white shadow-lg scale-105'
+          ? 'border-transparent text-white shadow-md scale-105'
           : 'border-gray-200 text-gray-700 hover:border-gray-300 bg-white/80 backdrop-blur-sm'
       }`}
       style={{
@@ -39,20 +39,20 @@ const RootGroupButton: React.FC<RootGroupButtonProps> = ({ rootGroup, isActive, 
       }}
     >
       <div 
-        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${
+        className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center ${
           isActive ? 'bg-white/20' : 'bg-white'
         }`}
         style={isActive ? {} : { backgroundColor: `${rootGroup.color}20` }}
       >
         <div
-          className="w-4 h-4 sm:w-5 sm:h-5 rounded-full"
+          className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full"
           style={{ backgroundColor: rootGroup.color }}
         />
       </div>
-      <span className={`font-semibold text-xs sm:text-sm text-center leading-tight ${isActive ? 'text-white' : 'text-gray-900'}`}>
+      <span className={`font-semibold text-[10px] sm:text-xs text-center leading-tight ${isActive ? 'text-white' : 'text-gray-900'}`}>
         {translatedName}
       </span>
-      <span className={`text-[9px] sm:text-[10px] ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
+      <span className={`text-[7px] sm:text-[8px] ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
         ({childGroupsCount})
       </span>
     </button>
@@ -265,11 +265,11 @@ export const GroupsPanel = () => {
 
   return (
     <Layout>
-      <div className="space-y-4 sm:space-y-6 pb-24 sm:pb-0">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+      <div className="space-y-2 sm:space-y-2.5 pb-24 sm:pb-0">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
           <div className="flex-1 min-w-0">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{t('groups.manageGroups')}</h2>
-            <p className="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">{t('groups.manageDescription')}</p>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">{t('groups.manageGroups')}</h2>
+            <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">{t('groups.manageDescription')}</p>
           </div>
           {/* Desktop Back Button */}
           <button
@@ -290,7 +290,7 @@ export const GroupsPanel = () => {
         {rootGroups.length > 0 ? (
           <Fragment>
             {/* קבוצות העל - Grid responsive עם מספר עמודות משתנה לפי גודל המסך */}
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-1.5 sm:gap-2">
               {rootGroups.map((rootGroup) => {
                 const isActive = rootGroup.id === activeRootId;
                 const childGroups = childGroupsMap.get(rootGroup.id) ?? [];
@@ -500,7 +500,7 @@ const CategorySection = ({
         background: `linear-gradient(to bottom, ${rootGroup.color}08, ${rootGroup.color}03, transparent)`
       }}
     >
-      <div className="px-3 sm:px-4 md:px-6 py-3 sm:py-4 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0" style={{ borderColor: `${rootGroup.color}40` }}>
+      <div className="px-3 sm:px-4 md:px-5 py-2.5 sm:py-3 border-b border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0" style={{ borderColor: `${rootGroup.color}40` }}>
         <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
           <div
             className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0"
@@ -529,7 +529,7 @@ const CategorySection = ({
         </button>
       </div>
 
-      <div className="p-3 sm:p-4 md:p-6 bg-gradient-to-b from-gray-50 to-white space-y-3 sm:space-y-4">
+      <div className="p-3 sm:p-4 md:p-5 bg-gradient-to-b from-gray-50 to-white space-y-2.5 sm:space-y-3">
         {isLoading || isCountsLoading ? (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: rootGroup.color }}></div>
