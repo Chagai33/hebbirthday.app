@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Calendar } from 'lucide-react';
 import { format, addYears } from 'date-fns';
@@ -19,31 +19,57 @@ export const UpcomingGregorianBirthdaysModal: React.FC<UpcomingGregorianBirthday
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'he' ? he : enUS;
 
+  const birthDate = new Date(birthday.birth_date_gregorian);
+  const today = useMemo(() => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }, []);
+
+  const futureBirthdays = useMemo(() => {
+    const birthdays = [];
+    const currentYear = today.getFullYear();
+    for (let i = 0; i < 10; i++) {
+      const nextBirthday = addYears(birthDate, birthDate.getFullYear() - currentYear + i);
+      nextBirthday.setFullYear(currentYear + i);
+
+      const age = nextBirthday.getFullYear() - birthDate.getFullYear();
+      const hebrewBirthday = birthday.future_hebrew_birthdays?.[i];
+      
+      // Check if hebrewBirthday is a string (Hebrew date string) or HebrewBirthdayDate object
+      const hebrewDateString = typeof hebrewBirthday === 'string' ? hebrewBirthday : null;
+      const hebrewDateGregorian = typeof hebrewBirthday === 'object' && hebrewBirthday?.gregorian 
+        ? new Date(hebrewBirthday.gregorian) 
+        : null;
+
+      birthdays.push({
+        gregorianDate: nextBirthday,
+        age,
+        hebrewDate: hebrewDateGregorian,
+        hebrewYear: typeof hebrewBirthday === 'object' ? hebrewBirthday?.hebrewYear : null,
+        hebrewDateString: hebrewDateString,
+      });
+    }
+    return birthdays;
+  }, [birthday.birth_date_gregorian, birthday.future_hebrew_birthdays, today]);
+
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   if (!isOpen) return null;
 
-  const birthDate = new Date(birthday.birth_date_gregorian);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const futureBirthdays = [];
-  for (let i = 0; i < 10; i++) {
-    const nextBirthday = addYears(birthDate, birthDate.getFullYear() - today.getFullYear() + i);
-    nextBirthday.setFullYear(today.getFullYear() + i);
-
-    const age = nextBirthday.getFullYear() - birthDate.getFullYear();
-    const hebrewBirthday = birthday.future_hebrew_birthdays?.[i];
-
-    futureBirthdays.push({
-      gregorianDate: nextBirthday,
-      age,
-      hebrewDate: hebrewBirthday?.gregorian ? new Date(hebrewBirthday.gregorian) : null,
-      hebrewYear: hebrewBirthday?.hebrewYear,
-    });
-  }
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[80vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={handleBackdropClick}
+    >
+      <div 
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[80vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
             {t('birthday.upcomingGregorianBirthdays', 'ימי הולדת לועזיים קרובים')}
@@ -71,6 +97,7 @@ export const UpcomingGregorianBirthdaysModal: React.FC<UpcomingGregorianBirthday
             const isUpcoming = date >= today;
             const isPast = date < today;
             const isNext = index === 0 && isUpcoming;
+            const hebrewDateString = item.hebrewDateString;
 
             return (
               <div
@@ -108,14 +135,21 @@ export const UpcomingGregorianBirthdaysModal: React.FC<UpcomingGregorianBirthday
                     <p className={`text-xs ${isPast ? 'text-gray-400' : 'text-gray-500'}`}>
                       {format(date, 'EEEE', { locale })}
                     </p>
-                    <div className="flex items-center gap-4 mt-1">
+                    <div className="flex flex-col gap-1 mt-1">
                       <p className={`text-sm font-semibold ${isPast ? 'text-blue-400' : 'text-blue-600'}`}>
                         {t('birthday.ageAtNextGregorian')}: {item.age}
                       </p>
                       {item.hebrewDate && (
-                        <p className={`text-xs ${isPast ? 'text-purple-400' : 'text-purple-600'}`}>
-                          {t('birthday.hebrewDate')}: {format(item.hebrewDate, 'dd/MM/yyyy')}
-                        </p>
+                        <div className="flex flex-col gap-0.5">
+                          <p className={`text-xs ${isPast ? 'text-purple-400' : 'text-purple-600'}`}>
+                            {t('birthday.hebrewDate')}: {format(item.hebrewDate, 'dd/MM/yyyy')}
+                          </p>
+                          {hebrewDateString && (
+                            <p className={`text-xs font-medium ${isPast ? 'text-purple-400' : 'text-purple-600'}`}>
+                              תאריך עברי: {hebrewDateString}
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>

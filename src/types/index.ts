@@ -193,8 +193,10 @@ export interface CSVBirthdayRow {
   afterSunset: boolean;
   gender?: Gender;
   groupId?: string;
+  groupName?: string;
   notes?: string;
   calendarPreference?: CalendarPreference;
+  wishlist?: string;
   validationErrors?: string[];
   warnings?: string[];
   isDuplicate?: boolean;

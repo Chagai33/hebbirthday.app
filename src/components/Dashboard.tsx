@@ -13,7 +13,7 @@ import { useBirthdays } from '../hooks/useBirthdays';
 import { useTenant } from '../contexts/TenantContext';
 import { useGroupFilter } from '../contexts/GroupFilterContext';
 import { useAuth } from '../contexts/AuthContext';
-import { useRootGroups, useInitializeRootGroups } from '../hooks/useGroups';
+import { useRootGroups, useInitializeRootGroups, useGroups } from '../hooks/useGroups';
 import { Birthday, DashboardStats } from '../types';
 import { Plus, Users, Calendar, TrendingUp, Cake, Upload, Info, ChevronDown, ChevronUp, BarChart3 } from 'lucide-react';
 import { isWithinInterval, addWeeks, addMonths } from 'date-fns';
@@ -37,6 +37,7 @@ export const Dashboard = () => {
   const { data: allBirthdays = [], isLoading } = useBirthdays();
   const { selectedGroupIds } = useGroupFilter();
   const { data: rootGroups = [], isLoading: isLoadingGroups } = useRootGroups();
+  const { data: allGroups = [] } = useGroups();
   const initializeRootGroups = useInitializeRootGroups();
   const queryClient = useQueryClient();
   const { success, error: showError } = useToast();
@@ -201,6 +202,47 @@ export const Dashboard = () => {
     }
   };
 
+  // פונקציה לפרסור Wishlist
+  const parseWishlist = (wishlistStr: string | undefined): Array<{ name: string; priority: 'high' | 'medium' | 'low' }> => {
+    if (!wishlistStr || !wishlistStr.trim()) return [];
+    
+    const items: Array<{ name: string; priority: 'high' | 'medium' | 'low' }> = [];
+    const parts = wishlistStr.split(';').map(p => p.trim()).filter(p => p);
+    
+    for (const part of parts) {
+      // פורמט: "שם פריט (עדיפות: X)" או "שם פריט (Priority: X)"
+      const priorityMatch = part.match(/\(.*?(?:עדיפות|Priority|priority):\s*([^)]+)\)/i);
+      const priorityStr = priorityMatch ? priorityMatch[1].trim().toLowerCase() : 'medium';
+      
+      // חילוץ שם הפריט (הכל לפני הסוגריים)
+      const nameMatch = part.match(/^([^(]+)/);
+      const name = nameMatch ? nameMatch[1].trim() : part.trim();
+      
+      if (!name) continue;
+      
+      // תרגום עדיפות
+      let priority: 'high' | 'medium' | 'low' = 'medium';
+      if (priorityStr === 'high' || priorityStr === 'גבוהה' || priorityStr === 'גבוה') {
+        priority = 'high';
+      } else if (priorityStr === 'low' || priorityStr === 'נמוכה' || priorityStr === 'נמוך') {
+        priority = 'low';
+      }
+      
+      items.push({ name, priority });
+    }
+    
+    return items;
+  };
+
+  // פונקציה לחיפוש קבוצה לפי שם
+  const findGroupByName = (groupName: string | undefined): string | undefined => {
+    if (!groupName || !groupName.trim()) return undefined;
+    
+    const normalizedName = groupName.trim().toLowerCase();
+    const found = allGroups.find(g => g.name.toLowerCase() === normalizedName);
+    return found?.id;
+  };
+
   const handleConfirmImport = async (selectedRows: CSVBirthdayRow[]) => {
     if (!currentTenant || !user) return;
 
@@ -209,7 +251,18 @@ export const Dashboard = () => {
 
     for (const row of selectedRows) {
       try {
-        await birthdayService.createBirthday(
+        // חיפוש קבוצה לפי שם או מזהה
+        let finalGroupId = row.groupId || '';
+        if (!finalGroupId && row.groupName) {
+          const foundGroupId = findGroupByName(row.groupName);
+          if (foundGroupId) {
+            finalGroupId = foundGroupId;
+          } else {
+            logger.warn(`Group not found by name: ${row.groupName}`);
+          }
+        }
+
+        const birthdayId = await birthdayService.createBirthday(
           currentTenant.id,
           {
             firstName: row.firstName,
@@ -217,12 +270,31 @@ export const Dashboard = () => {
             birthDateGregorian: row.birthDate,
             afterSunset: row.afterSunset,
             gender: row.gender,
-            groupId: row.groupId || '',
+            groupId: finalGroupId || '',
             notes: row.notes,
             calendarPreferenceOverride: row.calendarPreference,
           },
           user.id
         );
+
+        // יצירת Wishlist items אם יש
+        if (row.wishlist) {
+          const wishlistItems = parseWishlist(row.wishlist);
+          for (const item of wishlistItems) {
+            try {
+              await wishlistService.createItem(
+                birthdayId,
+                currentTenant.id,
+                item.name,
+                '',
+                item.priority
+              );
+            } catch (wishlistError) {
+              logger.warn(`Failed to create wishlist item for ${row.firstName} ${row.lastName}:`, wishlistError);
+            }
+          }
+        }
+
         imported++;
       } catch (error) {
         logger.error('Failed to import:', row, error);

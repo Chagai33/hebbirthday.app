@@ -363,9 +363,29 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
               {i18n.language === 'he' ? (
                 <>
                   <button
-                    onClick={() => {
-                      const selectedBirthdays = birthdays.filter(b => selectedIds.has(b.id));
-                      exportBirthdaysToCSV(selectedBirthdays, `birthdays-${new Date().toISOString().split('T')[0]}.csv`, i18n.language);
+                    onClick={async () => {
+                      try {
+                        const selectedBirthdays = birthdays.filter(b => selectedIds.has(b.id));
+                        if (selectedBirthdays.length === 0) {
+                          showToast(t('birthday.noSelection', 'לא נבחרו רשומות לייצוא'), 'warning');
+                          return;
+                        }
+                        if (!currentTenant) {
+                          showToast(t('messages.error', 'שגיאה'), 'error');
+                          return;
+                        }
+                        await exportBirthdaysToCSV(
+                          selectedBirthdays, 
+                          groups, 
+                          currentTenant.id,
+                          `birthdays-${new Date().toISOString().split('T')[0]}.csv`, 
+                          i18n.language
+                        );
+                        showToast(t('birthday.exportSuccess', 'הייצוא הושלם בהצלחה'), 'success');
+                      } catch (error) {
+                        logger.error('Error exporting CSV:', error);
+                        showToast(t('messages.exportError', 'שגיאה בייצוא הקובץ'), 'error');
+                      }
                     }}
                     className="px-2 sm:px-3 py-1 sm:py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1"
                   >
@@ -420,9 +440,29 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     <span className="hidden sm:inline">{t('birthday.refresh')}</span>
                   </button>
                   <button
-                    onClick={() => {
-                      const selectedBirthdays = birthdays.filter(b => selectedIds.has(b.id));
-                      exportBirthdaysToCSV(selectedBirthdays, `birthdays-${new Date().toISOString().split('T')[0]}.csv`, i18n.language);
+                    onClick={async () => {
+                      try {
+                        const selectedBirthdays = birthdays.filter(b => selectedIds.has(b.id));
+                        if (selectedBirthdays.length === 0) {
+                          showToast(t('birthday.noSelection', 'לא נבחרו רשומות לייצוא'), 'warning');
+                          return;
+                        }
+                        if (!currentTenant) {
+                          showToast(t('messages.error', 'שגיאה'), 'error');
+                          return;
+                        }
+                        await exportBirthdaysToCSV(
+                          selectedBirthdays, 
+                          groups, 
+                          currentTenant.id,
+                          `birthdays-${new Date().toISOString().split('T')[0]}.csv`, 
+                          i18n.language
+                        );
+                        showToast(t('birthday.exportSuccess', 'הייצוא הושלם בהצלחה'), 'success');
+                      } catch (error) {
+                        logger.error('Error exporting CSV:', error);
+                        showToast(t('messages.exportError', 'שגיאה בייצוא הקובץ'), 'error');
+                      }
                     }}
                     className="px-2 sm:px-3 py-1 sm:py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1"
                   >
@@ -677,9 +717,9 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-700">
                       <div className="flex flex-col gap-0.5 sm:gap-1">
                         <span>{format(new Date(birthday.birth_date_gregorian), 'dd/MM/yyyy', { locale })}</span>
-                        {birthday.birth_date_hebrew_string && (
-                          <span className="text-[10px] sm:text-xs text-gray-500">{birthday.birth_date_hebrew_string}</span>
-                        )}
+                        <span className="text-[10px] sm:text-xs text-gray-500">
+                          {birthday.birth_date_hebrew_string || (i18n.language === 'he' ? 'לא זמין' : 'Not available')}
+                        </span>
                       </div>
                     </td>
                     <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-semibold">

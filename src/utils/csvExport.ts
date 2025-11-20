@@ -1,60 +1,233 @@
-import { Birthday } from '../types';
+import { Birthday, Group, WishlistItem, BirthdayCalculations } from '../types';
+import { wishlistService } from '../services/wishlist.service';
+import { zodiacService } from '../services/zodiac.service';
+import { birthdayCalculationsService } from '../services/birthdayCalculations.service';
 
-export function exportBirthdaysToCSV(birthdays: Birthday[], filename: string = 'birthdays.csv', language: string = 'en') {
+// פונקציות תרגום מזלות
+function getZodiacSignNameEn(sign: string): string {
+  const signNames: { [key: string]: string } = {
+    'aries': 'Aries',
+    'taurus': 'Taurus',
+    'gemini': 'Gemini',
+    'cancer': 'Cancer',
+    'leo': 'Leo',
+    'virgo': 'Virgo',
+    'libra': 'Libra',
+    'scorpio': 'Scorpio',
+    'sagittarius': 'Sagittarius',
+    'capricorn': 'Capricorn',
+    'aquarius': 'Aquarius',
+    'pisces': 'Pisces'
+  };
+  return signNames[sign] || sign;
+}
+
+function getZodiacSignNameHe(sign: string): string {
+  const signNames: { [key: string]: string } = {
+    'aries': 'טלה',
+    'taurus': 'שור',
+    'gemini': 'תאומים',
+    'cancer': 'סרטן',
+    'leo': 'אריה',
+    'virgo': 'בתולה',
+    'libra': 'מאזניים',
+    'scorpio': 'עקרב',
+    'sagittarius': 'קשת',
+    'capricorn': 'גדי',
+    'aquarius': 'דלי',
+    'pisces': 'דגים'
+  };
+  return signNames[sign] || sign;
+}
+
+function formatPriority(priority: string, language: string): string {
+  if (language === 'he') {
+    const priorityMap: { [key: string]: string } = {
+      'high': 'גבוהה',
+      'medium': 'בינונית',
+      'low': 'נמוכה'
+    };
+    return priorityMap[priority] || priority;
+  } else {
+    const priorityMap: { [key: string]: string } = {
+      'high': 'High',
+      'medium': 'Medium',
+      'low': 'Low'
+    };
+    return priorityMap[priority] || priority;
+  }
+}
+
+function formatWishlist(wishlistItems: WishlistItem[], language: string): string {
+  if (!wishlistItems || wishlistItems.length === 0) {
+    return '';
+  }
+  
+  const priorityLabel = language === 'he' ? 'עדיפות' : 'Priority';
+  return wishlistItems
+    .map(item => `${item.item_name} (${priorityLabel}: ${formatPriority(item.priority, language)})`)
+    .join('; ');
+}
+
+export async function exportBirthdaysToCSV(
+  birthdays: Birthday[], 
+  groups: Group[],
+  tenantId: string,
+  filename: string = 'birthdays.csv', 
+  language: string = 'en'
+) {
   const headers = language === 'he' ? [
+    'מזהה רשומה',
     'שם פרטי',
     'שם משפחה',
     'תאריך לידה לועזי',
     'אחרי שקיעה',
     'מגדר',
+    'מזל לועזי',
     'תאריך לידה עברי',
+    'מזל עברי',
     'שנה עברית',
     'יום הולדת עברי הבא',
     'יום הולדת לועזי הבא',
+    'שם קבוצה',
     'מזהה קבוצה',
     'הערות',
-    'העדפת לוח שנה'
+    'העדפת לוח שנה - קבוצה',
+    'העדפת לוח שנה - רשומה',
+    'רשימת משאלות'
   ] : [
+    'Record ID',
     'First Name',
     'Last Name',
     'Birth Date (Gregorian)',
     'After Sunset',
     'Gender',
+    'Gregorian Zodiac Sign',
     'Hebrew Date',
+    'Hebrew Zodiac Sign',
     'Hebrew Year',
     'Next Hebrew Birthday',
     'Next Gregorian Birthday',
+    'Group Name',
     'Group ID',
     'Notes',
-    'Calendar Preference'
+    'Calendar Preference - Group',
+    'Calendar Preference - Record',
+    'Wishlist'
   ];
 
-  const rows = birthdays.map(birthday => {
+  // טעינת wishlist items לכל הרשומות (מקבילית)
+  const wishlistPromises = birthdays.map(birthday => 
+    wishlistService.getItemsForBirthday(birthday.id, tenantId).catch(() => [])
+  );
+  const wishlistsArray = await Promise.all(wishlistPromises);
+  const wishlistsMap = new Map<string, WishlistItem[]>();
+  birthdays.forEach((birthday, index) => {
+    wishlistsMap.set(birthday.id, wishlistsArray[index]);
+  });
+
+  // יצירת מפה של groups לפי ID
+  const groupsMap = new Map<string, Group>();
+  groups.forEach(group => {
+    groupsMap.set(group.id, group);
+  });
+
+  const rows = await Promise.all(birthdays.map(async (birthday) => {
+    // חישוב מזלות - נסה להשתמש ב-calculations אם קיים, אחרת חשב ישירות
+    let gregorianSign = '';
+    let hebrewSign = '';
+    
+    // בדיקה אם יש enriched birthday עם calculations
+    const enrichedBirthday = birthday as any;
+    if (enrichedBirthday.calculations) {
+      const calculations = enrichedBirthday.calculations as BirthdayCalculations;
+      gregorianSign = calculations.gregorianSign || '';
+      hebrewSign = calculations.hebrewSign || '';
+    }
+    
+    // אם אין calculations, חשב ישירות
+    if (!gregorianSign) {
+      try {
+        gregorianSign = zodiacService.getGregorianSign(new Date(birthday.birth_date_gregorian));
+      } catch (e) {
+        gregorianSign = '';
+      }
+    }
+    
+    if (!hebrewSign && birthday.hebrew_month) {
+      hebrewSign = zodiacService.getHebrewSign(birthday.hebrew_month);
+    }
+
+    // תרגום מזלות לפי שפה
+    const gregorianSignName = gregorianSign 
+      ? (language === 'he' ? getZodiacSignNameHe(gregorianSign) : getZodiacSignNameEn(gregorianSign))
+      : '';
+    const hebrewSignName = hebrewSign 
+      ? (language === 'he' ? getZodiacSignNameHe(hebrewSign) : getZodiacSignNameEn(hebrewSign))
+      : '';
+
+    // חישוב יום הולדת לועזי הבא
     let nextGregorianStr = '';
-    if (birthday.calculations?.nextGregorianBirthday) {
-      const date = birthday.calculations.nextGregorianBirthday;
+    if (enrichedBirthday.calculations?.nextGregorianBirthday) {
+      const date = enrichedBirthday.calculations.nextGregorianBirthday;
       if (date instanceof Date) {
         nextGregorianStr = date.toISOString().split('T')[0];
       } else if (typeof date === 'string') {
         nextGregorianStr = date.split('T')[0];
       }
+    } else {
+      // חישוב ישיר אם אין calculations
+      const calculations = birthdayCalculationsService.calculateAll(birthday, new Date());
+      if (calculations.nextGregorianBirthday) {
+        nextGregorianStr = calculations.nextGregorianBirthday.toISOString().split('T')[0];
+      }
     }
 
+    // מציאת קבוצה
+    const group = birthday.group_id ? groupsMap.get(birthday.group_id) : null;
+    const groupName = group?.name || '';
+    const groupCalendarPreference = group?.calendar_preference || '';
+
+    // קבלת wishlist
+    const wishlistItems = wishlistsMap.get(birthday.id) || [];
+    const wishlistStr = formatWishlist(wishlistItems, language);
+
+    // תרגום העדפת לוח שנה
+    const translateCalendarPreference = (pref: string | null | undefined): string => {
+      if (!pref) return '';
+      if (language === 'he') {
+        const prefMap: { [key: string]: string } = {
+          'gregorian': 'לועזי',
+          'hebrew': 'עברי',
+          'both': 'שניהם'
+        };
+        return prefMap[pref] || pref;
+      } else {
+        return pref;
+      }
+    };
+
     return [
+      birthday.id || '',
       birthday.first_name || '',
       birthday.last_name || '',
       birthday.birth_date_gregorian || '',
-      birthday.after_sunset ? 'Yes' : 'No',
+      birthday.after_sunset ? (language === 'he' ? 'כן' : 'Yes') : (language === 'he' ? 'לא' : 'No'),
       birthday.gender || '',
-      birthday.birth_date_hebrew_string || '',
+      gregorianSignName,
+      (birthday.birth_date_hebrew_string || '').replace(/"/g, '""'),
+      hebrewSignName,
       birthday.hebrew_year?.toString() || '',
       birthday.next_upcoming_hebrew_birthday || '',
       nextGregorianStr,
+      groupName,
       birthday.group_id || '',
       (birthday.notes || '').replace(/"/g, '""'),
-      birthday.calendar_preference_override || ''
+      translateCalendarPreference(groupCalendarPreference),
+      translateCalendarPreference(birthday.calendar_preference_override),
+      wishlistStr.replace(/"/g, '""')
     ];
-  });
+  }));
 
   const csvContent = [
     headers.join(','),
@@ -110,8 +283,10 @@ export interface CSVBirthdayData {
   afterSunset: boolean;
   gender?: 'male' | 'female' | 'other';
   groupId?: string;
+  groupName?: string;
   notes?: string;
   calendarPreference?: 'gregorian' | 'hebrew' | 'both';
+  wishlist?: string;
 }
 
 function normalizeHeader(header: string): string {
@@ -227,6 +402,20 @@ export function parseCSVFile(csvText: string): CSVBirthdayData[] {
       'מזהה קבוצה'
     );
 
+    const groupName = getColumnValue(
+      row,
+      'group name',
+      'groupname',
+      'שם קבוצה'
+    );
+
+    const wishlist = getColumnValue(
+      row,
+      'wishlist',
+      'רשימת משאלות',
+      'רשימת משאלות'
+    );
+
     data.push({
       firstName,
       lastName,
@@ -243,6 +432,7 @@ export function parseCSVFile(csvText: string): CSVBirthdayData[] {
         ? 'other'
         : undefined,
       groupId: groupId || undefined,
+      groupName: groupName || undefined,
       notes: notes || undefined,
       calendarPreference: calPrefValue === 'gregorian' || calPrefValue === 'לועזי'
         ? 'gregorian'
@@ -250,7 +440,8 @@ export function parseCSVFile(csvText: string): CSVBirthdayData[] {
         ? 'hebrew'
         : calPrefValue === 'both' || calPrefValue === 'שניהם'
         ? 'both'
-        : undefined
+        : undefined,
+      wishlist: wishlist || undefined
     });
   }
 
