@@ -289,8 +289,8 @@ export const GroupsPanel = () => {
 
         {rootGroups.length > 0 ? (
           <Fragment>
-            {/* קבוצות העל - במובייל: grid קטן, בדסקטופ: flex */}
-            <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-2 sm:gap-3">
+            {/* קבוצות העל - Grid responsive עם מספר עמודות משתנה לפי גודל המסך */}
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3">
               {rootGroups.map((rootGroup) => {
                 const isActive = rootGroup.id === activeRootId;
                 const childGroups = childGroupsMap.get(rootGroup.id) ?? [];
