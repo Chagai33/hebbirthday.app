@@ -27,12 +27,12 @@ export const ResetPassword: React.FC = () => {
     setError('');
     
     if (password !== confirmPassword) {
-      setError(t('auth.passwordsDoNotMatch', 'הסיסמאות אינן תואמות'));
+      setError(t('validation.passwordsDontMatch'));
       return;
     }
 
     if (password.length < 6) {
-      setError(t('auth.passwordTooShort', 'הסיסמה חייבת להכיל לפחות 6 תווים'));
+      setError(t('validation.passwordTooShort'));
       return;
     }
 
@@ -47,7 +47,19 @@ export const ResetPassword: React.FC = () => {
         }, 3000);
       }
     } catch (err: any) {
-      setError(err.message || t('common.error'));
+      if (err.message === 'expired-action-code') {
+        setError(t('auth.expiredActionCode'));
+      } else if (err.message === 'invalid-action-code') {
+        setError(t('auth.invalidActionCode'));
+      } else if (err.message === 'user-disabled') {
+        setError(t('auth.userDisabled'));
+      } else if (err.message === 'user-not-found') {
+        setError(t('auth.userNotFound'));
+      } else if (err.message === 'weak-password') {
+        setError(t('validation.passwordTooShort'));
+      } else {
+        setError(t('common.error'));
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -85,10 +97,10 @@ export const ResetPassword: React.FC = () => {
               </svg>
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              {t('auth.passwordResetSuccess', 'הסיסמה אופסה בהצלחה')}
+              {t('auth.passwordResetSuccess')}
             </h3>
             <p className="text-gray-600">
-              {t('auth.redirectingToLogin', 'מועבר לעמוד ההתחברות...')}
+              {t('auth.redirectingToLogin')}
             </p>
           </div>
         ) : (
@@ -101,7 +113,7 @@ export const ResetPassword: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('auth.newPassword', 'סיסמה חדשה')}
+                {t('auth.newPassword')}
               </label>
               <div className="relative">
                 <Lock className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -118,7 +130,7 @@ export const ResetPassword: React.FC = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('auth.confirmPassword', 'אימות סיסמה')}
+                {t('auth.confirmPassword')}
               </label>
               <div className="relative">
                 <Lock className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />

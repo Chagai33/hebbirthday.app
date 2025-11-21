@@ -161,7 +161,7 @@ export const Dashboard = () => {
         }
       }
 
-      const language = currentTenant?.default_language || 'he';
+      const language = (i18n.language === 'he' ? 'he' : 'en') as 'he' | 'en';
       openGoogleCalendarForBirthday(birthday, language, wishlist, groupInfo);
     } catch (error) {
       logger.error('Error opening Google Calendar:', error);

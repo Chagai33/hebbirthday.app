@@ -26,6 +26,12 @@ export const Login: React.FC = () => {
     }
   }, [user, authLoading, navigate, from]);
 
+  const getErrorMessage = (code: string) => {
+    const errorKey = `auth.errors.${code}`;
+    const message = t(errorKey);
+    return message === errorKey ? t('auth.errors.default') : message;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -36,19 +42,19 @@ export const Login: React.FC = () => {
       // Don't navigate here - let AuthContext's onAuthStateChanged handle it
     } catch (err: any) {
       // Check if user has Google account
-      if (err.message.includes('שגויים') || err.message.includes('credentials')) {
+      if (err.message === 'invalidCredential') {
         try {
           const methods = await authService.checkSignInMethods(email);
           if (methods.includes('google.com')) {
-            setError(t('auth.useGoogleOrReset', 'חשבון זה מקושר ל-Google. התחבר למטה או אפס סיסמה כדי להשתמש גם באימייל.'));
+            setError(t('auth.errors.useGoogleOrReset'));
           } else {
-            setError(err.message || t('common.error'));
+            setError(getErrorMessage(err.message));
           }
         } catch {
-          setError(err.message || t('common.error'));
+           setError(getErrorMessage(err.message));
         }
       } else {
-        setError(err.message || t('common.error'));
+         setError(getErrorMessage(err.message));
       }
       setIsSubmitting(false);
     }
@@ -60,7 +66,7 @@ export const Login: React.FC = () => {
     try {
       await signInWithGoogle();
     } catch (err: any) {
-      setError(err.message || t('common.error'));
+      setError(getErrorMessage(err.message));
       setIsSubmitting(false);
     }
   };

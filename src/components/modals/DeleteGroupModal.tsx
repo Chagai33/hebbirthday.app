@@ -39,7 +39,7 @@ export const DeleteGroupModal = ({
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">
-                {t('modals.deleteGroup.title', 'מחיקת קבוצה')}
+                {t('modals.deleteGroup.title')}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
                 {groupName}
@@ -60,7 +60,7 @@ export const DeleteGroupModal = ({
           </p>
           {recordCount > 0 && (
             <p className="text-sm text-gray-600 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-              {t('modals.deleteGroup.warning', 'בקבוצה זו יש {{count}} רשומות ימי הולדת', { count: recordCount })}
+              {t('modals.deleteGroup.warning', { count: recordCount })}
             </p>
           )}
         </div>
@@ -83,10 +83,10 @@ export const DeleteGroupModal = ({
               />
               <div>
                 <div className="font-semibold text-gray-900">
-                  {t('modals.deleteGroup.keepRecords', 'מחק רק את הקבוצה')}
+                  {t('modals.deleteGroup.keepRecords')}
                 </div>
                 <div className="text-sm text-gray-600 mt-1">
-                  {t('modals.deleteGroup.keepRecordsDesc', 'הרשומות יישארו במערכת ללא שיוך לקבוצה')}
+                  {t('modals.deleteGroup.keepRecordsDesc')}
                 </div>
               </div>
             </div>
@@ -109,10 +109,10 @@ export const DeleteGroupModal = ({
               />
               <div>
                 <div className="font-semibold text-red-700">
-                  {t('modals.deleteGroup.deleteAll', 'מחק את הקבוצה וכל הרשומות')}
+                  {t('modals.deleteGroup.deleteAll')}
                 </div>
                 <div className="text-sm text-gray-600 mt-1">
-                  {t('modals.deleteGroup.deleteAllDesc', 'כל ימי ההולדת בקבוצה זו יימחקו לצמיתות')}
+                  {t('modals.deleteGroup.deleteAllDesc')}
                 </div>
               </div>
             </div>
@@ -124,14 +124,14 @@ export const DeleteGroupModal = ({
             onClick={onClose}
             className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
           >
-            {t('common.cancel', 'ביטול')}
+            {t('common.cancel')}
           </button>
           <button
             onClick={handleConfirm}
             disabled={!selectedOption}
             className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {t('common.delete', 'מחיקה')}
+            {t('common.delete')}
           </button>
         </div>
       </div>

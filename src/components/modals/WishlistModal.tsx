@@ -121,7 +121,7 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
               </div>
               <div>
                 <h2 className="text-2xl font-bold">
-                  {t('wishlist.title', 'רשימת משאלות')}
+                  {t('wishlist.title')}
                 </h2>
                 <p className="text-pink-100 text-sm">
                   {birthday.first_name} {birthday.last_name}
@@ -144,7 +144,7 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
               className="w-full mb-6 px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
             >
               <Plus className="w-5 h-5" />
-              {t('wishlist.addItem', 'הוסף פריט')}
+              {t('wishlist.addItem')}
             </button>
           )}
 
@@ -153,14 +153,14 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    {t('wishlist.itemName', 'שם הפריט')} *
+                    {t('wishlist.itemName')} *
                   </label>
                   <input
                     type="text"
                     value={formData.itemName}
                     onChange={(e) => setFormData({ ...formData, itemName: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    placeholder={t('wishlist.itemNamePlaceholder', 'למשל: ספר, משחק, בגד...')}
+                    placeholder={t('wishlist.itemNamePlaceholder')}
                     required
                     autoFocus
                   />
@@ -168,20 +168,20 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    {t('wishlist.description', 'תיאור')}
+                    {t('wishlist.description')}
                   </label>
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                    placeholder={t('wishlist.descriptionPlaceholder', 'פרטים נוספים (אופציונלי)')}
+                    placeholder={t('wishlist.descriptionPlaceholder')}
                     rows={2}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    {t('wishlist.priority', 'עדיפות')}
+                    {t('wishlist.priority')}
                   </label>
                   <div className="grid grid-cols-3 gap-3">
                     <button
@@ -194,7 +194,7 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
                       }`}
                     >
                       <Star className="w-4 h-4 inline-block me-1" fill={formData.priority === 'high' ? 'currentColor' : 'none'} />
-                      {t('wishlist.high', 'גבוהה')}
+                      {t('wishlist.high')}
                     </button>
                     <button
                       type="button"
@@ -206,7 +206,7 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
                       }`}
                     >
                       <AlertCircle className="w-4 h-4 inline-block me-1" />
-                      {t('wishlist.medium', 'בינונית')}
+                      {t('wishlist.medium')}
                     </button>
                     <button
                       type="button"
@@ -218,7 +218,7 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
                       }`}
                     >
                       <CheckCircle className="w-4 h-4 inline-block me-1" />
-                      {t('wishlist.low', 'נמוכה')}
+                      {t('wishlist.low')}
                     </button>
                   </div>
                 </div>
@@ -229,14 +229,14 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
                     disabled={createItem.isPending || updateItem.isPending}
                     className="flex-1 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50"
                   >
-                    {editingId ? t('common.save', 'שמור') : t('common.add', 'הוסף')}
+                    {editingId ? t('common.save') : t('common.add')}
                   </button>
                   <button
                     type="button"
                     onClick={handleCancel}
                     className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
                   >
-                    {t('common.cancel', 'ביטול')}
+                    {t('common.cancel')}
                   </button>
                 </div>
               </div>
@@ -253,7 +253,7 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
                 <Gift className="w-10 h-10 text-gray-400" />
               </div>
               <p className="text-gray-500 mb-4">
-                {t('wishlist.empty', 'אין פריטים ברשימת המשאלות')}
+                {t('wishlist.empty')}
               </p>
             </div>
           ) : (

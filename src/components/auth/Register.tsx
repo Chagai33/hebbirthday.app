@@ -39,12 +39,18 @@ export const Register: React.FC = () => {
     }
   }, [location.state]);
 
+  const getErrorMessage = (code: string) => {
+    const errorKey = `auth.errors.${code}`;
+    const message = t(errorKey);
+    return message === errorKey ? t('auth.errors.default') : message;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (!acceptedTerms) {
-      setError(t('auth.mustAcceptTerms', 'יש לאשר את תנאי השימוש ומדיניות הפרטיות'));
+      setError(t('auth.mustAcceptTerms', 'You must accept the Terms of Use and Privacy Policy'));
       return;
     }
 
@@ -64,7 +70,7 @@ export const Register: React.FC = () => {
       await signUp(email, password, displayName);
       // Don't navigate here - let AuthContext's onAuthStateChanged handle it
     } catch (err: any) {
-      setError(err.message || t('common.error'));
+      setError(getErrorMessage(err.message));
       setIsSubmitting(false);
     }
   };
@@ -73,7 +79,7 @@ export const Register: React.FC = () => {
     setError('');
 
     if (!acceptedTerms) {
-      setError(t('auth.mustAcceptTerms', 'יש לאשר את תנאי השימוש ומדיניות הפרטיות'));
+      setError(t('auth.mustAcceptTerms', 'You must accept the Terms of Use and Privacy Policy'));
       return;
     }
 
@@ -81,11 +87,11 @@ export const Register: React.FC = () => {
     try {
       const { isNewUser } = await signInWithGoogle();
       if (!isNewUser) {
-        showToast(t('auth.accountExistsLoggingIn', 'החשבון קיים במערכת, מתחבר...'), 'info');
+        showToast(t('auth.accountExistsLoggingIn', 'Account exists, logging in...'), 'info');
       }
       // Redirect handled by useEffect
     } catch (err: any) {
-      setError(err.message || t('common.error'));
+      setError(getErrorMessage(err.message));
       setIsSubmitting(false);
     }
   };
@@ -203,13 +209,13 @@ export const Register: React.FC = () => {
               required
             />
             <label htmlFor="acceptTerms" className="text-sm text-gray-700 cursor-pointer">
-              {t('auth.acceptTerms', 'אני מאשר/ת שקראתי והסכמתי ל')}{' '}
+              {t('auth.acceptTerms', 'I confirm that I have read and agree to the')}{' '}
               <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 underline" onClick={(e) => e.stopPropagation()}>
-                {t('footer.termsOfUse', 'תנאי השימוש')}
+                {t('footer.termsOfUse', 'Terms of Use')}
               </a>
-              {' '}{t('auth.and', 'ול')}{' '}
+              {' '}{t('auth.and', 'and')}{' '}
               <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 underline" onClick={(e) => e.stopPropagation()}>
-                {t('footer.privacyPolicy', 'מדיניות הפרטיות')}
+                {t('footer.privacyPolicy', 'Privacy Policy')}
               </a>
               .
             </label>

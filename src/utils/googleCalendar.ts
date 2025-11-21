@@ -72,7 +72,7 @@ export function createBirthdayCalendarEvent(
   if (language === 'he') {
     title = `${birthday.first_name} ${birthday.last_name} | ${age} | יום הולדת עברי 🎂`;
   } else {
-    title = `Heb Birthday | ${age} | ${birthday.first_name} ${birthday.last_name} 🎂`;
+    title = `${birthday.first_name} ${birthday.last_name} | ${age} | Hebrew Birthday 🎂`;
   }
 
   let description = '';

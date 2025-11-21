@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { useTranslation } from 'react-i18next';
 import { googleCalendarService } from '../services/googleCalendar.service';
 import { useAuth } from './AuthContext';
 import { GoogleCalendarContextType, SyncResult, BulkSyncResult, CleanupOrphansResult, PreviewDeletionResult } from '../types';
@@ -23,6 +24,7 @@ interface GoogleCalendarProviderProps {
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ children }) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { showToast } = useToast();
   const [isConnected, setIsConnected] = useState(false);
@@ -90,7 +92,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
             setUserEmail(null);
             setCalendarId(null);
             setCalendarName(null);
-            showToast('הטוקן פג תוקף. אנא התחבר מחדש ליומן Google', 'warning');
+            showToast(t('googleCalendar.connectFirst'), 'warning');
             return;
           }
           
@@ -114,7 +116,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
 
   const connectToGoogle = async () => {
     if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
-      showToast('Google API טרם נטען. אנא רענן את הדף ונסה שוב', 'error');
+      showToast(t('googleCalendar.apiError'), 'error');
       return;
     }
 
@@ -124,7 +126,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       const tokenResponse = await googleCalendarService.initiateGoogleOAuth();
 
       if (!tokenResponse.accessToken) {
-        throw new Error('לא התקבל טוקן גישה מ-Google');
+        throw new Error(t('googleCalendar.noToken'));
       }
 
       await googleCalendarService.saveAccessToken(tokenResponse.accessToken, tokenResponse.expiresIn);
@@ -160,10 +162,10 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
         }
       }
 
-      showToast('החיבור ליומן Google הושלם בהצלחה', 'success');
+      showToast(t('googleCalendar.connected'), 'success');
     } catch (error: any) {
       logger.error('Error connecting to Google Calendar:', error);
-      showToast(error.message || 'שגיאה בחיבור ליומן Google', 'error');
+      showToast(error.message || t('googleCalendar.syncError'), 'error');
       throw error;
     } finally {
       setIsSyncing(false);
@@ -172,8 +174,8 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
 
   const syncSingleBirthday = async (birthdayId: string): Promise<SyncResult> => {
     if (!isConnected) {
-      showToast('יש להתחבר ליומן Google תחילה', 'error');
-      throw new Error('לא מחובר ליומן Google');
+      showToast(t('googleCalendar.connectFirst'), 'error');
+      throw new Error('Not connected to Google Calendar');
     }
 
     try {
@@ -182,15 +184,15 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
 
       if (result.success) {
         setLastSyncTime(new Date());
-        showToast('יום ההולדת נוסף ליומן Google בהצלחה', 'success');
+        showToast(t('googleCalendar.syncSuccess'), 'success');
       } else {
-        showToast(result.error || 'שגיאה בסנכרון', 'error');
+        showToast(result.error || t('googleCalendar.syncError'), 'error');
       }
 
       return result;
     } catch (error: any) {
       logger.error('Error syncing birthday:', error);
-      showToast(error.message || 'שגיאה בסנכרון', 'error');
+      showToast(error.message || t('googleCalendar.syncError'), 'error');
       throw error;
     } finally {
       setIsSyncing(false);
@@ -199,8 +201,8 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
 
   const syncMultipleBirthdays = async (birthdayIds: string[]): Promise<BulkSyncResult> => {
     if (!isConnected) {
-      showToast('יש להתחבר ליומן Google תחילה', 'error');
-      throw new Error('לא מחובר ליומן Google');
+      showToast(t('googleCalendar.connectFirst'), 'error');
+      throw new Error('Not connected to Google Calendar');
     }
 
     try {
@@ -248,12 +250,12 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
           results
       };
 
-      showToast(`סונכרנו ${successCount} ימי הולדת בהצלחה`, 'success');
+      showToast(t('googleCalendar.syncedCount', { count: successCount }), 'success');
 
       return finalResult;
     } catch (error: any) {
       logger.error('Error syncing multiple birthdays:', error);
-      showToast(error.message || 'שגיאה בסנכרון מרובה', 'error');
+      showToast(error.message || t('googleCalendar.syncError'), 'error');
       throw error;
     } finally {
       setIsSyncing(false);
@@ -262,18 +264,18 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
 
   const cleanupOrphanEvents = async (tenantId: string): Promise<CleanupOrphansResult> => {
     if (!isConnected) {
-      showToast('יש להתחבר ליומן Google תחילה', 'error');
-      throw new Error('לא מחובר ליומן Google');
+      showToast(t('googleCalendar.connectFirst'), 'error');
+      throw new Error('Not connected to Google Calendar');
     }
 
     try {
       setIsSyncing(true);
       const result = await googleCalendarService.cleanupOrphanEvents(tenantId);
-      showToast(result.message || `נמחקו ${result.deletedCount} אירועים יתומים`, 'success');
+      showToast(t('googleCalendar.cleanupSuccess', { count: result.deletedCount }), 'success');
       return result;
     } catch (error: any) {
       logger.error('Error cleaning orphans:', error);
-      showToast(error.message || 'שגיאה בניקוי יתומים', 'error');
+      showToast(error.message || t('common.error'), 'error');
       throw error;
     } finally {
       setIsSyncing(false);
@@ -282,8 +284,8 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
 
   const previewDeletion = async (tenantId: string): Promise<PreviewDeletionResult> => {
      if (!isConnected) {
-      showToast('יש להתחבר ליומן Google תחילה', 'error');
-      throw new Error('לא מחובר ליומן Google');
+      showToast(t('googleCalendar.connectFirst'), 'error');
+      throw new Error('Not connected to Google Calendar');
     }
     
     try {
@@ -292,7 +294,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
         return result;
     } catch (error: any) {
         logger.error('Error previewing deletion:', error);
-        showToast(error.message || 'שגיאה בתצוגה מקדימה', 'error');
+        showToast(error.message || t('common.error'), 'error');
         throw error;
     } finally {
         setIsSyncing(false);
@@ -301,17 +303,17 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
 
   const removeBirthdayFromCalendar = async (birthdayId: string): Promise<void> => {
     if (!isConnected) {
-      showToast('יש להתחבר ליומן Google תחילה', 'error');
-      throw new Error('לא מחובר ליומן Google');
+      showToast(t('googleCalendar.connectFirst'), 'error');
+      throw new Error('Not connected to Google Calendar');
     }
 
     try {
       setIsSyncing(true);
       await googleCalendarService.removeBirthdayFromCalendar(birthdayId);
-      showToast('יום ההולדת הוסר מיומן Google', 'success');
+      showToast(t('googleCalendar.removedSuccess'), 'success');
     } catch (error: any) {
       logger.error('Error removing birthday:', error);
-      showToast(error.message || 'שגיאה בהסרת יום ההולדת', 'error');
+      showToast(error.message || t('common.error'), 'error');
       throw error;
     } finally {
       setIsSyncing(false);
@@ -320,18 +322,18 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
 
   const deleteAllSyncedEvents = async (tenantId: string): Promise<{ totalDeleted: number; failedCount: number }> => {
     if (!isConnected) {
-      showToast('יש להתחבר ליומן Google תחילה', 'error');
-      throw new Error('לא מחובר ליומן Google');
+      showToast(t('googleCalendar.connectFirst'), 'error');
+      throw new Error('Not connected to Google Calendar');
     }
 
     try {
       setIsSyncing(true);
       const result = await googleCalendarService.deleteAllSyncedEvents(tenantId);
-      showToast(result.message || `נמחקו ${result.totalDeleted} אירועים מיומן Google`, 'success');
+      showToast(t('googleCalendar.eventsDeletedSuccess', { count: result.totalDeleted }), 'success');
       return result;
     } catch (error: any) {
       logger.error('Error deleting all synced events:', error);
-      showToast(error.message || 'שגיאה במחיקת האירועים', 'error');
+      showToast(error.message || t('common.error'), 'error');
       throw error;
     } finally {
       setIsSyncing(false);
@@ -348,10 +350,10 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       setUserEmail(null);
       setCalendarId(null);
       setCalendarName(null);
-      showToast('החיבור ליומן Google נותק בהצלחה', 'success');
+      showToast(t('googleCalendar.disconnectedSuccess'), 'success');
     } catch (error: any) {
       logger.error('Error disconnecting:', error);
-      showToast(error.message || 'שגיאה בניתוק החיבור', 'error');
+      showToast(error.message || t('common.error'), 'error');
       throw error;
     } finally {
       setIsSyncing(false);
@@ -360,8 +362,8 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
 
   const createCalendar = async (name: string): Promise<{ calendarId: string; calendarName: string }> => {
     if (!isConnected) {
-      showToast('יש להתחבר ליומן Google תחילה', 'error');
-      throw new Error('לא מחובר ליומן Google');
+      showToast(t('googleCalendar.connectFirst'), 'error');
+      throw new Error('Not connected to Google Calendar');
     }
 
     try {
@@ -371,11 +373,11 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       setCalendarId(result.calendarId);
       setCalendarName(result.calendarName);
       
-      showToast('יומן נוצר בהצלחה', 'success');
+      showToast(t('googleCalendar.createdSuccess'), 'success');
       return result;
     } catch (error: any) {
       logger.error('Error creating calendar:', error);
-      showToast(error.message || 'שגיאה ביצירת יומן', 'error');
+      showToast(error.message || t('common.error'), 'error');
       throw error;
     } finally {
       setIsSyncing(false);
@@ -384,8 +386,8 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
 
   const updateCalendarSelection = async (selectedCalendarId: string, selectedCalendarName: string): Promise<void> => {
     if (!isConnected) {
-      showToast('יש להתחבר ליומן Google תחילה', 'error');
-      throw new Error('לא מחובר ליומן Google');
+      showToast(t('googleCalendar.connectFirst'), 'error');
+      throw new Error('Not connected to Google Calendar');
     }
 
     try {
@@ -395,10 +397,10 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       setCalendarId(selectedCalendarId);
       setCalendarName(selectedCalendarName);
       
-      showToast('בחירת יומן עודכנה בהצלחה', 'success');
+      showToast(t('googleCalendar.calendarSelectionUpdated'), 'success');
     } catch (error: any) {
       logger.error('Error updating calendar selection:', error);
-      showToast(error.message || 'שגיאה בעדכון בחירת יומן', 'error');
+      showToast(error.message || t('common.error'), 'error');
       throw error;
     } finally {
       setIsSyncing(false);
@@ -407,8 +409,8 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
 
   const listCalendars = async (): Promise<Array<{ id: string; summary: string; description: string; primary: boolean }>> => {
     if (!isConnected) {
-      showToast('יש להתחבר ליומן Google תחילה', 'error');
-      throw new Error('לא מחובר ליומן Google');
+      showToast(t('googleCalendar.connectFirst'), 'error');
+      throw new Error('Not connected to Google Calendar');
     }
 
     try {
@@ -417,7 +419,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       return calendars;
     } catch (error: any) {
       logger.error('Error listing calendars:', error);
-      showToast(error.message || 'שגיאה בקבלת רשימת יומנים', 'error');
+      showToast(error.message || t('common.error'), 'error');
       throw error;
     } finally {
       setIsSyncing(false);
@@ -426,20 +428,20 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
 
   const deleteCalendar = async (calendarIdToDelete: string): Promise<void> => {
     if (!isConnected) {
-      showToast('יש להתחבר ליומן Google תחילה', 'error');
-      throw new Error('לא מחובר ליומן Google');
+      showToast(t('googleCalendar.connectFirst'), 'error');
+      throw new Error('Not connected to Google Calendar');
     }
 
     try {
       setIsSyncing(true);
       await googleCalendarService.deleteCalendar(calendarIdToDelete);
-      showToast('יומן נמחק בהצלחה', 'success');
+      showToast(t('googleCalendar.deletedSuccess'), 'success');
       
       // רענון רשימת היומנים אחרי מחיקה
       await listCalendars();
     } catch (error: any) {
       logger.error('Error deleting calendar:', error);
-      showToast(error.message || 'שגיאה במחיקת יומן', 'error');
+      showToast(error.message || t('common.error'), 'error');
       throw error;
     } finally {
       setIsSyncing(false);

@@ -339,7 +339,7 @@ export const BirthdayForm = ({
               <div className="flex items-center gap-2 p-2 sm:p-3 bg-orange-50 border border-orange-200 rounded-lg mb-2 sm:mb-4">
                 <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 flex-shrink-0" />
                 <p className="text-xs sm:text-sm text-orange-800">
-                  {t('birthday.unsyncedChanges', 'יש שינויים שלא עודכנו ליומן Google')}
+                  {t('birthday.unsyncedChanges')}
                 </p>
               </div>
             )}
@@ -398,7 +398,7 @@ export const BirthdayForm = ({
                     ))}
                   </select>
                   <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
-                    {t('common.day', 'יום')}
+                    {t('common.day')}
                   </label>
                 </div>
                 <div>
@@ -426,7 +426,7 @@ export const BirthdayForm = ({
                     })}
                   </select>
                   <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
-                    {t('common.month', 'חודש')}
+                    {t('common.month')}
                   </label>
                 </div>
                 <div>
@@ -450,7 +450,7 @@ export const BirthdayForm = ({
                     ))}
                   </select>
                   <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
-                    {t('common.year', 'שנה')}
+                    {t('common.year')}
                   </label>
                 </div>
               </div>
@@ -583,7 +583,7 @@ export const BirthdayForm = ({
                 className="w-full px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               />
               <p className="text-xs text-gray-500 mt-1">
-                {t('birthday.notesSyncHint', 'הערות יוצגו בתיאור האירוע ביומן Google אם תבחר לסנכרן')}
+                {t('birthday.notesSyncHint')}
               </p>
             </div>
 

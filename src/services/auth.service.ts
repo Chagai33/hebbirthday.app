@@ -32,11 +32,11 @@ export const authService = {
       });
     } catch (error: any) {
       if (error.code === 'auth/email-already-in-use') {
-        throw new Error('כתובת האימייל כבר בשימוש');
+        throw new Error('emailAlreadyInUse');
       } else if (error.code === 'auth/weak-password') {
-        throw new Error('הסיסמה חלשה מדי - נדרשים לפחות 6 תווים');
+        throw new Error('weakPassword');
       } else if (error.code === 'auth/invalid-email') {
-        throw new Error('כתובת האימייל לא תקינה');
+        throw new Error('invalidEmail');
       }
       throw error;
     }
@@ -48,11 +48,11 @@ export const authService = {
       await userCredential.user.getIdToken(true);
     } catch (error: any) {
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
-        throw new Error('אימייל או סיסמה שגויים');
+        throw new Error('invalidCredential');
       } else if (error.code === 'auth/invalid-email') {
-        throw new Error('כתובת האימייל לא תקינה');
+        throw new Error('invalidEmail');
       } else if (error.code === 'auth/too-many-requests') {
-        throw new Error('יותר מדי ניסיונות כושלים - נסה שוב מאוחר יותר');
+        throw new Error('tooManyRequests');
       }
       throw error;
     }
@@ -103,9 +103,9 @@ export const authService = {
       return { isNewUser };
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') {
-        throw new Error('ההתחברות בוטלה');
+        throw new Error('popupClosedByUser');
       } else if (error.code === 'auth/account-exists-with-different-credential') {
-        throw new Error('קיים חשבון עם כתובת אימייל זו. אנא התחבר באמצעות אימייל וסיסמה.');
+        throw new Error('accountExistsWithDifferentCredential');
       }
       console.error('Google Sign-In error:', error);
       throw error;
@@ -162,9 +162,9 @@ export const authService = {
       await sendPasswordResetEmail(auth, email);
     } catch (error: any) {
       if (error.code === 'auth/user-not-found') {
-        throw new Error('לא נמצא משתמש עם כתובת אימייל זו');
+        throw new Error('userNotFound');
       } else if (error.code === 'auth/invalid-email') {
-        throw new Error('כתובת האימייל לא תקינה');
+        throw new Error('invalidEmail');
       }
       throw error;
     }
@@ -175,15 +175,15 @@ export const authService = {
       await confirmPasswordReset(auth, oobCode, newPassword);
     } catch (error: any) {
       if (error.code === 'auth/expired-action-code') {
-        throw new Error('הקישור לאיפוס סיסמה פג תוקף. אנא בקש קישור חדש.');
+        throw new Error('expired-action-code');
       } else if (error.code === 'auth/invalid-action-code') {
-        throw new Error('הקישור לאיפוס סיסמה אינו תקין. אנא בקש קישור חדש.');
+        throw new Error('invalid-action-code');
       } else if (error.code === 'auth/user-disabled') {
-        throw new Error('המשתמש חסום.');
+        throw new Error('user-disabled');
       } else if (error.code === 'auth/user-not-found') {
-        throw new Error('משתמש לא נמצא.');
+        throw new Error('user-not-found');
       } else if (error.code === 'auth/weak-password') {
-        throw new Error('הסיסמה חלשה מדי - נדרשים לפחות 6 תווים.');
+        throw new Error('weak-password');
       }
       throw error;
     }
