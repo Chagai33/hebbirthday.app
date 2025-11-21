@@ -6,7 +6,8 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   sendPasswordResetEmail,
-  fetchSignInMethodsForEmail
+  fetchSignInMethodsForEmail,
+  confirmPasswordReset
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
@@ -164,6 +165,25 @@ export const authService = {
         throw new Error('לא נמצא משתמש עם כתובת אימייל זו');
       } else if (error.code === 'auth/invalid-email') {
         throw new Error('כתובת האימייל לא תקינה');
+      }
+      throw error;
+    }
+  },
+
+  async confirmPasswordReset(oobCode: string, newPassword: string): Promise<void> {
+    try {
+      await confirmPasswordReset(auth, oobCode, newPassword);
+    } catch (error: any) {
+      if (error.code === 'auth/expired-action-code') {
+        throw new Error('הקישור לאיפוס סיסמה פג תוקף. אנא בקש קישור חדש.');
+      } else if (error.code === 'auth/invalid-action-code') {
+        throw new Error('הקישור לאיפוס סיסמה אינו תקין. אנא בקש קישור חדש.');
+      } else if (error.code === 'auth/user-disabled') {
+        throw new Error('המשתמש חסום.');
+      } else if (error.code === 'auth/user-not-found') {
+        throw new Error('משתמש לא נמצא.');
+      } else if (error.code === 'auth/weak-password') {
+        throw new Error('הסיסמה חלשה מדי - נדרשים לפחות 6 תווים.');
       }
       throw error;
     }

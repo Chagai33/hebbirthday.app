@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useSearchParams, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { AuthProvider } from './contexts/AuthContext';
@@ -9,6 +9,7 @@ import { ToastProvider } from './contexts/ToastContext';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
 import { Login } from './components/auth/Login';
 import { Register } from './components/auth/Register';
+import { ResetPassword } from './components/auth/ResetPassword';
 import { Dashboard } from './components/Dashboard';
 import { GroupsPanel } from './components/groups/GroupsPanel';
 import { TermsOfUse } from './components/pages/TermsOfUse';
@@ -24,6 +25,22 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+const ActionUrlHandler = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const mode = searchParams.get('mode');
+    const oobCode = searchParams.get('oobCode');
+
+    if (mode === 'resetPassword' && oobCode) {
+      navigate(`/reset-password?oobCode=${oobCode}`, { replace: true });
+    }
+  }, [searchParams, navigate]);
+
+  return null;
+};
 
 function App() {
   // טיפול ב-Google OAuth callback אם יש טוקן ב-URL hash
@@ -53,9 +70,11 @@ function App() {
             <GoogleCalendarProvider>
               <GroupFilterProvider>
                 <BrowserRouter>
+                  <ActionUrlHandler />
                   <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/terms" element={<TermsOfUse />} />
                     <Route path="/privacy" element={<PrivacyPolicy />} />
                     <Route
