@@ -32,7 +32,7 @@ service cloud.firestore {
     }
 
     match /profiles/{userId} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && request.auth.uid == userId;
       allow create: if isAuthenticated() && request.auth.uid == userId;
       allow update: if isAuthenticated() && request.auth.uid == userId;
       allow delete: if false;
@@ -49,7 +49,9 @@ service cloud.firestore {
       allow read: if isAuthenticated() &&
                      (request.auth.uid == resource.data.user_id ||
                       isTenantMember(resource.data.tenant_id));
-      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.user_id;
+      allow create: if isAuthenticated() 
+                    && request.auth.uid == request.resource.data.user_id
+                    && get(/databases/$(database)/documents/tenants/$(request.resource.data.tenant_id)).data.owner_id == request.auth.uid;
       allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.user_id;
     }
 
@@ -78,7 +80,7 @@ service cloud.firestore {
     }
 
     match /rate_limits/{docId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if false;
     }
 
     match /googleCalendarTokens/{userId} {
