@@ -256,6 +256,7 @@
   },
   "wishlist": {
     "title": "Wishlist",
+    "subtitle": "The perfect gift is the one you remembered. Note it here, and we'll remind you inside the calendar event.",
     "addItem": "Add Item",
     "editItem": "Edit Item",
     "deleteItem": "Delete Item",

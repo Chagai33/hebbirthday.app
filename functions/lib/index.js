@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.previewDeletion = exports.cleanupOrphanEvents = exports.deleteGoogleCalendar = exports.listGoogleCalendars = exports.updateGoogleCalendarSelection = exports.createGoogleCalendar = exports.getGoogleAccountInfo = exports.disconnectGoogleCalendar = exports.deleteAllSyncedEventsFromGoogleCalendar = exports.removeBirthdayFromGoogleCalendar = exports.syncMultipleBirthdaysToGoogleCalendar = exports.syncBirthdayToGoogleCalendar = exports.onUserCreate = exports.migrateExistingUsers = exports.fixAllBirthdaysHebrewYear = exports.fixExistingBirthdays = exports.updateNextBirthdayScheduled = exports.refreshBirthdayHebrewData = exports.onBirthdayWrite = void 0;
+exports.deleteAccount = exports.getAccountDeletionSummary = exports.previewDeletion = exports.cleanupOrphanEvents = exports.deleteGoogleCalendar = exports.listGoogleCalendars = exports.updateGoogleCalendarSelection = exports.createGoogleCalendar = exports.getGoogleAccountInfo = exports.disconnectGoogleCalendar = exports.deleteAllSyncedEventsFromGoogleCalendar = exports.removeBirthdayFromGoogleCalendar = exports.syncMultipleBirthdaysToGoogleCalendar = exports.syncBirthdayToGoogleCalendar = exports.onUserCreate = exports.migrateExistingUsers = exports.fixAllBirthdaysHebrewYear = exports.fixExistingBirthdays = exports.updateNextBirthdayScheduled = exports.refreshBirthdayHebrewData = exports.onBirthdayWrite = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const node_fetch_1 = __importDefault(require("node-fetch"));
@@ -415,7 +415,7 @@ exports.updateNextBirthdayScheduled = functions.pubsub
             .collection('birthdays')
             .where('archived', '==', false)
             .get();
-        const batch = db.batch();
+        const bulkWriter = db.bulkWriter();
         let updateCount = 0;
         for (const doc of snapshot.docs) {
             const data = doc.data();
@@ -434,11 +434,11 @@ exports.updateNextBirthdayScheduled = functions.pubsub
                     if (!nextHebrewYear && data.birth_date_hebrew_year && data.birth_date_hebrew_month && data.birth_date_hebrew_day) {
                         try {
                             const currentHebrewYear = await getCurrentHebrewYear();
-                            const newFutureDates = await fetchNextHebrewBirthdays(currentHebrewYear, data.birth_date_hebrew_month, data.birth_date_hebrew_day, 10);
+                            const newFutureDates = await fetchNextHebrewBirthdays(currentHebrewYear, data.birth_date_hebrew_month, data.birth_date_hebrew_day, 501);
                             if (newFutureDates.length > 0) {
                                 const nextDate = newFutureDates[0];
                                 const gregorianDate = nextDate.gregorianDate;
-                                batch.update(doc.ref, {
+                                bulkWriter.update(doc.ref, {
                                     next_upcoming_hebrew_birthday: `${gregorianDate.getFullYear()}-${String(gregorianDate.getMonth() + 1).padStart(2, '0')}-${String(gregorianDate.getDate()).padStart(2, '0')}`,
                                     next_upcoming_hebrew_year: nextDate.hebrewYear,
                                     future_hebrew_birthdays: newFutureDates.map((item) => ({
@@ -455,7 +455,7 @@ exports.updateNextBirthdayScheduled = functions.pubsub
                         }
                     }
                     else {
-                        batch.update(doc.ref, {
+                        bulkWriter.update(doc.ref, {
                             next_upcoming_hebrew_birthday: nextGregorian,
                             next_upcoming_hebrew_year: nextHebrewYear,
                             updated_at: admin.firestore.FieldValue.serverTimestamp(),
@@ -474,7 +474,7 @@ exports.updateNextBirthdayScheduled = functions.pubsub
                             if (newFutureDates.length > 0) {
                                 const nextDate = newFutureDates[0];
                                 const gregorianDate = nextDate.gregorianDate;
-                                batch.update(doc.ref, {
+                                bulkWriter.update(doc.ref, {
                                     next_upcoming_hebrew_birthday: `${gregorianDate.getFullYear()}-${String(gregorianDate.getMonth() + 1).padStart(2, '0')}-${String(gregorianDate.getDate()).padStart(2, '0')}`,
                                     next_upcoming_hebrew_year: nextDate.hebrewYear,
                                     future_hebrew_birthdays: newFutureDates.map((item) => ({
@@ -494,7 +494,7 @@ exports.updateNextBirthdayScheduled = functions.pubsub
             }
         }
         if (updateCount > 0) {
-            await batch.commit();
+            await bulkWriter.close();
             functions.logger.log(`Updated ${updateCount} birthdays with new upcoming dates`);
         }
         else {
@@ -698,16 +698,16 @@ exports.onUserCreate = functions.auth.user().onCreate(async (user) => {
 async function getValidAccessToken(userId) {
     const tokenDoc = await db.collection('googleCalendarTokens').doc(userId).get();
     if (!tokenDoc.exists) {
-        throw new functions.https.HttpsError('not-found', 'לא נמצא חיבור ליומן Google. אנא התחבר מחדש');
+        throw new functions.https.HttpsError('not-found', 'googleCalendar.connectFirst');
     }
     const tokenData = tokenDoc.data();
     if (!tokenData) {
-        throw new functions.https.HttpsError('not-found', 'מידע החיבור ליומן Google לא תקין');
+        throw new functions.https.HttpsError('not-found', 'googleCalendar.syncError');
     }
     const now = Date.now();
     const expiresAt = tokenData.expiresAt || 0;
     if (now >= expiresAt) {
-        throw new functions.https.HttpsError('permission-denied', 'הטוקן פג תוקף. אנא התחבר מחדש ליומן Google');
+        throw new functions.https.HttpsError('permission-denied', 'googleCalendar.connectFirst');
     }
     return tokenData.accessToken;
 }
@@ -721,11 +721,11 @@ async function getCalendarId(userId) {
 }
 exports.syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'חובה להיות מחובר למערכת');
+        throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
     }
     const { birthdayId } = data;
     if (!birthdayId) {
-        throw new functions.https.HttpsError('invalid-argument', 'מזהה יום הולדת חסר');
+        throw new functions.https.HttpsError('invalid-argument', 'validation.required');
     }
     const rateLimitRef = db.collection('rate_limits').doc(`${context.auth.uid}_calendar_sync`);
     const rateLimitDoc = await rateLimitRef.get();
@@ -737,7 +737,7 @@ exports.syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, conte
         const requests = rateLimitData?.requests || [];
         const recentRequests = requests.filter((timestamp) => now - timestamp < windowMs);
         if (recentRequests.length >= maxRequests) {
-            throw new functions.https.HttpsError('resource-exhausted', 'יותר מדי בקשות. אנא המתן רגע');
+            throw new functions.https.HttpsError('resource-exhausted', 'auth.errors.tooManyRequests');
         }
         await rateLimitRef.update({ requests: [...recentRequests, now] });
     }
@@ -747,11 +747,11 @@ exports.syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, conte
     try {
         const birthdayDoc = await db.collection('birthdays').doc(birthdayId).get();
         if (!birthdayDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'יום ההולדת לא נמצא');
+            throw new functions.https.HttpsError('not-found', 'Birthday not found');
         }
         const birthday = birthdayDoc.data();
         if (!birthday) {
-            throw new functions.https.HttpsError('not-found', 'מידע יום ההולדת לא תקין');
+            throw new functions.https.HttpsError('not-found', 'Birthday data invalid');
         }
         const accessToken = await getValidAccessToken(context.auth.uid);
         const calendarId = await getCalendarId(context.auth.uid);
@@ -1043,9 +1043,9 @@ exports.syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, conte
                 }
             }
             if (creationError.code === 401 || creationError.code === 403) {
-                throw new functions.https.HttpsError('permission-denied', 'אין הרשאת גישה ליומן Google. אנא התחבר מחדש');
+                throw new functions.https.HttpsError('permission-denied', 'googleCalendar.connectFirst');
             }
-            throw new functions.https.HttpsError('internal', 'שגיאה ביצירת אירועים ביומן. השינויים בוטלו.');
+            throw new functions.https.HttpsError('internal', 'googleCalendar.syncError');
         }
         // --- Phase 5: Finalize & Update Firestore ---
         const eventIds = {};
@@ -1073,7 +1073,7 @@ exports.syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, conte
             success: true,
             eventIds: eventIds,
             birthdayId: birthdayId,
-            message: `נוספו ${createdEventIds.length} אירועים ליומן Google`
+            message: language === 'en' ? `Added ${createdEventIds.length} events to Google Calendar` : `נוספו ${createdEventIds.length} אירועים ליומן Google`
         };
     }
     catch (error) {
@@ -1082,21 +1082,21 @@ exports.syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, conte
             throw error;
         }
         if (error.code === 401 || error.code === 403) {
-            throw new functions.https.HttpsError('permission-denied', 'אין הרשאת גישה ליומן Google. אנא התחבר מחדש');
+            throw new functions.https.HttpsError('permission-denied', 'googleCalendar.connectFirst');
         }
-        throw new functions.https.HttpsError('internal', 'שגיאה בסנכרון ליומן Google. אנא נסה שנית');
+        throw new functions.https.HttpsError('internal', 'googleCalendar.syncError');
     }
 });
 exports.syncMultipleBirthdaysToGoogleCalendar = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'חובה להיות מחובר למערכת');
+        throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
     }
     const { birthdayIds } = data;
     if (!birthdayIds || !Array.isArray(birthdayIds) || birthdayIds.length === 0) {
-        throw new functions.https.HttpsError('invalid-argument', 'רשימת ימי הולדת חסרה או ריקה');
+        throw new functions.https.HttpsError('invalid-argument', 'validation.required');
     }
     if (birthdayIds.length > 50) {
-        throw new functions.https.HttpsError('invalid-argument', 'ניתן לסנכרן עד 50 ימי הולדת בו-זמנית');
+        throw new functions.https.HttpsError('invalid-argument', 'googleCalendar.syncError');
     }
     const rateLimitRef = db.collection('rate_limits').doc(`${context.auth.uid}_bulk_sync`);
     const rateLimitDoc = await rateLimitRef.get();
@@ -1108,7 +1108,7 @@ exports.syncMultipleBirthdaysToGoogleCalendar = functions.https.onCall(async (da
         const requests = rateLimitData?.requests || [];
         const recentRequests = requests.filter((timestamp) => now - timestamp < windowMs);
         if (recentRequests.length >= maxRequests) {
-            throw new functions.https.HttpsError('resource-exhausted', 'יותר מדי בקשות סנכרון מרובות. אנא המתן 5 דקות');
+            throw new functions.https.HttpsError('resource-exhausted', 'auth.errors.tooManyRequests');
         }
         await rateLimitRef.update({ requests: [...recentRequests, now] });
     }
@@ -1131,7 +1131,7 @@ exports.syncMultipleBirthdaysToGoogleCalendar = functions.https.onCall(async (da
         catch (error) {
             results.push({
                 success: false,
-                error: error.message || 'שגיאה לא ידועה',
+                error: error.message || 'Error',
                 birthdayId: birthdayId
             });
             failureCount++;
@@ -1144,16 +1144,16 @@ exports.syncMultipleBirthdaysToGoogleCalendar = functions.https.onCall(async (da
         successCount,
         failureCount,
         results,
-        message: `סונכרנו ${successCount} ימי הולדת ליומן Google`
+        message: 'googleCalendar.syncSuccess'
     };
 });
 exports.removeBirthdayFromGoogleCalendar = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'חובה להיות מחובר למערכת');
+        throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
     }
     const { birthdayId } = data;
     if (!birthdayId) {
-        throw new functions.https.HttpsError('invalid-argument', 'מזהה יום הולדת חסר');
+        throw new functions.https.HttpsError('invalid-argument', 'validation.required');
     }
     const rateLimitRef = db.collection('rate_limits').doc(`${context.auth.uid}_calendar_remove`);
     const rateLimitDoc = await rateLimitRef.get();
@@ -1165,7 +1165,7 @@ exports.removeBirthdayFromGoogleCalendar = functions.https.onCall(async (data, c
         const requests = rateLimitData?.requests || [];
         const recentRequests = requests.filter((timestamp) => now - timestamp < windowMs);
         if (recentRequests.length >= maxRequests) {
-            throw new functions.https.HttpsError('resource-exhausted', 'יותר מדי בקשות. אנא המתן רגע');
+            throw new functions.https.HttpsError('resource-exhausted', 'auth.errors.tooManyRequests');
         }
         await rateLimitRef.update({ requests: [...recentRequests, now] });
     }
@@ -1175,11 +1175,11 @@ exports.removeBirthdayFromGoogleCalendar = functions.https.onCall(async (data, c
     try {
         const birthdayDoc = await db.collection('birthdays').doc(birthdayId).get();
         if (!birthdayDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'יום ההולדת לא נמצא');
+            throw new functions.https.HttpsError('not-found', 'Birthday not found');
         }
         const birthday = birthdayDoc.data();
         if (!birthday || (!birthday.googleCalendarEventId && !birthday.googleCalendarEventIds)) {
-            throw new functions.https.HttpsError('not-found', 'יום ההולדת לא מסונכרן ליומן Google');
+            throw new functions.https.HttpsError('not-found', 'Birthday not synced');
         }
         const accessToken = await getValidAccessToken(context.auth.uid);
         const calendarId = await getCalendarId(context.auth.uid);
@@ -1279,7 +1279,7 @@ exports.removeBirthdayFromGoogleCalendar = functions.https.onCall(async (data, c
             lastSyncedAt: admin.firestore.FieldValue.delete()
         });
         functions.logger.log(`Removed ${deletedCount} events for birthday ${birthdayId} from Google Calendar`);
-        return { success: true, message: `הוסרו ${deletedCount} אירועים מיומן Google בהצלחה` };
+        return { success: true, message: 'googleCalendar.syncSuccess' };
     }
     catch (error) {
         functions.logger.error(`Error removing birthday ${birthdayId}:`, error);
@@ -1289,21 +1289,21 @@ exports.removeBirthdayFromGoogleCalendar = functions.https.onCall(async (data, c
                 googleCalendarEventIds: admin.firestore.FieldValue.delete(),
                 lastSyncedAt: admin.firestore.FieldValue.delete()
             });
-            return { success: true, message: 'האירועים כבר לא קיימים ביומן Google' };
+            return { success: true, message: 'googleCalendar.syncSuccess' };
         }
         if (error.code === 401 || error.code === 403) {
-            throw new functions.https.HttpsError('permission-denied', 'אין הרשאת גישה ליומן Google. אנא התחבר מחדש');
+            throw new functions.https.HttpsError('permission-denied', 'googleCalendar.connectFirst');
         }
-        throw new functions.https.HttpsError('internal', 'שגיאה בהסרת האירועים מיומן Google');
+        throw new functions.https.HttpsError('internal', 'googleCalendar.syncError');
     }
 });
 exports.deleteAllSyncedEventsFromGoogleCalendar = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'חובה להיות מחובר למערכת');
+        throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
     }
     const { tenantId } = data;
     if (!tenantId) {
-        throw new functions.https.HttpsError('invalid-argument', 'מזהה Tenant חסר');
+        throw new functions.https.HttpsError('invalid-argument', 'validation.required');
     }
     try {
         const accessToken = await getValidAccessToken(context.auth.uid);
@@ -1424,20 +1424,20 @@ exports.deleteAllSyncedEventsFromGoogleCalendar = functions.https.onCall(async (
             success: true,
             totalDeleted,
             failedCount,
-            message: `נמחקו ${totalDeleted} אירועים מיומן Google${failedCount > 0 ? `. ${failedCount} נכשלו` : ''}`
+            message: 'googleCalendar.deleteAllSummary'
         };
     }
     catch (error) {
         functions.logger.error('Error deleting all synced events:', error);
         if (error.code === 401 || error.code === 403) {
-            throw new functions.https.HttpsError('permission-denied', 'אין הרשאת גישה ליומן Google. אנא התחבר מחדש');
+            throw new functions.https.HttpsError('permission-denied', 'googleCalendar.connectFirst');
         }
-        throw new functions.https.HttpsError('internal', 'שגיאה במחיקת האירועים מיומן Google');
+        throw new functions.https.HttpsError('internal', 'googleCalendar.syncError');
     }
 });
 exports.disconnectGoogleCalendar = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'חובה להיות מחובר למערכת');
+        throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
     }
     try {
         await db.collection('googleCalendarTokens').doc(context.auth.uid).delete();
@@ -1454,16 +1454,16 @@ exports.disconnectGoogleCalendar = functions.https.onCall(async (data, context) 
         });
         await batch.commit();
         functions.logger.log(`Disconnected Google Calendar for user ${context.auth.uid}`);
-        return { success: true, message: 'החיבור ליומן Google נותק בהצלחה' };
+        return { success: true, message: 'googleCalendar.disconnect' };
     }
     catch (error) {
         functions.logger.error('Error disconnecting Google Calendar:', error);
-        throw new functions.https.HttpsError('internal', 'שגיאה בניתוק החיבור ליומן Google');
+        throw new functions.https.HttpsError('internal', 'googleCalendar.syncError');
     }
 });
 exports.getGoogleAccountInfo = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'חובה להיות מחובר למערכת');
+        throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
     }
     try {
         const accessToken = await getValidAccessToken(context.auth.uid);
@@ -1481,18 +1481,18 @@ exports.getGoogleAccountInfo = functions.https.onCall(async (data, context) => {
     catch (error) {
         functions.logger.error('Error getting Google account info:', error);
         if (error.code === 401 || error.code === 403) {
-            throw new functions.https.HttpsError('permission-denied', 'אין הרשאת גישה. אנא התחבר מחדש');
+            throw new functions.https.HttpsError('permission-denied', 'googleCalendar.connectFirst');
         }
-        throw new functions.https.HttpsError('internal', 'שגיאה בקבלת מידע על חשבון Google');
+        throw new functions.https.HttpsError('internal', 'common.error');
     }
 });
 exports.createGoogleCalendar = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'חובה להיות מחובר למערכת');
+        throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
     }
     const { name } = data;
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
-        throw new functions.https.HttpsError('invalid-argument', 'שם יומן חסר או לא תקין');
+        throw new functions.https.HttpsError('invalid-argument', 'validation.required');
     }
     try {
         const accessToken = await getValidAccessToken(context.auth.uid);
@@ -1503,11 +1503,11 @@ exports.createGoogleCalendar = functions.https.onCall(async (data, context) => {
         const calendarResponse = await calendar.calendars.insert({
             requestBody: {
                 summary: name.trim(),
-                description: 'יומן ימי הולדת - נוצר על ידי אפליקציית ימי הולדת עבריים'
+                description: 'Birthday Calendar - Created by Hebrew Birthday App / יומן ימי הולדת - נוצר על ידי אפליקציית ימי הולדת עבריים'
             }
         });
         if (!calendarResponse.data.id) {
-            throw new Error('לא התקבל מזהה יומן מ-Google');
+            throw new Error('No calendar ID returned');
         }
         const calendarId = calendarResponse.data.id;
         const calendarName = calendarResponse.data.summary || name.trim();
@@ -1539,46 +1539,46 @@ exports.createGoogleCalendar = functions.https.onCall(async (data, context) => {
             success: true,
             calendarId: calendarId,
             calendarName: calendarName,
-            message: 'יומן נוצר בהצלחה'
+            message: 'googleCalendar.createCalendar'
         };
     }
     catch (error) {
         functions.logger.error('Error creating Google Calendar:', error);
         if (error.code === 401 || error.code === 403) {
-            throw new functions.https.HttpsError('permission-denied', 'אין הרשאת גישה. אנא התחבר מחדש');
+            throw new functions.https.HttpsError('permission-denied', 'googleCalendar.connectFirst');
         }
-        throw new functions.https.HttpsError('internal', 'שגיאה ביצירת יומן Google. אנא נסה שנית');
+        throw new functions.https.HttpsError('internal', 'common.error');
     }
 });
 exports.updateGoogleCalendarSelection = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'חובה להיות מחובר למערכת');
+        throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
     }
     const { calendarId, calendarName } = data;
     if (!calendarId || typeof calendarId !== 'string') {
-        throw new functions.https.HttpsError('invalid-argument', 'מזהה יומן חסר או לא תקין');
+        throw new functions.https.HttpsError('invalid-argument', 'validation.required');
     }
     try {
         // עדכון הטוקן עם פרטי היומן הנבחר
         await db.collection('googleCalendarTokens').doc(context.auth.uid).update({
             calendarId: calendarId,
-            calendarName: calendarName || (calendarId === 'primary' ? 'יומן ראשי' : 'יומן מותאם אישית'),
+            calendarName: calendarName || (calendarId === 'primary' ? 'Primary Calendar' : 'Custom Calendar'),
             updatedAt: admin.firestore.FieldValue.serverTimestamp()
         });
         functions.logger.log(`Updated calendar selection to ${calendarId} for user ${context.auth.uid}`);
         return {
             success: true,
-            message: 'בחירת יומן עודכנה בהצלחה'
+            message: 'googleCalendar.selectCalendar'
         };
     }
     catch (error) {
         functions.logger.error('Error updating calendar selection:', error);
-        throw new functions.https.HttpsError('internal', 'שגיאה בעדכון בחירת יומן. אנא נסה שנית');
+        throw new functions.https.HttpsError('internal', 'common.error');
     }
 });
 exports.listGoogleCalendars = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'חובה להיות מחובר למערכת');
+        throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
     }
     try {
         const accessToken = await getValidAccessToken(context.auth.uid);
@@ -1607,25 +1607,25 @@ exports.listGoogleCalendars = functions.https.onCall(async (data, context) => {
     catch (error) {
         functions.logger.error('Error listing Google Calendars:', error);
         if (error.code === 401 || error.code === 403) {
-            throw new functions.https.HttpsError('permission-denied', 'אין הרשאת גישה. אנא התחבר מחדש');
+            throw new functions.https.HttpsError('permission-denied', 'googleCalendar.connectFirst');
         }
-        throw new functions.https.HttpsError('internal', 'שגיאה בקבלת רשימת יומנים. אנא נסה שנית');
+        throw new functions.https.HttpsError('internal', 'common.error');
     }
 });
 exports.deleteGoogleCalendar = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'חובה להיות מחובר למערכת');
+        throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
     }
     const { calendarId } = data;
     if (!calendarId || typeof calendarId !== 'string') {
-        throw new functions.https.HttpsError('invalid-argument', 'מזהה יומן חסר או לא תקין');
+        throw new functions.https.HttpsError('invalid-argument', 'validation.required');
     }
     try {
         const accessToken = await getValidAccessToken(context.auth.uid);
         // קריאת המסמך כדי לבדוק את createdCalendars וה-calendarId הנוכחי
         const tokenDoc = await db.collection('googleCalendarTokens').doc(context.auth.uid).get();
         if (!tokenDoc.exists) {
-            throw new functions.https.HttpsError('not-found', 'לא נמצא חיבור ליומן Google');
+            throw new functions.https.HttpsError('not-found', 'googleCalendar.connectFirst');
         }
         const tokenData = tokenDoc.data();
         const createdCalendars = tokenData?.createdCalendars || [];
@@ -1644,8 +1644,9 @@ exports.deleteGoogleCalendar = functions.https.onCall(async (data, context) => {
                 });
                 // בדיקה שה-description מכיל את הטקסט שמזהה יומנים שנוצרו על ידי האפליקציה
                 const description = calendarInfo.data.description || '';
-                if (!description.includes('יומן ימי הולדת - נוצר על ידי אפליקציית ימי הולדת עבריים')) {
-                    throw new functions.https.HttpsError('permission-denied', 'לא ניתן למחוק יומן שלא נוצר על ידי האפליקציה');
+                if (!description.includes('יומן ימי הולדת - נוצר על ידי אפליקציית ימי הולדת עבריים') &&
+                    !description.includes('Birthday Calendar - Created by Hebrew Birthday App')) {
+                    throw new functions.https.HttpsError('permission-denied', 'googleCalendar.deleteCalendarWarning');
                 }
                 // אם הגענו לכאן, היומן נוצר על ידי האפליקציה (לפי description)
                 functions.logger.log(`Calendar ${calendarId} verified as created by app via description check`);
@@ -1656,14 +1657,14 @@ exports.deleteGoogleCalendar = functions.https.onCall(async (data, context) => {
                 }
                 // אם יש שגיאה בקבלת פרטי היומן, נזרוק שגיאה
                 if (error.code === 404) {
-                    throw new functions.https.HttpsError('not-found', 'יומן לא נמצא');
+                    throw new functions.https.HttpsError('not-found', 'googleCalendar.syncError');
                 }
-                throw new functions.https.HttpsError('permission-denied', 'לא ניתן למחוק יומן שלא נוצר על ידי האפליקציה');
+                throw new functions.https.HttpsError('permission-denied', 'googleCalendar.deleteCalendarWarning');
             }
         }
         // בדיקה שההיומן לא נוכחי
         if (currentCalendarId === calendarId) {
-            throw new functions.https.HttpsError('failed-precondition', 'לא ניתן למחוק את היומן הנוכחי. אנא בחר יומן אחר תחילה');
+            throw new functions.https.HttpsError('failed-precondition', 'googleCalendar.deleteCalendarWarning');
         }
         // אם היומן נמצא ב-createdCalendars, נסיר אותו מהרשימה אחרי המחיקה
         const shouldRemoveFromCreatedCalendars = !!calendarEntry;
@@ -1678,7 +1679,7 @@ exports.deleteGoogleCalendar = functions.https.onCall(async (data, context) => {
             orderBy: 'startTime'
         });
         if (eventsResponse.data.items && eventsResponse.data.items.length > 0) {
-            throw new functions.https.HttpsError('failed-precondition', 'לא ניתן למחוק יומן שיש בו אירועים. אנא מחק את כל האירועים תחילה');
+            throw new functions.https.HttpsError('failed-precondition', 'googleCalendar.deleteCalendarWarning');
         }
         // מחיקת היומן מ-Google Calendar API
         await calendar.calendars.delete({
@@ -1695,7 +1696,7 @@ exports.deleteGoogleCalendar = functions.https.onCall(async (data, context) => {
         functions.logger.log(`Deleted Google Calendar ${calendarId} for user ${context.auth.uid}`);
         return {
             success: true,
-            message: 'יומן נמחק בהצלחה'
+            message: 'googleCalendar.deleteCalendar'
         };
     }
     catch (error) {
@@ -1704,17 +1705,17 @@ exports.deleteGoogleCalendar = functions.https.onCall(async (data, context) => {
             throw error;
         }
         if (error.code === 401 || error.code === 403) {
-            throw new functions.https.HttpsError('permission-denied', 'אין הרשאת גישה. אנא התחבר מחדש');
+            throw new functions.https.HttpsError('permission-denied', 'googleCalendar.connectFirst');
         }
         if (error.code === 404) {
-            throw new functions.https.HttpsError('not-found', 'יומן לא נמצא');
+            throw new functions.https.HttpsError('not-found', 'googleCalendar.syncError');
         }
-        throw new functions.https.HttpsError('internal', 'שגיאה במחיקת יומן Google. אנא נסה שנית');
+        throw new functions.https.HttpsError('internal', 'common.error');
     }
 });
 exports.cleanupOrphanEvents = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'חובה להיות מחובר למערכת');
+        throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
     }
     const { tenantId } = data;
     // Optional: validate tenantId if we want to restrict user to their tenant. 
@@ -1759,24 +1760,24 @@ exports.cleanupOrphanEvents = functions.https.onCall(async (data, context) => {
             success: true,
             deletedCount,
             failedCount,
-            message: `ניקוי הושלם. נמחקו ${deletedCount} אירועים.`
+            message: 'googleCalendar.cleanupOrphans'
         };
     }
     catch (error) {
         functions.logger.error('Error cleaning orphan events:', error);
         if (error.code === 401 || error.code === 403) {
-            throw new functions.https.HttpsError('permission-denied', 'אין הרשאת גישה ליומן Google. אנא התחבר מחדש');
+            throw new functions.https.HttpsError('permission-denied', 'googleCalendar.connectFirst');
         }
-        throw new functions.https.HttpsError('internal', 'שגיאה בניקוי אירועים יתומים');
+        throw new functions.https.HttpsError('internal', 'common.error');
     }
 });
 exports.previewDeletion = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'חובה להיות מחובר למערכת');
+        throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
     }
     const { tenantId } = data;
     if (!tenantId) {
-        throw new functions.https.HttpsError('invalid-argument', 'מזהה Tenant חסר');
+        throw new functions.https.HttpsError('invalid-argument', 'validation.required');
     }
     try {
         const birthdaysSnapshot = await db.collection('birthdays')
@@ -1818,7 +1819,93 @@ exports.previewDeletion = functions.https.onCall(async (data, context) => {
     }
     catch (error) {
         functions.logger.error('Error previewing deletion:', error);
-        throw new functions.https.HttpsError('internal', 'שגיאה בטעינת תצוגה מקדימה');
+        throw new functions.https.HttpsError('internal', 'common.error');
+    }
+});
+exports.getAccountDeletionSummary = functions.https.onCall(async (data, context) => {
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
+    }
+    const { tenantId } = data;
+    if (!tenantId) {
+        throw new functions.https.HttpsError('invalid-argument', 'validation.required');
+    }
+    try {
+        const birthdaysCount = await db.collection('birthdays')
+            .where('tenant_id', '==', tenantId)
+            .count()
+            .get();
+        const groupsCount = await db.collection('groups')
+            .where('tenant_id', '==', tenantId)
+            .count()
+            .get();
+        return {
+            birthdaysCount: birthdaysCount.data().count,
+            groupsCount: groupsCount.data().count
+        };
+    }
+    catch (error) {
+        functions.logger.error('Error getting account deletion summary:', error);
+        throw new functions.https.HttpsError('internal', 'common.error');
+    }
+});
+exports.deleteAccount = functions.https.onCall(async (data, context) => {
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
+    }
+    const { tenantId } = data;
+    const userId = context.auth.uid;
+    if (!tenantId) {
+        throw new functions.https.HttpsError('invalid-argument', 'validation.required');
+    }
+    // Verify tenant ownership
+    const tenantDoc = await db.collection('tenants').doc(tenantId).get();
+    if (!tenantDoc.exists) {
+        throw new functions.https.HttpsError('not-found', 'Tenant not found');
+    }
+    const tenantData = tenantDoc.data();
+    if (tenantData?.owner_id !== userId) {
+        throw new functions.https.HttpsError('permission-denied', 'Only the owner can delete the account');
+    }
+    try {
+        const bulkWriter = db.bulkWriter();
+        // 1. Delete Birthdays
+        const birthdaysSnapshot = await db.collection('birthdays')
+            .where('tenant_id', '==', tenantId)
+            .get();
+        birthdaysSnapshot.docs.forEach(doc => {
+            bulkWriter.delete(doc.ref);
+        });
+        // 2. Delete Groups
+        const groupsSnapshot = await db.collection('groups')
+            .where('tenant_id', '==', tenantId)
+            .get();
+        groupsSnapshot.docs.forEach(doc => {
+            bulkWriter.delete(doc.ref);
+        });
+        // 3. Delete Tenant Members
+        const membersSnapshot = await db.collection('tenant_members')
+            .where('tenant_id', '==', tenantId)
+            .get();
+        membersSnapshot.docs.forEach(doc => {
+            bulkWriter.delete(doc.ref);
+        });
+        // 4. Delete Tenant
+        bulkWriter.delete(tenantDoc.ref);
+        // 5. Delete User Document (if exists)
+        // Note: The user document ID is the same as the Auth UID
+        const userRef = db.collection('users').doc(userId);
+        bulkWriter.delete(userRef);
+        // Execute all Firestore deletions
+        await bulkWriter.close();
+        // 6. Delete User from Authentication
+        await admin.auth().deleteUser(userId);
+        functions.logger.log(`Successfully deleted account for user ${userId} and tenant ${tenantId}`);
+        return { success: true };
+    }
+    catch (error) {
+        functions.logger.error('Error deleting account:', error);
+        throw new functions.https.HttpsError('internal', 'Failed to delete account');
     }
 });
 //# sourceMappingURL=index.js.map

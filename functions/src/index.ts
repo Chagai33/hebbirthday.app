@@ -470,7 +470,7 @@ export const updateNextBirthdayScheduled = functions.pubsub
         .where('archived', '==', false)
         .get();
 
-      const batch = db.batch();
+      const bulkWriter = db.bulkWriter();
       let updateCount = 0;
 
       for (const doc of snapshot.docs) {
@@ -503,7 +503,7 @@ export const updateNextBirthdayScheduled = functions.pubsub
                 if (newFutureDates.length > 0) {
                   const nextDate = newFutureDates[0];
                   const gregorianDate = nextDate.gregorianDate;
-                  batch.update(doc.ref, {
+                  bulkWriter.update(doc.ref, {
                     next_upcoming_hebrew_birthday: `${gregorianDate.getFullYear()}-${String(gregorianDate.getMonth() + 1).padStart(2, '0')}-${String(gregorianDate.getDate()).padStart(2, '0')}`,
                     next_upcoming_hebrew_year: nextDate.hebrewYear,
                     future_hebrew_birthdays: newFutureDates.map((item) => ({
@@ -518,7 +518,7 @@ export const updateNextBirthdayScheduled = functions.pubsub
                 functions.logger.warn(`Failed to refresh birthday ${doc.id} with missing hebrewYear:`, error);
               }
             } else {
-              batch.update(doc.ref, {
+              bulkWriter.update(doc.ref, {
                 next_upcoming_hebrew_birthday: nextGregorian,
                 next_upcoming_hebrew_year: nextHebrewYear,
                 updated_at: admin.firestore.FieldValue.serverTimestamp(),
@@ -541,7 +541,7 @@ export const updateNextBirthdayScheduled = functions.pubsub
                 if (newFutureDates.length > 0) {
                   const nextDate = newFutureDates[0];
                   const gregorianDate = nextDate.gregorianDate;
-                  batch.update(doc.ref, {
+                  bulkWriter.update(doc.ref, {
                     next_upcoming_hebrew_birthday: `${gregorianDate.getFullYear()}-${String(gregorianDate.getMonth() + 1).padStart(2, '0')}-${String(gregorianDate.getDate()).padStart(2, '0')}`,
                     next_upcoming_hebrew_year: nextDate.hebrewYear,
                     future_hebrew_birthdays: newFutureDates.map((item) => ({
@@ -561,7 +561,7 @@ export const updateNextBirthdayScheduled = functions.pubsub
       }
 
       if (updateCount > 0) {
-        await batch.commit();
+        await bulkWriter.close();
         functions.logger.log(`Updated ${updateCount} birthdays with new upcoming dates`);
       } else {
         functions.logger.log('No birthdays needed updating');
@@ -2110,5 +2110,112 @@ export const previewDeletion = functions.https.onCall(async (data, context) => {
   } catch (error: any) {
     functions.logger.error('Error previewing deletion:', error);
     throw new functions.https.HttpsError('internal', 'common.error');
+  }
+});
+
+export const getAccountDeletionSummary = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
+  }
+
+  const { tenantId } = data;
+  if (!tenantId) {
+    throw new functions.https.HttpsError('invalid-argument', 'validation.required');
+  }
+
+  try {
+    const birthdaysCount = await db.collection('birthdays')
+      .where('tenant_id', '==', tenantId)
+      .count()
+      .get();
+
+    const groupsCount = await db.collection('groups')
+      .where('tenant_id', '==', tenantId)
+      .count()
+      .get();
+
+    return {
+      birthdaysCount: birthdaysCount.data().count,
+      groupsCount: groupsCount.data().count
+    };
+  } catch (error) {
+    functions.logger.error('Error getting account deletion summary:', error);
+    throw new functions.https.HttpsError('internal', 'common.error');
+  }
+});
+
+export const deleteAccount = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'auth.signIn');
+  }
+
+  const { tenantId } = data;
+  const userId = context.auth.uid;
+
+  if (!tenantId) {
+    throw new functions.https.HttpsError('invalid-argument', 'validation.required');
+  }
+
+  // Verify tenant ownership
+  const tenantDoc = await db.collection('tenants').doc(tenantId).get();
+  if (!tenantDoc.exists) {
+    throw new functions.https.HttpsError('not-found', 'Tenant not found');
+  }
+
+  const tenantData = tenantDoc.data();
+  if (tenantData?.owner_id !== userId) {
+    throw new functions.https.HttpsError('permission-denied', 'Only the owner can delete the account');
+  }
+
+  try {
+    const bulkWriter = db.bulkWriter();
+
+    // 1. Delete Birthdays
+    const birthdaysSnapshot = await db.collection('birthdays')
+      .where('tenant_id', '==', tenantId)
+      .get();
+    
+    birthdaysSnapshot.docs.forEach(doc => {
+      bulkWriter.delete(doc.ref);
+    });
+
+    // 2. Delete Groups
+    const groupsSnapshot = await db.collection('groups')
+      .where('tenant_id', '==', tenantId)
+      .get();
+
+    groupsSnapshot.docs.forEach(doc => {
+      bulkWriter.delete(doc.ref);
+    });
+
+    // 3. Delete Tenant Members
+    const membersSnapshot = await db.collection('tenant_members')
+      .where('tenant_id', '==', tenantId)
+      .get();
+
+    membersSnapshot.docs.forEach(doc => {
+      bulkWriter.delete(doc.ref);
+    });
+
+    // 4. Delete Tenant
+    bulkWriter.delete(tenantDoc.ref);
+
+    // 5. Delete User Document (if exists)
+    // Note: The user document ID is the same as the Auth UID
+    const userRef = db.collection('users').doc(userId);
+    bulkWriter.delete(userRef);
+
+    // Execute all Firestore deletions
+    await bulkWriter.close();
+
+    // 6. Delete User from Authentication
+    await admin.auth().deleteUser(userId);
+
+    functions.logger.log(`Successfully deleted account for user ${userId} and tenant ${tenantId}`);
+
+    return { success: true };
+  } catch (error) {
+    functions.logger.error('Error deleting account:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to delete account');
   }
 });

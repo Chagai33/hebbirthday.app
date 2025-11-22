@@ -419,46 +419,5 @@ export const googleCalendarService = {
       logger.error('Error deleting calendar:', error);
       throw new Error(error.message || 'שגיאה במחיקת יומן Google');
     }
-  },
-
-  async cleanupOrphanEvents(tenantId: string): Promise<{ success: boolean; deletedCount: number; failedCount: number; message: string }> {
-    try {
-      const cleanupFunction = httpsCallable<
-        { tenantId: string },
-        { success: boolean; deletedCount: number; failedCount: number; message: string }
-      >(functions, 'cleanupOrphanEvents');
-
-      const result = await cleanupFunction({ tenantId });
-      
-      if (!result.data.success) {
-        throw new Error(result.data.message || 'שגיאה בניקוי אירועים');
-      }
-      
-      logger.log(`Cleanup orphans: Deleted ${result.data.deletedCount}, Failed ${result.data.failedCount}`);
-      return result.data;
-    } catch (error: any) {
-      logger.error('Error cleaning orphan events:', error);
-      throw new Error(error.message || 'שגיאה בניקוי אירועים יתומים');
-    }
-  },
-
-  async previewDeletion(tenantId: string): Promise<{ success: boolean; summary: any[]; totalCount: number }> {
-    try {
-      const previewFunction = httpsCallable<
-        { tenantId: string },
-        { success: boolean; summary: any[]; totalCount: number }
-      >(functions, 'previewDeletion');
-
-      const result = await previewFunction({ tenantId });
-      
-      if (!result.data.success) {
-        throw new Error('שגיאה בטעינת תצוגה מקדימה');
-      }
-      
-      return result.data;
-    } catch (error: any) {
-      logger.error('Error previewing deletion:', error);
-      throw new Error(error.message || 'שגיאה בטעינת נתונים למחיקה');
-    }
   }
 };

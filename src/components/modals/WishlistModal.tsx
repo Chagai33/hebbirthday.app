@@ -126,6 +126,9 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
                 <p className="text-pink-100 text-sm">
                   {birthday.first_name} {birthday.last_name}
                 </p>
+                <p className="text-white/90 text-xs mt-1">
+                  {t('wishlist.subtitle')}
+                </p>
               </div>
             </div>
             <button

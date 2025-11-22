@@ -6,8 +6,9 @@ import { useTenant } from '../../contexts/TenantContext';
 import { useGroupFilter } from '../../contexts/GroupFilterContext';
 import { useGroups } from '../../hooks/useGroups';
 import { useBirthdays } from '../../hooks/useBirthdays';
-import { LogOut, Globe, Menu, X, FolderTree, Filter } from 'lucide-react';
+import { LogOut, Globe, Menu, X, FolderTree, Filter, Settings } from 'lucide-react';
 import { useTranslatedRootGroupName } from '../../utils/groupNameTranslator';
+import { TenantSettings } from '../settings/TenantSettings';
 
 export const Header: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -17,6 +18,7 @@ export const Header: React.FC = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showGroupFilter, setShowGroupFilter] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const { selectedGroupIds, toggleGroupFilter, clearGroupFilters } = useGroupFilter();
   const { data: allGroups = [] } = useGroups();
   const { data: birthdays = [] } = useBirthdays();
@@ -204,6 +206,14 @@ export const Header: React.FC = () => {
               <>
                 <div className="h-6 w-px bg-gray-300" />
                 <button
+                  onClick={() => setShowSettings(true)}
+                  className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  title={t('tenant.settings')}
+                >
+                  <Settings className="w-5 h-5" />
+                </button>
+                <div className="h-6 w-px bg-gray-300" />
+                <button
                   onClick={handleSignOut}
                   className="flex items-center gap-2 px-3 py-1.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors text-sm"
                 >
@@ -215,6 +225,7 @@ export const Header: React.FC = () => {
           </div>
         </div>
       </div>
+      {showSettings && <TenantSettings onClose={() => setShowSettings(false)} />}
     </header>
   );
 };

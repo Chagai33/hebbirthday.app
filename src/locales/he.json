@@ -98,7 +98,10 @@
     "switchLanguage": "החלף לאנגלית",
     "switchToEnglish": "English",
     "switchToHebrew": "עברית",
-    "linkedInProfile": "פרופיל LinkedIn"
+    "linkedInProfile": "פרופיל LinkedIn",
+    "day": "יום",
+    "month": "חודש",
+    "year": "שנה"
   },
   "auth": {
     "signIn": "התחבר",
@@ -209,6 +212,7 @@
     "preferenceExplanation": "הגדרה זו מעקפת את העדפת הקבוצה עבור אדם זה בלבד",
     "days": "ימים",
     "notes": "הערות",
+    "notesSyncHint": "הערות יוצגו בתיאור האירוע ביומן Google אם תבחר לסנכרן",
     "archived": "בארכיון",
     "upcomingBirthdays": "ימי הולדת קרובים",
     "addToCalendar": "הוסף ליומן",
@@ -280,12 +284,16 @@
     "enterSubgroupName": "הכנס שם תת-קבוצה"
   },
   "wishlist": {
+    "title": "רשימת המשאלות",
+    "subtitle": "המתנה המושלמת היא זו שזכרתם. רשמו אותה כאן, ואנחנו נזכיר לכם אותה בתוך האירוע ביומן.",
     "wishlist": "רשימת משאלות",
     "addItem": "הוסף פריט",
     "editItem": "ערוך פריט",
     "deleteItem": "מחק פריט",
     "itemName": "שם הפריט",
+    "itemNamePlaceholder": "למשל: ספר, משחק, בגד...",
     "description": "תיאור",
+    "descriptionPlaceholder": "פרטים נוספים (אופציונלי)",
     "priority": "עדיפות",
     "high": "גבוהה",
     "medium": "בינונית",
