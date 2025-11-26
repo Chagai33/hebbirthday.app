@@ -274,7 +274,7 @@ export const GroupsPanel = () => {
           {/* Desktop Back Button */}
           <button
             onClick={() => navigate('/')}
-            className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm flex-shrink-0"
+            className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition-colors shadow-sm flex-shrink-0"
           >
             {i18n.language === 'he' ? <ArrowRight className="w-5 h-5" /> : <ArrowLeft className="w-5 h-5" />}
             <span className="hidden sm:inline">{t('common.back')}</span>
@@ -520,10 +520,9 @@ const CategorySection = ({
         </div>
         <button
           onClick={onAddGroup}
-          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-white rounded-lg text-xs sm:text-sm font-medium transition-all hover:scale-105 shadow-sm flex-shrink-0"
-          style={{ backgroundColor: rootGroup.color }}
+          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg text-xs sm:text-sm font-medium transition-all shadow-sm flex-shrink-0"
         >
-          <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500" />
           <span className="hidden sm:inline">{t('groups.addGroup')}</span>
           <span className="sm:hidden">{t('groups.addGroup').split(' ')[0]}</span>
         </button>

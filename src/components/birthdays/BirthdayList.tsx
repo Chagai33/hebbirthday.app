@@ -372,7 +372,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       </div>
 
       {selectedIds.size > 0 && (
-        <div className="sticky top-0 z-10 bg-blue-50 border border-blue-200 rounded-lg p-2.5 sm:p-4 shadow-md">
+        <div className="sticky top-0 z-10 bg-white border border-slate-200 rounded-lg p-2.5 sm:p-4 shadow-lg">
           <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 ${i18n.language === 'he' ? 'justify-start' : 'justify-start'}`}>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-blue-900 text-sm">
@@ -407,21 +407,21 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                         showToast(t('messages.exportError', 'שגיאה בייצוא הקובץ'), 'error');
                       }
                     }}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
                   >
                     <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('birthday.exportSelected')}</span>
                   </button>
                   <button
                     onClick={() => handleBulkRefresh()}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-violet-50 text-violet-600 border border-violet-200 hover:bg-violet-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
                   >
                     <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('birthday.refresh')}</span>
                   </button>
                   <button
                     onClick={() => handleBulkDelete()}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
                   >
                     <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('common.delete')}</span>
@@ -430,7 +430,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     <button
                       onClick={handleBulkSyncToCalendar}
                       disabled={isSyncing}
-                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-sky-50 text-sky-600 border border-sky-200 hover:bg-sky-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <UploadCloud className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="hidden sm:inline">{t('googleCalendar.syncToCalendar')}</span>
@@ -438,7 +438,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   )}
                   <button
                     onClick={() => setSelectedIds(new Set())}
-                    className={`text-xs sm:text-sm text-blue-600 hover:text-blue-700 underline ${i18n.language === 'he' ? 'mr-2 sm:mr-3' : 'ml-2 sm:ml-3'}`}
+                    className={`text-xs sm:text-sm text-slate-500 hover:text-slate-700 underline ${i18n.language === 'he' ? 'mr-2 sm:mr-3' : 'ml-2 sm:ml-3'}`}
                   >
                     {t('common.clear')}
                   </button>
@@ -447,14 +447,14 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 <>
                   <button
                     onClick={() => handleBulkDelete()}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
                   >
                     <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('common.delete')}</span>
                   </button>
                   <button
                     onClick={() => handleBulkRefresh()}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-violet-50 text-violet-600 border border-violet-200 hover:bg-violet-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
                   >
                     <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('birthday.refresh')}</span>
@@ -484,7 +484,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                         showToast(t('messages.exportError', 'שגיאה בייצוא הקובץ'), 'error');
                       }
                     }}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
                   >
                     <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('birthday.exportSelected')}</span>
@@ -493,7 +493,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     <button
                       onClick={handleBulkSyncToCalendar}
                       disabled={isSyncing}
-                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-sky-50 text-sky-600 border border-sky-200 hover:bg-sky-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <UploadCloud className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="hidden sm:inline">{t('googleCalendar.syncToCalendar')}</span>
@@ -501,7 +501,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   )}
                   <button
                     onClick={() => setSelectedIds(new Set())}
-                    className={`text-xs sm:text-sm text-blue-600 hover:text-blue-700 underline ${i18n.language === 'he' ? 'mr-2 sm:mr-3' : 'ml-2 sm:ml-3'}`}
+                    className={`text-xs sm:text-sm text-slate-500 hover:text-slate-700 underline ${i18n.language === 'he' ? 'mr-2 sm:mr-3' : 'ml-2 sm:ml-3'}`}
                   >
                     {t('common.clear')}
                   </button>

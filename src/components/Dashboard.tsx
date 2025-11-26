@@ -452,13 +452,13 @@ export const Dashboard = () => {
               {/* קבוצה 1: פעולות ראשיות */}
               <button
                 onClick={() => setShowForm(true)}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md text-sm"
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 rounded-lg font-medium transition-all shadow-sm text-sm"
                 title={t('birthday.addBirthday')}
               >
                 <Plus className="w-4 h-4" />
                 <span>{t('birthday.addBirthday')}</span>
               </button>
-              <label className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md cursor-pointer text-sm">
+              <label className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 rounded-lg font-medium transition-all shadow-sm cursor-pointer text-sm">
                 <input
                   type="file"
                   accept=".csv"
@@ -489,7 +489,7 @@ export const Dashboard = () => {
               <div className="h-8 w-px bg-gray-300 mx-1" />
               
               {/* קבוצה 2: פעולות ראשיות */}
-              <label className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md cursor-pointer text-sm">
+              <label className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 rounded-lg font-medium transition-all shadow-sm cursor-pointer text-sm">
                 <input
                   type="file"
                   accept=".csv"
@@ -502,7 +502,7 @@ export const Dashboard = () => {
               </label>
               <button
                 onClick={() => setShowForm(true)}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md text-sm"
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 rounded-lg font-medium transition-all shadow-sm text-sm"
                 title={t('birthday.addBirthday')}
               >
                 <Plus className="w-4 h-4" />
