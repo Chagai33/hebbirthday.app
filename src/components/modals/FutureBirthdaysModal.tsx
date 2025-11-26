@@ -42,7 +42,7 @@ export const FutureBirthdaysModal: React.FC<FutureBirthdaysModalProps> = ({
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
-            {t('birthday.futureBirthdays', 'ימי הולדת עבריים קרובים')}
+            {t('birthday.futureBirthdays')}
           </h2>
           <button
             onClick={onClose}
@@ -57,13 +57,13 @@ export const FutureBirthdaysModal: React.FC<FutureBirthdaysModalProps> = ({
             {name}
           </p>
           <p className="text-sm text-gray-500">
-            {t('birthday.next10Years', 'עשר השנים הבאות')}
+            {t('birthday.next10Years')}
           </p>
         </div>
 
         {futureDates.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            {t('birthday.noFutureDates', 'אין תאריכים זמינים')}
+            {t('birthday.noFutureDates')}
           </div>
         ) : (
           <div className="space-y-2">
@@ -101,18 +101,18 @@ export const FutureBirthdaysModal: React.FC<FutureBirthdaysModalProps> = ({
                     </p>
                     {hebrewYear && birthHebrewYear && (
                       <p className={`text-xs font-semibold ${isPast ? 'text-purple-400' : 'text-purple-600'}`}>
-                        {t('birthday.age', 'גיל')}: {hebrewYear - birthHebrewYear}
+                        {t('birthday.age')}: {hebrewYear - birthHebrewYear}
                       </p>
                     )}
                   </div>
                   {index === 0 && isUpcoming && (
                     <span className="px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded">
-                      {t('birthday.next', 'הבא')}
+                      {t('birthday.next')}
                     </span>
                   )}
                   {isPast && (
                     <span className="px-2 py-1 bg-gray-400 text-white text-xs font-medium rounded">
-                      {t('birthday.past', 'עבר')}
+                      {t('birthday.past')}
                     </span>
                   )}
                 </div>

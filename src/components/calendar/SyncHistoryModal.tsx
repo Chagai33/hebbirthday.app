@@ -74,7 +74,7 @@ export const SyncHistoryModal: React.FC<SyncHistoryModalProps> = ({ isOpen, onCl
                       <ul className="list-disc list-inside space-y-0.5 text-red-600">
                         {item.failedItems.map((fail, i) => (
                           <li key={i} className="truncate">
-                            <span className="font-medium">{fail.name}</span>: {fail.reason}
+                            <span className="font-medium">{fail.name}</span>
                           </li>
                         ))}
                       </ul>
