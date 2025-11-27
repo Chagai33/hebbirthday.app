@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useSearchParams, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AuthProvider } from './contexts/AuthContext';
 import { TenantProvider } from './contexts/TenantContext';
 import { GroupFilterProvider } from './contexts/GroupFilterContext';
@@ -43,6 +44,12 @@ const ActionUrlHandler = () => {
 };
 
 function App() {
+  const { t, i18n } = useTranslation();
+
+  useEffect(() => {
+    document.title = t('app.title', 'HebBirthday | Hebrew & Gregorian Calendar');
+  }, [i18n.language, t]);
+
   // טיפול ב-Google OAuth callback אם יש טוקן ב-URL hash
   useEffect(() => {
     if (window.google && window.google.accounts && window.google.accounts.oauth2) {

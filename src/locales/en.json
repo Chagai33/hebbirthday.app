@@ -1,4 +1,7 @@
 {
+  "app": {
+    "title": "HebBirthday | Hebrew & Gregorian Calendar"
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",

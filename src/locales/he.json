@@ -1,4 +1,7 @@
 {
+  "app": {
+    "title": "HebBirthday | ניהול ימי הולדת עבריים ולועזיים"
+  },
   "googleCalendar": {
     "title": "יומן Google",
     "connect": "התחבר ליומן Google",
