@@ -118,7 +118,7 @@ export const Register: React.FC = () => {
             <div className="text-4xl font-black tracking-tight leading-none relative inline-flex items-baseline" dir="ltr">
               <span className="text-blue-600">Heb</span>
               <span className="text-purple-600">Birthday</span>
-              <span className="text-gray-400 text-xl ml-1 absolute left-full bottom-1">.app</span>
+              <span className="text-gray-400 text-xl ml-[1px] absolute left-full bottom-1">.app</span>
             </div>
             <span className="text-sm text-gray-500 font-medium mt-1">
               {t('app.tagline')}

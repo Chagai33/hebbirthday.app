@@ -2,18 +2,16 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTenant } from '../../contexts/TenantContext';
 import { useGroupFilter } from '../../contexts/GroupFilterContext';
 import { useGroups } from '../../hooks/useGroups';
 import { useBirthdays } from '../../hooks/useBirthdays';
-import { LogOut, Globe, Menu, X, FolderTree, Filter, Settings, ChevronDown, ChevronUp } from 'lucide-react';
+import { LogOut, Globe, FolderTree, Filter, Settings, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslatedRootGroupName } from '../../utils/groupNameTranslator';
 import { TenantSettings } from '../settings/TenantSettings';
 
 export const Header: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { user, signOut } = useAuth();
-  const { currentTenant } = useTenant();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -55,12 +53,12 @@ export const Header: React.FC = () => {
             <div className="flex items-center gap-2 sm:gap-4">
               <button
                 onClick={() => navigate('/login')}
-                className="flex flex-col items-start transition-opacity hover:opacity-80"
+                className="flex flex-col items-start transition-opacity hover:opacity-80 -ms-1 pe-6"
               >
                 <div className="text-xl sm:text-2xl font-black tracking-tight leading-none relative inline-flex items-baseline" dir="ltr">
                   <span className="text-blue-600">Heb</span>
                   <span className="text-purple-600">Birthday</span>
-                  <span className="text-gray-400 text-sm sm:text-base ml-0.5 absolute left-full bottom-0">.app</span>
+                  <span className="text-gray-400 text-sm sm:text-base ml-[1px] absolute left-full bottom-0">.app</span>
                 </div>
                 <span className="text-[10px] sm:text-xs text-gray-500 font-medium -mt-0.5">
                   {t('app.tagline')}
@@ -105,12 +103,12 @@ export const Header: React.FC = () => {
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button
               onClick={() => navigate('/')}
-              className="flex flex-col items-start transition-opacity hover:opacity-80"
+              className="flex flex-col items-start transition-opacity hover:opacity-80 -ms-1 pe-6"
             >
               <div className="text-xl sm:text-2xl font-black tracking-tight leading-none relative inline-flex items-baseline" dir="ltr">
                 <span className="text-blue-600">Heb</span>
                 <span className="text-purple-600">Birthday</span>
-                <span className="text-gray-400 text-sm sm:text-base ml-0.5 absolute left-full bottom-0">.app</span>
+                <span className="text-gray-400 text-sm sm:text-base ml-[1px] absolute left-full bottom-0">.app</span>
               </div>
               <span className="text-[10px] sm:text-xs text-gray-500 font-medium -mt-0.5">
                 {t('app.tagline')}
