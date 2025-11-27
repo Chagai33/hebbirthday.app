@@ -1,6 +1,7 @@
 {
   "app": {
-    "title": "HebBirthday | ניהול ימי הולדת עבריים ולועזיים"
+    "title": "HebBirthday | ניהול ימי הולדת עבריים ולועזיים",
+    "tagline": "לא שוכחים אף תאריך - עברי או לועזי"
   },
   "googleCalendar": {
     "title": "יומן Google",

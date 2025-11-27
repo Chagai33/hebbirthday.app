@@ -55,9 +55,16 @@ export const Header: React.FC = () => {
             <div className="flex items-center gap-2 sm:gap-4">
               <button
                 onClick={() => navigate('/login')}
-                className="text-base sm:text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                className="flex flex-col items-start transition-opacity hover:opacity-80"
               >
-                {t('birthday.birthdays')}
+                <div className="text-xl sm:text-2xl font-black tracking-tight leading-none relative inline-flex items-baseline" dir="ltr">
+                  <span className="text-blue-600">Heb</span>
+                  <span className="text-purple-600">Birthday</span>
+                  <span className="text-gray-400 text-sm sm:text-base ml-0.5 absolute left-full bottom-0">.app</span>
+                </div>
+                <span className="text-[10px] sm:text-xs text-gray-500 font-medium -mt-0.5">
+                  {t('app.tagline')}
+                </span>
               </button>
             </div>
 
@@ -98,9 +105,16 @@ export const Header: React.FC = () => {
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button
               onClick={() => navigate('/')}
-              className="text-lg sm:text-xl font-bold text-blue-600 hover:text-blue-700 transition-colors truncate"
+              className="flex flex-col items-start transition-opacity hover:opacity-80"
             >
-              {t('birthday.birthdays')}
+              <div className="text-xl sm:text-2xl font-black tracking-tight leading-none relative inline-flex items-baseline" dir="ltr">
+                <span className="text-blue-600">Heb</span>
+                <span className="text-purple-600">Birthday</span>
+                <span className="text-gray-400 text-sm sm:text-base ml-0.5 absolute left-full bottom-0">.app</span>
+              </div>
+              <span className="text-[10px] sm:text-xs text-gray-500 font-medium -mt-0.5">
+                {t('app.tagline')}
+              </span>
             </button>
           </div>
 
