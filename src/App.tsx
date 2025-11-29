@@ -7,6 +7,7 @@ import { TenantProvider } from './contexts/TenantContext';
 import { GroupFilterProvider } from './contexts/GroupFilterContext';
 import { GoogleCalendarProvider } from './contexts/GoogleCalendarContext';
 import { ToastProvider } from './contexts/ToastContext';
+import { TooltipProvider } from './components/common/Tooltip';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
 import { Login } from './components/auth/Login';
 import { Register } from './components/auth/Register';
@@ -71,9 +72,10 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <AuthProvider>
-          <TenantProvider>
+      <TooltipProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <TenantProvider>
             <GoogleCalendarProvider>
               <GroupFilterProvider>
                 <BrowserRouter>
@@ -108,7 +110,8 @@ function App() {
           </TenantProvider>
         </AuthProvider>
       </ToastProvider>
-    </QueryClientProvider>
+    </TooltipProvider>
+  </QueryClientProvider>
   );
 }
 

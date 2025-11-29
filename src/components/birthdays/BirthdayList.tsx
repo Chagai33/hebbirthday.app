@@ -13,6 +13,7 @@ import { Edit, Trash2, Calendar, Search, CalendarDays, RefreshCw, Filter, Gift, 
 import { FutureBirthdaysModal } from '../modals/FutureBirthdaysModal';
 import { UpcomingGregorianBirthdaysModal } from '../modals/UpcomingGregorianBirthdaysModal';
 import { WishlistModal } from '../modals/WishlistModal';
+import { Tooltip } from '../common/Tooltip';
 import { birthdayCalculationsService } from '../../services/birthdayCalculations.service';
 import { calendarPreferenceService } from '../../services/calendarPreference.service';
 import { exportBirthdaysToCSV } from '../../utils/csvExport';
@@ -741,26 +742,58 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                       ) : (
                         <div className="flex flex-col gap-1">
                           {showGregorian && (
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-blue-600">{birthday.calculations.currentGregorianAge}</span>
-                              {birthday.calculations.gregorianSign && (
-                                <span className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1 font-normal">
-                                  <Sparkles className="w-2.5 h-2.5 text-blue-400" />
-                                  {t(`zodiac.${birthday.calculations.gregorianSign}`)}
-                                </span>
-                              )}
-                            </div>
+                            <Tooltip
+                              theme="blue"
+                              content={
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="font-medium">
+                                    {t('birthday.currentGregorianAge')}: {birthday.calculations.currentGregorianAge}
+                                  </span>
+                                  {birthday.calculations.gregorianSign && (
+                                    <span className="text-blue-700/70">
+                                      {t(`zodiac.${birthday.calculations.gregorianSign}`)}
+                                    </span>
+                                  )}
+                                </div>
+                              }
+                            >
+                              <div className="flex items-center gap-1.5 cursor-pointer">
+                                <span className="text-blue-600">{birthday.calculations.currentGregorianAge}</span>
+                                {birthday.calculations.gregorianSign && (
+                                  <span className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1 font-normal">
+                                    <Sparkles className="w-2.5 h-2.5 text-blue-400" />
+                                    {t(`zodiac.${birthday.calculations.gregorianSign}`)}
+                                  </span>
+                                )}
+                              </div>
+                            </Tooltip>
                           )}
                           {showHebrew && (
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-purple-600">{birthday.calculations.currentHebrewAge}</span>
-                              {birthday.calculations.hebrewSign && (
-                                <span className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1 font-normal">
-                                  <Sparkles className="w-2.5 h-2.5 text-purple-400" />
-                                  {t(`zodiac.${birthday.calculations.hebrewSign}`)}
-                                </span>
-                              )}
-                            </div>
+                            <Tooltip
+                              theme="purple"
+                              content={
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="font-medium">
+                                    {t('birthday.currentHebrewAge')}: {birthday.calculations.currentHebrewAge}
+                                  </span>
+                                  {birthday.calculations.hebrewSign && (
+                                    <span className="text-purple-700/70">
+                                      {t(`zodiac.${birthday.calculations.hebrewSign}`)}
+                                    </span>
+                                  )}
+                                </div>
+                              }
+                            >
+                              <div className="flex items-center gap-1.5 cursor-pointer">
+                                <span className="text-purple-600">{birthday.calculations.currentHebrewAge}</span>
+                                {birthday.calculations.hebrewSign && (
+                                  <span className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1 font-normal">
+                                    <Sparkles className="w-2.5 h-2.5 text-purple-400" />
+                                    {t(`zodiac.${birthday.calculations.hebrewSign}`)}
+                                  </span>
+                                )}
+                              </div>
+                            </Tooltip>
                           )}
                         </div>
                       )}
