@@ -373,7 +373,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       </div>
 
       {selectedIds.size > 0 && (
-        <div className="sticky top-0 z-10 bg-white border border-slate-200 rounded-lg p-2.5 sm:p-4 shadow-lg">
+        <div className="sticky top-14 sm:top-16 z-10 bg-white border border-slate-200 rounded-lg p-2.5 sm:p-4 shadow-lg">
           <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 ${i18n.language === 'he' ? 'justify-start' : 'justify-start'}`}>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-blue-900 text-sm">

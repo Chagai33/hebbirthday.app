@@ -44,7 +44,7 @@ export const Header: React.FC = () => {
   // If public page, show minimal header
   if (isPublicPage) {
     return (
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-12 sm:h-16">
             <div className="flex items-center gap-2 sm:gap-4">
@@ -89,7 +89,7 @@ export const Header: React.FC = () => {
   }
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
+    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-16 gap-4">
           {/* שמאל - כותרת ומידע */}

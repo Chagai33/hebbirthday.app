@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    scroll-padding-top: 64px;
+  }
+}
+
 @layer utilities {
   @keyframes slide-in {
     from {
