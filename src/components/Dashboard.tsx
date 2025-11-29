@@ -499,13 +499,6 @@ export const Dashboard = () => {
           )}
         </div>
         
-        {/* כפתורים למובייל - רק Google Calendar נשאר כי האחרים ב-FloatingDock */}
-        <div className="sm:hidden space-y-2">
-          <div className="w-full">
-            <GoogleCalendarButton />
-          </div>
-        </div>
-        
         <div className="space-y-3 sm:space-y-4">
 
           {isLoading ? (

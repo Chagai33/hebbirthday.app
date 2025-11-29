@@ -8,7 +8,7 @@
   },
   "googleCalendar": {
     "title": "יומן Google",
-    "connect": "התחבר ליומן Google",
+    "connect": "חיבור ליומן גוגל",
     "connected": "מחובר ליומן Google",
     "disconnect": "נתק חיבור",
     "sync": "סנכרן",
@@ -240,7 +240,7 @@
   "birthday": {
     "birthdays": "ניהול ימי הולדת עברי / לועזי",
     "fullName": "שם מלא",
-    "addBirthday": "הוסף יום הולדת",
+    "addBirthday": "הוספת רשומה",
     "editBirthday": "ערוך יום הולדת",
     "firstName": "שם פרטי",
     "lastName": "שם משפחה",
@@ -281,7 +281,7 @@
     "refreshError": "שגיאה ברענון הנתונים",
     "futureBirthdays": "ימי הולדת עבריים קרובים",
     "upcomingGregorianBirthdays": "ימי הולדת לועזיים קרובים",
-    "importCSV": "ייבא CSV",
+    "importCSV": "ייבוא מקובץ",
     "next10Years": "עשר השנים הבאות",
     "noFutureDates": "אין תאריכים זמינים",
     "next": "הבא",
@@ -307,7 +307,7 @@
     "hebrewDistribution": "התפלגות עברית"
   },
   "groups": {
-    "title": "קבוצות",
+    "title": "ניהול קבוצות",
     "groups": "קבוצות",
     "manageGroups": "ניהול קבוצות",
     "addGroup": "הוסף קבוצה",
