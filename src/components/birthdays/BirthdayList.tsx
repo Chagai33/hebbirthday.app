@@ -650,10 +650,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   {t('birthday.birthDate')}
                 </th>
                 <th className="px-2 sm:px-6 py-2 sm:py-4 text-start text-xs sm:text-sm font-bold text-gray-900">
-                  {t('birthday.currentGregorianAge')}
-                </th>
-                <th className="px-2 sm:px-6 py-2 sm:py-4 text-start text-xs sm:text-sm font-bold text-gray-900">
-                  {t('birthday.currentHebrewAge')}
+                  {t('birthday.ageColumn')}
                 </th>
                 <th className="px-2 sm:px-6 py-2 sm:py-4 text-start text-xs sm:text-sm font-bold text-gray-900">
                   {t('birthday.nextGregorianBirthday')}
@@ -739,33 +736,33 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                       </div>
                     </td>
                     <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-semibold">
-                      {showGregorian ? (
+                      {(!showGregorian && !showHebrew) ? (
+                        <span className="text-gray-400">-</span>
+                      ) : (
                         <div className="flex flex-col gap-1">
-                          <span className="text-blue-600">{birthday.calculations.currentGregorianAge}</span>
-                          {birthday.calculations.gregorianSign && (
-                            <span className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1 font-normal">
-                              <Sparkles className="w-2.5 h-2.5 text-blue-400" />
-                              {t(`zodiac.${birthday.calculations.gregorianSign}`)}
-                            </span>
+                          {showGregorian && (
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-blue-600">{birthday.calculations.currentGregorianAge}</span>
+                              {birthday.calculations.gregorianSign && (
+                                <span className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1 font-normal">
+                                  <Sparkles className="w-2.5 h-2.5 text-blue-400" />
+                                  {t(`zodiac.${birthday.calculations.gregorianSign}`)}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          {showHebrew && (
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-purple-600">{birthday.calculations.currentHebrewAge}</span>
+                              {birthday.calculations.hebrewSign && (
+                                <span className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1 font-normal">
+                                  <Sparkles className="w-2.5 h-2.5 text-purple-400" />
+                                  {t(`zodiac.${birthday.calculations.hebrewSign}`)}
+                                </span>
+                              )}
+                            </div>
                           )}
                         </div>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </td>
-                    <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-semibold">
-                      {showHebrew ? (
-                        <div className="flex flex-col gap-1">
-                          <span className="text-purple-600">{birthday.calculations.currentHebrewAge}</span>
-                          {birthday.calculations.hebrewSign && (
-                            <span className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-1 font-normal">
-                              <Sparkles className="w-2.5 h-2.5 text-purple-400" />
-                              {t(`zodiac.${birthday.calculations.hebrewSign}`)}
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">-</span>
                       )}
                     </td>
                     <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-700">

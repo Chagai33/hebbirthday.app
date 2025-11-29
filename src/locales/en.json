@@ -216,6 +216,7 @@
     "ageAtNextGregorian": "Age at Next Gregorian",
     "ageAtNextHebrew": "Age at Next Hebrew",
     "age": "Age",
+    "ageColumn": "Age",
     "calendarPreference": "Calendar Preference",
     "gregorianOnly": "Gregorian Only",
     "hebrewOnly": "Hebrew Only",

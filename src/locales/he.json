@@ -256,6 +256,7 @@
     "ageAtNextGregorian": "גיל ביום הולדת לועזי הבא",
     "ageAtNextHebrew": "גיל ביום הולדת עברי הבא",
     "age": "גיל:",
+    "ageColumn": "גיל",
     "calendarPreference": "העדפת לוח שנה",
     "gregorianOnly": "לועזי בלבד",
     "hebrewOnly": "עברי בלבד",
