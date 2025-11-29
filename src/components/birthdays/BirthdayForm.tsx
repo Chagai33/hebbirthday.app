@@ -606,7 +606,7 @@ export const BirthdayForm = ({
                         onClick={() => setShowSunsetTooltip(false)}
                       />
                       <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-64 bg-gray-900 text-white text-xs rounded p-2 z-20 shadow-lg text-center">
-                        {t('birthday.sunsetExplanation', "The Hebrew day starts at sunset. If the calculated Hebrew date doesn't match, you can edit the birthday and change this setting.")}
+                        {t('birthday.sunsetExplanation')}
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
                       </div>
                     </>

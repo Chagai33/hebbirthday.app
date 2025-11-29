@@ -137,7 +137,7 @@ export const UpcomingGregorianBirthdaysModal: React.FC<UpcomingGregorianBirthday
                     </p>
                     <div className="flex flex-col gap-1 mt-1">
                       <p className={`text-sm font-semibold ${isPast ? 'text-blue-400' : 'text-blue-600'}`}>
-                        {t('birthday.age')}: {item.age}
+                        {t('birthday.age')} {item.age}
                       </p>
                       {item.hebrewDate && (
                         <div className="flex flex-col gap-0.5">

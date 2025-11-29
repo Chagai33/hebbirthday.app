@@ -236,12 +236,14 @@
   },
   "birthday": {
     "birthdays": "ניהול ימי הולדת עברי / לועזי",
+    "fullName": "שם מלא",
     "addBirthday": "הוסף יום הולדת",
     "editBirthday": "ערוך יום הולדת",
     "firstName": "שם פרטי",
     "lastName": "שם משפחה",
     "birthDate": "תאריך לידה",
     "afterSunset": "אחרי השקיעה",
+    "sunsetExplanation": "היום העברי מתחיל בשקיעה. אם התאריך העברי המחושב אינו תואם, ניתן לערוך את יום ההולדת ולשנות הגדרה זו.",
     "gender": "מגדר",
     "group": "קבוצה",
     "selectGroup": "בחר קבוצה",
@@ -253,6 +255,7 @@
     "currentHebrewAge": "גיל עברי",
     "ageAtNextGregorian": "גיל ביום הולדת לועזי הבא",
     "ageAtNextHebrew": "גיל ביום הולדת עברי הבא",
+    "age": "גיל:",
     "calendarPreference": "העדפת לוח שנה",
     "gregorianOnly": "לועזי בלבד",
     "hebrewOnly": "עברי בלבד",
@@ -372,7 +375,7 @@
     "sunsetVerification": {
       "title": "אימות זמן לידה",
       "message": "האם האדם נולד אחרי השקיעה?",
-      "explanation": "זה משפיע על חישוב התאריך העברי."
+      "explanation": "היום העברי מתחיל בשקיעה. אם התאריך העברי המחושב אינו תואם, ניתן לערוך את יום ההולדת ולשנות הגדרה זו."
     },
     "genderVerification": {
       "title": "בחירת מגדר",

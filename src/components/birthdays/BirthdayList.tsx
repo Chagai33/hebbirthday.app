@@ -644,10 +644,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   />
                 </th>
                 <th className="px-2 sm:px-6 py-2 sm:py-4 text-start text-xs sm:text-sm font-bold text-gray-900">
-                  {t('birthday.firstName')}
-                </th>
-                <th className="px-2 sm:px-6 py-2 sm:py-4 text-start text-xs sm:text-sm font-bold text-gray-900">
-                  {t('birthday.lastName')}
+                  {t('birthday.fullName')}
                 </th>
                 <th className="px-2 sm:px-6 py-2 sm:py-4 text-start text-xs sm:text-sm font-bold text-gray-900">
                   {t('birthday.birthDate')}
@@ -720,7 +717,9 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                               <span className="text-[10px] sm:text-xs text-gray-400">?</span>
                             </div>
                           )}
-                          <span className="text-xs sm:text-sm font-medium text-gray-900">{birthday.first_name}</span>
+                          <span className="text-xs sm:text-sm font-medium text-gray-900">
+                            {birthday.first_name} {birthday.last_name}
+                          </span>
                           {duplicateIds?.has(birthday.id) && (
                             <div className="relative group/tooltip">
                               <Copy className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500" />
@@ -731,9 +730,6 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                           )}
                         </div>
                       </td>
-                    <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-medium text-gray-900">
-                      {birthday.last_name}
-                    </td>
                     <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-700">
                       <div className="flex flex-col gap-0.5 sm:gap-1">
                         <span>{format(new Date(birthday.birth_date_gregorian), 'dd/MM/yyyy', { locale })}</span>

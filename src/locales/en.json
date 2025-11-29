@@ -197,6 +197,7 @@
   },
   "birthday": {
     "birthdays": "Birthdays",
+    "fullName": "Full Name",
     "addBirthday": "Add Birthday",
     "editBirthday": "Edit Birthday",
     "firstName": "First Name",
@@ -214,6 +215,7 @@
     "currentHebrewAge": "Hebrew Age",
     "ageAtNextGregorian": "Age at Next Gregorian",
     "ageAtNextHebrew": "Age at Next Hebrew",
+    "age": "Age",
     "calendarPreference": "Calendar Preference",
     "gregorianOnly": "Gregorian Only",
     "hebrewOnly": "Hebrew Only",
