@@ -50,6 +50,15 @@ export const BirthdayForm = ({
   const [hasUnsyncedChanges, setHasUnsyncedChanges] = useState(false);
   const [showSunsetTooltip, setShowSunsetTooltip] = useState(false);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
+
   // בדיקת שינויים לא מסונכרנים
   useEffect(() => {
     if (editBirthday && (editBirthday.googleCalendarEventIds || editBirthday.googleCalendarEventId)) {
@@ -325,7 +334,7 @@ export const BirthdayForm = ({
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start sm:items-center justify-center z-50 p-2 sm:p-4 pt-3 sm:pt-4 pb-20 sm:pb-4 overflow-hidden" onClick={onClose}>
-        <div className="bg-white rounded-lg sm:rounded-2xl shadow-2xl max-w-2xl w-full p-3 sm:p-6 max-h-[calc(100vh-1.5rem)] sm:max-h-[90vh] sm:overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="bg-white rounded-lg sm:rounded-2xl shadow-2xl max-w-2xl w-full p-3 sm:p-6 max-h-[calc(100vh-6rem)] sm:max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-between mb-2 sm:mb-6">
             <h2 className="text-base sm:text-2xl font-bold text-gray-900">
               {editBirthday ? t('birthday.editBirthday') : t('birthday.addBirthday')}
