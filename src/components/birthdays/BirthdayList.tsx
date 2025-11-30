@@ -349,6 +349,12 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
     }
   };
 
+  const getSortSelectColor = () => {
+    if (sortBy.startsWith('upcoming-hebrew')) return 'text-[#8e24aa]';
+    if (sortBy.startsWith('upcoming')) return 'text-blue-600';
+    return 'text-gray-900';
+  };
+
   return (
     <div className="space-y-3 sm:space-y-4">
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
@@ -393,16 +399,16 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className={`px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${getSortSelectColor()} font-medium`}
           >
-            <option value="upcoming">{t('sort.upcomingSoonest', 'Next Birthday (Gregorian - Soonest)')}</option>
-            <option value="upcoming-latest">{t('sort.upcomingLatest', 'Next Birthday (Gregorian - Latest)')}</option>
-            <option value="upcoming-hebrew">{t('sort.upcomingHebrewSoonest', 'Next Birthday (Hebrew - Soonest)')}</option>
-            <option value="upcoming-hebrew-latest">{t('sort.upcomingHebrewLatest', 'Next Birthday (Hebrew - Latest)')}</option>
-            <option value="name-az">{t('sort.nameAZ', 'Name (A-Z)')}</option>
-            <option value="name-za">{t('sort.nameZA', 'Name (Z-A)')}</option>
-            <option value="age-youngest">{t('sort.ageYoungest', 'Age (Youngest)')}</option>
-            <option value="age-oldest">{t('sort.ageOldest', 'Age (Oldest)')}</option>
+            <option value="upcoming" className="text-blue-600 font-medium">{t('sort.upcomingSoonest', 'Next Birthday (Gregorian - Soonest)')}</option>
+            <option value="upcoming-latest" className="text-blue-600 font-medium">{t('sort.upcomingLatest', 'Next Birthday (Gregorian - Latest)')}</option>
+            <option value="upcoming-hebrew" className="text-[#8e24aa] font-medium">{t('sort.upcomingHebrewSoonest', 'Next Birthday (Hebrew - Soonest)')}</option>
+            <option value="upcoming-hebrew-latest" className="text-[#8e24aa] font-medium">{t('sort.upcomingHebrewLatest', 'Next Birthday (Hebrew - Latest)')}</option>
+            <option value="name-az" className="text-gray-900">{t('sort.nameAZ', 'Name (A-Z)')}</option>
+            <option value="name-za" className="text-gray-900">{t('sort.nameZA', 'Name (Z-A)')}</option>
+            <option value="age-youngest" className="text-gray-900">{t('sort.ageYoungest', 'Age (Youngest)')}</option>
+            <option value="age-oldest" className="text-gray-900">{t('sort.ageOldest', 'Age (Oldest)')}</option>
           </select>
         </div>
       </div>
