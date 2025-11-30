@@ -47,6 +47,71 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
   const [sortBy, setSortBy] = useState<'upcoming' | 'upcoming-latest' | 'upcoming-hebrew' | 'upcoming-hebrew-latest' | 'name-az' | 'name-za' | 'age-youngest' | 'age-oldest'>(() => (localStorage.getItem('birthday-sort') as any) || 'upcoming');
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>(() => (localStorage.getItem('birthday-gender') as any) || 'all');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Strict Global Visibility Logic
+  // We determine visibility solely based on the Tenant Preference (Strict Mode).
+  // Individual overrides are ignored for the main table layout to ensure consistency.
+  const tenantPref = currentTenant?.default_calendar_preference || 'both';
+  
+  // Show Hebrew if preference is Hebrew OR Both
+  const showHebrewColumn = tenantPref === 'hebrew' || tenantPref === 'both';
+  // Show Gregorian if preference is Gregorian OR Both
+  const showGregorianColumn = tenantPref === 'gregorian' || tenantPref === 'both';
+
+  // Filter available sort options based on strict visibility
+  // If Strict Hebrew -> Hide Gregorian sorts
+  // If Strict Gregorian -> Hide Hebrew sorts
+  const availableSortOptions = [
+    { value: 'upcoming', label: t('sort.upcomingSoonest', 'Next Birthday (Gregorian - Soonest)'), show: showGregorianColumn },
+    { value: 'upcoming-latest', label: t('sort.upcomingLatest', 'Next Birthday (Gregorian - Latest)'), show: showGregorianColumn },
+    { value: 'upcoming-hebrew', label: t('sort.upcomingHebrewSoonest', 'Next Birthday (Hebrew - Soonest)'), show: showHebrewColumn },
+    { value: 'upcoming-hebrew-latest', label: t('sort.upcomingHebrewLatest', 'Next Birthday (Hebrew - Latest)'), show: showHebrewColumn },
+    { value: 'name-az', label: t('sort.nameAZ', 'Name (A-Z)'), show: true },
+    { value: 'name-za', label: t('sort.nameZA', 'Name (Z-A)'), show: true },
+    { value: 'age-youngest', label: t('sort.ageYoungest', 'Age (Youngest)'), show: true },
+    { value: 'age-oldest', label: t('sort.ageOldest', 'Age (Oldest)'), show: true },
+  ].filter(opt => opt.show);
+
+  // NOTE: This effect sets the default sorting based on the tenant's calendar preference
+  // ONLY if the user hasn't manually selected a sort order (checked via localStorage).
+  useEffect(() => {
+    const savedSort = localStorage.getItem('birthday-sort');
+    
+    // If there is no saved sort manually by the user, we apply the tenant default.
+    if (!savedSort && currentTenant?.default_calendar_preference) {
+      if (currentTenant.default_calendar_preference === 'gregorian') {
+        setSortBy('upcoming');
+      } else {
+        // For 'hebrew' or 'both', we default to Hebrew upcoming as per user request
+        setSortBy('upcoming-hebrew');
+      }
+    }
+    
+    // Self-Correction Logic:
+    // If the current sort is hidden by the new preference, we must switch it.
+    if (currentTenant?.default_calendar_preference) {
+        const pref = currentTenant.default_calendar_preference;
+        
+        // If Strict Hebrew, and current sort is Gregorian -> Force Hebrew
+        if (pref === 'hebrew' && (sortBy === 'upcoming' || sortBy === 'upcoming-latest')) {
+            setSortBy('upcoming-hebrew');
+        }
+        // If Strict Gregorian, and current sort is Hebrew -> Force Gregorian
+        else if (pref === 'gregorian' && (sortBy.startsWith('upcoming-hebrew'))) {
+            setSortBy('upcoming');
+        }
+        // If Both, and we are in a "neutral" state or just switched to Both, 
+        // we prefer Hebrew as default if the previous state was ambiguous, 
+        // but if the user was already on Gregorian, we might leave it. 
+        // However, the requirement says "Default to Hebrew for Both". 
+        // We only force this if we are currently on a "wrong" default? 
+        // No, let's leave user choice if valid. 
+        // But if they were on a hidden sort (e.g. coming from a state that shouldn't exist), we fix it.
+        // The logic above handles the strict hiding conflicts.
+    }
+
+  }, [currentTenant, sortBy]); // Added sortBy to deps to ensure immediate correction if it becomes invalid
+
   const [showFutureModal, setShowFutureModal] = useState(false);
   const [showGregorianModal, setShowGregorianModal] = useState(false);
   const [showWishlistModal, setShowWishlistModal] = useState(false);
@@ -401,14 +466,19 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
             onChange={(e) => setSortBy(e.target.value as any)}
             className={`px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${getSortSelectColor()} font-medium`}
           >
-            <option value="upcoming" className="text-blue-600 font-medium">{t('sort.upcomingSoonest', 'Next Birthday (Gregorian - Soonest)')}</option>
-            <option value="upcoming-latest" className="text-blue-600 font-medium">{t('sort.upcomingLatest', 'Next Birthday (Gregorian - Latest)')}</option>
-            <option value="upcoming-hebrew" className="text-[#8e24aa] font-medium">{t('sort.upcomingHebrewSoonest', 'Next Birthday (Hebrew - Soonest)')}</option>
-            <option value="upcoming-hebrew-latest" className="text-[#8e24aa] font-medium">{t('sort.upcomingHebrewLatest', 'Next Birthday (Hebrew - Latest)')}</option>
-            <option value="name-az" className="text-gray-900">{t('sort.nameAZ', 'Name (A-Z)')}</option>
-            <option value="name-za" className="text-gray-900">{t('sort.nameZA', 'Name (Z-A)')}</option>
-            <option value="age-youngest" className="text-gray-900">{t('sort.ageYoungest', 'Age (Youngest)')}</option>
-            <option value="age-oldest" className="text-gray-900">{t('sort.ageOldest', 'Age (Oldest)')}</option>
+            {availableSortOptions.map(option => (
+              <option 
+                key={option.value} 
+                value={option.value}
+                className={
+                  option.value.startsWith('upcoming-hebrew') ? 'text-[#8e24aa] font-medium' :
+                  option.value.startsWith('upcoming') ? 'text-blue-600 font-medium' :
+                  'text-gray-900'
+                }
+              >
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -427,7 +497,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   <button
                     onClick={async () => {
                       try {
-                        const selectedBirthdays = birthdays.filter(b => selectedIds.has(b.id));
+                        const selectedBirthdays = filteredAndSortedBirthdays.filter(b => selectedIds.has(b.id));
                         if (selectedBirthdays.length === 0) {
                           showToast(t('birthday.noSelection', 'לא נבחרו רשומות לייצוא'), 'warning');
                           return;
@@ -526,7 +596,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   <button
                     onClick={async () => {
                       try {
-                        const selectedBirthdays = birthdays.filter(b => selectedIds.has(b.id));
+                        const selectedBirthdays = filteredAndSortedBirthdays.filter(b => selectedIds.has(b.id));
                         if (selectedBirthdays.length === 0) {
                           showToast(t('birthday.noSelection', 'לא נבחרו רשומות לייצוא'), 'warning');
                           return;
@@ -738,12 +808,16 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 <th className="px-2 sm:px-6 py-2 sm:py-4 text-start text-xs sm:text-sm font-bold text-gray-900">
                   {t('birthday.ageColumn')}
                 </th>
-                <th className="px-2 sm:px-6 py-2 sm:py-4 text-start text-xs sm:text-sm font-bold text-gray-900">
-                  {t('birthday.nextGregorianBirthday')}
-                </th>
-                <th className="px-2 sm:px-6 py-2 sm:py-4 text-start text-xs sm:text-sm font-bold text-gray-900">
-                  {t('birthday.nextHebrewBirthday')}
-                </th>
+                {showGregorianColumn && (
+                  <th className="px-2 sm:px-6 py-2 sm:py-4 text-start text-xs sm:text-sm font-bold text-gray-900">
+                    {t('birthday.nextGregorianBirthday')}
+                  </th>
+                )}
+                {showHebrewColumn && (
+                  <th className="px-2 sm:px-6 py-2 sm:py-4 text-start text-xs sm:text-sm font-bold text-gray-900">
+                    {t('birthday.nextHebrewBirthday')}
+                  </th>
+                )}
                 <th className="px-2 sm:px-6 py-2 sm:py-4 text-end text-xs sm:text-sm font-bold text-gray-900 min-w-[140px]">
                   {t('common.actions')}
                 </th>
@@ -752,7 +826,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
             <tbody className="divide-y divide-gray-200">
               {filteredAndSortedBirthdays.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-gray-500">
+                  <td colSpan={showGregorianColumn && showHebrewColumn ? 9 : 8} className="px-4 py-8 text-center text-gray-500">
                     {searchTerm
                       ? t('common.noResults', 'No results found')
                       : t('birthday.noBirthdays', 'No birthdays yet')}
@@ -760,9 +834,10 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 </tr>
               ) : (
                 filteredAndSortedBirthdays.map((birthday) => {
-                  const showGregorian = calendarPreferenceService.shouldShowGregorian(birthday.effectivePreference);
-                  const showHebrew = calendarPreferenceService.shouldShowHebrew(birthday.effectivePreference);
-
+                  // We use strict global visibility for columns structure, but local preference for "content emphasis" if needed,
+                  // or we just render based on strict columns.
+                  // Actually, if strict mode is ON (e.g. Hebrew Only), we just show Hebrew data.
+                  
                   return (
                     <tr
                       key={birthday.id}
@@ -796,18 +871,19 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                       </td>
                     <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-700">
                       <div className="flex flex-col gap-0.5 sm:gap-1">
-                        <span>{format(new Date(birthday.birth_date_gregorian), 'dd/MM/yyyy', { locale })}</span>
-                        <span className="text-[10px] sm:text-xs text-gray-500">
-                          {birthday.birth_date_hebrew_string || (i18n.language === 'he' ? 'לא זמין' : 'Not available')}
-                        </span>
+                        {showGregorianColumn && (
+                          <span>{format(new Date(birthday.birth_date_gregorian), 'dd/MM/yyyy', { locale })}</span>
+                        )}
+                        {showHebrewColumn && (
+                          <span className={showGregorianColumn ? "text-[10px] sm:text-xs text-gray-500" : ""}>
+                            {birthday.birth_date_hebrew_string || (i18n.language === 'he' ? 'לא זמין' : 'Not available')}
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-semibold">
-                      {(!showGregorian && !showHebrew) ? (
-                        <span className="text-gray-400">-</span>
-                      ) : (
                         <div className="flex flex-col gap-1">
-                          {showGregorian && (
+                          {showGregorianColumn && (
                             <Tooltip
                               theme="blue"
                               content={
@@ -834,7 +910,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                               </div>
                             </Tooltip>
                           )}
-                          {showHebrew && (
+                          {showHebrewColumn && (
                             <Tooltip
                               theme="purple"
                               content={
@@ -862,10 +938,9 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                             </Tooltip>
                           )}
                         </div>
-                      )}
                     </td>
+                    {showGregorianColumn && (
                     <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-700">
-                      {showGregorian ? (
                         <button
                           onClick={() => {
                             setSelectedBirthday(birthday);
@@ -886,12 +961,11 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                             ({birthday.calculations.daysUntilGregorianBirthday} {t('birthday.days')})
                           </span>
                         </button>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
                     </td>
+                    )}
+                    {showHebrewColumn && (
                     <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-700">
-                      {showHebrew && birthday.calculations.nextHebrewBirthday ? (
+                      {birthday.calculations.nextHebrewBirthday ? (
                         <button
                           onClick={() => {
                             setSelectedBirthday(birthday);
@@ -918,6 +992,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                         <span className="text-gray-400">-</span>
                       )}
                     </td>
+                    )}
                     <td className="px-2 sm:px-6 py-2 sm:py-4 min-w-[140px]">
                       <div className="flex items-center justify-end gap-0.5 sm:gap-1 opacity-70 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                         <button

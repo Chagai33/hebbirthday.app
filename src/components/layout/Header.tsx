@@ -9,6 +9,7 @@ import { LogOut, FolderTree, Filter, Settings, ChevronDown, ChevronUp, Menu } fr
 import { useTranslatedRootGroupName } from '../../utils/groupNameTranslator';
 import { TenantSettings } from '../settings/TenantSettings';
 import { useLayoutContext } from '../../contexts/LayoutContext';
+import { useTodayHebrewDate } from '../../hooks/useTodayHebrewDate';
 
 export const Header: React.FC = () => {
   const { openAboutModal } = useLayoutContext();
@@ -22,6 +23,7 @@ export const Header: React.FC = () => {
   const { selectedGroupIds, toggleGroupFilter, clearGroupFilters } = useGroupFilter();
   const { data: allGroups = [] } = useGroups();
   const { data: birthdays = [] } = useBirthdays();
+  const { data: hebrewDate } = useTodayHebrewDate();
 
   // Check if we're on a public page (terms, privacy) without user
   const isPublicPage = !user && (location.pathname === '/terms' || location.pathname === '/privacy');
@@ -109,7 +111,23 @@ export const Header: React.FC = () => {
             </button>
           </div>
 
-          {/* ימין - כפתורים עם separators */}
+          <div className="flex-1 flex justify-center min-w-0">
+            {hebrewDate && (
+              <div className="flex flex-col items-center justify-center px-2 leading-none select-none min-w-[80px]">
+                <span className="text-[10px] sm:text-xs font-bold text-[#8e24aa] whitespace-nowrap">
+                  {hebrewDate.hebrew}
+                </span>
+                <span className="text-[10px] sm:text-xs font-bold text-[#304FFE] whitespace-nowrap mt-0.5">
+                  {new Date().toLocaleDateString(i18n.language === 'he' ? 'he-IL' : 'en-US', {
+                    day: 'numeric',
+                    month: 'numeric',
+                    year: 'numeric'
+                  })}
+                </span>
+              </div>
+            )}
+          </div>
+
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-3 ms-auto">
               <a

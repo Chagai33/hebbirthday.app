@@ -133,7 +133,14 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
         </div>
       </div>
       <FloatingBackButton onClick={onClose} position="bottom-left" />
-      {showSettings && <TenantSettings onClose={() => setShowSettings(false)} />}
+      {showSettings && (
+        <div onClick={(e) => e.stopPropagation()}>
+          <TenantSettings onClose={() => {
+            setShowSettings(false);
+            onClose(); // Close the parent modal as well to return to main screen
+          }} />
+        </div>
+      )}
       <InfoModal isOpen={showInfoModal} onClose={() => setShowInfoModal(false)} />
     </div>
   );

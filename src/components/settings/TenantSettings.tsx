@@ -159,6 +159,25 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
               </ul>
             </div>
 
+            <div className="flex gap-3 pt-4 border-t border-gray-200 mt-6">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium transition-colors"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <Save className="w-5 h-5" />
+                {isSaving ? t('common.loading') : t('common.save')}
+              </button>
+            </div>
+
             {/* Danger Zone */}
             <div className="border-t border-gray-200 pt-6 mt-6">
               <h3 className="text-lg font-semibold text-red-600 mb-4 flex items-center gap-2">
@@ -183,25 +202,6 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
                   {t('common.delete', 'Delete')}
                 </button>
               </div>
-            </div>
-
-            <div className="flex gap-3 pt-4 border-t border-gray-200 mt-6">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium transition-colors"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={isSaving}
-                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                <Save className="w-5 h-5" />
-                {isSaving ? t('common.loading') : t('common.save')}
-              </button>
             </div>
           </div>
         </div>

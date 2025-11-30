@@ -53,6 +53,7 @@ export const tenantService = {
       hebrew_year_last_updated: this.timestampToString(data.hebrew_year_last_updated),
       created_at: this.timestampToString(data.created_at),
       updated_at: this.timestampToString(data.updated_at),
+      default_calendar_preference: data.default_calendar_preference,
     };
   },
 
@@ -91,6 +92,9 @@ export const tenantService = {
     if (data.current_hebrew_year !== undefined) {
       updateData.current_hebrew_year = data.current_hebrew_year;
       updateData.hebrew_year_last_updated = serverTimestamp();
+    }
+    if (data.default_calendar_preference !== undefined) {
+      updateData.default_calendar_preference = data.default_calendar_preference;
     }
 
     await updateDoc(doc(db, 'tenants', tenantId), updateData);
