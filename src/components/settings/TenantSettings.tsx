@@ -5,12 +5,13 @@ import { useTranslation, Trans } from 'react-i18next';
 import { useTenant } from '../../contexts/TenantContext';
 import { CalendarPreferenceSelector } from './CalendarPreferenceSelector';
 import { CalendarPreference } from '../../types';
-import { Settings, Save, X, Trash2, AlertTriangle, Globe, Info } from 'lucide-react';
+import { Settings, Save, X, Trash2, AlertTriangle, Globe, Info, ChevronDown, ChevronUp, Users } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 import { Toast } from '../common/Toast';
 import { httpsCallable } from 'firebase/functions';
 import { functions, auth } from '../../config/firebase';
 import { signOut } from 'firebase/auth';
+import { useGroups, useUpdateGroup } from '../../hooks/useGroups';
 
 interface TenantSettingsProps {
   onClose: () => void;
@@ -21,6 +22,8 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
   const isHebrew = i18n.language === 'he';
   const { currentTenant, updateTenant } = useTenant();
   const { toasts, hideToast, success, error } = useToast();
+  const { data: groups = [] } = useGroups();
+  const updateGroup = useUpdateGroup();
 
   const [preference, setPreference] = useState<CalendarPreference>(
     currentTenant?.default_calendar_preference || 'both'
@@ -29,6 +32,9 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
     currentTenant?.is_guest_portal_enabled ?? true
   );
   const [isSaving, setIsSaving] = useState(false);
+
+  // Group Exceptions State
+  const [showGroupExceptions, setShowGroupExceptions] = useState(false);
 
   // Deletion State
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -55,6 +61,21 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
       logger.error('Error updating tenant settings:', err);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleGroupToggle = async (groupId: string, currentValue: boolean | undefined) => {
+    // If undefined, it defaults to true (enabled), so toggling means setting to false
+    const newValue = currentValue === false ? true : false;
+    
+    try {
+      await updateGroup.mutateAsync({
+        groupId: groupId,
+        data: { is_guest_portal_enabled: newValue }
+      });
+    } catch (err) {
+      logger.error('Error updating group portal access:', err);
+      error(t('common.error'));
     }
   };
 
@@ -93,6 +114,13 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
   if (!currentTenant) {
     return null;
   }
+
+  // Sort groups: Parents first, then alphabetically
+  const sortedGroups = [...groups].sort((a, b) => {
+    if (!a.parent_id && b.parent_id) return -1;
+    if (a.parent_id && !b.parent_id) return 1;
+    return a.name.localeCompare(b.name);
+  });
 
   return (
     <>
@@ -306,6 +334,61 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                     </label>
                   </div>
+                  
+                  {/* Group Exceptions List - Only visible if global setting is enabled */}
+                  {isGuestPortalEnabled && (
+                    <div className="mt-4 border-t border-gray-100 pt-3">
+                      <button 
+                        onClick={() => setShowGroupExceptions(!showGroupExceptions)}
+                        className="flex items-center justify-between w-full text-sm text-gray-600 hover:text-purple-700 transition-colors group p-1"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          <span className="font-medium">ניהול הרשאות לקבוצות ספציפיות</span>
+                        </div>
+                        {showGroupExceptions ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
+                      
+                      {showGroupExceptions && (
+                        <div className="mt-3 space-y-1 pl-1 animate-in fade-in slide-in-from-top-1 duration-200 bg-gray-50 rounded-lg p-2 max-h-60 overflow-y-auto">
+                          {groups.length === 0 ? (
+                            <p className="text-xs text-gray-400 text-center py-2">לא נמצאו קבוצות</p>
+                          ) : (
+                            sortedGroups.map(group => {
+                              const parentGroup = group.parent_id ? groups.find(g => g.id === group.parent_id) : null;
+                              const isGroupEnabled = group.is_guest_portal_enabled !== false; // Default true
+                              
+                              return (
+                                <div key={group.id} className="flex items-center justify-between py-2 px-2 hover:bg-white rounded-md transition-colors">
+                                  <div className="flex flex-col min-w-0 mr-2">
+                                    <span className="text-sm font-medium text-gray-700 truncate flex items-center gap-1.5">
+                                      <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: group.color || '#CBD5E1' }}></span>
+                                      {group.name}
+                                    </span>
+                                    {parentGroup && (
+                                      <span className="text-[10px] text-gray-400 mr-3.5 truncate">
+                                        תחת: {parentGroup.name}
+                                      </span>
+                                    )}
+                                  </div>
+                                  
+                                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                                    <input
+                                      type="checkbox"
+                                      className="sr-only peer"
+                                      checked={isGroupEnabled}
+                                      onChange={() => handleGroupToggle(group.id, group.is_guest_portal_enabled)}
+                                    />
+                                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+                                  </label>
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

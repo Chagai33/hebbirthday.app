@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { groupService } from '../services/group.service';
 import { useTenant } from '../contexts/TenantContext';
 import { useAuth } from '../contexts/AuthContext';
-import { GroupType } from '../types';
+import { Group, GroupType } from '../types';
 
 export const useGroups = () => {
   const { currentTenant } = useTenant();
@@ -92,6 +92,7 @@ export const useCreateGroup = () => {
 
 export const useUpdateGroup = () => {
   const queryClient = useQueryClient();
+  const { currentTenant } = useTenant();
 
   return useMutation({
     mutationFn: async ({
@@ -103,9 +104,48 @@ export const useUpdateGroup = () => {
     }) => {
       return groupService.updateGroup(groupId, data);
     },
-    onSuccess: () => {
+    onMutate: async ({ groupId, data }) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: ['groups'] });
+      await queryClient.cancelQueries({ queryKey: ['childGroups'] });
+      await queryClient.cancelQueries({ queryKey: ['rootGroups'] });
+
+      // Snapshot the previous value
+      const previousGroups = queryClient.getQueryData<Group[]>(['groups', currentTenant?.id]);
+
+      // Optimistically update to the new value
+      if (previousGroups) {
+        queryClient.setQueryData<Group[]>(['groups', currentTenant?.id], (old) => {
+          if (!old) return [];
+          return old.map((group) => {
+            if (group.id === groupId) {
+              return {
+                ...group,
+                ...data,
+                // Handle specific fields mapping if needed
+                calendar_preference: data.calendarPreference !== undefined ? data.calendarPreference : group.calendar_preference,
+                is_guest_portal_enabled: data.is_guest_portal_enabled !== undefined ? data.is_guest_portal_enabled : group.is_guest_portal_enabled,
+              };
+            }
+            return group;
+          });
+        });
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousGroups };
+    },
+    onError: (err, newTodo, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousGroups) {
+        queryClient.setQueryData(['groups', currentTenant?.id], context.previousGroups);
+      }
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure we're in sync with server
       queryClient.invalidateQueries({ queryKey: ['groups'] });
       queryClient.invalidateQueries({ queryKey: ['childGroups'] });
+      queryClient.invalidateQueries({ queryKey: ['rootGroups'] });
     },
   });
 };
@@ -120,6 +160,7 @@ export const useDeleteGroup = () => {
       queryClient.invalidateQueries({ queryKey: ['groups'] });
       queryClient.invalidateQueries({ queryKey: ['childGroups'] });
       queryClient.invalidateQueries({ queryKey: ['birthdays'] });
+      queryClient.invalidateQueries({ queryKey: ['rootGroups'] });
     },
   });
 };
