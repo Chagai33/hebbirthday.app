@@ -71,7 +71,7 @@ export const Header: React.FC = () => {
                   href="https://www.linkedin.com/in/chagai-yechiel/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-col items-end text-[10px] leading-tight text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap"
+                  className="flex flex-col items-start text-[10px] leading-tight text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap"
                 >
                   <span>{t('common.developedBy')}</span>
                 <span>{i18n.language === 'he' ? 'חגי יחיאל' : 'Chagai Yechiel'}</span>
@@ -111,13 +111,13 @@ export const Header: React.FC = () => {
             </button>
           </div>
 
-          <div className="flex-1 flex justify-center min-w-0">
+          <div className="flex-1 flex justify-center min-w-0 mt-2">
             {hebrewDate && (
               <div className="flex flex-col items-center justify-center px-2 leading-none select-none min-w-[80px]">
-                <span className="text-[10px] sm:text-xs font-bold text-[#8e24aa] whitespace-nowrap">
+                <span className="text-[10px] sm:text-xs font-bold text-[#8e24aa] whitespace-nowrap mb-0.5">
                   {hebrewDate.hebrew}
                 </span>
-                <span className="text-[10px] sm:text-xs font-bold text-[#304FFE] whitespace-nowrap mt-0.5">
+                <span className="text-[10px] sm:text-xs font-medium text-[#304FFE] whitespace-nowrap">
                   {new Date().toLocaleDateString(i18n.language === 'he' ? 'he-IL' : 'en-US', {
                     day: 'numeric',
                     month: 'numeric',
@@ -134,7 +134,7 @@ export const Header: React.FC = () => {
                 href="https://www.linkedin.com/in/chagai-yechiel/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-end text-[10px] leading-tight text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap"
+                className="flex flex-col items-start text-[10px] leading-tight text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap"
               >
                 <span>{t('common.developedBy')}</span>
                 <span>{i18n.language === 'he' ? 'חגי יחיאל' : 'Chagai Yechiel'}</span>

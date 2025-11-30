@@ -1,5 +1,5 @@
 import { logger } from "../../utils/logger";
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Birthday } from '../../types';
 import { format } from 'date-fns';
@@ -17,7 +17,7 @@ import { Tooltip } from '../common/Tooltip';
 import { birthdayCalculationsService } from '../../services/birthdayCalculations.service';
 import { calendarPreferenceService } from '../../services/calendarPreference.service';
 import { exportBirthdaysToCSV } from '../../utils/csvExport';
-import { useToast } from '../../hooks/useToast';
+import { useToast } from '../../contexts/ToastContext';
 
 interface BirthdayListProps {
   birthdays: Birthday[];
@@ -74,12 +74,16 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
 
   // NOTE: This effect sets the default sorting based on the tenant's calendar preference
   // ONLY if the user hasn't manually selected a sort order (checked via localStorage).
+  const prevTenantPref = useRef<string | undefined>(undefined);
+
   useEffect(() => {
     const savedSort = localStorage.getItem('birthday-sort');
+    const currentPref = currentTenant?.default_calendar_preference;
+    const prevPref = prevTenantPref.current;
     
     // If there is no saved sort manually by the user, we apply the tenant default.
-    if (!savedSort && currentTenant?.default_calendar_preference) {
-      if (currentTenant.default_calendar_preference === 'gregorian') {
+    if (!savedSort && currentPref) {
+      if (currentPref === 'gregorian') {
         setSortBy('upcoming');
       } else {
         // For 'hebrew' or 'both', we default to Hebrew upcoming as per user request
@@ -89,27 +93,25 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
     
     // Self-Correction Logic:
     // If the current sort is hidden by the new preference, we must switch it.
-    if (currentTenant?.default_calendar_preference) {
-        const pref = currentTenant.default_calendar_preference;
-        
+    if (currentPref) {
+        // If we just switched TO 'both' from another setting (transition event),
+        // we want to reset to the default Hebrew view for 'both'.
+        // We use prevPref check to ensure this only happens on the transition, not on every render.
+        if (currentPref === 'both' && prevPref && prevPref !== 'both') {
+            setSortBy('upcoming-hebrew');
+        }
         // If Strict Hebrew, and current sort is Gregorian -> Force Hebrew
-        if (pref === 'hebrew' && (sortBy === 'upcoming' || sortBy === 'upcoming-latest')) {
+        else if (currentPref === 'hebrew' && (sortBy === 'upcoming' || sortBy === 'upcoming-latest')) {
             setSortBy('upcoming-hebrew');
         }
         // If Strict Gregorian, and current sort is Hebrew -> Force Gregorian
-        else if (pref === 'gregorian' && (sortBy.startsWith('upcoming-hebrew'))) {
+        else if (currentPref === 'gregorian' && (sortBy.startsWith('upcoming-hebrew'))) {
             setSortBy('upcoming');
         }
-        // If Both, and we are in a "neutral" state or just switched to Both, 
-        // we prefer Hebrew as default if the previous state was ambiguous, 
-        // but if the user was already on Gregorian, we might leave it. 
-        // However, the requirement says "Default to Hebrew for Both". 
-        // We only force this if we are currently on a "wrong" default? 
-        // No, let's leave user choice if valid. 
-        // But if they were on a hidden sort (e.g. coming from a state that shouldn't exist), we fix it.
-        // The logic above handles the strict hiding conflicts.
     }
 
+    // Update the ref for the next run
+    prevTenantPref.current = currentPref;
   }, [currentTenant, sortBy]); // Added sortBy to deps to ensure immediate correction if it becomes invalid
 
   const [showFutureModal, setShowFutureModal] = useState(false);
@@ -392,8 +394,11 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
           ? format(nextHebrewDate, 'd MMMM yyyy', { locale: he }) 
           : '';
 
+      const zodiacSign = calculations.hebrewSign ? t(`zodiac.${calculations.hebrewSign}`) : '';
+
       return `*${birthday.first_name} ${birthday.last_name}*
 *תאריך לידה:* ${birthday.birth_date_hebrew_string || ''}
+*מזל:* ${zodiacSign}
 *יום הולדת עברי:* ${formattedDate}
 *גיל:* ${calculations.ageAtNextHebrewBirthday}`;
     });
@@ -402,7 +407,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
 
     try {
       await navigator.clipboard.writeText(fullText);
-      showToast('הועתק ללוח (פורמט עברי לוואטסאפ)', 'success');
+      showToast('התאריכים העבריים והמזלות הועתקו ללוח', 'success');
       setIsCopied(true);
       setTimeout(() => {
         setIsCopied(false);
@@ -524,6 +529,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('birthday.exportSelected')}</span>
                   </button>
+                  {showHebrewColumn && (
                   <button
                     onClick={handleCopyToClipboard}
                     className={`px-2 sm:px-3 py-1 sm:py-1.5 border shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1 ${
@@ -546,6 +552,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     )}
                     <span className="hidden sm:inline">{isCopied ? 'הועתק!' : 'העתק לוואטסאפ'}</span>
                   </button>
+                  )}
                   <button
                     onClick={() => handleBulkRefresh()}
                     className="px-2 sm:px-3 py-1 sm:py-1.5 bg-violet-50 text-violet-600 border border-violet-200 hover:bg-violet-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
@@ -623,6 +630,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('birthday.exportSelected')}</span>
                   </button>
+                  {showHebrewColumn && (
                   <button
                     onClick={handleCopyToClipboard}
                     className={`px-2 sm:px-3 py-1 sm:py-1.5 border shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1 ${
@@ -645,6 +653,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     )}
                     <span className="hidden sm:inline">{isCopied ? 'הועתק!' : 'העתק לוואטסאפ'}</span>
                   </button>
+                  )}
                   {isConnected && (
                     <button
                       onClick={handleBulkSyncToCalendar}
