@@ -1,0 +1,70 @@
+import React, { useState, useEffect } from 'react';
+import { GuestLayout } from './GuestLayout';
+import { GuestLogin } from './GuestLogin';
+import { GuestWishlistManager } from './GuestWishlistManager';
+import { guestService, GuestVerificationData } from '../../services/guest.service';
+import { WishlistItem } from '../../types';
+
+export const GuestPortal: React.FC = () => {
+  const [currentView, setCurrentView] = useState<'login' | 'manager'>('login');
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    checkSession();
+  }, []);
+
+  const checkSession = async () => {
+    const session = guestService.getSession();
+    if (session) {
+      try {
+        // Validate session by attempting login with stored credentials
+        const response = await guestService.login(session.firstName, session.lastName, session.verification);
+        if (response.success) {
+          setWishlist(response.wishlist);
+          setCurrentView('manager');
+        } else {
+          guestService.clearSession();
+        }
+      } catch {
+        guestService.clearSession();
+      }
+    }
+    setLoading(false);
+  };
+
+  const handleLoginSuccess = (birthdayId: string, verification: GuestVerificationData, wishlistData: WishlistItem[]) => {
+    setWishlist(wishlistData);
+    setCurrentView('manager');
+  };
+
+  const handleLogout = () => {
+    guestService.clearSession();
+    setWishlist([]);
+    setCurrentView('login');
+  };
+
+  if (loading) {
+    return (
+      <GuestLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="w-8 h-8 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+        </div>
+      </GuestLayout>
+    );
+  }
+
+  return (
+    <GuestLayout>
+      {currentView === 'login' ? (
+        <GuestLogin onLoginSuccess={handleLoginSuccess} />
+      ) : (
+        <GuestWishlistManager 
+            initialWishlist={wishlist} 
+            onLogout={handleLogout} 
+        />
+      )}
+    </GuestLayout>
+  );
+};
+

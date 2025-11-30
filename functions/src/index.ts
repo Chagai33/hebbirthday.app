@@ -2719,3 +2719,6 @@ export const deleteAccount = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError('internal', 'Failed to delete account');
   }
 });
+
+export { guestPortalOps } from './guestPortal';
+

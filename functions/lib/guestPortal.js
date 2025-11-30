@@ -1,0 +1,327 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.guestPortalOps = void 0;
+const functions = __importStar(require("firebase-functions"));
+const admin = __importStar(require("firebase-admin"));
+const db = admin.firestore();
+// --- Rate Limiting Logic ---
+async function checkRateLimit(ip) {
+    const rateLimitRef = db.collection('rate_limits').doc(ip.replace(/\./g, '_')); // Sanitize IP for doc ID
+    const doc = await rateLimitRef.get();
+    if (!doc.exists) {
+        return { allowed: true };
+    }
+    const data = doc.data();
+    const now = admin.firestore.Timestamp.now();
+    if (data.blockedUntil && data.blockedUntil > now) {
+        const waitSeconds = Math.ceil(data.blockedUntil.seconds - now.seconds);
+        return { allowed: false, waitSeconds };
+    }
+    // If block expired, reset attempts (or we can keep them and decay, but simple reset is fine for now)
+    if (data.blockedUntil && data.blockedUntil <= now) {
+        await rateLimitRef.delete();
+    }
+    return { allowed: true };
+}
+async function recordFailedAttempt(ip) {
+    const rateLimitRef = db.collection('rate_limits').doc(ip.replace(/\./g, '_'));
+    await db.runTransaction(async (t) => {
+        const doc = await t.get(rateLimitRef);
+        let attempts = 1;
+        if (doc.exists) {
+            attempts = (doc.data()?.attempts || 0) + 1;
+        }
+        let blockedUntil = null;
+        // Policy: 3 free attempts.
+        // 4th attempt -> block 30s
+        // 5th attempt -> block 60s
+        // 6th+ attempt -> block 5 mins
+        if (attempts >= 3) {
+            let delaySeconds = 0;
+            if (attempts === 3)
+                delaySeconds = 30;
+            else if (attempts === 4)
+                delaySeconds = 60;
+            else
+                delaySeconds = 300;
+            blockedUntil = admin.firestore.Timestamp.fromMillis(Date.now() + (delaySeconds * 1000));
+        }
+        t.set(rateLimitRef, {
+            attempts,
+            blockedUntil: blockedUntil || admin.firestore.FieldValue.serverTimestamp(), // Just to have a date if not blocked yet
+            lastAttempt: admin.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+    });
+}
+// --- Session Management ---
+async function createSession(birthdayId, tenantId) {
+    const token = db.collection('guest_sessions').doc().id; // Generate random ID
+    await db.collection('guest_sessions').doc(token).set({
+        birthdayId,
+        tenantId,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        expiresAt: admin.firestore.Timestamp.fromMillis(Date.now() + (5 * 60 * 1000)) // 5 minutes
+    });
+    return token;
+}
+async function validateSession(token) {
+    const doc = await db.collection('guest_sessions').doc(token).get();
+    if (!doc.exists)
+        return { isValid: false };
+    const data = doc.data();
+    const now = admin.firestore.Timestamp.now();
+    if (data.expiresAt <= now) {
+        // Expired
+        await doc.ref.delete(); // Cleanup
+        return { isValid: false };
+    }
+    return { isValid: true, birthdayId: data.birthdayId, tenantId: data.tenantId };
+}
+// --- Identity Verification ---
+// Updated to return ALL matches
+async function findAllMatchingGuests(firstName, lastName, verification) {
+    try {
+        const snapshot = await db.collection('birthdays')
+            .where('first_name', '==', firstName)
+            .where('last_name', '==', lastName)
+            .where('archived', '==', false)
+            .limit(10) // Limit to avoid abuse
+            .get();
+        if (snapshot.empty)
+            return [];
+        const matches = [];
+        for (const doc of snapshot.docs) {
+            const data = doc.data();
+            let isMatch = false;
+            if (verification?.type === 'gregorian' && verification.dateString) {
+                if (data.birth_date_gregorian === verification.dateString)
+                    isMatch = true;
+            }
+            else if (verification?.type === 'hebrew' && verification.hebrewYear) {
+                if (data.hebrew_year === verification.hebrewYear &&
+                    data.hebrew_month === verification.hebrewMonth &&
+                    data.hebrew_day === verification.hebrewDay)
+                    isMatch = true;
+            }
+            if (isMatch) {
+                matches.push({
+                    tenantId: data.tenant_id,
+                    birthdayId: doc.id,
+                    groupId: data.group_id,
+                    birthday: data
+                });
+            }
+        }
+        return matches;
+    }
+    catch (error) {
+        console.error('Error verifying guest:', error);
+        return [];
+    }
+}
+// Helper to get Tenant Owner Name
+async function getTenantDisplayName(tenantId) {
+    try {
+        const tenantDoc = await db.collection('tenants').doc(tenantId).get();
+        if (!tenantDoc.exists)
+            return 'Unknown Group';
+        const tenantData = tenantDoc.data();
+        if (!tenantData)
+            return 'Unknown Group';
+        // Try to get owner's display name
+        if (tenantData.owner_id) {
+            const userDoc = await db.collection('users').doc(tenantData.owner_id).get();
+            if (userDoc.exists && userDoc.data()?.display_name) {
+                return userDoc.data()?.display_name;
+            }
+        }
+        // Fallback to tenant name
+        return tenantData.name || 'Unknown Group';
+    }
+    catch {
+        return 'Unknown Group';
+    }
+}
+// Helper to get Group Name
+async function getGroupName(groupId) {
+    if (!groupId)
+        return '';
+    try {
+        const doc = await db.collection('groups').doc(groupId).get();
+        return doc.exists ? (doc.data()?.name || '') : '';
+    }
+    catch {
+        return '';
+    }
+}
+exports.guestPortalOps = functions.https.onCall(async (data, context) => {
+    const mode = data.mode;
+    // Get IP from context (best effort)
+    const ip = context.rawRequest.ip || context.rawRequest.headers['x-forwarded-for'] || 'unknown';
+    const ipStr = Array.isArray(ip) ? ip[0] : ip;
+    // 1. LOGIN (Find & Verify)
+    if (mode === 'login') {
+        // Check Rate Limit
+        const limitCheck = await checkRateLimit(ipStr);
+        if (!limitCheck.allowed) {
+            throw new functions.https.HttpsError('resource-exhausted', `Too many attempts. Please wait ${limitCheck.waitSeconds} seconds.`);
+        }
+        const { firstName, lastName, verification } = data;
+        if (!firstName || !lastName || !verification) {
+            throw new functions.https.HttpsError('invalid-argument', 'Missing fields');
+        }
+        const matches = await findAllMatchingGuests(firstName, lastName, verification);
+        if (matches.length === 0) {
+            await recordFailedAttempt(ipStr);
+            throw new functions.https.HttpsError('not-found', 'No matching record found or incorrect date.');
+        }
+        // Case A: Single Match
+        if (matches.length === 1) {
+            const { birthdayId, tenantId } = matches[0];
+            const token = await createSession(birthdayId, tenantId);
+            // Fetch wishlist items
+            const wishlistSnapshot = await db.collection('wishlist_items')
+                .where('birthday_id', '==', birthdayId)
+                .get();
+            const wishlist = wishlistSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                created_at: doc.data().created_at?.toDate?.()?.toISOString() || new Date().toISOString(),
+                updated_at: doc.data().updated_at?.toDate?.()?.toISOString() || new Date().toISOString()
+            }));
+            return { success: true, token, birthdayId, wishlist };
+        }
+        // Case B: Multiple Matches
+        if (matches.length > 1) {
+            // Fetch tenant owner names and group names
+            const options = await Promise.all(matches.map(async (m) => {
+                const ownerName = await getTenantDisplayName(m.tenantId);
+                const groupName = await getGroupName(m.groupId);
+                // Format: "רשימה אצל [שם הבעלים] ([שם הקבוצה])" or just "[שם הבעלים]"
+                // But to keep it language agnostic here, we'll just return the names and format in frontend potentially,
+                // OR we stick to the dot format but with better names: "Chagai Yechiel • Family"
+                return {
+                    birthdayId: m.birthdayId,
+                    tenantName: groupName ? `${ownerName} • ${groupName}` : ownerName
+                };
+            }));
+            return {
+                success: true,
+                multiple: true,
+                options
+            };
+        }
+    }
+    // 2. SELECT PROFILE (For multiple matches)
+    if (mode === 'select_profile') {
+        const { firstName, lastName, verification, birthdayId } = data;
+        // Re-verify to prevent ID enumeration (must match credentials)
+        const matches = await findAllMatchingGuests(firstName, lastName, verification);
+        const selected = matches.find(m => m.birthdayId === birthdayId);
+        if (!selected) {
+            await recordFailedAttempt(ipStr);
+            throw new functions.https.HttpsError('permission-denied', 'Invalid selection');
+        }
+        const token = await createSession(selected.birthdayId, selected.tenantId);
+        const wishlistSnapshot = await db.collection('wishlist_items')
+            .where('birthday_id', '==', selected.birthdayId)
+            .get();
+        const wishlist = wishlistSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            created_at: doc.data().created_at?.toDate?.()?.toISOString() || new Date().toISOString(),
+            updated_at: doc.data().updated_at?.toDate?.()?.toISOString() || new Date().toISOString()
+        }));
+        return { success: true, token, birthdayId: selected.birthdayId, wishlist };
+    }
+    // 3. MANAGE WISHLIST (Uses Token)
+    if (mode === 'manage_wishlist') {
+        const { action, itemData, itemId, token } = data;
+        if (!token) {
+            throw new functions.https.HttpsError('unauthenticated', 'Missing session token');
+        }
+        // Verify Token
+        const { isValid, birthdayId, tenantId } = await validateSession(token);
+        if (!isValid || !birthdayId || !tenantId) {
+            throw new functions.https.HttpsError('unauthenticated', 'Session expired or invalid');
+        }
+        if (action === 'add') {
+            if (!itemData)
+                throw new functions.https.HttpsError('invalid-argument', 'Missing item data');
+            const newItem = {
+                birthday_id: birthdayId,
+                tenant_id: tenantId,
+                item_name: itemData.item_name,
+                description: itemData.description || '',
+                priority: itemData.priority || 'medium',
+                created_at: admin.firestore.FieldValue.serverTimestamp(),
+                updated_at: admin.firestore.FieldValue.serverTimestamp()
+            };
+            const ref = await db.collection('wishlist_items').add(newItem);
+            return { success: true, id: ref.id };
+        }
+        if (action === 'update') {
+            if (!itemId || !itemData)
+                throw new functions.https.HttpsError('invalid-argument', 'Missing data');
+            const itemRef = db.collection('wishlist_items').doc(itemId);
+            const itemDoc = await itemRef.get();
+            // Verify ownership
+            if (!itemDoc.exists || itemDoc.data()?.birthday_id !== birthdayId) {
+                throw new functions.https.HttpsError('not-found', 'Item not found or permission denied');
+            }
+            await itemRef.update({
+                item_name: itemData.item_name,
+                description: itemData.description || '',
+                priority: itemData.priority || 'medium',
+                updated_at: admin.firestore.FieldValue.serverTimestamp()
+            });
+            return { success: true };
+        }
+        if (action === 'delete') {
+            if (!itemId)
+                throw new functions.https.HttpsError('invalid-argument', 'Missing item ID');
+            const itemRef = db.collection('wishlist_items').doc(itemId);
+            const itemDoc = await itemRef.get();
+            if (!itemDoc.exists || itemDoc.data()?.birthday_id !== birthdayId) {
+                throw new functions.https.HttpsError('not-found', 'Item not found or permission denied');
+            }
+            await itemRef.delete();
+            return { success: true };
+        }
+    }
+    throw new functions.https.HttpsError('invalid-argument', 'Invalid mode');
+});
+//# sourceMappingURL=guestPortal.js.map

@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteAccount = exports.getAccountDeletionSummary = exports.previewDeletion = exports.cleanupOrphanEvents = exports.deleteGoogleCalendar = exports.listGoogleCalendars = exports.updateGoogleCalendarSelection = exports.createGoogleCalendar = exports.getGoogleAccountInfo = exports.getGoogleCalendarStatus = exports.disconnectGoogleCalendar = exports.deleteAllSyncedEventsFromGoogleCalendar = exports.resetBirthdaySyncData = exports.removeBirthdayFromGoogleCalendar = exports.syncBirthdayToGoogleCalendar = exports.syncMultipleBirthdaysToGoogleCalendar = exports.processCalendarSyncJob = exports.exchangeGoogleAuthCode = exports.onUserCreate = exports.migrateExistingUsers = exports.fixAllBirthdaysHebrewYear = exports.fixExistingBirthdays = exports.updateNextBirthdayScheduled = exports.refreshBirthdayHebrewData = exports.onBirthdayWrite = void 0;
+exports.guestPortalOps = exports.deleteAccount = exports.getAccountDeletionSummary = exports.previewDeletion = exports.cleanupOrphanEvents = exports.deleteGoogleCalendar = exports.listGoogleCalendars = exports.updateGoogleCalendarSelection = exports.createGoogleCalendar = exports.getGoogleAccountInfo = exports.getGoogleCalendarStatus = exports.disconnectGoogleCalendar = exports.deleteAllSyncedEventsFromGoogleCalendar = exports.resetBirthdaySyncData = exports.removeBirthdayFromGoogleCalendar = exports.syncBirthdayToGoogleCalendar = exports.syncMultipleBirthdaysToGoogleCalendar = exports.processCalendarSyncJob = exports.exchangeGoogleAuthCode = exports.onUserCreate = exports.migrateExistingUsers = exports.fixAllBirthdaysHebrewYear = exports.fixExistingBirthdays = exports.updateNextBirthdayScheduled = exports.refreshBirthdayHebrewData = exports.onBirthdayWrite = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const node_fetch_1 = __importDefault(require("node-fetch"));
@@ -2252,6 +2252,7 @@ exports.previewDeletion = functions.https.onCall(async (data, context) => {
         return {
             success: true,
             summary,
+            recordsCount: summary.length,
             totalCount,
             calendarId, // Return calendar ID
             calendarName // Return calendar name
@@ -2348,4 +2349,6 @@ exports.deleteAccount = functions.https.onCall(async (data, context) => {
         throw new functions.https.HttpsError('internal', 'Failed to delete account');
     }
 });
+var guestPortal_1 = require("./guestPortal");
+Object.defineProperty(exports, "guestPortalOps", { enumerable: true, get: function () { return guestPortal_1.guestPortalOps; } });
 //# sourceMappingURL=index.js.map
