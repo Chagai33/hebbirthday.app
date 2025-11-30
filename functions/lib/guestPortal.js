@@ -187,6 +187,37 @@ async function getGroupName(groupId) {
         return '';
     }
 }
+// Helper to check if guest access is enabled for Tenant/Group
+async function isGuestAccessAllowed(tenantId, groupId) {
+    try {
+        // Check Tenant
+        const tenantDoc = await db.collection('tenants').doc(tenantId).get();
+        if (!tenantDoc.exists)
+            return false;
+        const tenantData = tenantDoc.data();
+        // Default to true if undefined
+        if (tenantData?.is_guest_portal_enabled === false)
+            return false;
+        // Check Group (if applicable)
+        if (groupId) {
+            const groupDoc = await db.collection('groups').doc(groupId).get();
+            if (groupDoc.exists) {
+                const groupData = groupDoc.data();
+                // Default to true if undefined
+                if (groupData?.is_guest_portal_enabled === false)
+                    return false;
+            }
+        }
+        return true;
+    }
+    catch (error) {
+        console.error('Error checking guest access:', error);
+        // Fail safe: if we can't verify settings, we probably shouldn't block unless explicitly disabled,
+        // but if DB is down, everything is down.
+        // Plan: "Default to true (enabled) to not block existing data"
+        return true;
+    }
+}
 exports.guestPortalOps = functions.https.onCall(async (data, context) => {
     const mode = data.mode;
     // Get IP from context (best effort)
@@ -203,7 +234,11 @@ exports.guestPortalOps = functions.https.onCall(async (data, context) => {
         if (!firstName || !lastName || !verification) {
             throw new functions.https.HttpsError('invalid-argument', 'Missing fields');
         }
-        const matches = await findAllMatchingGuests(firstName, lastName, verification);
+        const matchesRaw = await findAllMatchingGuests(firstName, lastName, verification);
+        // Filter out matches where guest portal is disabled
+        // Use Promise.all to check all concurrently
+        const accessChecks = await Promise.all(matchesRaw.map(m => isGuestAccessAllowed(m.tenantId, m.groupId)));
+        const matches = matchesRaw.filter((_, index) => accessChecks[index]);
         if (matches.length === 0) {
             await recordFailedAttempt(ipStr);
             throw new functions.https.HttpsError('not-found', 'No matching record found or incorrect date.');
@@ -249,7 +284,10 @@ exports.guestPortalOps = functions.https.onCall(async (data, context) => {
     if (mode === 'select_profile') {
         const { firstName, lastName, verification, birthdayId } = data;
         // Re-verify to prevent ID enumeration (must match credentials)
-        const matches = await findAllMatchingGuests(firstName, lastName, verification);
+        const matchesRaw = await findAllMatchingGuests(firstName, lastName, verification);
+        // Filter allowed
+        const accessChecks = await Promise.all(matchesRaw.map(m => isGuestAccessAllowed(m.tenantId, m.groupId)));
+        const matches = matchesRaw.filter((_, index) => accessChecks[index]);
         const selected = matches.find(m => m.birthdayId === birthdayId);
         if (!selected) {
             await recordFailedAttempt(ipStr);
@@ -277,6 +315,21 @@ exports.guestPortalOps = functions.https.onCall(async (data, context) => {
         const { isValid, birthdayId, tenantId } = await validateSession(token);
         if (!isValid || !birthdayId || !tenantId) {
             throw new functions.https.HttpsError('unauthenticated', 'Session expired or invalid');
+        }
+        // REAL-TIME ACCESS CHECK:
+        // Even with a valid token, we must verify that the tenant/group still allows guest access.
+        // This prevents access if an admin disables the portal while a guest is logged in.
+        // 1. Fetch the birthday record to get the current group_id
+        const birthdayDoc = await db.collection('birthdays').doc(birthdayId).get();
+        if (!birthdayDoc.exists) {
+            throw new functions.https.HttpsError('not-found', 'Birthday record not found');
+        }
+        const birthdayData = birthdayDoc.data();
+        const groupId = birthdayData?.group_id;
+        // 2. Check permissions
+        const isAllowed = await isGuestAccessAllowed(tenantId, groupId);
+        if (!isAllowed) {
+            throw new functions.https.HttpsError('permission-denied', 'Guest portal access has been disabled by the administrator.');
         }
         if (action === 'add') {
             if (!itemData)

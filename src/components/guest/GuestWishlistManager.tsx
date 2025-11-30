@@ -57,9 +57,13 @@ export const GuestWishlistManager: React.FC<GuestWishlistManagerProps> = ({ init
       
       setItems([newItem, ...items]);
       resetForm();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError(t('guest.sessionExpired'));
+      if (err.message?.includes('permission-denied') || err.code === 'permission-denied') {
+           setError(t('guest.accessDenied') || 'Access to the guest portal has been disabled.');
+      } else {
+           setError(t('guest.sessionExpired'));
+      }
     } finally {
       setLoading(false);
     }
@@ -85,9 +89,13 @@ export const GuestWishlistManager: React.FC<GuestWishlistManagerProps> = ({ init
       } : item));
       
       resetForm();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError(t('guest.updateError'));
+      if (err.message?.includes('permission-denied') || err.code === 'permission-denied') {
+           setError(t('guest.accessDenied') || 'Access to the guest portal has been disabled.');
+      } else {
+           setError(t('guest.updateError'));
+      }
     } finally {
       setLoading(false);
     }
@@ -99,9 +107,13 @@ export const GuestWishlistManager: React.FC<GuestWishlistManagerProps> = ({ init
     try {
       await guestService.deleteItem(id);
       setItems(items.filter(item => item.id !== id));
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError(t('guest.deleteError'));
+      if (err.message?.includes('permission-denied') || err.code === 'permission-denied') {
+           setError(t('guest.accessDenied') || 'Access to the guest portal has been disabled.');
+      } else {
+           setError(t('guest.deleteError'));
+      }
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Globe, Trash2, MessageSquare, LogOut, Settings, Info } from 'lucide-react';
+import { X, Globe, Trash2, MessageSquare, LogOut, Settings, Info, Gift } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -87,6 +87,16 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               <Info className="w-5 h-5 text-blue-500" />
               <span className="text-sm font-medium">{t('help.title')}</span>
             </button>
+
+            <Link
+              to="/portal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+            >
+              <Gift className="w-5 h-5 text-purple-500" />
+              <span className="text-sm font-medium">{t('guest.portalTitle', 'Wishlist Portal')}</span>
+            </Link>
 
             <Link
               to="/terms"

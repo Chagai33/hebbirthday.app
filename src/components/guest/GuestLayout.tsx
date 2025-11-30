@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Gift, Globe, Menu, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Globe, Menu, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../common/Button';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,8 @@ export const GuestLayout: React.FC<{ children: React.ReactNode }> = ({ children 
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const toggleLanguage = () => {
     const newLang = i18n.language === 'en' ? 'he' : 'en';
@@ -18,15 +20,43 @@ export const GuestLayout: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const currentLangLabel = i18n.language === 'en' ? 'עברית' : 'English';
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isMenuOpen &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Simple Header */}
       <header className="bg-white shadow-sm py-4 px-6 relative">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-2 text-purple-600 cursor-pointer" onClick={() => navigate('/portal')}>
-            <Gift className="w-8 h-8" />
-            <span className="text-xl font-bold">{t('guest.portalTitle', 'Wishlist Portal')}</span>
-            </div>
+            <button
+              onClick={() => navigate('/')}
+              className="flex flex-col items-start transition-opacity hover:opacity-80 -ms-1 pe-6"
+            >
+              <div className="text-xl sm:text-2xl font-black tracking-tight leading-none relative inline-flex items-baseline" dir="ltr">
+                <span className="text-[#8e24aa]">Heb</span>
+                <span className="text-[#304FFE]">Birthday</span>
+                <span className="text-gray-400 text-sm sm:text-base ml-[1px]">.app</span>
+              </div>
+              <span className="text-[10px] sm:text-xs text-gray-500 font-medium -mt-0.5">
+                {t('app.taglinePart1')} <span className="text-[#8e24aa]">{t('app.taglineHebrew')}</span> {t('app.taglineOr')} <span className="text-[#304FFE]">{t('app.taglineGregorian')}</span>
+              </span>
+            </button>
 
             <div className="hidden md:flex items-center gap-4">
                 <Button variant="ghost" size="sm" onClick={toggleLanguage} className="flex items-center gap-2">
@@ -43,6 +73,7 @@ export const GuestLayout: React.FC<{ children: React.ReactNode }> = ({ children 
 
             {/* Mobile Menu Button */}
             <button 
+                ref={buttonRef}
                 className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
@@ -52,7 +83,10 @@ export const GuestLayout: React.FC<{ children: React.ReactNode }> = ({ children 
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-            <div className="absolute top-full left-0 right-0 bg-white border-t border-gray-100 shadow-lg md:hidden z-50">
+            <div 
+                ref={menuRef}
+                className="absolute top-full left-0 right-0 bg-white border-t border-gray-100 shadow-lg md:hidden z-50"
+            >
                 <div className="p-4 space-y-2">
                     <button 
                         onClick={() => {

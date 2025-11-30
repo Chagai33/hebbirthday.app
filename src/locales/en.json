@@ -9,7 +9,11 @@
   "guest": {
     "portalTitle": "Wishlist Portal",
     "welcome": "Welcome Guest",
-    "welcomeSubtitle": "Enter your details to manage your wishlist",
+    "welcomeSubtitle": "Identify yourself to view and edit your wishlist",
+    "portalInfo": "This portal is for existing birthday records. Can't log in? Ask your friends or family to add your birthday to the app.",
+    "portalInfoShort": "This portal is for existing birthday records...",
+    "readMore": "Read more",
+    "readLess": "Show less",
     "findWishlist": "Find Your Wishlist",
     "searchSubtitle": "Search for your name to get started",
     "searchPlaceholder": "Start typing your name...",
@@ -22,7 +26,7 @@
     "month": "Month",
     "year": "Year",
     "verifyButton": "Verify & Access Wishlist",
-    "accessButton": "Access Wishlist",
+    "accessButton": "Enter My Wishlist",
     "loginError": "Login failed. Please check your name and birth date.",
     "missingFields": "Please enter your first and last name",
     "myWishlist": "My Wishlist",
@@ -42,6 +46,7 @@
     "selectProfile": "Select List",
     "multipleProfilesFound": "We found multiple records matching your details. Please select which list you would like to view:",
     "back": "Back",
+    "accessDenied": "Access to the guest portal has been disabled by the administrator.",
     "rateLimitError": "Too many attempts. Please wait."
   },
   "common": {
@@ -85,7 +90,9 @@
     "day": "Day",
     "month": "Month",
     "year": "Year",
-    "menu": "Menu"
+    "menu": "Menu",
+    "note": "Note",
+    "moreInfo": "More Info"
   },
   "googleCalendar": {
     "title": "Google Calendar",
@@ -172,8 +179,11 @@
     "verificationCode": "Verification Code",
     "signInWithGoogle": "Sign in with Google",
     "signUpWithGoogle": "Sign up with Google",
+    "signInWithEmail": "Sign in with Email",
+    "signUpWithEmail": "Sign up with Email",
     "or": "or",
     "signInWithPhone": "Sign in with Phone",
+    "guestWishlistAccess": "Added to the app? Click here to edit your wishlist",
     "accountExistsLoggingIn": "Account exists, logging in...",
     "alreadyHaveAccount": "Already have an account?",
     "dontHaveAccount": "Don't have an account?",
@@ -222,7 +232,16 @@
     "member": "Member",
     "settings": "Settings",
     "defaultCalendarPreference": "Default Calendar Preference",
-    "preferenceDescription": "This affects how birthdays are displayed throughout the system"
+    "preferenceDescription": "This affects how birthdays are displayed throughout the system",
+    "guestPortalAccess": "Guest Portal Access",
+    "guestPortalDescription": "Allow guests to access and manage their wishlists via the public portal.",
+    "guestPortalExceptionNote": "This is a global setting. You can override this for specific groups in the Groups management page.",
+    "aboutGuestPortal": "About the Guest Portal",
+    "guestPortalDetailedDesc": "The guest portal allows your family and friends to easily access and update their own wishlists without creating a user account. They simply verify their identity using their name and birth date.",
+    "howItWorks": "How it works:",
+    "howItWorksStep1": "Guests visit the <0>portal link</0>",
+    "howItWorksStep2": "They enter their name and birth date",
+    "howItWorksStep3": "Once verified, they can manage their wishlist"
   },
   "sort": {
     "upcomingSoonest": "Next Birthday (Soonest)",
@@ -296,6 +315,8 @@
     "family": "Family",
     "friends": "Friends",
     "preferenceExplanation": "This will affect how birthdays are displayed in this group",
+    "guestPortalAccess": "Guest Portal Access",
+    "guestPortalDescription": "Allow access to birthdays in this group via the guest portal.",
     "work": "Work",
     "other": "Other",
     "custom": "Custom",

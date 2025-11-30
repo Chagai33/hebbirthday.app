@@ -7,7 +7,7 @@ import { useBirthdays } from '../../hooks/useBirthdays';
 import { groupService } from '../../services/group.service';
 import { Layout } from '../layout/Layout';
 import { Group, GroupType } from '../../types';
-import { Plus, Edit, Trash2, X, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Plus, Edit, Trash2, X, ArrowRight, ArrowLeft, Globe } from 'lucide-react';
 import { Toast } from '../common/Toast';
 import { useToast } from '../../hooks/useToast';
 import { DeleteGroupModal } from '../modals/DeleteGroupModal';
@@ -86,10 +86,12 @@ export const GroupsPanel = () => {
     name: string;
     color: string;
     calendarPreference?: 'gregorian' | 'hebrew' | 'both';
+    isGuestPortalEnabled: boolean;
   }>({
     name: '',
     color: GROUP_COLORS[0],
     calendarPreference: 'both',
+    isGuestPortalEnabled: true,
   });
 
   const rootGroups = useMemo(() => {
@@ -174,6 +176,7 @@ export const GroupsPanel = () => {
         name: group.name,
         color: group.color,
         calendarPreference: group.calendar_preference || 'both',
+        isGuestPortalEnabled: group.is_guest_portal_enabled ?? true,
       });
     } else {
       setEditingGroup(null);
@@ -181,6 +184,7 @@ export const GroupsPanel = () => {
         name: '',
         color: GROUP_COLORS[0],
         calendarPreference: 'both',
+        isGuestPortalEnabled: true,
       });
     }
     setSelectedParentId(parentId);
@@ -195,6 +199,7 @@ export const GroupsPanel = () => {
       name: '',
       color: GROUP_COLORS[0],
       calendarPreference: 'both',
+      isGuestPortalEnabled: true,
     });
   };
 
@@ -206,7 +211,10 @@ export const GroupsPanel = () => {
       if (editingGroup) {
         await updateGroup.mutateAsync({
           groupId: editingGroup.id,
-          data: formData,
+          data: {
+            ...formData,
+            is_guest_portal_enabled: formData.isGuestPortalEnabled,
+          },
         });
         success(t('groups.groupUpdated'));
       } else if (selectedParentId) {
@@ -215,6 +223,7 @@ export const GroupsPanel = () => {
           parentId: selectedParentId,
           color: formData.color,
           calendarPreference: formData.calendarPreference,
+          is_guest_portal_enabled: formData.isGuestPortalEnabled,
         });
         success(t('groups.groupCreated'));
       }
@@ -411,6 +420,32 @@ export const GroupsPanel = () => {
                   <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
                     {t('groups.preferenceExplanation')}
                   </p>
+                </div>
+
+                {/* Guest Portal Toggle */}
+                <div className="flex items-start gap-3 bg-purple-50 border border-purple-100 rounded-lg p-3">
+                    <div className="text-purple-600 mt-0.5">
+                        <Globe className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                            <label className="text-sm font-medium text-gray-900">
+                                {t('groups.guestPortalAccess', 'Guest Portal Access')}
+                            </label>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    className="sr-only peer"
+                                    checked={formData.isGuestPortalEnabled}
+                                    onChange={(e) => setFormData({ ...formData, isGuestPortalEnabled: e.target.checked })}
+                                />
+                                <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+                            </label>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                            {t('groups.guestPortalDescription', 'Allow access to birthdays in this group via the guest portal.')}
+                        </p>
+                    </div>
                 </div>
 
                 <div className="flex gap-2 sm:gap-3 justify-end pt-2">

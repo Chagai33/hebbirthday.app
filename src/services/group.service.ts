@@ -85,6 +85,7 @@ export const groupService = {
       parentId?: string | null;
       color?: string;
       calendarPreference?: 'gregorian' | 'hebrew' | 'both';
+      is_guest_portal_enabled?: boolean;
     },
     userId: string
   ): Promise<string> {
@@ -96,6 +97,7 @@ export const groupService = {
       parent_id: groupInput.parentId || null,
       is_root: isRoot,
       color: groupInput.color || (isRoot ? '#6366f1' : '#8b5cf6'),
+      is_guest_portal_enabled: groupInput.is_guest_portal_enabled ?? true,
       created_by: userId,
       created_at: serverTimestamp(),
       updated_at: serverTimestamp(),
@@ -112,7 +114,7 @@ export const groupService = {
 
   async updateGroup(
     groupId: string,
-    data: { name?: string; color?: string; calendarPreference?: 'gregorian' | 'hebrew' | 'both' }
+    data: { name?: string; color?: string; calendarPreference?: 'gregorian' | 'hebrew' | 'both'; is_guest_portal_enabled?: boolean }
   ): Promise<void> {
     const updateData: any = {
       updated_at: serverTimestamp(),
@@ -121,6 +123,7 @@ export const groupService = {
     if (data.name !== undefined) updateData.name = data.name;
     if (data.color !== undefined) updateData.color = data.color;
     if (data.calendarPreference !== undefined) updateData.calendar_preference = data.calendarPreference;
+    if (data.is_guest_portal_enabled !== undefined) updateData.is_guest_portal_enabled = data.is_guest_portal_enabled;
 
     await updateDoc(doc(db, 'groups', groupId), updateData);
   },
@@ -225,6 +228,8 @@ export const groupService = {
       is_root: data.is_root || false,
       type: data.type,
       color: data.color,
+      is_guest_portal_enabled: data.is_guest_portal_enabled ?? true,
+      calendar_preference: data.calendar_preference,
       created_by: data.created_by,
       created_at: this.timestampToString(data.created_at),
       updated_at: this.timestampToString(data.updated_at),

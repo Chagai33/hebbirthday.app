@@ -9,7 +9,11 @@
   "guest": {
     "portalTitle": "פורטל מתנות",
     "welcome": "ברוכים הבאים",
-    "welcomeSubtitle": "הזינו את פרטיכם כדי לנהל את רשימת המשאלות",
+    "welcomeSubtitle": "הזדהו כדי לצפות ולערוך את רשימת המשאלות שלכם",
+    "portalInfo": "הפורטל מיועד למי שיום הולדתם כבר רשום במערכת. לא מצליחים להיכנס? בקשו מהחברים או המשפחה להוסיף את יום ההולדת שלכם לאפליקציה.",
+    "portalInfoShort": "הפורטל מיועד למי שיום הולדתם כבר רשום במערכת...",
+    "readMore": "קרא עוד",
+    "readLess": "הצג פחות",
     "findWishlist": "מצאו את רשימת המשאלות שלכם",
     "searchSubtitle": "חפשו את שמכם כדי להתחיל",
     "searchPlaceholder": "התחל להקליד את שמך...",
@@ -22,7 +26,7 @@
     "month": "חודש",
     "year": "שנה",
     "verifyButton": "אמת וכנס לרשימה",
-    "accessButton": "כניסה לרשימת המשאלות",
+    "accessButton": "כניסה לרשימת המשאלות שלי",
     "loginError": "ההתחברות נכשלה. אנא בדקו את השם ותאריך הלידה.",
     "missingFields": "נא להזין שם פרטי ושם משפחה",
     "myWishlist": "רשימת המשאלות שלי",
@@ -42,6 +46,7 @@
     "selectProfile": "בחר רשימה",
     "multipleProfilesFound": "מצאנו מספר רשימות התואמות את פרטיך. אנא בחר לאיזו רשימה ברצונך להיכנס:",
     "back": "חזור",
+    "accessDenied": "הגישה לפורטל נחסמה על ידי המנהל.",
     "rateLimitError": "יותר מדי נסיונות. אנא המתן לפני נסיון נוסף."
   },
   "googleCalendar": {
@@ -187,7 +192,9 @@
     "day": "יום",
     "month": "חודש",
     "year": "שנה",
-    "menu": "תפריט"
+    "menu": "תפריט",
+    "note": "הערה",
+    "moreInfo": "מידע נוסף"
   },
   "auth": {
     "signIn": "התחבר",
@@ -201,8 +208,11 @@
     "verificationCode": "קוד אימות",
     "signInWithGoogle": "התחבר עם Google",
     "signUpWithGoogle": "הירשם עם Google",
+    "signInWithEmail": "התחבר עם כתובת אימייל",
+    "signUpWithEmail": "הירשם עם כתובת אימייל",
     "or": "או",
     "signInWithPhone": "התחבר עם טלפון",
+    "guestWishlistAccess": "הוסיפו אתכם לאפליקציה? לחצו כאן לעריכת רשימת המשאלות",
     "accountExistsLoggingIn": "החשבון קיים במערכת, מתחבר...",
     "alreadyHaveAccount": "כבר יש לך חשבון?",
     "dontHaveAccount": "אין לך חשבון?",
@@ -251,7 +261,16 @@
     "member": "חבר",
     "settings": "הגדרות",
     "defaultCalendarPreference": "העדפת לוח שנה ברירת מחדל",
-    "preferenceDescription": "זה משפיע על אופן הצגת ימי ההולדת במערכת"
+    "preferenceDescription": "זה משפיע על אופן הצגת ימי ההולדת במערכת",
+    "guestPortalAccess": "גישה לפורטל אורחים",
+    "guestPortalDescription": "אפשר לאורחים לגשת ולנהל את המשאלות שלהם דרך הפורטל הציבורי.",
+    "guestPortalExceptionNote": "זוהי הגדרה גלובלית. ניתן להחריג קבוצות ספציפיות בעמוד ניהול קבוצות.",
+    "aboutGuestPortal": "אודות פורטל האורחים",
+    "guestPortalDetailedDesc": "פורטל האורחים מאפשר למשפחה ולחברים לגשת ולעדכן את רשימות המשאלות שלהם בקלות, ללא צורך ביצירת חשבון משתמש. הם פשוט מאמתים את זהותם באמצעות שמם ותאריך הלידה שלהם.",
+    "howItWorks": "איך זה עובד:",
+    "howItWorksStep1": "אורחים נכנסים לפורטל דרך <0>הקישור</0>",
+    "howItWorksStep2": "הם מזינים את שמם ותאריך הלידה שלהם",
+    "howItWorksStep3": "לאחר אימות, הם יכולים לנהל את רשימת המשאלות שלהם"
   },
   "settings": {
     "note1": "הגדרה זו חלה כברירת מחדל על כל הקבוצות",
@@ -365,6 +384,8 @@
     "friends": "חברים",
     "work": "עבודה",
     "other": "אחר",
+    "guestPortalAccess": "גישה לפורטל אורחים",
+    "guestPortalDescription": "אפשר גישה לימי הולדת בקבוצה זו דרך פורטל האורחים.",
     "custom": "מותאם אישית",
     "noGroups": "אין קבוצות תחת {{category}}",
     "noGroupsYet": "טרם נוצרו קבוצות",

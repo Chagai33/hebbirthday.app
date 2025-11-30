@@ -1,11 +1,11 @@
 import { FloatingBackButton } from '../common/FloatingBackButton';
 import { logger } from "../../utils/logger";
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { useTenant } from '../../contexts/TenantContext';
 import { CalendarPreferenceSelector } from './CalendarPreferenceSelector';
 import { CalendarPreference } from '../../types';
-import { Settings, Save, X, Trash2, AlertTriangle } from 'lucide-react';
+import { Settings, Save, X, Trash2, AlertTriangle, Globe, Info } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 import { Toast } from '../common/Toast';
 import { httpsCallable } from 'firebase/functions';
@@ -25,6 +25,9 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
   const [preference, setPreference] = useState<CalendarPreference>(
     currentTenant?.default_calendar_preference || 'both'
   );
+  const [isGuestPortalEnabled, setIsGuestPortalEnabled] = useState(
+    currentTenant?.is_guest_portal_enabled ?? true
+  );
   const [isSaving, setIsSaving] = useState(false);
 
   // Deletion State
@@ -33,6 +36,9 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
   const [isCalculatingSummary, setIsCalculatingSummary] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Info Popup State
+  const [showInfoPopup, setShowInfoPopup] = useState(false);
+
   const handleSave = async () => {
     if (!currentTenant) return;
 
@@ -40,6 +46,7 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
     try {
       await updateTenant(currentTenant.id, {
         default_calendar_preference: preference,
+        is_guest_portal_enabled: isGuestPortalEnabled,
       });
       success(t('messages.tenantUpdated'));
       setTimeout(() => onClose(), 1000);
@@ -157,6 +164,150 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
                 <li>{t('settings.note2', 'Groups can override this with their own preference')}</li>
                 <li>{t('settings.note3', 'Individual records can override group preferences')}</li>
               </ul>
+            </div>
+
+            {/* Guest Portal Settings */}
+            <div className="bg-white border border-gray-200 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <div className="text-purple-600 mt-1">
+                  <Globe className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div>
+                        <h3 className="font-semibold text-gray-900">
+                          {t('tenant.guestPortalAccess', 'Guest Portal Access')}
+                        </h3>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {t('tenant.guestPortalDescription', 'Allow guests to access and manage their wishlists via the public portal.')}
+                        </p>
+                      </div>
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setShowInfoPopup(!showInfoPopup)}
+                          className="text-gray-400 hover:text-blue-600 transition-colors p-1 rounded-full hover:bg-blue-50 focus:outline-none"
+                          title={t('common.moreInfo', 'More Info')}
+                        >
+                          <Info className="w-5 h-5" />
+                        </button>
+                        
+                        {/* Info Popup */}
+                        {showInfoPopup && (
+                          <>
+                            <div 
+                              className="fixed inset-0 z-[70]" 
+                              onClick={() => setShowInfoPopup(false)}
+                            />
+                            {/* Desktop Popup */}
+                            <div className="hidden sm:block absolute top-full left-1/2 -translate-x-1/2 mt-2 w-96 bg-white rounded-xl shadow-xl border border-gray-200 p-5 z-[71] text-sm text-gray-600">
+                              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-gray-200 rotate-45"></div>
+                              <div className="relative z-10 space-y-3">
+                                <h4 className="font-semibold text-gray-900 text-base">
+                                  {t('tenant.aboutGuestPortal', 'About the Guest Portal')}
+                                </h4>
+                                <p className="leading-relaxed">
+                                  {t('tenant.guestPortalDetailedDesc', 'The guest portal allows your family and friends to easily access and update their own wishlists without creating a user account. They simply verify their identity using their name and birth date.')}
+                                </p>
+                                <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                  <h5 className="font-medium text-blue-900 text-xs mb-1">
+                                    {t('tenant.howItWorks', 'How it works:')}
+                                  </h5>
+                                  <ul className="list-disc list-inside text-xs text-blue-800 space-y-1">
+                                    <li>
+                                      <Trans
+                                        i18nKey="tenant.howItWorksStep1"
+                                        defaults="Guests visit the <0>portal link</0>"
+                                        components={[
+                                          <a
+                                            href="/portal"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:underline font-medium"
+                                            key="link"
+                                          >
+                                            portal link
+                                          </a>
+                                        ]}
+                                      />
+                                    </li>
+                                    <li>{t('tenant.howItWorksStep2', 'They enter their name and birth date')}</li>
+                                    <li>{t('tenant.howItWorksStep3', 'Once verified, they can manage their wishlist')}</li>
+                                  </ul>
+                                </div>
+                                <p className="text-xs text-gray-500 pt-2 border-t border-gray-100 italic">
+                                  {t('tenant.guestPortalExceptionNote', 'This is a global setting. You can override this for specific groups in the Groups management page.')}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Mobile Popup (Centered Modal) */}
+                            <div className="sm:hidden fixed inset-0 z-[71] flex items-center justify-center p-4 pointer-events-none">
+                              <div className="bg-white rounded-xl shadow-2xl border border-gray-200 p-5 w-full max-w-sm pointer-events-auto animate-in fade-in zoom-in-95 duration-200">
+                                <div className="flex justify-between items-start mb-3">
+                                  <h4 className="font-semibold text-gray-900 text-base">
+                                    {t('tenant.aboutGuestPortal', 'About the Guest Portal')}
+                                  </h4>
+                                  <button 
+                                    onClick={() => setShowInfoPopup(false)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                  >
+                                    <X className="w-5 h-5" />
+                                  </button>
+                                </div>
+                                <div className="space-y-3 text-sm text-gray-600">
+                                  <p className="leading-relaxed">
+                                    {t('tenant.guestPortalDetailedDesc', 'The guest portal allows your family and friends to easily access and update their own wishlists without creating a user account. They simply verify their identity using their name and birth date.')}
+                                  </p>
+                                  <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                    <h5 className="font-medium text-blue-900 text-xs mb-1">
+                                      {t('tenant.howItWorks', 'How it works:')}
+                                    </h5>
+                                    <ul className="list-disc list-inside text-xs text-blue-800 space-y-1">
+                                      <li>
+                                        <Trans
+                                          i18nKey="tenant.howItWorksStep1"
+                                          defaults="Guests visit the <0>portal link</0>"
+                                          components={[
+                                            <a
+                                              href="/portal"
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-blue-600 hover:underline font-medium"
+                                              key="link"
+                                            >
+                                              portal link
+                                            </a>
+                                          ]}
+                                        />
+                                      </li>
+                                      <li>{t('tenant.howItWorksStep2', 'They enter their name and birth date')}</li>
+                                      <li>{t('tenant.howItWorksStep3', 'Once verified, they can manage their wishlist')}</li>
+                                    </ul>
+                                  </div>
+                                  <p className="text-xs text-gray-500 pt-2 border-t border-gray-100 italic">
+                                    {t('tenant.guestPortalExceptionNote', 'This is a global setting. You can override this for specific groups in the Groups management page.')}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={isGuestPortalEnabled}
+                        onChange={(e) => setIsGuestPortalEnabled(e.target.checked)}
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-3 pt-4 border-t border-gray-200 mt-6">

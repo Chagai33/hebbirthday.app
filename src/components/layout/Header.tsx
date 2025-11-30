@@ -128,7 +128,7 @@ export const Header: React.FC = () => {
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
             <div className="flex items-center gap-3 ms-auto">
               <a
                 href="https://www.linkedin.com/in/chagai-yechiel/"

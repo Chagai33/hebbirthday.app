@@ -65,18 +65,20 @@ export const useCreateGroup = () => {
       parentId,
       color,
       calendarPreference,
+      is_guest_portal_enabled,
     }: {
       name: string;
       parentId?: string | null;
       color?: string;
       calendarPreference?: 'gregorian' | 'hebrew' | 'both';
+      is_guest_portal_enabled?: boolean;
     }) => {
       if (!currentTenant || !user) {
         throw new Error('No tenant or user found');
       }
       return groupService.createGroup(
         currentTenant.id,
-        { name, parentId, color, calendarPreference },
+        { name, parentId, color, calendarPreference, is_guest_portal_enabled },
         user.id
       );
     },
@@ -97,7 +99,7 @@ export const useUpdateGroup = () => {
       data,
     }: {
       groupId: string;
-      data: { name?: string; color?: string; calendarPreference?: 'gregorian' | 'hebrew' | 'both' };
+      data: { name?: string; color?: string; calendarPreference?: 'gregorian' | 'hebrew' | 'both'; is_guest_portal_enabled?: boolean };
     }) => {
       return groupService.updateGroup(groupId, data);
     },

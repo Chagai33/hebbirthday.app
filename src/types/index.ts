@@ -17,6 +17,7 @@ export interface Tenant {
   default_calendar_preference?: CalendarPreference;
   current_hebrew_year?: number;
   hebrew_year_last_updated?: string;
+  is_guest_portal_enabled?: boolean;
   sharedCalendarId?: string | null;
   sharedCalendarName?: string | null;
   created_at: string;
@@ -50,6 +51,7 @@ export interface Group {
   is_root: boolean;
   type?: GroupType;
   color: string;
+  is_guest_portal_enabled?: boolean;
   calendar_preference?: CalendarPreference;
   created_at: string;
   updated_at: string;
