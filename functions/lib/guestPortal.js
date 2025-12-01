@@ -39,24 +39,19 @@ const admin = __importStar(require("firebase-admin"));
 const db = admin.firestore();
 // --- Rate Limiting Logic ---
 async function checkRateLimit(ip) {
-    console.log(`Checking rate limit for IP: ${ip}`); // Added logging
     const rateLimitRef = db.collection('rate_limits').doc(ip.replace(/\./g, '_')); // Sanitize IP for doc ID
     const doc = await rateLimitRef.get();
     if (!doc.exists) {
-        console.log(`No rate limit record found for IP: ${ip}`); // Added logging
         return { allowed: true };
     }
     const data = doc.data();
     const now = admin.firestore.Timestamp.now();
-    console.log(`Rate limit data for IP ${ip}:`, JSON.stringify(data)); // Added logging
     if (data.blockedUntil && data.blockedUntil > now) {
         const waitSeconds = Math.ceil(data.blockedUntil.seconds - now.seconds);
-        console.log(`IP ${ip} is blocked for ${waitSeconds} seconds`); // Added logging
         return { allowed: false, waitSeconds };
     }
     // If block expired, reset attempts (or we can keep them and decay, but simple reset is fine for now)
     if (data.blockedUntil && data.blockedUntil <= now) {
-        console.log(`Block expired for IP ${ip}, deleting record`); // Added logging
         await rateLimitRef.delete();
     }
     return { allowed: true };
@@ -70,7 +65,6 @@ async function recordFailedAttempt(ip) {
         if (doc.exists) {
             attempts = (doc.data()?.attempts || 0) + 1;
         }
-        console.log(`Current attempts for IP ${ip}: ${attempts}`); // Added logging
         let blockedUntil = null;
         // Policy: 3 free attempts.
         // 4th attempt -> block 30s
