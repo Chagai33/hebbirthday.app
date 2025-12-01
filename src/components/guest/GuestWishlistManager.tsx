@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Edit2, Save, AlertCircle } from 'lucide-react';
+import { Plus, Trash2, Edit2, Save, AlertCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { WishlistItem } from '../../types';
 import { guestService } from '../../services/guest.service';
@@ -8,10 +8,12 @@ import { Button } from '../common/Button';
 interface GuestWishlistManagerProps {
   initialWishlist: WishlistItem[];
   onLogout: () => void;
+  onBackToSearch?: () => void;
 }
 
-export const GuestWishlistManager: React.FC<GuestWishlistManagerProps> = ({ initialWishlist, onLogout }) => {
-  const { t } = useTranslation();
+export const GuestWishlistManager: React.FC<GuestWishlistManagerProps> = ({ initialWishlist, onLogout, onBackToSearch }) => {
+  const { t, i18n } = useTranslation();
+  const isHebrew = i18n.language === 'he';
   const [items, setItems] = useState<WishlistItem[]>(initialWishlist);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -138,11 +140,23 @@ export const GuestWishlistManager: React.FC<GuestWishlistManagerProps> = ({ init
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-800">{t('guest.myWishlist')}</h2>
-        <Button variant="secondary" size="sm" onClick={onLogout}>
-            {t('guest.exit')}
-        </Button>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-800">{t('guest.myWishlist')}</h2>
+            <Button variant="secondary" size="sm" onClick={onLogout} className="text-red-600 hover:bg-red-50 border-red-200">
+                {t('auth.signOut')}
+            </Button>
+        </div>
+        
+        {onBackToSearch && (
+            <button
+                onClick={onBackToSearch}
+                className="flex items-center gap-2 text-sm text-gray-600 hover:text-purple-600 transition-colors w-fit"
+            >
+                {isHebrew ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
+                <span>{t('guest.backToSearch', 'Back to search')}</span>
+            </button>
+        )}
       </div>
 
       {error && (

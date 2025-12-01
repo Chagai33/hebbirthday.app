@@ -9,6 +9,11 @@ export const GuestPortal: React.FC = () => {
   const [currentView, setCurrentView] = useState<'login' | 'manager'>('login');
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastSearchParams, setLastSearchParams] = useState<{
+    firstName: string;
+    lastName: string;
+    verification: GuestVerificationData;
+  } | null>(null);
 
   useEffect(() => {
     checkSession();
@@ -33,14 +38,25 @@ export const GuestPortal: React.FC = () => {
     setLoading(false);
   };
 
-  const handleLoginSuccess = (birthdayId: string, verification: GuestVerificationData, wishlistData: WishlistItem[]) => {
+  const handleLoginSuccess = (birthdayId: string, verification: GuestVerificationData, wishlistData: WishlistItem[], firstName?: string, lastName?: string) => {
     setWishlist(wishlistData);
+    if (firstName && lastName) {
+        setLastSearchParams({ firstName, lastName, verification });
+    }
     setCurrentView('manager');
   };
 
   const handleLogout = () => {
     guestService.clearSession();
     setWishlist([]);
+    setLastSearchParams(null);
+    setCurrentView('login');
+  };
+
+  const handleBackToSearch = () => {
+    guestService.clearSession();
+    setWishlist([]);
+    // Do not clear lastSearchParams
     setCurrentView('login');
   };
 
@@ -57,11 +73,15 @@ export const GuestPortal: React.FC = () => {
   return (
     <GuestLayout>
       {currentView === 'login' ? (
-        <GuestLogin onLoginSuccess={handleLoginSuccess} />
+        <GuestLogin 
+            onLoginSuccess={handleLoginSuccess} 
+            initialValues={lastSearchParams}
+        />
       ) : (
         <GuestWishlistManager 
             initialWishlist={wishlist} 
             onLogout={handleLogout} 
+            onBackToSearch={handleBackToSearch}
         />
       )}
     </GuestLayout>

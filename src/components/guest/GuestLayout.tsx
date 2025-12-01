@@ -3,6 +3,7 @@ import { Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../common/Button';
 import { useNavigate } from 'react-router-dom';
+import { CurrentDateDisplay } from '../common/CurrentDateDisplay';
 
 export const GuestLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { t, i18n } = useTranslation();
@@ -35,6 +36,10 @@ export const GuestLayout: React.FC<{ children: React.ReactNode }> = ({ children 
                 {t('app.taglinePart1')} <span className="text-[#8e24aa]">{t('app.taglineHebrew')}</span> {t('app.taglineOr')} <span className="text-[#304FFE]">{t('app.taglineGregorian')}</span>
               </span>
             </button>
+
+            <div className="flex-1 flex justify-center min-w-0 mt-2">
+              <CurrentDateDisplay />
+            </div>
 
             <div className="flex items-center gap-4">
                 <button

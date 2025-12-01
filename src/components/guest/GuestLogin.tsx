@@ -6,7 +6,12 @@ import { WishlistItem } from '../../types';
 import { Users, Info, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface GuestLoginProps {
-  onLoginSuccess: (birthdayId: string, verification: GuestVerificationData, wishlist: WishlistItem[]) => void;
+  onLoginSuccess: (birthdayId: string, verification: GuestVerificationData, wishlist: WishlistItem[], firstName: string, lastName: string) => void;
+  initialValues?: {
+    firstName: string;
+    lastName: string;
+    verification: GuestVerificationData;
+  } | null;
 }
 
 // --- Hebrew Format Helpers ---
@@ -70,25 +75,36 @@ const getDateString = (day: number | string, month: number | string, year: numbe
   return `${formattedYear}-${formattedMonth}-${formattedDay}`;
 };
 
-export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess }) => {
+export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialValues }) => {
   const { t, i18n } = useTranslation();
   const isHebrew = i18n.language === 'he';
   
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [firstName, setFirstName] = useState(initialValues?.firstName || '');
+  const [lastName, setLastName] = useState(initialValues?.lastName || '');
   
-  const [verificationType, setVerificationType] = useState<'gregorian' | 'hebrew'>('gregorian');
+  const [verificationType, setVerificationType] = useState<'gregorian' | 'hebrew'>(initialValues?.verification.type || 'gregorian');
   
+  // Helper to parse gregorian date string
+  const parseGregorianDate = (dateStr: string | undefined) => {
+    if (!dateStr) return { day: '', month: '', year: '' };
+    const [year, month, day] = dateStr.split('-');
+    return { day: parseInt(day), month: parseInt(month), year: parseInt(year) };
+  };
+
+  const initialGregorian = initialValues?.verification.type === 'gregorian' 
+    ? parseGregorianDate(initialValues.verification.dateString)
+    : { day: '', month: '', year: '' };
+
   // Gregorian State
-  const [gregorianDate, setGregorianDate] = useState('');
-  const [selectedDay, setSelectedDay] = useState<number | string>('');
-  const [selectedMonth, setSelectedMonth] = useState<number | string>('');
-  const [selectedYear, setSelectedYear] = useState<number | string>('');
+  const [gregorianDate, setGregorianDate] = useState(initialValues?.verification.dateString || '');
+  const [selectedDay, setSelectedDay] = useState<number | string>(initialGregorian.day);
+  const [selectedMonth, setSelectedMonth] = useState<number | string>(initialGregorian.month);
+  const [selectedYear, setSelectedYear] = useState<number | string>(initialGregorian.year);
   
   // Hebrew State
-  const [hebrewDay, setHebrewDay] = useState('1');
-  const [hebrewMonth, setHebrewMonth] = useState('Nisan');
-  const [hebrewYear, setHebrewYear] = useState(currentYear);
+  const [hebrewDay, setHebrewDay] = useState(initialValues?.verification.hebrewDay?.toString() || '1');
+  const [hebrewMonth, setHebrewMonth] = useState(initialValues?.verification.hebrewMonth || 'Nisan');
+  const [hebrewYear, setHebrewYear] = useState(initialValues?.verification.hebrewYear || currentYear);
 
   // Profiles State
   const [profiles, setProfiles] = useState<Array<{ birthdayId: string; tenantName: string }> | null>(null);
@@ -164,7 +180,7 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess }) => {
         if (response.multiple && response.options) {
             setProfiles(response.options);
         } else if (response.birthdayId && response.wishlist) {
-            onLoginSuccess(response.birthdayId, verification, response.wishlist);
+            onLoginSuccess(response.birthdayId, verification, response.wishlist, firstName.trim(), lastName.trim());
         }
       } else {
         setError(t('guest.loginError'));
@@ -190,7 +206,7 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess }) => {
           const response = await guestService.selectProfile(firstName.trim(), lastName.trim(), verification, birthdayId);
           
           if (response.success && response.birthdayId && response.wishlist) {
-              onLoginSuccess(response.birthdayId, verification, response.wishlist);
+              onLoginSuccess(response.birthdayId, verification, response.wishlist, firstName.trim(), lastName.trim());
           } else {
               setError(t('guest.loginError'));
           }
