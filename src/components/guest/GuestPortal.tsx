@@ -19,6 +19,10 @@ export const GuestPortal: React.FC = () => {
     checkSession();
   }, []);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentView]);
+
   const checkSession = async () => {
     const session = guestService.getSession();
     if (session) {
