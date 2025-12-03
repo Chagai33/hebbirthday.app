@@ -299,6 +299,8 @@
     "groupPreference": "Group preference",
     "useGroupDefault": "Use group default",
     "preferenceExplanation": "This setting overrides the group preference for this person only",
+    "preferenceConflict": "Selected groups have conflicting preferences. Please select a manual setting.",
+    "selectPreferenceRequired": "Preference selection is required due to group conflict",
     "days": "days",
     "notes": "Notes",
     "archived": "Archived",
@@ -383,6 +385,7 @@
       "title": "Possible Duplicate",
       "mergeMessage": "This person already exists in another group. Would you like to add them to the new group as well, instead of creating a duplicate?",
       "mergeMessageWithGroups": "This person already exists in another group. Would you like to add them to {{groups}} as well, instead of creating a duplicate?",
+      "alreadyInGroup": "This person already exists in {{groups}}. No need to add again.",
       "mergeConfirm": "Yes, Add",
       "message": "A person with similar name already exists. Do you want to continue?",
       "existingPerson": "Existing person"

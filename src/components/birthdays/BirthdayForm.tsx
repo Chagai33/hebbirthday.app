@@ -47,6 +47,7 @@ export const BirthdayForm = ({
   const [duplicates, setDuplicates] = useState<Birthday[]>([]);
   const [pendingData, setPendingData] = useState<BirthdayFormData | null>(null);
   const [newGroupNames, setNewGroupNames] = useState<string[]>([]);
+  const [newGroupIds, setNewGroupIds] = useState<string[]>([]);
   const [hasUnsyncedChanges, setHasUnsyncedChanges] = useState(false);
   const [showSunsetTooltip, setShowSunsetTooltip] = useState(false);
 
@@ -314,6 +315,7 @@ export const BirthdayForm = ({
           })
           .filter((name): name is string => !!name);
         setNewGroupNames(names);
+        setNewGroupIds(data.groupIds || []);
         setShowDuplicateModal(true);
         return;
       }
@@ -433,9 +435,24 @@ export const BirthdayForm = ({
 
   // Calculate selected groups for display or preference logic
   const selectedGroupIds = watch('groupIds') || [];
+  const calendarPreferenceOverride = watch('calendarPreferenceOverride');
   // Use the first selected group for calendar preference hint (or show mixed?)
   const firstSelectedGroupId = selectedGroupIds.length > 0 ? selectedGroupIds[0] : undefined;
   const firstSelectedGroup = allGroups.find(g => g.id === firstSelectedGroupId);
+
+  // Check for conflicting preferences among selected groups
+  const conflictingPreferences = useMemo(() => {
+    if (selectedGroupIds.length <= 1) return false;
+    
+    const selectedGroups = allGroups.filter(g => selectedGroupIds.includes(g.id));
+    if (selectedGroups.length === 0) return false;
+
+    const preferences = selectedGroups
+      .map(g => g.calendar_preference || 'both')
+      .filter((v, i, a) => a.indexOf(v) === i); // Unique values
+      
+    return preferences.length > 1;
+  }, [selectedGroupIds, allGroups]);
 
   return (
     <>
@@ -712,23 +729,41 @@ export const BirthdayForm = ({
                 {t('birthday.calendarPreference')}
               </label>
               <div className="space-y-1 sm:space-y-2">
-                {firstSelectedGroup && firstSelectedGroup.calendar_preference && (
+                {firstSelectedGroup && firstSelectedGroup.calendar_preference && !conflictingPreferences && (
                   <div className="text-xs text-gray-600 bg-gray-50 p-1.5 sm:p-2 rounded">
                     {t('birthday.groupPreference', 'Group preference')} ({firstSelectedGroup.name}): <span className="font-semibold">{t(`birthday.${firstSelectedGroup.calendar_preference}`)}</span>
                   </div>
                 )}
+                {conflictingPreferences && !calendarPreferenceOverride && (
+                  <div className="text-xs text-red-600 bg-red-50 p-1.5 sm:p-2 rounded border border-red-200">
+                    {t('birthday.preferenceConflict', 'Selected groups have conflicting preferences. Please select a manual setting.')}
+                  </div>
+                )}
                 <select
-                  {...register('calendarPreferenceOverride')}
-                  className="w-full px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  {...register('calendarPreferenceOverride', {
+                    required: conflictingPreferences ? t('birthday.selectPreferenceRequired') : false
+                  })}
+                  className={`w-full px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-base border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    conflictingPreferences && !calendarPreferenceOverride ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  }`}
                 >
-                  <option value="">{t('birthday.useGroupDefault', 'Use group default')}</option>
+                  <option value="" disabled={conflictingPreferences}>
+                    {conflictingPreferences 
+                      ? t('common.select', 'Select') 
+                      : t('birthday.useGroupDefault', 'Use group default')}
+                  </option>
                   <option value="gregorian">{t('birthday.gregorianOnly')}</option>
                   <option value="hebrew">{t('birthday.hebrewOnly')}</option>
                   <option value="both">{t('birthday.both')}</option>
                 </select>
-                <p className="text-xs text-gray-500 leading-tight">
-                  {t('birthday.preferenceExplanation', 'This setting overrides the group preference for this person only')}
-                </p>
+                {errors.calendarPreferenceOverride && (
+                  <p className="text-red-500 text-xs mt-0.5 sm:mt-1">{errors.calendarPreferenceOverride.message}</p>
+                )}
+                {!conflictingPreferences && (
+                  <p className="text-xs text-gray-500 leading-tight">
+                    {t('birthday.preferenceExplanation', 'This setting overrides the group preference for this person only')}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -783,6 +818,7 @@ export const BirthdayForm = ({
         onConfirm={handleDuplicateConfirm}
         duplicates={duplicates}
         newGroupNames={newGroupNames}
+        newGroupIds={newGroupIds}
       />
 
       <SunsetVerificationModal

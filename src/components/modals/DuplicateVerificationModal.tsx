@@ -10,6 +10,7 @@ interface DuplicateVerificationModalProps {
   onConfirm: () => void;
   duplicates: Birthday[];
   newGroupNames?: string[]; // Names of the new groups being added
+  newGroupIds?: string[];
 }
 
 export const DuplicateVerificationModal: React.FC<DuplicateVerificationModalProps> = ({
@@ -18,18 +19,17 @@ export const DuplicateVerificationModal: React.FC<DuplicateVerificationModalProp
   onConfirm,
   duplicates,
   newGroupNames = [],
+  newGroupIds = [],
 }) => {
   const { t } = useTranslation();
 
-  const existingGroups = useMemo(() => {
-    const groups = new Set<string>();
-    duplicates.forEach(d => {
-        // We don't have group names here directly, just IDs usually.
-        // But in the context of display, we might want to show something.
-        // For now, we'll just focus on the fact that they exist.
+  const isAlreadyInGroups = useMemo(() => {
+    if (!newGroupIds || newGroupIds.length === 0) return false;
+    return duplicates.some(duplicate => {
+       const duplicateGroups = duplicate.group_ids || (duplicate.group_id ? [duplicate.group_id] : []);
+       return newGroupIds.every(newId => duplicateGroups.includes(newId));
     });
-    return groups;
-  }, [duplicates]);
+  }, [duplicates, newGroupIds]);
 
   if (!isOpen) return null;
 
@@ -54,12 +54,17 @@ export const DuplicateVerificationModal: React.FC<DuplicateVerificationModalProp
         </div>
 
         <p className="text-gray-600 mb-4">
-          {newGroupNames.length > 0 
-            ? t('modals.duplicateVerification.mergeMessageWithGroups', 
-                'This person already exists in another group. Would you like to add them to {{groups}} as well, instead of creating a duplicate?',
+          {isAlreadyInGroups
+            ? t('modals.duplicateVerification.alreadyInGroup', 
+                'This person already exists in {{groups}}. No need to add again.', 
                 { groups: newGroupNames.join(', ') })
-            : t('modals.duplicateVerification.mergeMessage', 
-                'This person already exists in another group. Would you like to add them to the new group as well, instead of creating a duplicate?')
+            : (newGroupNames.length > 0 
+                ? t('modals.duplicateVerification.mergeMessageWithGroups', 
+                    'This person already exists in another group. Would you like to add them to {{groups}} as well, instead of creating a duplicate?',
+                    { groups: newGroupNames.join(', ') })
+                : t('modals.duplicateVerification.mergeMessage', 
+                    'This person already exists in another group. Would you like to add them to the new group as well, instead of creating a duplicate?')
+              )
           }
         </p>
 
@@ -84,19 +89,24 @@ export const DuplicateVerificationModal: React.FC<DuplicateVerificationModalProp
         </div>
 
         <div className="flex flex-col gap-3">
-          <button
-            onClick={onConfirm}
-            className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center justify-center gap-2"
-          >
-            <GitMerge className="w-4 h-4" />
-            {t('modals.duplicateVerification.mergeConfirm', 'Yes, Add to Group')}
-          </button>
+          {!isAlreadyInGroups && (
+            <button
+              onClick={onConfirm}
+              className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center justify-center gap-2"
+            >
+              <GitMerge className="w-4 h-4" />
+              {t('modals.duplicateVerification.mergeConfirm', 'Yes, Add to Group')}
+            </button>
+          )}
           
           <button
             onClick={onClose}
-            className="w-full px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+            className={isAlreadyInGroups 
+              ? "w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors" 
+              : "w-full px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+            }
           >
-            {t('common.cancel', 'Cancel')}
+            {isAlreadyInGroups ? t('common.close', 'Close') : t('common.cancel', 'Cancel')}
           </button>
         </div>
       </div>
