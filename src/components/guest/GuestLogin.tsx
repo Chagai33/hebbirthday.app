@@ -115,6 +115,7 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
   }> | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingProfileId, setLoadingProfileId] = useState<string | null>(null);
   const [error, setError] = useState('');
   
   // Info Box State
@@ -220,6 +221,7 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
 
   const handleProfileSelect = async (birthdayId: string) => {
       setIsLoading(true);
+      setLoadingProfileId(birthdayId);
       setError('');
       try {
           const verification = getVerificationData();
@@ -235,6 +237,7 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
           setError(t('guest.loginError'));
       } finally {
           setIsLoading(false);
+          setLoadingProfileId(null);
       }
   };
 
@@ -261,17 +264,32 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
                     <button
                         key={p.birthdayId}
                         onClick={() => handleProfileSelect(p.birthdayId)}
-                        className="w-full p-4 flex items-center gap-4 bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md text-start group"
+                        disabled={isLoading}
+                        className={`w-full p-4 flex items-center gap-4 bg-white border border-gray-200 rounded-xl transition-all duration-200 shadow-sm text-start group ${
+                            isLoading 
+                                ? 'opacity-70 cursor-not-allowed' 
+                                : 'hover:bg-blue-50 hover:border-blue-300 hover:shadow-md'
+                        }`}
                     >
-                        <div className="p-3 bg-blue-50 rounded-full group-hover:bg-blue-100 transition-colors shrink-0">
-                            <Users className="w-5 h-5 text-blue-600" />
+                        <div className={`p-3 rounded-full transition-colors shrink-0 ${
+                            isLoading ? 'bg-gray-100' : 'bg-blue-50 group-hover:bg-blue-100'
+                        }`}>
+                            {loadingProfileId === p.birthdayId ? (
+                                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                                <Users className={`w-5 h-5 ${isLoading ? 'text-gray-400' : 'text-blue-600'}`} />
+                            )}
                         </div>
                         <div className="flex-1 flex flex-col gap-1">
-                            <span className="font-semibold text-gray-800 group-hover:text-blue-700 text-lg transition-colors">
+                            <span className={`font-semibold text-lg transition-colors ${
+                                isLoading ? 'text-gray-500' : 'text-gray-800 group-hover:text-blue-700'
+                            }`}>
                                 {formatTenantName(p.tenantDisplayName || p.tenantName)}
                             </span>
                             {p.groupDisplayName && (
-                                <span className="text-sm text-gray-600 group-hover:text-blue-600 transition-colors">
+                                <span className={`text-sm transition-colors ${
+                                    isLoading ? 'text-gray-400' : 'text-gray-600 group-hover:text-blue-600'
+                                }`}>
                                     {t('guest.groups', 'Groups')}: {p.groupDisplayName}
                                 </span>
                             )}
