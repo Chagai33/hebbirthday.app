@@ -330,3 +330,6 @@ export interface GoogleCalendarContextType {
   previewDeletion: (tenantId: string) => Promise<PreviewDeletionResult>;
   resetBirthdaySyncData: (birthdayId: string) => Promise<void>; // Added
 }
+
+// Export GELT types
+export * from './gelt';

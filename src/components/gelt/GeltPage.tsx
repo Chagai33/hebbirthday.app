@@ -1,0 +1,694 @@
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Layout } from '../layout/Layout';
+import { useGelt, useUpdateGelt, useResetGelt } from '../../hooks/useGelt';
+import { useSaveGeltTemplate, useDefaultGeltTemplate } from '../../hooks/useGeltTemplates';
+import { GeltTemplate } from '../../types/gelt';
+import { useBirthdays } from '../../hooks/useBirthdays';
+import { GeltChildrenList } from './GeltChildrenList';
+import { GeltAgeGroupsList } from './GeltAgeGroupsList';
+import { GeltBudgetConfigModal } from './GeltBudgetConfigModal';
+import { GeltCalculationResults } from './GeltCalculationResults';
+import { GeltImportModal } from './GeltImportModal';
+import { GeltTemplateModal } from './GeltTemplateModal';
+import { GeltLoadTemplateModal } from './GeltLoadTemplateModal';
+import { GeltGroupChildrenModal } from './GeltGroupChildrenModal';
+import { Button } from '../common/Button';
+import { 
+  calculateBudget, 
+  resetChildAge, 
+  excludeChild,
+  updateAgeGroup,
+  updateBudgetConfig,
+  updateChildAge,
+} from '../../utils/geltCalculations';
+import { exportToCSV, prepareExportData } from '../../utils/geltExport';
+import { Child, AgeGroup, BudgetConfig, GeltState } from '../../types/gelt';
+import { Download, Upload, RotateCcw, Users, Settings, Calculator, ChevronDown, ChevronUp, Save, FolderOpen, Info, X } from 'lucide-react';
+import { useToast } from '../../contexts/ToastContext';
+import { DEFAULT_AGE_GROUPS, DEFAULT_BUDGET_CONFIG } from '../../utils/geltConstants';
+
+export const GeltPage: React.FC = () => {
+  const { t } = useTranslation();
+  const { data: geltState, isLoading } = useGelt();
+  const updateGelt = useUpdateGelt();
+  const resetGelt = useResetGelt();
+  const { data: birthdays = [] } = useBirthdays();
+  const { success, error: showError } = useToast();
+  const { data: defaultTemplate, isLoading: isLoadingDefaultTemplate } = useDefaultGeltTemplate();
+
+  const [localState, setLocalState] = useState<GeltState | null>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showChildrenList, setShowChildrenList] = useState(false);
+  const [showBudgetConfigModal, setShowBudgetConfigModal] = useState(false);
+  const [showSaveTemplateModal, setShowSaveTemplateModal] = useState(false);
+  const [showLoadTemplateModal, setShowLoadTemplateModal] = useState(false);
+  const [showHowItWorksModal, setShowHowItWorksModal] = useState(false);
+  const [showCalculationResults, setShowCalculationResults] = useState(true);
+  const [showGroupChildrenModal, setShowGroupChildrenModal] = useState(false);
+  const [selectedGroupForChildren, setSelectedGroupForChildren] = useState<AgeGroup | null>(null);
+  
+  const saveTemplate = useSaveGeltTemplate();
+  const hasInitializedRef = useRef(false);
+
+  // Helper function to check if state is empty/reset
+  // State is considered empty if it has no children and no custom configurations
+  const isStateEmpty = (state: GeltState): boolean => {
+    // Check if there are any children
+    if (state.children.length > 0 || state.includedChildren.length > 0) {
+      return false;
+    }
+    
+    // Check if customGroupSettings exists (indicates custom budget was used)
+    if (state.customGroupSettings !== null) {
+      return false;
+    }
+    
+    // Check if budgetConfig has custom budget
+    if (state.budgetConfig.customBudget && state.budgetConfig.customBudget > 0) {
+      return false;
+    }
+    
+    // Check if ageGroups differ from defaults in meaningful ways
+    // We only check if the structure is the same, not the isIncluded flags
+    // because isIncluded can change without making the state "non-empty"
+    const defaultGroupIds = new Set(DEFAULT_AGE_GROUPS.map(g => g.id));
+    const stateGroupIds = new Set(state.ageGroups.map(g => g.id));
+    
+    // If group IDs don't match, state is not empty
+    if (defaultGroupIds.size !== stateGroupIds.size || 
+        !Array.from(defaultGroupIds).every(id => stateGroupIds.has(id))) {
+      return false;
+    }
+    
+    // Check if any group has different minAge, maxAge, or amountPerChild
+    for (const defaultGroup of DEFAULT_AGE_GROUPS) {
+      const stateGroup = state.ageGroups.find(g => g.id === defaultGroup.id);
+      if (!stateGroup) return false;
+      if (stateGroup.minAge !== defaultGroup.minAge ||
+          stateGroup.maxAge !== defaultGroup.maxAge ||
+          stateGroup.amountPerChild !== defaultGroup.amountPerChild) {
+        return false;
+      }
+    }
+    
+    // Check if budgetConfig matches defaults (excluding customBudget)
+    if (state.budgetConfig.participants !== DEFAULT_BUDGET_CONFIG.participants ||
+        state.budgetConfig.allowedOverflowPercentage !== DEFAULT_BUDGET_CONFIG.allowedOverflowPercentage) {
+      return false;
+    }
+    
+    return true;
+  };
+
+  // Initialize local state from server state or default template (only on first load)
+  useEffect(() => {
+    if (isLoading || isLoadingDefaultTemplate) return;
+    
+    // Only initialize once - don't update localState from server after auto-save
+    if (hasInitializedRef.current) return;
+    
+    if (geltState) {
+      // Always apply default template's isIncluded values if template exists
+      // This ensures that default template settings are always respected
+      if (defaultTemplate) {
+        const defaultGroupIds = new Set(defaultTemplate.ageGroups.map(g => g.id));
+        const stateGroupIds = new Set(geltState.ageGroups.map(g => g.id));
+        const groupsMatch = defaultGroupIds.size === stateGroupIds.size && 
+                           Array.from(defaultGroupIds).every(id => stateGroupIds.has(id));
+        
+        if (groupsMatch) {
+          // Always merge isIncluded values from default template
+          // This ensures default template's isIncluded settings override server state
+          const mergedAgeGroups = geltState.ageGroups.map(stateGroup => {
+            const defaultGroup = defaultTemplate.ageGroups.find(g => g.id === stateGroup.id);
+            if (defaultGroup) {
+              return {
+                ...stateGroup,
+                isIncluded: defaultGroup.isIncluded,
+              };
+            }
+            return stateGroup;
+          });
+          
+          // If state is empty, load full default template
+          if (isStateEmpty(geltState)) {
+            setLocalState({
+              ...geltState,
+              ageGroups: mergedAgeGroups,
+              budgetConfig: { ...defaultTemplate.budgetConfig },
+              customGroupSettings: defaultTemplate.customGroupSettings 
+                ? defaultTemplate.customGroupSettings.map(group => ({ ...group }))
+                : null,
+            });
+          } else {
+            // State is not empty, but still apply default template's isIncluded values
+            setLocalState({
+              ...geltState,
+              ageGroups: mergedAgeGroups,
+            });
+          }
+        } else {
+          // Groups don't match, use state as-is
+          setLocalState(geltState);
+        }
+      } else {
+        // No default template, use state from server
+        setLocalState(geltState);
+      }
+      hasInitializedRef.current = true;
+    }
+  }, [geltState, defaultTemplate, isLoading, isLoadingDefaultTemplate]);
+
+  // Convert includedChildren array to Set for calculations
+  const includedChildrenSet = useMemo(() => {
+    if (!localState) return new Set<string>();
+    return new Set(localState.includedChildren);
+  }, [localState]);
+
+  // Calculate budget whenever state changes
+  const calculation = useMemo(() => {
+    if (!localState) {
+      return {
+        totalRequired: 0,
+        amountPerParticipant: 0,
+        maxAllowed: 0,
+        groupTotals: {},
+      };
+    }
+
+    return calculateBudget(
+      localState.ageGroups,
+      localState.children,
+      includedChildrenSet,
+      localState.budgetConfig,
+      localState.customGroupSettings
+    );
+  }, [localState, includedChildrenSet]);
+
+  // Auto-save to Firestore when state changes (debounced)
+  useEffect(() => {
+    if (!localState || isLoading) return;
+
+    const timeoutId = setTimeout(() => {
+      updateGelt.mutate(localState, {
+        onError: (err) => {
+          showError(t('gelt.saveError'));
+          console.error('Failed to save GELT state:', err);
+        },
+      });
+    }, 1000); // Debounce 1 second
+
+    return () => clearTimeout(timeoutId);
+  }, [localState, isLoading, updateGelt, showError, t]);
+
+  if (isLoading || isLoadingDefaultTemplate || !localState) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const handleUpdateChild = (updatedChild: Child) => {
+    // Check if age was changed - if so, use updateChildAge to preserve originalAge
+    const existingChild = localState.children.find(c => c.id === updatedChild.id);
+    if (existingChild && existingChild.age !== updatedChild.age) {
+      // Age was changed - use updateChildAge to preserve originalAge
+      setLocalState({
+        ...localState,
+        children: updateChildAge(localState.children, updatedChild.id, updatedChild.age),
+      });
+    } else {
+      // Other fields changed, update normally
+      setLocalState({
+        ...localState,
+        children: localState.children.map((c) =>
+          c.id === updatedChild.id ? updatedChild : c
+        ),
+      });
+    }
+  };
+
+  const handleToggleInclude = (childId: string, include: boolean) => {
+    const newIncluded = excludeChild(includedChildrenSet, childId, !include);
+    setLocalState({
+      ...localState,
+      includedChildren: Array.from(newIncluded),
+    });
+  };
+
+  const handleResetAge = (childId: string) => {
+    const updated = resetChildAge(localState.children, childId);
+    setLocalState({
+      ...localState,
+      children: updated,
+    });
+  };
+
+  const handleRemoveChild = (childId: string) => {
+    setLocalState({
+      ...localState,
+      children: localState.children.filter((c) => c.id !== childId),
+      includedChildren: localState.includedChildren.filter((id) => id !== childId),
+    });
+  };
+
+  const handleShowGroupChildren = (group: AgeGroup) => {
+    setSelectedGroupForChildren(group);
+    setShowGroupChildrenModal(true);
+  };
+
+  const handleUpdateGroup = (updatedGroup: AgeGroup) => {
+    setLocalState({
+      ...localState,
+      ageGroups: updateAgeGroup(localState.ageGroups, updatedGroup),
+    });
+  };
+
+  const handleToggleGroupInclude = (groupId: string, include: boolean) => {
+    setLocalState({
+      ...localState,
+      ageGroups: localState.ageGroups.map((g) =>
+        g.id === groupId ? { ...g, isIncluded: include } : g
+      ),
+    });
+  };
+
+  const handleUpdateBudgetConfig = (config: BudgetConfig) => {
+    // אם מגדירים תקציב מותאם בפעם הראשונה, נשמור את הערכים המקוריים
+    const wasCustomBudget = localState.budgetConfig.customBudget && localState.budgetConfig.customBudget > 0;
+    const isSettingCustomBudget = config.customBudget && config.customBudget > 0;
+    
+    let newCustomGroupSettings = localState.customGroupSettings;
+    
+    // אם מגדירים תקציב מותאם בפעם הראשונה, נשמור את הערכים המקוריים
+    if (!wasCustomBudget && isSettingCustomBudget) {
+      newCustomGroupSettings = localState.ageGroups.map(group => ({ ...group }));
+    }
+    // אם מסירים תקציב מותאם, ננקה את customGroupSettings
+    else if (wasCustomBudget && !isSettingCustomBudget) {
+      newCustomGroupSettings = null;
+    }
+    
+    setLocalState({
+      ...localState,
+      budgetConfig: updateBudgetConfig(localState.budgetConfig, config),
+      customGroupSettings: newCustomGroupSettings,
+    });
+  };
+
+  const handleImport = (children: Child[]) => {
+    // Merge with existing children, avoiding duplicates
+    const existingIds = new Set(localState.children.map((c) => c.id));
+    const newChildren = children.filter((c) => !existingIds.has(c.id));
+    
+    setLocalState({
+      ...localState,
+      children: [...localState.children, ...newChildren],
+      includedChildren: [
+        ...localState.includedChildren,
+        ...newChildren.map((c) => c.id),
+      ],
+    });
+    
+    success(t('gelt.importSuccess', { count: newChildren.length }));
+  };
+
+  const handleReset = () => {
+    if (window.confirm(t('gelt.confirmReset'))) {
+      resetGelt.mutate(undefined, {
+        onSuccess: () => {
+          // Load default template if exists, otherwise use system defaults
+          if (defaultTemplate) {
+            setLocalState({
+              children: [],
+              ageGroups: defaultTemplate.ageGroups.map(group => ({ ...group })),
+              budgetConfig: { ...defaultTemplate.budgetConfig },
+              calculation: {
+                totalRequired: 0,
+                amountPerParticipant: 0,
+                maxAllowed: 0,
+                groupTotals: {},
+              },
+              customGroupSettings: defaultTemplate.customGroupSettings 
+                ? defaultTemplate.customGroupSettings.map(group => ({ ...group }))
+                : null,
+              includedChildren: [],
+            });
+          } else {
+            // No default template, use system defaults
+            setLocalState({
+              children: [],
+              ageGroups: DEFAULT_AGE_GROUPS,
+              budgetConfig: DEFAULT_BUDGET_CONFIG,
+              calculation: {
+                totalRequired: 0,
+                amountPerParticipant: 0,
+                maxAllowed: 0,
+                groupTotals: {},
+              },
+              customGroupSettings: null,
+              includedChildren: [],
+            });
+          }
+          success(t('gelt.resetSuccess'));
+        },
+        onError: () => {
+          showError(t('gelt.resetError'));
+        },
+      });
+    }
+  };
+
+  const handleExport = () => {
+    const exportData = prepareExportData(
+      calculation,
+      localState.budgetConfig,
+      localState.ageGroups,
+      localState.children
+    );
+    const csv = exportToCSV(exportData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `gelt-export-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    success(t('gelt.exportSuccess'));
+  };
+
+  const handleSaveTemplate = async (template: {
+    name: string;
+    description?: string;
+    ageGroups: AgeGroup[];
+    budgetConfig: BudgetConfig;
+    customGroupSettings: AgeGroup[] | null;
+    is_default?: boolean;
+  }) => {
+    try {
+      await saveTemplate.mutateAsync(template);
+      success(t('gelt.templateSaved'));
+    } catch {
+      showError(t('gelt.templateSaveError'));
+    }
+  };
+
+  const handleLoadTemplate = (template: GeltTemplate) => {
+    setLocalState({
+      ...localState!,
+      ageGroups: template.ageGroups,
+      budgetConfig: template.budgetConfig,
+      customGroupSettings: template.customGroupSettings,
+    });
+    success(t('gelt.templateLoaded', { name: template.name }));
+  };
+
+  return (
+    <Layout>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 mb-2">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">{t('gelt.pageTitle')}</h1>
+              <button
+                onClick={() => setShowHowItWorksModal(true)}
+                className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                title={t('gelt.howItWorks')}
+              >
+                <Info className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            </div>
+            {defaultTemplate && (
+              <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm bg-blue-50 px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl border border-blue-200 shadow-sm">
+                <span className="font-medium text-gray-700 hidden sm:inline">{t('gelt.currentTemplate')}:</span>
+                <span className="text-blue-700 font-semibold text-xs sm:text-sm truncate max-w-[200px] sm:max-w-none">
+                  {defaultTemplate.is_default 
+                    ? t('gelt.userDefaultTemplate', { name: defaultTemplate.name })
+                    : t('gelt.systemDefault')}
+                </span>
+              </div>
+            )}
+            {!defaultTemplate && (
+              <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm bg-gray-50 px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <span className="font-medium text-gray-700 hidden sm:inline">{t('gelt.currentTemplate')}:</span>
+                <span className="text-gray-600 text-xs sm:text-sm">{t('gelt.systemDefault')}</span>
+              </div>
+            )}
+          </div>
+          <p className="text-sm sm:text-base text-gray-600 hidden sm:block">{t('gelt.description')}</p>
+          
+          {/* Warning about modified ages */}
+          {localState && localState.children.some(child => child.originalAge !== undefined) && (
+            <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
+              <Info className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-yellow-800 font-medium">
+                  {t('gelt.modifiedAgesWarning')}
+                </p>
+                <p className="text-[10px] sm:text-xs text-yellow-700 mt-1">
+                  {t('gelt.modifiedAgesWarningDescription')}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          <Button
+            variant="primary"
+            onClick={() => setShowImportModal(true)}
+            icon={<Upload className="w-4 h-4" />}
+          >
+            {t('gelt.importFromBirthdays')}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setShowBudgetConfigModal(true)}
+            icon={<Settings className="w-4 h-4" />}
+          >
+            {t('gelt.budgetConfig')}
+            <span className="ml-2 text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md font-medium">
+              {localState.budgetConfig.participants} / {localState.budgetConfig.allowedOverflowPercentage}%
+              {localState.budgetConfig.customBudget && (
+                <span className="ml-1 font-semibold">
+                  • {localState.budgetConfig.customBudget}₪
+                </span>
+              )}
+            </span>
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setShowLoadTemplateModal(true)}
+            icon={<FolderOpen className="w-4 h-4" />}
+          >
+            {t('gelt.loadTemplate')}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setShowSaveTemplateModal(true)}
+            icon={<Save className="w-4 h-4" />}
+          >
+            {t('gelt.saveTemplate')}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            icon={<Download className="w-4 h-4" />}
+          >
+            {t('gelt.export')}
+          </Button>
+          <Button
+            variant="danger"
+            onClick={handleReset}
+            icon={<RotateCcw className="w-4 h-4" />}
+          >
+            {t('gelt.reset')}
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
+          {/* Left column - Children and Age Groups */}
+          <div className="lg:col-span-3 space-y-4 sm:space-y-6">
+            {/* Children List - Collapsible */}
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6">
+              <button
+                onClick={() => setShowChildrenList(!showChildrenList)}
+                className="w-full flex items-center justify-between gap-2 mb-3 sm:mb-4 hover:opacity-80 transition-opacity"
+              >
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                  <h2 className="text-base sm:text-lg lg:text-xl font-semibold">{t('gelt.children')}</h2>
+                  <span className="text-xs sm:text-sm text-gray-500">
+                    ({localState.children.length})
+                  </span>
+                </div>
+                {showChildrenList ? (
+                  <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                )}
+              </button>
+              {showChildrenList && (
+                <GeltChildrenList
+                  children={localState.children}
+                  includedChildren={includedChildrenSet}
+                  onUpdateChild={handleUpdateChild}
+                  onToggleInclude={handleToggleInclude}
+                  onResetAge={handleResetAge}
+                />
+              )}
+            </div>
+
+            {/* Age Groups List */}
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6">
+              <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                <Calculator className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                <h2 className="text-base sm:text-lg lg:text-xl font-semibold">{t('gelt.ageGroups')}</h2>
+              </div>
+              <GeltAgeGroupsList
+                ageGroups={localState.ageGroups}
+                calculation={calculation}
+                onUpdateGroup={handleUpdateGroup}
+                onToggleInclude={handleToggleGroupInclude}
+                onShowGroupChildren={handleShowGroupChildren}
+                children={localState.children}
+              />
+            </div>
+          </div>
+
+          {/* Right column - Calculation Results */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6">
+              <button
+                onClick={() => setShowCalculationResults(!showCalculationResults)}
+                className="w-full flex items-center justify-between gap-2 mb-3 sm:mb-4 hover:opacity-80 transition-opacity"
+              >
+                <div className="flex items-center gap-2">
+                  <Calculator className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                  <h2 className="text-base sm:text-lg lg:text-xl font-semibold">{t('gelt.calculationResults')}</h2>
+                </div>
+                {showCalculationResults ? (
+                  <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                )}
+              </button>
+              {showCalculationResults && (
+                <GeltCalculationResults calculation={calculation} />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Import Modal */}
+      <GeltImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={handleImport}
+        birthdays={birthdays}
+        ageGroups={localState.ageGroups}
+      />
+
+      {/* Budget Config Modal */}
+      <GeltBudgetConfigModal
+        isOpen={showBudgetConfigModal}
+        onClose={() => setShowBudgetConfigModal(false)}
+        config={localState.budgetConfig}
+        onUpdate={handleUpdateBudgetConfig}
+      />
+
+      {/* Save Template Modal */}
+      <GeltTemplateModal
+        isOpen={showSaveTemplateModal}
+        onClose={() => setShowSaveTemplateModal(false)}
+        onSave={handleSaveTemplate}
+        currentAgeGroups={localState.ageGroups}
+        currentBudgetConfig={localState.budgetConfig}
+        currentCustomGroupSettings={localState.customGroupSettings}
+        isLoading={saveTemplate.isPending}
+      />
+
+      {/* Load Template Modal */}
+      <GeltLoadTemplateModal
+        isOpen={showLoadTemplateModal}
+        onClose={() => setShowLoadTemplateModal(false)}
+        onLoad={handleLoadTemplate}
+        onTemplateDeleted={(wasDefault) => {
+          // If default template was deleted, reset to system defaults
+          if (wasDefault) {
+            setLocalState({
+              children: localState?.children || [],
+              ageGroups: DEFAULT_AGE_GROUPS,
+              budgetConfig: DEFAULT_BUDGET_CONFIG,
+              calculation: {
+                totalRequired: 0,
+                amountPerParticipant: 0,
+                maxAllowed: 0,
+                groupTotals: {},
+              },
+              customGroupSettings: null,
+              includedChildren: localState?.includedChildren || [],
+            });
+          }
+        }}
+      />
+
+      {/* How It Works Modal */}
+      {showHowItWorksModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowHowItWorksModal(false)}>
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full animate-slide-in relative max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowHowItWorksModal(false)}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors z-10"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('gelt.howItWorksTitle')}</h2>
+              <div className="prose prose-sm max-w-none">
+                <p className="text-gray-700 whitespace-pre-line leading-relaxed">
+                  {t('gelt.howItWorksContent')}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50">
+              <Button variant="outline" onClick={() => setShowHowItWorksModal(false)}>
+                {t('common.close')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Group Children Modal */}
+      {selectedGroupForChildren && (
+        <GeltGroupChildrenModal
+          isOpen={showGroupChildrenModal}
+          onClose={() => {
+            setShowGroupChildrenModal(false);
+            setSelectedGroupForChildren(null);
+          }}
+          group={selectedGroupForChildren}
+          children={localState.children}
+          includedChildren={includedChildrenSet}
+          onUpdateChild={handleUpdateChild}
+          onToggleInclude={handleToggleInclude}
+          onRemoveChild={handleRemoveChild}
+        />
+      )}
+    </Layout>
+  );
+};

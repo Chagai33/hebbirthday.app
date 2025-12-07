@@ -14,6 +14,7 @@ import { Register } from './components/auth/Register';
 import { ResetPassword } from './components/auth/ResetPassword';
 import { Dashboard } from './components/Dashboard';
 import { GroupsPanel } from './components/groups/GroupsPanel';
+import { GeltPage } from './components/gelt/GeltPage';
 import { TermsOfUse } from './components/pages/TermsOfUse';
 import { PrivacyPolicy } from './components/pages/PrivacyPolicy';
 import { GuestPortal } from './components/guest/GuestPortal';
@@ -101,6 +102,14 @@ function App() {
                       element={
                         <ProtectedRoute>
                           <GroupsPanel />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/gelt"
+                      element={
+                        <ProtectedRoute>
+                          <GeltPage />
                         </ProtectedRoute>
                       }
                     />

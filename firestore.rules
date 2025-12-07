@@ -3,6 +3,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // --- Helper Functions ---
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -31,6 +32,8 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.token.role == role;
     }
 
+    // --- Existing Collections ---
+
     match /profiles/{userId} {
       allow read: if isAuthenticated() && request.auth.uid == userId;
       allow create: if isAuthenticated() && request.auth.uid == userId;
@@ -47,37 +50,137 @@ service cloud.firestore {
 
     match /tenant_members/{membershipId} {
       allow read: if isAuthenticated() &&
+                     resource != null &&
                      (request.auth.uid == resource.data.user_id ||
                       isTenantMember(resource.data.tenant_id));
       allow create: if isAuthenticated() 
                     && request.auth.uid == request.resource.data.user_id
                     && get(/databases/$(database)/documents/tenants/$(request.resource.data.tenant_id)).data.owner_id == request.auth.uid;
-      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.user_id;
+      allow update, delete: if isAuthenticated() && 
+                               resource != null &&
+                               request.auth.uid == resource.data.user_id;
     }
 
     match /groups/{groupId} {
-      allow read: if isAuthenticated() && isTenantMember(resource.data.tenant_id);
+      allow read: if isAuthenticated() && 
+                     resource != null &&
+                     isTenantMember(resource.data.tenant_id);
       allow create: if isAuthenticated() &&
                        (hasCustomClaims() ? request.resource.data.tenant_id == getUserTenantId() : true);
       allow update, delete: if isAuthenticated() &&
-                               isTenantMember(resource.data.tenant_id);
+                               resource != null &&
+                               isTenantMember(resource.data.tenant_id) &&
+                               resource.data.tenant_id == request.resource.data.tenant_id; // Prevent tenant_id change
     }
 
     match /birthdays/{birthdayId} {
-      allow read: if isAuthenticated() && isTenantMember(resource.data.tenant_id);
+      allow read: if isAuthenticated() && 
+                     resource != null &&
+                     isTenantMember(resource.data.tenant_id);
       allow create: if isAuthenticated() &&
                        (hasCustomClaims() ? request.resource.data.tenant_id == getUserTenantId() : true);
       allow update, delete: if isAuthenticated() &&
-                               isTenantMember(resource.data.tenant_id);
+                               resource != null &&
+                               isTenantMember(resource.data.tenant_id) &&
+                               resource.data.tenant_id == request.resource.data.tenant_id; // Prevent tenant_id change
     }
 
     match /wishlist_items/{itemId} {
-      allow read: if isAuthenticated() && isTenantMember(resource.data.tenant_id);
+      allow read: if isAuthenticated() && 
+                     resource != null &&
+                     isTenantMember(resource.data.tenant_id);
       allow create: if isAuthenticated() &&
                        (hasCustomClaims() ? request.resource.data.tenant_id == getUserTenantId() : true);
       allow update, delete: if isAuthenticated() &&
-                               isTenantMember(resource.data.tenant_id);
+                               resource != null &&
+                               isTenantMember(resource.data.tenant_id) &&
+                               resource.data.tenant_id == request.resource.data.tenant_id; // Prevent tenant_id change
     }
+
+    // --- Gelt Calculations (Secured Version) ---
+    match /gelt_calculations/{calculationId} {
+      allow read: if isAuthenticated() && 
+                     resource != null && 
+                     isTenantMember(resource.data.tenant_id);
+      
+      allow create: if isAuthenticated() &&
+                       request.resource.data.tenant_id != null &&
+                       (hasCustomClaims() 
+                         ? request.resource.data.tenant_id == getUserTenantId() 
+                         : true);
+      
+      allow update: if isAuthenticated() &&
+                       resource != null &&
+                       isTenantMember(resource.data.tenant_id) &&
+                       resource.data.tenant_id == request.resource.data.tenant_id;
+      
+      allow delete: if isAuthenticated() &&
+                       resource != null &&
+                       isTenantMember(resource.data.tenant_id);
+    }
+
+    // --- NEW: Gelt States ---
+    match /gelt_states/{stateId} {
+      // Read: stateId is the tenant_id, so check if user is member of that tenant
+      allow read: if isAuthenticated() && isTenantMember(stateId);
+      
+      // Create/Update: stateId should match tenant_id, and user should be tenant member
+      allow create, update: if isAuthenticated() &&
+                              (hasCustomClaims() 
+                                ? (request.resource.data.tenant_id == getUserTenantId() && stateId == getUserTenantId())
+                                : (request.resource.data.tenant_id == stateId && isTenantMember(stateId)));
+      
+      // Delete: allow if user is tenant member
+      allow delete: if isAuthenticated() && isTenantMember(stateId);
+    }
+
+    // --- GELT Templates ---
+    match /gelt_templates/{templateId} {
+      // Read: רק חברי tenant יכולים לקרוא תבניות של אותו tenant
+      // לשאילתות (queries) - Firestore בודק את ה-rule עבור כל מסמך שיחזר מה-query
+      // למסמכים בודדים - נבדוק ב-resource
+      // חשוב: ה-query חייב לכלול where('tenant_id', '==', tenantId) כדי שהכלל יעבוד
+      // ב-queries, resource הוא null, אז נאפשר קריאה אם המשתמש מאומת
+      // ה-where clause יבטיח שרק תבניות של אותו tenant יוחזרו
+      // למסמכים בודדים, נבדוק את ה-tenant_id של המסמך
+      // הפתרון: לאפשר קריאה אם המשתמש מאומת, ולבדוק את ה-tenant_id של המסמך אם הוא קיים
+      // ב-queries, resource הוא null, אז נאפשר קריאה אם המשתמש מאומת
+      // למסמכים בודדים, נבדוק את ה-tenant_id של המסמך
+      // אם יש custom claims, נבדוק שהמשתמש הוא חבר ב-tenant של המסמך
+      allow read: if isAuthenticated() && 
+                     (resource == null || 
+                      (resource != null && 
+                       resource.data != null && 
+                       resource.data.tenant_id != null && 
+                       (hasCustomClaims() 
+                         ? (getUserTenantId() == resource.data.tenant_id)
+                         : isTenantMember(resource.data.tenant_id))));
+      
+      // Create: רק חברי tenant יכולים ליצור תבניות
+      allow create: if isAuthenticated() &&
+                       request.resource.data.tenant_id != null &&
+                       isTenantMember(request.resource.data.tenant_id) &&
+                       request.resource.data.created_by == request.auth.uid &&
+                       request.resource.data.updated_by == request.auth.uid;
+      
+      // Update: רק חברי tenant יכולים לעדכן תבניות
+      allow update: if isAuthenticated() &&
+                       resource != null &&
+                       resource.data != null &&
+                       resource.data.tenant_id != null &&
+                       isTenantMember(resource.data.tenant_id) &&
+                       request.resource.data.tenant_id == resource.data.tenant_id &&
+                       request.resource.data.updated_by == request.auth.uid;
+      
+      // Delete: רק חברי tenant יכולים למחוק תבניות
+      allow delete: if isAuthenticated() &&
+                      resource != null &&
+                      resource.data != null &&
+                      resource.data.tenant_id != null &&
+                      isTenantMember(resource.data.tenant_id);
+    }
+
+    // --- System & Rate Limits ---
 
     match /rate_limits/{docId} {
       allow read, write: if false;

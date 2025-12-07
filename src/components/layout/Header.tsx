@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useGroupFilter } from '../../contexts/GroupFilterContext';
 import { useGroups } from '../../hooks/useGroups';
 import { useBirthdays } from '../../hooks/useBirthdays';
-import { LogOut, FolderTree, Filter, Settings, ChevronDown, ChevronUp, Menu } from 'lucide-react';
+import { LogOut, FolderTree, Filter, Settings, ChevronDown, ChevronUp, Menu, Calculator } from 'lucide-react';
 import { useTranslatedRootGroupName } from '../../utils/groupNameTranslator';
 import { TenantSettings } from '../settings/TenantSettings';
 import { useLayoutContext } from '../../contexts/LayoutContext';
@@ -231,6 +231,27 @@ export const Header: React.FC = () => {
                     )}
 
                     {user && (
+                      <button
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          if (location.pathname === '/gelt') {
+                            navigate('/');
+                          } else {
+                            navigate('/gelt');
+                          }
+                        }}
+                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm ${
+                          location.pathname === '/gelt'
+                            ? 'bg-blue-50 text-blue-700'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        <Calculator className="w-4 h-4" />
+                        <span>{t('gelt.title')}</span>
+                      </button>
+                    )}
+
+                    {user && (
                       <>
                         <div className="h-px bg-gray-100 my-1" />
                         <button
@@ -327,6 +348,29 @@ export const Header: React.FC = () => {
                 >
                   <FolderTree className="w-4 h-4" />
                   <span>{t('groups.manageGroups')}</span>
+                </button>
+                <div className="h-6 w-px bg-gray-300" />
+              </>
+            )}
+
+            {user && (
+              <>
+                <button
+                  onClick={() => {
+                    if (location.pathname === '/gelt') {
+                      navigate('/');
+                    } else {
+                      navigate('/gelt');
+                    }
+                  }}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm ${
+                    location.pathname === '/gelt'
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <Calculator className="w-4 h-4" />
+                  <span>{t('gelt.title')}</span>
                 </button>
                 <div className="h-6 w-px bg-gray-300" />
               </>
