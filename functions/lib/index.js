@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.guestPortalOps = exports.updateNextBirthdayScheduled = exports.resetBirthdaySyncData = exports.deleteAccount = exports.getAccountDeletionSummary = exports.previewDeletion = exports.cleanupOrphanEvents = exports.listGoogleCalendars = exports.updateGoogleCalendarSelection = exports.getGoogleAccountInfo = exports.getGoogleCalendarStatus = exports.disconnectGoogleCalendar = exports.removeBirthdayFromGoogleCalendar = exports.onUserCreate = exports.deleteAllSyncedEvents = exports.deleteGoogleCalendar = exports.createGoogleCalendar = exports.exchangeGoogleAuthCode = exports.syncMultipleBirthdaysToGoogleCalendar = exports.processCalendarSyncJob = exports.retryFailedSyncs = exports.syncBirthdayToGoogleCalendar = exports.refreshBirthdayHebrewData = exports.onBirthdayWrite = void 0;
+exports.guestPortalOps = exports.updateNextBirthdayScheduled = exports.resetBirthdaySyncData = exports.deleteAccount = exports.getAccountDeletionSummary = exports.previewDeletion = exports.cleanupOrphanEvents = exports.listGoogleCalendars = exports.updateGoogleCalendarSelection = exports.getGoogleAccountInfo = exports.getGoogleCalendarStatus = exports.disconnectGoogleCalendar = exports.removeBirthdayFromGoogleCalendar = exports.onUserCreate = exports.deleteAllSyncedEventsFromGoogleCalendar = exports.deleteGoogleCalendar = exports.createGoogleCalendar = exports.exchangeGoogleAuthCode = exports.syncMultipleBirthdaysToGoogleCalendar = exports.processCalendarSyncJob = exports.retryFailedSyncs = exports.syncBirthdayToGoogleCalendar = exports.refreshBirthdayHebrewData = exports.onBirthdayWrite = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const node_fetch_1 = __importDefault(require("node-fetch"));
@@ -334,7 +334,7 @@ async function calculateExpectedEvents(birthday) {
     return events;
 }
 // --- CORE SYNC LOGIC (V3.2) ---
-async function processBirthdaySync(birthdayId, currentData, tenantId) {
+async function processBirthdaySync(birthdayId, currentData, tenantId, force = false) {
     const tenantDoc = await db.collection('tenants').doc(tenantId).get();
     const ownerId = tenantDoc.data()?.owner_id;
     if (!ownerId) {
@@ -366,7 +366,12 @@ async function processBirthdaySync(birthdayId, currentData, tenantId) {
             archived: currentData.archived, notes: currentData.notes, groups: currentData.group_ids || []
         };
         const currentDataHash = crypto.createHash('sha256').update(JSON.stringify(dataToHash)).digest('hex');
-        if (currentData.syncMetadata?.dataHash === currentDataHash && currentData.syncMetadata?.status === 'SYNCED') {
+        // Check if we have mapped events. If map is empty/missing, force sync even if hash matches.
+        const hasMappedEvents = currentData.googleCalendarEventsMap && Object.keys(currentData.googleCalendarEventsMap).length > 0;
+        // DEBUG LOGS
+        functions.logger.log(`DEBUG: Syncing ${birthdayId} to Calendar: ${calendarId} | Force: ${force} | HasEvents: ${hasMappedEvents}`);
+        functions.logger.log(`DEBUG: CurrentHash: ${currentDataHash} | StoredHash: ${currentData.syncMetadata?.dataHash}`);
+        if (!force && hasMappedEvents && currentData.syncMetadata?.dataHash === currentDataHash && currentData.syncMetadata?.status === 'SYNCED') {
             functions.logger.log(`Idempotent skip for ${birthdayId}`);
             return;
         }
@@ -404,17 +409,56 @@ async function processBirthdaySync(birthdayId, currentData, tenantId) {
         // D. Execution
         const tasks = [];
         const failedKeys = [];
-        creates.forEach(item => tasks.push(async () => {
-            try {
-                const res = await calendar.events.insert({ calendarId, requestBody: item.resource });
-                if (res.data.id)
-                    currentMap[item.key] = res.data.id;
-            }
-            catch (e) {
-                failedKeys.push(item.key);
-                throw e;
-            }
-        }));
+        // Create Tasks (With Deterministic IDs to prevent duplicates)
+        creates.forEach(item => {
+            tasks.push(async () => {
+                try {
+                    // 1. Generate Deterministic ID (Allowed chars: 0-9, a-v)
+                    // Format: hb_<md5_hash_of_unique_key>
+                    const uniqueStr = `${birthdayId}_${item.key}`;
+                    const deterministicId = 'hb' + crypto.createHash('md5').update(uniqueStr).digest('hex');
+                    // 2. Add ID to resource
+                    const resourceWithId = { ...item.resource, id: deterministicId };
+                    const res = await calendar.events.insert({ calendarId, requestBody: resourceWithId });
+                    if (res.data.id) {
+                        currentMap[item.key] = res.data.id;
+                    }
+                }
+                catch (e) {
+                    // 3. Handle Duplicate Scenario (409 Conflict) - PROFESSIONAL FIX
+                    if (e.code === 409) {
+                        functions.logger.log(`Event ${item.key} exists (409). Reconciling state...`);
+                        // 1. Recalculate the Deterministic ID
+                        const uniqueStr = `${birthdayId}_${item.key}`;
+                        const deterministicId = 'hb' + crypto.createHash('md5').update(uniqueStr).digest('hex');
+                        try {
+                            // 2. Perform full UPDATE (PUT) to overwrite existing state
+                            // We explicitly set status: 'confirmed' to "undelete" the event if it was in trash.
+                            await calendar.events.update({
+                                calendarId,
+                                eventId: deterministicId,
+                                requestBody: {
+                                    ...item.resource,
+                                    id: deterministicId,
+                                    status: 'confirmed' // Crucial: Resurrects cancelled events
+                                }
+                            });
+                            // 3. Update Map
+                            currentMap[item.key] = deterministicId;
+                            functions.logger.log(`Successfully restored/updated event ${deterministicId}`);
+                        }
+                        catch (updateErr) {
+                            functions.logger.error(`Failed to reconcile event ${deterministicId}`, updateErr);
+                            failedKeys.push(item.key);
+                        }
+                    }
+                    else {
+                        failedKeys.push(item.key);
+                        throw e;
+                    }
+                }
+            });
+        });
         updates.forEach(item => tasks.push(async () => {
             try {
                 await calendar.events.patch({ calendarId, eventId: item.eventId, requestBody: item.resource });
@@ -529,12 +573,22 @@ exports.onBirthdayWrite = functions.firestore.document('birthdays/{birthdayId}')
     }
     // 3. Smart Sync
     const finalData = { ...afterData, ...updateData };
-    if (finalData.tenant_id) {
+    // CRITICAL FIX: Only sync if explicitly enabled via 'isSynced' flag
+    if (finalData.tenant_id && finalData.isSynced === true) {
         try {
             await processBirthdaySync(context.params.birthdayId, finalData, finalData.tenant_id);
         }
         catch (e) {
             functions.logger.error('Sync error:', e);
+        }
+    }
+    else if (finalData.tenant_id && beforeData?.isSynced === true && finalData.isSynced === false) {
+        // If it was synced and now turned off -> Trigger removal
+        try {
+            await processBirthdaySync(context.params.birthdayId, { ...finalData, archived: true }, finalData.tenant_id);
+        }
+        catch (e) {
+            functions.logger.error('Removal error:', e);
         }
     }
     return null;
@@ -555,14 +609,18 @@ exports.refreshBirthdayHebrewData = functions.https.onCall(async (data, context)
 exports.syncBirthdayToGoogleCalendar = functions.https.onCall(async (data, context) => {
     if (!context.auth)
         throw new functions.https.HttpsError('unauthenticated', 'Auth required');
-    const doc = await db.collection('birthdays').doc(data.birthdayId).get();
+    const docRef = db.collection('birthdays').doc(data.birthdayId);
+    const doc = await docRef.get();
     if (!doc.exists)
         throw new functions.https.HttpsError('not-found', 'Not found');
     const bData = doc.data();
     const tDoc = await db.collection('tenants').doc(bData?.tenant_id).get();
     if (tDoc.data()?.owner_id !== context.auth.uid)
         throw new functions.https.HttpsError('permission-denied', 'Not owner');
-    await processBirthdaySync(data.birthdayId, bData, bData?.tenant_id);
+    // 1. Set flag to enable sync loop
+    await docRef.update({ isSynced: true });
+    // 2. Process with FORCE=true because user manually requested it
+    await processBirthdaySync(data.birthdayId, { ...bData, isSynced: true }, bData?.tenant_id, true);
     return { success: true };
 });
 exports.retryFailedSyncs = functions.pubsub.schedule('every 1 hours').onRun(async (context) => {
@@ -599,11 +657,16 @@ exports.processCalendarSyncJob = functions.runWith({ timeoutSeconds: 540, memory
     let successes = 0, failures = 0;
     for (const bid of birthdayIds) {
         try {
-            const doc = await db.collection('birthdays').doc(bid).get();
+            const docRef = db.collection('birthdays').doc(bid);
+            const doc = await docRef.get();
             if (doc.exists) {
                 const d = doc.data();
-                if (d && d.tenant_id)
-                    await processBirthdaySync(bid, d, d.tenant_id);
+                if (d && d.tenant_id) {
+                    // Set flag (this might trigger onBirthdayWrite, but Idempotency will catch it)
+                    await docRef.update({ isSynced: true });
+                    // Force sync for manual bulk jobs
+                    await processBirthdaySync(bid, { ...d, isSynced: true }, d.tenant_id, true);
+                }
             }
             successes++;
             if (jobId)
@@ -648,7 +711,7 @@ exports.syncMultipleBirthdaysToGoogleCalendar = functions.https.onCall(async (da
         };
         await tasksClient.createTask({ parent, task });
     }
-    return { success: true, message: 'Batch started', jobId };
+    return { success: true, message: 'Batch started', jobId, status: 'queued', totalAttempted: birthdayIds.length };
 });
 // Calendar Management & Maintenance
 exports.exchangeGoogleAuthCode = functions.https.onCall(async (data, context) => {
@@ -691,7 +754,7 @@ exports.deleteGoogleCalendar = functions.https.onCall(async (data, context) => {
     // Cleanup Firestore logic... (simplified for brevity)
     return { success: true };
 });
-exports.deleteAllSyncedEvents = functions.https.onCall(async (data, context) => {
+exports.deleteAllSyncedEventsFromGoogleCalendar = functions.https.onCall(async (data, context) => {
     if (!context.auth)
         throw new functions.https.HttpsError('unauthenticated', 'Auth required');
     const { tenantId, forceDBOnly } = data;
@@ -701,19 +764,54 @@ exports.deleteAllSyncedEvents = functions.https.onCall(async (data, context) => 
         oauth2Client.setCredentials({ access_token: accessToken });
         const calendar = googleapis_1.google.calendar({ version: 'v3', auth: oauth2Client });
         const calendarId = await getCalendarId(context.auth.uid);
+        functions.logger.log(`Deleting events from calendar: ${calendarId} for tenant: ${tenantId}`); // DEBUG LOG
         let pageToken;
+        let deletedCount = 0, foundCount = 0, failedCount = 0;
+        let queryParams = {
+            calendarId,
+            privateExtendedProperty: ['createdByApp=hebbirthday'],
+            maxResults: 250,
+            singleEvents: true
+        };
+        // We only add tenantId if it's provided and valid, otherwise we do a "broad" cleanup based on app ID only
+        if (tenantId && tenantId !== 'undefined' && tenantId !== 'null') {
+            queryParams.privateExtendedProperty.push(`tenantId=${tenantId}`);
+        }
+        // Define dryRun if not present in data (default to false for forceful delete)
+        const dryRun = false;
         do {
-            const res = await calendar.events.list({ calendarId, privateExtendedProperty: [`createdByApp=hebbirthday`, `tenantId=${tenantId}`], pageToken });
-            const tasks = (res.data.items || []).map((e) => () => calendar.events.delete({ calendarId, eventId: e.id }).catch(err => { if (err.code !== 404)
-                throw err; }));
-            await (0, calendar_utils_1.batchProcessor)(tasks, 10);
+            const res = await calendar.events.list({ ...queryParams, pageToken });
+            const items = res.data.items || [];
+            for (const ev of items) {
+                if (ev.id) {
+                    foundCount++;
+                    if (!dryRun) {
+                        try {
+                            await calendar.events.delete({ calendarId, eventId: ev.id });
+                            deletedCount++;
+                        }
+                        catch (e) {
+                            failedCount++;
+                            functions.logger.warn(`Orphan delete fail ${ev.id}`, e);
+                        }
+                    }
+                }
+            }
             pageToken = res.data.nextPageToken;
         } while (pageToken);
     }
     // DB Clean
     const batch = db.batch();
     const docs = await db.collection('birthdays').where('tenant_id', '==', tenantId).get();
-    docs.forEach(doc => batch.update(doc.ref, { googleCalendarEventsMap: admin.firestore.FieldValue.delete(), syncMetadata: admin.firestore.FieldValue.delete(), lastSyncedAt: admin.firestore.FieldValue.delete() }));
+    docs.forEach(doc => batch.update(doc.ref, {
+        googleCalendarEventsMap: admin.firestore.FieldValue.delete(),
+        syncMetadata: admin.firestore.FieldValue.delete(),
+        lastSyncedAt: admin.firestore.FieldValue.delete(),
+        googleCalendarEventId: admin.firestore.FieldValue.delete(),
+        googleCalendarEventIds: admin.firestore.FieldValue.delete(),
+        syncedCalendarId: admin.firestore.FieldValue.delete(),
+        isSynced: false // Break the loop: Explicitly mark as not synced
+    }));
     await batch.commit();
     return { success: true };
 });
@@ -849,9 +947,20 @@ exports.cleanupOrphanEvents = functions.runWith({ timeoutSeconds: 540, memory: '
         const oauth2Client = new googleapis_1.google.auth.OAuth2();
         oauth2Client.setCredentials({ access_token: accessToken });
         const calendar = googleapis_1.google.calendar({ version: 'v3', auth: oauth2Client });
-        let pageToken, deletedCount = 0, foundCount = 0, failedCount = 0;
+        let pageToken;
+        let deletedCount = 0, foundCount = 0, failedCount = 0;
+        // Check tenantId usage (suppress unused variable warning if logically not needed here but kept for API compat)
+        if (tenantId) { /* Logic that might use tenantId in future or logs */ }
         do {
-            const res = await calendar.events.list({ calendarId, privateExtendedProperty: ['createdByApp=hebbirthday', ...(tenantId ? [`tenantId=${tenantId}`] : [])], maxResults: 250, pageToken, singleEvents: true });
+            // שינוי קריטי: חיפוש רחב יותר רק לפי שם האפליקציה, ללא תלות ב-TenantId
+            // זה מבטיח שנמצא גם אירועים "שבורים"
+            const res = await calendar.events.list({
+                calendarId,
+                privateExtendedProperty: ['createdByApp=hebbirthday'],
+                maxResults: 250,
+                pageToken,
+                singleEvents: true
+            });
             const items = res.data.items || [];
             for (const ev of items) {
                 if (ev.id) {
@@ -873,6 +982,7 @@ exports.cleanupOrphanEvents = functions.runWith({ timeoutSeconds: 540, memory: '
         return { success: true, deletedCount: dryRun ? foundCount : deletedCount, foundCount, failedCount, calendarName };
     }
     catch (e) {
+        functions.logger.error('Orphan cleanup failed:', e);
         throw new functions.https.HttpsError('internal', 'Orphan cleanup failed');
     }
 });
@@ -887,10 +997,10 @@ exports.previewDeletion = functions.https.onCall(async (data, context) => {
         let totalCount = 0;
         snaps.forEach(doc => {
             const d = doc.data();
-            if (!d.syncedCalendarId || d.syncedCalendarId !== calendarId)
-                return;
-            const count = d.googleCalendarEventsMap ? Object.keys(d.googleCalendarEventsMap).length : (d.googleCalendarEventIds ? (d.googleCalendarEventIds.hebrew?.length || 0) + (d.googleCalendarEventIds.gregorian?.length || 0) : (d.googleCalendarEventId ? 1 : 0));
-            if (count > 0) {
+            // Relaxed check: Count if it has ANY mapped events, regardless of stored calendar ID logic
+            const hasEvents = d.googleCalendarEventsMap && Object.keys(d.googleCalendarEventsMap).length > 0;
+            if (hasEvents) {
+                const count = Object.keys(d.googleCalendarEventsMap).length;
                 summary.push({ name: `${d.first_name} ${d.last_name}`, hebrewEvents: count, gregorianEvents: 0 });
                 totalCount += count;
             }
