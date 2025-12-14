@@ -27,7 +27,7 @@ class GoogleCalendarService {
                             const exchangeFn = httpsCallable<{code: string}, {accessToken: string}>(functions, 'exchangeGoogleAuthCode');
                             const res = await exchangeFn({ code: response.code });
                             resolve(res.data);
-                        } catch (error) {
+  } catch (error) {
                             reject(error);
                         }
                     } else {
@@ -72,7 +72,7 @@ class GoogleCalendarService {
     }
 
     async deleteAllSyncedEvents(tenantId: string, forceDBOnly?: boolean): Promise<{ totalDeleted: number; failedCount: number; calendarName?: string }> {
-        const fn = httpsCallable<{tenantId: string; forceDBOnly?: boolean}, { totalDeleted: number; failedCount: number; calendarName?: string }>(functions, 'deleteAllSyncedEvents');
+        const fn = httpsCallable<{tenantId: string; forceDBOnly?: boolean}, { totalDeleted: number; failedCount: number; calendarName?: string }>(functions, 'deleteAllSyncedEventsFromGoogleCalendar');
         const res = await fn({ tenantId, forceDBOnly });
         return res.data;
     }

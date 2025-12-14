@@ -308,6 +308,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       setIsSyncing(true);
       await googleCalendarService.updateCalendarSelection(selectedCalendarId, selectedCalendarName);
       
+      // Update local state immediately
       setCalendarId(selectedCalendarId);
       setCalendarName(selectedCalendarName);
       

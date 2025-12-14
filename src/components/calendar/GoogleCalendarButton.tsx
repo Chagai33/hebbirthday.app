@@ -163,8 +163,9 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
       await deleteAllSyncedEvents(currentTenant.id);
       setShowConfirm(false);
       setPreviewData(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting all events:', error);
+      alert(`שגיאה במחיקה: ${error.message || 'שגיאה לא ידועה'}`);
     }
   };
 
@@ -212,12 +213,32 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
       return;
     }
 
+    // שמירת השם זמנית לפני הניקוי
+    const nameToCreate = newCalendarName.trim();
+    
+    // סגירת המודל מיד לתחושת תגובתיות
+    setShowCreateCalendar(false);
+    setNewCalendarName('');
+
     try {
-      await createCalendar(newCalendarName.trim());
-      setShowCreateCalendar(false);
-      setNewCalendarName('');
+      // 1. יצירת היומן - הפונקציה ב-Context כבר מעדכנת את ה-State הגלובלי (calendarId/Name)
+      const result = await createCalendar(nameToCreate);
+      
+      // 2. וידוא בחירה (למקרה שה-Context לא תפס)
+      if (result?.calendarId) {
+          // זה יעדכן את ה-State ב-Context שוב ויבטיח שה-UI מתרנדר
+          await updateCalendarSelection(result.calendarId, result.calendarName);
+      }
+      
+      // 3. רענון הרשימה ברקע כדי שהיומן יופיע ב-Dropdown בפעם הבאה
+      // אנחנו לא מחכים לזה כדי לא לעכב את ה-UI
+      loadAvailableCalendars();
+      
     } catch (error) {
       console.error('Error creating calendar:', error);
+      // במקרה שגיאה נפתח שוב את המודל (אופציונלי, אבל עדיף למשתמש)
+      setNewCalendarName(nameToCreate);
+      setShowCreateCalendar(true);
     }
   };
 
@@ -240,6 +261,13 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
       setLoadingCalendars(false);
     }
   };
+
+  useEffect(() => {
+    // If we just created a calendar (createdCalendars length changed), refresh the list
+    if (isConnected) {
+        loadAvailableCalendars();
+    }
+  }, [createdCalendars.length, isConnected]);
 
   const handleSelectCalendar = async (selectedCalendar: CalendarOption) => {
     try {

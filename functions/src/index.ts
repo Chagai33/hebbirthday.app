@@ -496,7 +496,9 @@ async function processBirthdaySync(birthdayId: string, currentData: any, tenantI
         }
     }));
 
-    await batchProcessor(tasks, 5);
+    // Run SEQUENTIALLY (Concurrency: 1) to prevent Google Rate Limit (403)
+    // This is more robust than sleep() and ensures stability.
+    await batchProcessor(tasks, 1);
 
     // E. Reconciliation
     const newStatus = failedKeys.length > 0 ? 'PARTIAL_SYNC' : 'SYNCED';
@@ -685,6 +687,12 @@ export const syncMultipleBirthdaysToGoogleCalendar = functions.https.onCall(asyn
 
     const parent = tasksClient.queuePath(PROJECT_ID, LOCATION, QUEUE);
     const CHUNK_SIZE = 5;
+    let delaySeconds = 0;
+    
+    // Staggered Scheduling: Spread load over time to avoid Google API Rate Limits
+    // 5 birthdays * ~20 events = 100 requests. 10s gap keeps us well under 600 req/min quota.
+    const DELAY_INCREMENT = 10; 
+
     for (let i = 0; i < birthdayIds.length; i += CHUNK_SIZE) {
         const chunk = birthdayIds.slice(i, i + CHUNK_SIZE);
         const task = {
@@ -694,9 +702,13 @@ export const syncMultipleBirthdaysToGoogleCalendar = functions.https.onCall(asyn
                 body: Buffer.from(JSON.stringify({ birthdayIds: chunk, userId, jobId })).toString('base64'),
                 headers: { 'Content-Type': 'application/json' },
                 oidcToken: { serviceAccountEmail: `${PROJECT_ID}@appspot.gserviceaccount.com` }
+            },
+            scheduleTime: {
+                seconds: Math.floor(Date.now() / 1000) + delaySeconds
             }
         };
         await tasksClient.createTask({ parent, task });
+        delaySeconds += DELAY_INCREMENT;
     }
     return { success: true, message: 'Batch started', jobId, status: 'queued', totalAttempted: birthdayIds.length };
 });
@@ -781,7 +793,7 @@ export const deleteAllSyncedEventsFromGoogleCalendar = functions.https.onCall(as
                         try { 
                             await calendar.events.delete({ calendarId, eventId: ev.id }); 
                             deletedCount++; 
-                            await sleep(150); // Rate Limit Protection
+                            await sleep(50); // Reduced delay to prevent Timeout (408)
                         }
                         catch (e) { failedCount++; functions.logger.warn(`Orphan delete fail ${ev.id}`, e); }
                     }
@@ -825,9 +837,24 @@ export const removeBirthdayFromGoogleCalendar = functions.https.onCall(async (da
     const doc = await db.collection('birthdays').doc(data.birthdayId).get();
     if (!doc.exists) throw new functions.https.HttpsError('not-found', 'Not found');
     const bData = doc.data();
+    
     if (bData?.tenant_id) {
-       // Use V3.2 Logic: Simulate archive to trigger deletion
-       await processBirthdaySync(data.birthdayId, { ...bData, archived: true }, bData.tenant_id);
+       // 1. CRITICAL: Mark as unsynced FIRST to prevent Trigger recreation loop
+       await doc.ref.update({ isSynced: false });
+
+       // 2. Perform the deletion (waits for it to finish)
+       // We pass isSynced: false so processBirthdaySync knows not to re-enable it
+       await processBirthdaySync(data.birthdayId, { ...bData, isSynced: false, archived: true }, bData.tenant_id);
+       
+       // 3. Cleanup metadata
+       await doc.ref.update({ 
+           googleCalendarEventsMap: admin.firestore.FieldValue.delete(), 
+           syncMetadata: admin.firestore.FieldValue.delete(),
+           googleCalendarEventId: admin.firestore.FieldValue.delete(),
+           googleCalendarEventIds: admin.firestore.FieldValue.delete(),
+           syncedCalendarId: admin.firestore.FieldValue.delete(),
+           lastSyncedAt: admin.firestore.FieldValue.delete()
+       });
     }
     return { success: true };
   } catch (error: any) {

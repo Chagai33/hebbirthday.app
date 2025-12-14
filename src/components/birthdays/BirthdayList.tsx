@@ -592,7 +592,25 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                       className="px-2 sm:px-3 py-1 sm:py-1.5 bg-sky-50 text-sky-600 border border-sky-200 hover:bg-sky-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <UploadCloud className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      <span className="hidden sm:inline">{t('googleCalendar.syncToCalendar')}</span>
+                      <span className="hidden sm:inline">{t('googleCalendar.syncSelected', 'סנכרן')}</span>
+                    </button>
+                  )}
+                  {isConnected && (
+                    <button
+                      onClick={async () => {
+                        if (!window.confirm(t('googleCalendar.confirmBulkUnsync', 'האם לבטל סנכרון ולמחוק מהיומן עבור הרשומות שנבחרו?'))) return;
+                        const birthdaysToUnsync = Array.from(selectedIds);
+                        let successCount = 0;
+                        for (const bid of birthdaysToUnsync) {
+                           try { await removeBirthdayFromCalendar(bid); successCount++; } catch (e) { logger.error(e); }
+                        }
+                        setSelectedIds(new Set());
+                        showToast(`${successCount} רשומות הוסרו מהסנכרון`, 'success');
+                      }}
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    >
+                      <CloudOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">{t('googleCalendar.unsyncSelected', 'בטל סנכרון')}</span>
                     </button>
                   )}
                   <button
@@ -672,7 +690,25 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                       className="px-2 sm:px-3 py-1 sm:py-1.5 bg-sky-50 text-sky-600 border border-sky-200 hover:bg-sky-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <UploadCloud className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      <span className="hidden sm:inline">{t('googleCalendar.syncToCalendar')}</span>
+                      <span className="hidden sm:inline">{t('googleCalendar.syncSelected', 'סנכרן')}</span>
+                    </button>
+                  )}
+                  {isConnected && (
+                    <button
+                      onClick={async () => {
+                        if (!window.confirm(t('googleCalendar.confirmBulkUnsync', 'האם לבטל סנכרון ולמחוק מהיומן עבור הרשומות שנבחרו?'))) return;
+                        const birthdaysToUnsync = Array.from(selectedIds);
+                        let successCount = 0;
+                        for (const bid of birthdaysToUnsync) {
+                           try { await removeBirthdayFromCalendar(bid); successCount++; } catch (e) { logger.error(e); }
+                        }
+                        setSelectedIds(new Set());
+                        showToast(`${successCount} רשומות הוסרו מהסנכרון`, 'success');
+                      }}
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    >
+                      <CloudOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <span className="hidden sm:inline">{t('googleCalendar.unsyncSelected', 'בטל סנכרון')}</span>
                     </button>
                   )}
                   <button
@@ -1037,42 +1073,48 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                           <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                         </button>
                         {isConnected && (
-                          (birthday.googleCalendarEventId || birthday.googleCalendarEventIds) ? (
-                            <>
-                              {unsyncedMap.get(birthday.id) && (
-                                <div className="relative">
-                                  <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600" title={t('birthday.unsyncedChanges')} />
-                                </div>
-                              )}
-                              <button
-                                onClick={() => handleRemoveFromCalendar(birthday.id)}
-                                disabled={isSyncing}
-                                className="p-1 sm:p-2 text-red-600 hover:bg-red-100 rounded-lg transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
-                                title={t('googleCalendar.remove')}
-                              >
-                                <CloudOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                              </button>
-                              {unsyncedMap.get(birthday.id) && (
-                                <button
-                                  onClick={() => handleSyncToCalendar(birthday.id)}
-                                  disabled={isSyncing}
-                                  className="p-1 sm:p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
-                                  title={t('googleCalendar.updateToCalendar')}
-                                >
-                                  <UploadCloud className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                </button>
-                              )}
-                            </>
-                          ) : (
-                            <button
-                              onClick={() => handleSyncToCalendar(birthday.id)}
-                              disabled={isSyncing}
-                              className="p-1 sm:p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
-                              title={t('googleCalendar.syncToCalendar')}
-                            >
-                              <UploadCloud className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                            </button>
-                          )
+                          <div className="flex items-center justify-center mx-1">
+                            {(() => {
+                              const isSynced = !!(birthday.googleCalendarEventId || birthday.googleCalendarEventIds);
+                              const isError = birthday.syncMetadata?.status === 'ERROR';
+                              const isPending = unsyncedMap.get(birthday.id);
+                              
+                              let iconColorClass = "text-gray-300 hover:text-gray-500 hover:bg-gray-50"; // ברירת מחדל: לא מסונכרן (אפור בהיר)
+                              let tooltipContent = t('googleCalendar.startSyncing', 'לחץ לסנכרון');
+
+                              if (isSynced) {
+                                if (isError) {
+                                  iconColorClass = "text-red-500 hover:text-red-600 hover:bg-red-50 animate-pulse";
+                                  tooltipContent = t('googleCalendar.syncError', 'שגיאה בסנכרון');
+                                } else if (isPending) {
+                                  iconColorClass = "text-amber-400 hover:text-amber-500 hover:bg-amber-50";
+                                  tooltipContent = t('googleCalendar.unsyncedChanges', 'יש שינויים הממתינים לסנכרון');
+                                } else {
+                                  iconColorClass = "text-green-500 hover:text-green-600 hover:bg-green-50";
+                                  tooltipContent = t('googleCalendar.stopSyncing', 'מסונכרן. לחץ להסרה');
+                                }
+                              }
+
+                              return (
+                                <Tooltip content={tooltipContent}>
+                                  <button
+                                    onClick={() => {
+                                      if (isSyncing) return;
+                                      if (isSynced) {
+                                        handleRemoveFromCalendar(birthday.id);
+                                      } else {
+                                        handleSyncToCalendar(birthday.id);
+                                      }
+                                    }}
+                                    disabled={isSyncing}
+                                    className={`p-1 sm:p-2 rounded-lg transition-all duration-200 transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed ${iconColorClass}`}
+                                  >
+                                    <UploadCloud className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={isSynced ? 2.5 : 2} />
+                                  </button>
+                                </Tooltip>
+                              );
+                            })()}
+                          </div>
                         )}
                         {onAddToCalendar && (
                           <button
