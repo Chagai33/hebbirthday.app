@@ -1,56 +1,342 @@
-# Project Context: Hebrew Birthday Management System (v2.0)
-**Architecture:** Multi-tenant React app with Firebase backend.
-**Core Logic:**
-- Hebrew dates are calculated server-side via Cloud Functions (Hebcal API).
-- Google Calendar Sync uses client-side OAuth with tokens stored in Firestore.
-- Data isolation is enforced by `tenant_id` on every document.
+# Cursor AI Rules - HebBirthday Project
 
-# Tech Stack & Source of Truth
-- **Frontend:** React 18, TypeScript, Vite, Tailwind CSS.
-- **State:** React Query (Server State), Context API (Auth/Tenant).
-- **Backend:** Firebase (Auth, Firestore, Functions Node.js 20).
-- **Critical Files:**
-  - `functions/src/index.ts` (Backend Logic Source of Truth).
-  - `src/types/index.ts` (Data Model Definition).
-  - `firestore.rules` (Security & Access Control).
+## 🎯 Project Overview
+This is a Hebrew Birthday Management System with Google Calendar sync, built with React + Firebase.
+**Version:** 3.0.0 (Clean Architecture refactoring completed Dec 2024)
 
-# Communication & BiDi Formatting (STRICT)
-1. **Language:** Always answer in Hebrew (עברית).
-2. **English Positioning:**
-   - **Long terms/Paths:** Place file paths, function names, and error messages on a **separate line**.
-   - **Short terms:** Wrap inline English words in backticks (e.g., `tenantId`) to preserve RTL direction.
-3. **Agent Mode Behavior:**
-   - If I define a problem -> **Ask clarifying questions** first.
-   - If I ask for a fix -> **Present a plan** using the 'Double Critique' method below.
-   - **NEVER** execute code without my explicit "Go ahead" / "בצע".
+---
 
-# The "Double Critique" Logic Process
-**Trigger:** Apply this for Logic/DB/Async changes. (Skip for simple UI/CSS tweaks).
-1.  **Plan:** Propose the solution based on current file facts.
-2.  **Critique 1 (Performance/Scale):** Check for DB read/write spikes (e.g., loops without `Promise.all`, missing `batch` writes).
-3.  **Critique 2 (Blind Spot Check - Chat Only):**
-    - Ask yourself: "Am I guessing what happened?"
-    - **Action:**
-      - If Backend issue: Ask for `functions/logs` (specifically `updateNextBirthdayScheduled` if relevant).
-      - If Frontend issue: Ask for `Browser Console Logs`.
-      - Do not theorize without evidence.
-4.  **Final Solution:** Generate code only after passing both critiques.
+## ⚠️ CRITICAL - READ FIRST!
 
-# Iron Rules (Hard Constraints)
-1.  **Root Cause First (No Band-Aids):**
-    - **ALWAYS** propose solutions that solve the fundamental root cause of the issue.
-    - **NEVER** suggest "patchwork" fixes, workarounds, or hacks unless I explicitly ask for a temporary hotfix.
-    - If a bug is due to bad architecture, point it out and suggest a refactor.
-2.  **Deployment Commands:**
-    - **NEVER** execute deployment commands (like `firebase deploy`) automatically.
-    - **ALWAYS** provide the specific command in a code block for me to run manually.
-3.  **No Assumptions (Logs First):**
-    - Never assume the state of the DB matches the Types perfectly.
-    - If a process fails, demand Logs before writing a single line of fix code.
-4.  **Modularity:**
-    - Frontend: Use the Service Layer (`src/services/`) for all Firebase interactions.
-    - Backend: Keep `index.ts` clean.
-5.  **Date Logic:**
-    - NEVER calculate Hebrew dates on the client for saving.
-    - ALWAYS rely on the `onBirthdayWrite` trigger for the authoritative Hebrew date.
-6.  **Secrets:** Never output API keys or secrets in the chat.
+### Before making ANY changes:
+1. **READ `DEVELOPMENT_NOTES.md`** - Contains all known gotchas and solutions
+2. **CHECK `ARCHITECTURE.md`** - Understand the Clean Architecture structure
+3. **VERIFY `DEPENDENCIES.md`** - Check compatibility before upgrading packages
+
+---
+
+## 🚫 NEVER DO THIS
+
+### 1. Module System
+```typescript
+// ❌ NEVER - Backend is CommonJS, not ESM!
+export default function() { }
+import x from 'y';
+
+// ✅ ALWAYS - Use CommonJS in functions/
+module.exports = { }
+const x = require('y');
+```
+
+### 2. Firebase Initialization
+```typescript
+// ❌ NEVER - At module level!
+const db = admin.firestore();
+const config = functions.config().google;
+
+// ✅ ALWAYS - Inside functions!
+export const myFn = functions.https.onCall(async () => {
+  const db = admin.firestore();
+});
+```
+
+### 3. Firestore Field Deletion
+```typescript
+// ❌ NEVER - Firestore rejects undefined!
+await update({ field: undefined });
+
+// ✅ ALWAYS - Use FieldValue.delete()
+await update({ field: admin.firestore.FieldValue.delete() });
+```
+
+### 4. Immutable Objects (Hebcal)
+```typescript
+// ❌ NEVER - next() returns new object!
+hDate.next();
+
+// ✅ ALWAYS - Assign the return value!
+hDate = hDate.next();
+```
+
+### 5. Logging
+```typescript
+// ❌ NEVER - Use functions.logger!
+console.log('Something');
+
+// ✅ ALWAYS
+functions.logger.info('Something');
+functions.logger.error('Error:', error);
+```
+
+---
+
+## ✅ ALWAYS DO THIS
+
+### 1. Check Before Refactoring
+- Is this code in `guestPortal.ts` or `migration.ts`? **DON'T TOUCH** (legacy)
+- Does it work in production? **BE CAREFUL**
+- Is there a test? **NO** (add in v3.1)
+
+### 2. Emulator vs Production
+Files with workarounds for emulator:
+- `functions/src/interfaces/triggers/user-triggers.ts`
+- `functions/src/guestPortal.ts`
+
+**Before deployment:** Replace `new Date().toISOString()` with `serverTimestamp()`
+
+### 3. TypeScript Strict Mode
+- Use proper types from `domain/entities/types.ts`
+- Avoid `any` (use `unknown` if needed)
+- Add interfaces for new entities
+
+### 4. Error Handling
+```typescript
+// ✅ Always wrap in try-catch
+try {
+  await operation();
+  functions.logger.info('✅ Success');
+} catch (error) {
+  functions.logger.error('❌ Failed:', error);
+  throw new functions.https.HttpsError('internal', error.message);
+}
+```
+
+---
+
+## 📁 File Structure Rules
+
+### Don't create files in:
+- `functions/src/` root (except index.ts, guestPortal.ts, migration.ts)
+
+### Create files in:
+- `domain/services/` - Pure business logic
+- `application/use-cases/` - Orchestration logic
+- `infrastructure/` - External service wrappers
+- `interfaces/` - Entry points only
+
+### Naming Conventions:
+- Services: `XxxService.ts` (e.g., `HebcalService.ts`)
+- Use Cases: `XxxUseCase.ts` (e.g., `SyncBirthdayUseCase.ts`)
+- Repositories: `XxxRepository.ts` (e.g., `BirthdayRepository.ts`)
+- Clients: `XxxClient.ts` (e.g., `GoogleCalendarClient.ts`)
+
+---
+
+## 🔧 Common Tasks
+
+### Adding a New Function:
+
+1. **Create Use Case** (if needed):
+```typescript
+// application/use-cases/xxx/NewFeatureUseCase.ts
+export class NewFeatureUseCase {
+  constructor(private repo: XxxRepository) {}
+  async execute(...): Promise<Result> { }
+}
+```
+
+2. **Add to DI Container**:
+```typescript
+// interfaces/dependencies.ts
+const newFeatureUseCase = new NewFeatureUseCase(repo);
+return { ...deps, newFeatureUseCase };
+```
+
+3. **Create Entry Point**:
+```typescript
+// interfaces/http/xxx-functions.ts
+export const newFeatureFn = functions.https.onCall(async (data, context) => {
+  const deps = createDependencies();
+  return await deps.newFeatureUseCase.execute(...);
+});
+```
+
+4. **Export in index.ts**:
+```typescript
+// index.ts
+export { newFeatureFn as newFeature } from './interfaces/http/xxx-functions';
+```
+
+### Fixing a Bug:
+
+1. **Check `DEVELOPMENT_NOTES.md`** - Maybe it's already documented
+2. **Add logging** - Understand what's happening
+3. **Fix the root cause** - Not just symptoms
+4. **Add to DEVELOPMENT_NOTES.md** - Help future developers
+5. **Update CHANGELOG.md** - Document the fix
+
+---
+
+## 🐛 Debugging Tips
+
+### 1. Function not loading?
+```bash
+# Check for module-level function calls
+grep -r "functions.config()" functions/src/
+grep -r "admin.firestore()" functions/src/ | grep -v "function\|class"
+```
+
+### 2. Firestore error?
+```bash
+# Check for undefined values
+grep -r ": undefined" functions/src/
+```
+
+### 3. Timestamp issues?
+```bash
+# Check for emulator workarounds
+grep -r "new Date().toISOString()" functions/src/
+grep -r "Workaround" functions/src/
+```
+
+---
+
+## 📚 Quick Reference
+
+### Key Files:
+- `functions/src/index.ts` - Entry point (exports only)
+- `functions/src/interfaces/dependencies.ts` - DI Container
+- `functions/src/domain/entities/types.ts` - All TypeScript types
+- `functions/src/guestPortal.ts` - Legacy (don't refactor)
+- `functions/src/migration.ts` - Legacy (don't refactor)
+
+### Documentation:
+- `DEVELOPMENT_NOTES.md` - **START HERE!**
+- `ARCHITECTURE.md` - Structure & patterns
+- `DEPENDENCIES.md` - Versions & compatibility
+- `CHANGELOG.md` - History
+- `PROJECT_STATUS.md` - Current state
+
+### Commands:
+```bash
+# Dev
+firebase emulators:start    # Backend
+npm run dev                 # Frontend
+
+# Build
+npm run build              # Frontend
+cd functions && npm run build  # Backend
+
+# Deploy
+firebase deploy --only functions:functionName
+firebase deploy            # All
+```
+
+---
+
+## 🎨 Code Style
+
+### Comments:
+- Use **Hebrew** for implementation comments
+- Use **English** for JSDoc/external APIs
+- Be concise but clear
+
+### Formatting:
+- 2 spaces (not tabs)
+- Single quotes
+- Semicolons
+- Trailing commas
+
+### TypeScript:
+- Prefer `interface` over `type`
+- Use `unknown` over `any`
+- Enable strict mode checks
+
+---
+
+## 🔄 Version Control
+
+### Commit Messages:
+```
+feat: add new calendar sync feature
+fix: resolve timeout in onUserCreate
+docs: update DEVELOPMENT_NOTES
+chore: update dependencies
+refactor: extract EventBuilder to service
+test: add unit tests for HebcalService
+```
+
+### Branches:
+- `main` - Production
+- `develop` - Development
+- `feature/xxx` - New features
+- `fix/xxx` - Bug fixes
+
+---
+
+## 🚀 Deployment Checklist
+
+Before deploying:
+- [ ] `npm run build` (frontend) - succeeds
+- [ ] `cd functions && npm run build` - succeeds
+- [ ] Check for "Workaround" comments
+- [ ] Replace `new Date().toISOString()` with `serverTimestamp()`
+- [ ] `firebase functions:config:get` - verify config exists
+- [ ] Update `CHANGELOG.md`
+- [ ] Update `PROJECT_STATUS.md`
+
+---
+
+## 💡 Pro Tips for AI Assistants
+
+1. **Context is everything:**
+   - Frontend = ESM, React, Vite
+   - Backend = CommonJS, Firebase Functions Gen 1
+
+2. **When user reports "it doesn't work":**
+   - Ask for logs (emulator or Firebase Console)
+   - Check if it's emulator vs production issue
+   - Look in `DEVELOPMENT_NOTES.md` for similar issues
+
+3. **Before suggesting changes:**
+   - Understand the Clean Architecture layers
+   - Don't bypass the architecture
+   - Use DI Container, don't create dependencies inline
+
+4. **Testing is coming:**
+   - v3.1 will add tests
+   - Write testable code now
+   - Use dependency injection
+
+5. **Legacy code:**
+   - `guestPortal.ts` and `migration.ts` were not refactored
+   - They work, don't touch unless necessary
+   - If you must, be very careful
+
+---
+
+## 📊 Current Status (Quick)
+
+✅ **Working:**
+- All features in production
+- Google Calendar sync
+- Hebrew date conversion
+- Guest Portal
+- Multi-tenant
+
+⚠️ **Known Issues:**
+- `functions.config()` deprecated (until March 2026)
+- Emulator workarounds for `serverTimestamp()`
+- Old records with `after_sunset` need re-edit
+
+❌ **Not Implemented:**
+- Unit tests (v3.1)
+- Integration tests (v3.1)
+- CI/CD (v3.1)
+
+---
+
+## 🎯 Remember
+
+> "If it's not in DEVELOPMENT_NOTES.md, it's likely to happen again."
+
+Always document:
+- New gotchas
+- Solutions to problems
+- Breaking changes
+- Migration steps
+
+---
+
+**Last Updated:** December 2024  
+**For AI Models:** Read `DEVELOPMENT_NOTES.md` first!
