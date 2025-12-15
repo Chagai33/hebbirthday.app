@@ -1,9 +1,6 @@
 
-const { HDate } = require('@hebcal/core');
+import { HDate, gematriya, Locale } from '@hebcal/core';
 
-const date = new Date('2020-06-06'); // 14 Sivan 5780 approx
-const hDate = new HDate(date);
-console.log('Default render:', hDate.render());
-console.log("render('he'):", hDate.render('he'));
-console.log("toString('h'):", hDate.toString('h'));
-
+const hd = new HDate();
+console.log('Locale.gettext("Kislev", "he"):', Locale.gettext('Kislev', 'he'));
+console.log('hd.getMonthName():', hd.getMonthName());
