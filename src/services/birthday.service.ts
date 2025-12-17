@@ -11,8 +11,7 @@ import {
   orderBy,
   serverTimestamp,
   Timestamp,
-  onSnapshot,
-  Unsubscribe
+  onSnapshot // ← הוסף את זה!
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 import { Birthday, BirthdayFormData } from '../types';
@@ -87,18 +86,10 @@ export const birthdayService = {
 
     if (data.firstName !== undefined) updateData.first_name = data.firstName;
     if (data.lastName !== undefined) updateData.last_name = data.lastName;
-    
-    // בדיקה אם התאריך או afterSunset השתנו - אם כן, צריך לאפס את הנתונים העבריים
-    let shouldResetHebrewData = false;
-    let currentData: any = null;
-    
-    if (data.birthDateGregorian !== undefined || data.afterSunset !== undefined) {
-      // קוראים את המסמך הנוכחי פעם אחת לבדיקת שני השדות
-      const currentDoc = await getDoc(doc(db, 'birthdays', birthdayId));
-      currentData = currentDoc.data();
-    }
-    
     if (data.birthDateGregorian !== undefined) {
+      // בדיקה אם התאריך הלועזי באמת השתנה
+      const currentDoc = await getDoc(doc(db, 'birthdays', birthdayId));
+      const currentData = currentDoc.data();
       const currentBirthDate = currentData?.birth_date_gregorian;
       
       let newBirthDateString: string;
@@ -127,30 +118,13 @@ export const birthdayService = {
           updateData.gregorian_day = birthDate.getDate();
         }
 
-        shouldResetHebrewData = true;
+        updateData.birth_date_hebrew_string = null;
+        updateData.next_upcoming_hebrew_birthday = null;
+        updateData.future_hebrew_birthdays = [];
       }
       // אם התאריך לא השתנה, לא נעשה כלום - הנתונים העבריים נשמרים
     }
-    
-    if (data.afterSunset !== undefined) {
-      const currentAfterSunset = currentData?.after_sunset ?? false;
-      const newAfterSunset = data.afterSunset ?? false;
-      
-      // תמיד שלח את הערך המנורמל (כדי למנוע undefined)
-      updateData.after_sunset = newAfterSunset;
-      
-      // אם afterSunset השתנה, צריך לאפס את הנתונים העבריים
-      if (currentAfterSunset !== newAfterSunset) {
-        shouldResetHebrewData = true;
-      }
-    }
-    
-    // אם אחד מהשדות הרלוונטיים השתנה, אפס את הנתונים העבריים
-    if (shouldResetHebrewData) {
-      updateData.birth_date_hebrew_string = null;
-      updateData.next_upcoming_hebrew_birthday = null;
-      updateData.future_hebrew_birthdays = [];
-    }
+    if (data.afterSunset !== undefined) updateData.after_sunset = data.afterSunset;
     if (data.gender !== undefined) updateData.gender = data.gender;
     if (data.groupIds !== undefined) {
       updateData.group_ids = data.groupIds;
@@ -198,32 +172,6 @@ export const birthdayService = {
 
     const snapshot = await getDocs(q);
     return snapshot.docs.map((doc) => this.docToBirthday(doc.id, doc.data()));
-  },
-
-  subscribeToTenantBirthdays(
-    tenantId: string,
-    includeArchived: boolean,
-    callback: (birthdays: Birthday[]) => void
-  ): Unsubscribe {
-    let q = query(
-      collection(db, 'birthdays'),
-      where('tenant_id', '==', tenantId),
-      orderBy('birth_date_gregorian', 'asc')
-    );
-
-    if (!includeArchived) {
-      q = query(
-        collection(db, 'birthdays'),
-        where('tenant_id', '==', tenantId),
-        where('archived', '==', false),
-        orderBy('birth_date_gregorian', 'asc')
-      );
-    }
-
-    return onSnapshot(q, (snapshot) => {
-      const birthdays = snapshot.docs.map((doc) => this.docToBirthday(doc.id, doc.data()));
-      callback(birthdays);
-    });
   },
 
   async getUpcomingBirthdays(tenantId: string, days: number = 30): Promise<Birthday[]> {
@@ -315,12 +263,6 @@ export const birthdayService = {
       calendar_preference_override: data.calendar_preference_override || null,
       notes: data.notes || '',
       archived: data.archived ?? false,
-      googleCalendarEventId: data.googleCalendarEventId || null,
-      googleCalendarEventIds: data.googleCalendarEventIds || null,
-      lastSyncedAt: data.lastSyncedAt ? this.timestampToString(data.lastSyncedAt) : null,
-      googleCalendarEventsMap: data.googleCalendarEventsMap || {},
-      isSynced: data.isSynced ?? false,
-      syncMetadata: data.syncMetadata || undefined,
       created_at: this.timestampToString(data.created_at),
       created_by: data.created_by,
       updated_at: this.timestampToString(data.updated_at),
@@ -334,5 +276,35 @@ export const birthdayService = {
       return timestamp.toDate().toISOString();
     }
     return new Date().toISOString();
+  },
+  subscribeToTenantBirthdays(
+    tenantId: string,
+    includeArchived: boolean,
+    callback: (birthdays: Birthday[]) => void
+  ): () => void {
+    // ✅ צריך להוסיף את onSnapshot לאימפורטים בראש הקובץ:
+    // import { collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, serverTimestamp, Timestamp, onSnapshot } from 'firebase/firestore';
+    
+    let q = query(
+      collection(db, 'birthdays'),
+      where('tenant_id', '==', tenantId),
+      orderBy('birth_date_gregorian', 'asc')
+    );
+
+    if (!includeArchived) {
+      q = query(
+        collection(db, 'birthdays'),
+        where('tenant_id', '==', tenantId),
+        where('archived', '==', false),
+        orderBy('birth_date_gregorian', 'asc')
+      );
+    }
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const birthdays = snapshot.docs.map((doc) => this.docToBirthday(doc.id, doc.data()));
+      callback(birthdays);
+    });
+
+    return unsubscribe;
   },
 };

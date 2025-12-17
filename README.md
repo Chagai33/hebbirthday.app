@@ -1,429 +1,293 @@
-# 🎂 HebBirthday - Hebrew Birthday Management System
+# Hebrew Birthday Management System v2.0
 
-> מערכת לניהול ימי הולדת עבריים ולועזיים עם סנכרון ליומן גוגל
+A modern, multi-tenant web application for managing Hebrew and Gregorian birthdays with full internationalization support (Hebrew & English).
 
-**גרסה:** 3.0.0  
-**עדכון אחרון:** דצמבר 2024
+## Features
 
----
+### Core Functionality
+- ✅ **Multi-Tenant Architecture** - Manage multiple families/groups (tenants)
+- ✅ **Hebrew Date Integration** - Automatic Hebrew date calculation via Hebcal API
+- ✅ **Dual Authentication** - Email/Password, Google, and Phone authentication
+- ✅ **Account Linking** - Seamlessly link multiple authentication methods
+- ✅ **Internationalization** - Full RTL support for Hebrew and English
+- ✅ **Google Calendar Export** - Export birthdays directly to Google Calendar
+- ✅ **Smart Verification** - Duplicate detection, sunset time, and gender verification modals
 
-## 📚 תיעוד
+### Technical Features
+- 🔒 **Secure** - Firestore security rules with role-based access control
+- 🚀 **Scalable** - Built for hundreds of users and thousands of records per tenant
+- ⚡ **Fast** - React Query for optimized data fetching and caching
+- 🎨 **Beautiful UI** - Tailwind CSS with responsive design
+- 📱 **Mobile-Friendly** - Works seamlessly on all devices
 
-📖 **קרא את המסמכים הבאים לפני שמתחיל:**
+## Tech Stack
 
-1. **[DEVELOPMENT_NOTES.md](./DEVELOPMENT_NOTES.md)** - בעיות נפוצות, פתרונות, gotchas
-2. **[DEPENDENCIES.md](./DEPENDENCIES.md)** - כל התלויות והגרסאות
-3. **[ARCHITECTURE.md](./ARCHITECTURE.md)** - מבנה הפרויקט (Clean Architecture)
+### Frontend
+- **React 18** with TypeScript
+- **Vite** for blazing fast development
+- **Tailwind CSS** for styling
+- **React Router** for navigation
+- **React Hook Form** for form validation
+- **TanStack Query** for server state management
+- **i18next** for internationalization
+- **date-fns** for date manipulation
+- **Lucide React** for icons
 
----
+### Backend
+- **Firebase Authentication** - Email, Google, Phone
+- **Cloud Firestore** - NoSQL database
+- **Cloud Functions** - Serverless compute
+- **Firebase Hosting** - Static site hosting
 
-## ✨ תכונות עיקריות
+## Project Structure
 
-- ✅ **ניהול ימי הולדת** - לועזי ועברי
-- ✅ **חישוב אוטומטי** - המרה לתאריך עברי
-- ✅ **סנכרון ליומן גוגל** - אירועים לעשרות שנים קדימה
-- ✅ **מזלות** - לועזי ועברי
-- ✅ **רשימת משאלות** - לכל יום הולדת
-- ✅ **Guest Portal** - גישה אורחים לרשימת משאלות
-- ✅ **Multi-tenant** - תמיכה במספר ארגונים
-- ✅ **i18n** - עברית ואנגלית
+```
+├── src/
+│   ├── components/
+│   │   ├── auth/              # Login, Register components
+│   │   ├── birthdays/         # Birthday form, list, cards
+│   │   ├── common/            # Reusable components
+│   │   ├── layout/            # Layout, Header
+│   │   └── modals/            # Verification modals
+│   ├── contexts/              # React contexts (Auth, Tenant)
+│   ├── hooks/                 # Custom React hooks
+│   ├── services/              # Firebase services
+│   ├── config/                # App configuration (Firebase, i18n)
+│   ├── locales/               # Translation files (en, he)
+│   ├── types/                 # TypeScript types
+│   └── utils/                 # Utility functions
+├── functions/                 # Cloud Functions
+│   └── src/
+│       └── index.ts           # Function definitions
+├── firestore.rules            # Security rules
+├── firestore.indexes.json     # Database indexes
+└── firebase.json              # Firebase configuration
+```
 
----
+## Getting Started
 
-## 🚀 Quick Start
-
-### דרישות מקדימות:
-
-- Node.js 20+
-- npm
+### Prerequisites
+- Node.js 18+
 - Firebase CLI
-- Java 11+ (לאימולטור)
+- Firebase project (hebbirthday2026)
 
-### התקנה:
+### Installation
 
+1. **Clone and install dependencies**
 ```bash
-# 1. Clone הפרויקט
-git clone <repo-url>
-cd HebBirthdayv3cv2/v3cv2
-
-# 2. התקן dependencies - Frontend
 npm install
+cd functions && npm install && cd ..
+```
 
-# 3. התקן dependencies - Backend
-cd functions
-npm install
-cd ..
-
-# 4. התקן Firebase CLI (אם עוד לא)
-npm install -g firebase-tools
-
-# 5. Login ל-Firebase
+2. **Configure Firebase**
+```bash
 firebase login
-
-# 6. בחר project
 firebase use hebbirthday2026
 ```
 
-### Development:
-
+3. **Deploy Firestore configuration**
 ```bash
-# Terminal 1 - אימולטור
-firebase emulators:start
-
-# Terminal 2 - Frontend
-npm run dev
-
-# פתח דפדפן:
-# Frontend: http://localhost:5173
-# Emulator UI: http://localhost:4000
+firebase deploy --only firestore:rules,firestore:indexes
 ```
 
----
-
-## 🏗️ מבנה הפרויקט
-
-```
-v3cv2/
-├── src/                    # Frontend (React + TypeScript)
-│   ├── components/         # React components
-│   ├── services/           # API calls
-│   ├── hooks/              # Custom hooks
-│   ├── config/             # Firebase config
-│   └── i18n/               # Translations
-│
-├── functions/              # Backend (Firebase Functions)
-│   └── src/
-│       ├── domain/         # Business logic
-│       ├── application/    # Use cases
-│       ├── infrastructure/ # External services
-│       ├── interfaces/     # Entry points
-│       └── shared/         # Utils
-│
-├── public/                 # Static files
-├── dist/                   # Build output
-│
-├── firebase.json           # Firebase config
-├── firestore.rules         # Security rules
-├── firestore.indexes.json  # Firestore indexes
-│
-├── DEVELOPMENT_NOTES.md    # 📘 בעיות ופתרונות
-├── DEPENDENCIES.md         # 📦 תלויות וגרסאות
-└── ARCHITECTURE.md         # 🏗️ ארכיטקטורה
-```
-
----
-
-## 🛠️ פקודות שימושיות
-
-### Development:
-
+4. **Deploy Cloud Functions**
 ```bash
-# Frontend dev server
-npm run dev
-
-# Backend dev (emulator)
-firebase emulators:start
-
-# Build frontend
-npm run build
-
-# Build backend
-cd functions && npm run build
-
-# Lint
-npm run lint
-
-# Type check
-npm run typecheck
-```
-
-### Deployment:
-
-```bash
-# Deploy הכל
-firebase deploy
-
-# Deploy רק functions
 firebase deploy --only functions
+```
 
-# Deploy רק hosting
+5. **Start development server**
+```bash
+npm run dev
+```
+
+6. **Build for production**
+```bash
+npm run build
 firebase deploy --only hosting
-
-# Deploy פונקציה ספציפית
-firebase deploy --only functions:syncBirthdayToGoogleCalendar
 ```
 
-### Logs:
+## Configuration
 
-```bash
-# Logs live
-firebase functions:log
-
-# Logs ספציפיים
-firebase functions:log --only myFunctionName
-
-# Logs באימולטור
-# מופיעים ישירות בטרמינל
-```
-
----
-
-## 🔧 Configuration
-
-### Firebase Config (`firebase.json`):
-
-```json
-{
-  "firestore": {
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
-  },
-  "functions": {
-    "source": "functions"
-  },
-  "hosting": {
-    "public": "dist"
-  },
-  "emulators": {
-    "auth": { "port": 9099 },
-    "functions": { "port": 5001 },
-    "firestore": { "port": 8080 },
-    "ui": { "port": 4000 }
-  }
-}
-```
-
-### Environment Variables:
-
-**Frontend (`.env.local`):**
+### Environment Variables
+Create `.env` file:
 ```env
-VITE_USE_FIREBASE_EMULATOR=true  # לאימולטור
+VITE_USE_FIREBASE_EMULATOR=false
+VITE_GOOGLE_CLIENT_ID=your_google_oauth_client_id
 ```
 
-**Backend (לעתיד - `.env`):**
-```env
-GOOGLE_CLIENT_ID=your-client-id
-GOOGLE_CLIENT_SECRET=your-client-secret
-GOOGLE_REDIRECT_URI=postmessage
-```
+### Firebase Configuration
+The Firebase config is in `src/config/firebase.ts`. Your project credentials are already configured.
 
-**Backend (כרגע - Firebase Config):**
+## Cloud Functions
+
+### onBirthdayWrite
+Triggered when a birthday is created or updated. Automatically:
+- Calls Hebcal API to get Hebrew date
+- Calculates next 10 years of Hebrew birthdays
+- Updates birthday document with Hebrew dates
+
+### updateNextBirthdayScheduled
+Runs daily at midnight (Asia/Jerusalem timezone):
+- Scans all birthdays
+- Updates `nextUpcomingHebrewBirthdayGregorian` for past dates
+- Ensures accurate upcoming birthday tracking
+
+## Data Model
+
+### Collections
+
+#### users
+- User profile information
+- Linked authentication providers
+- List of tenants user belongs to
+
+#### tenants
+- Tenant (family/group) information
+- Owner ID and settings
+- Created/updated timestamps
+
+#### userTenantMemberships
+- Links users to tenants
+- Defines roles (owner, admin, member)
+- Controls access permissions
+
+#### birthdays
+- Person's information (name, dates, gender)
+- Hebrew date calculations
+- Future birthday dates (10 years)
+- Audit fields (created/updated by)
+
+#### tenantInvitations
+- Pending invitations to tenants
+- Email and role information
+- Status tracking
+
+## Security
+
+### Firestore Rules
+- ✅ All data requires authentication
+- ✅ Multi-tenant isolation enforced
+- ✅ Role-based access control (owner, admin, member)
+- ✅ Users can only access their tenant's data
+- ✅ Admins can manage birthdays and members
+- ✅ Only owners can delete tenants
+
+### Best Practices Implemented
+- No sensitive data in client code
+- Hebcal API calls only from Cloud Functions
+- Proper error handling and logging
+- Input validation on client and server
+- Rate limiting through Firebase
+
+## Internationalization
+
+### Supported Languages
+- 🇮🇱 Hebrew (עברית) - RTL support
+- 🇺🇸 English
+
+### Adding New Languages
+1. Create translation file in `src/locales/[lang].json`
+2. Add to i18n config in `src/config/i18n.ts`
+3. Add language toggle in Header component
+
+## Google Calendar Integration
+
+### Setup
+1. Create OAuth 2.0 credentials in Google Cloud Console
+2. Add authorized origins
+3. Set `VITE_GOOGLE_CLIENT_ID` in `.env`
+
+### Usage
+Users can:
+- Export single birthdays to Google Calendar
+- Bulk export multiple birthdays
+- Automatic creation of recurring events
+
+## Account Linking
+
+The system supports linking multiple authentication methods to a single user account:
+
+### Automatic Linking
+- Email + Google with same email address → Auto-linked
+- Prevents duplicate accounts
+
+### Manual Linking
+- Users can link phone numbers from profile
+- Users can link Google account after email signup
+- All linked providers tracked in `linkedProviders` field
+
+## Deployment
+
+See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed deployment instructions.
+
+### Quick Deploy
 ```bash
-firebase functions:config:set \
-  google.client_id="YOUR_CLIENT_ID" \
-  google.client_secret="YOUR_CLIENT_SECRET" \
-  google.redirect_uri="postmessage"
-```
-
----
-
-## 🐛 Troubleshooting
-
-### בעיות נפוצות:
-
-#### 1. "Failed to load function definition"
-```bash
-# בדוק שפונקציות נבנות:
-cd functions
-npm run build
-
-# בדוק logs:
-cat functions-debug.log
-```
-
-**פתרון:** קרא [DEVELOPMENT_NOTES.md](./DEVELOPMENT_NOTES.md#בעיה-5)
-
-#### 2. "onUserCreate לא יוצר tenants"
-```bash
-# ודא שהאימולטור רץ:
-firebase emulators:start
-
-# נקה נתונים:
-# פתח http://localhost:4000
-# Authentication → Clear all data
-```
-
-**פתרון:** קרא [DEVELOPMENT_NOTES.md](./DEVELOPMENT_NOTES.md#בעיה-1)
-
-#### 3. "Cannot use undefined as Firestore value"
-```typescript
-// ❌ לא לעשות:
-await update({ field: undefined });
-
-// ✅ לעשות:
-await update({ field: admin.firestore.FieldValue.delete() });
-```
-
-**פתרון:** קרא [DEVELOPMENT_NOTES.md](./DEVELOPMENT_NOTES.md#בעיה-3)
-
----
-
-## 📊 Tech Stack
-
-### Frontend:
-- **React 18** - UI framework
-- **TypeScript** - Type safety
-- **Vite** - Build tool
-- **TanStack Query** - State management
-- **React Router v7** - Routing
-- **Tailwind CSS** - Styling
-- **i18next** - i18n
-- **Firebase SDK** - Auth, Firestore, Functions
-
-### Backend:
-- **Firebase Functions** - Serverless
-- **TypeScript** - Type safety
-- **Firebase Admin** - Backend SDK
-- **Google APIs** - Calendar API
-- **Cloud Tasks** - Batch jobs
-- **Hebcal** - Hebrew dates
-
----
-
-## 🧪 Testing
-
-### Manual Testing Checklist:
-
-**אימולטור:**
-- [ ] הרשמה/התחברות
-- [ ] יצירת יום הולדת
-- [ ] עריכת יום הולדת + after_sunset
-- [ ] Guest Portal - כניסה
-- [ ] Guest Portal - רשימת משאלות
-
-**פרודקשן:**
-- [ ] כל מה שבאימולטור
-- [ ] חיבור ל-Google Calendar
-- [ ] סנכרון יום הולדת
-- [ ] ביטול סנכרון
-- [ ] סנכרון מרובה
-
----
-
-## 🔐 Security
-
-### Firestore Rules:
-
-```javascript
-// firestore.rules
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // User must be authenticated
-    function isSignedIn() {
-      return request.auth != null;
-    }
-    
-    // User belongs to tenant
-    function belongsToTenant(tenantId) {
-      return isSignedIn() && 
-        request.auth.token.tenantId == tenantId;
-    }
-    
-    match /birthdays/{birthdayId} {
-      allow read, write: if belongsToTenant(resource.data.tenant_id);
-    }
-    
-    // ... more rules
-  }
-}
-```
-
----
-
-## 🚢 Deployment
-
-### Pre-deployment Checklist:
-
-- [ ] **Build עובד:** `npm run build` (frontend & functions)
-- [ ] **Tests עוברים** (כשיהיו)
-- [ ] **Linter נקי:** `npm run lint`
-- [ ] **החלפת workarounds:** בדוק `grep -r "Workaround" functions/src/`
-- [ ] **Google Config קיים:** `firebase functions:config:get`
-- [ ] **Firestore indexes:** ענה N אם לא בטוח
-
-### Deployment:
-
-```bash
-# 1. Build frontend
-npm run build
-
-# 2. Build functions
-cd functions
-npm run build
-cd ..
-
-# 3. Deploy
+# Deploy everything
 firebase deploy
 
-# 4. בדוק logs
-firebase functions:log
+# Deploy specific services
+firebase deploy --only functions
+firebase deploy --only hosting
+firebase deploy --only firestore:rules
 ```
 
----
+## Development
 
-## 📈 Roadmap
-
-### v3.1 (הבא):
-- [ ] Unit tests (Jest)
-- [ ] Integration tests (Emulator)
-- [ ] CI/CD (GitHub Actions)
-
-### v3.2:
-- [ ] Migration ל-firebase-functions v5
-- [ ] .env files במקום functions.config()
-- [ ] Monitoring & Analytics
-
-### v4.0:
-- [ ] Firebase Functions Gen 2
-- [ ] Performance optimization
-- [ ] PWA support
-
----
-
-## 🤝 Contributing
-
-### Code Style:
-
-- **TypeScript** - strict mode
-- **ESLint** - airbnb config
-- **Prettier** - 2 spaces, single quotes
-- **Comments** - עברית בתוך הקוד
-
-### Commit Messages:
-
-```
-feat: add birthday export feature
-fix: resolve sync timeout issue
-docs: update DEVELOPMENT_NOTES
-chore: update dependencies
+### Available Scripts
+```bash
+npm run dev          # Start dev server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run lint         # Run ESLint
+npm run typecheck    # TypeScript type checking
 ```
 
+### Code Style
+- TypeScript strict mode
+- Functional components with hooks
+- No `any` types
+- Async/await for promises
+- Proper error handling
+
+## Troubleshooting
+
+### Common Issues
+
+**Hebrew dates not calculating**
+- Check Cloud Functions logs: `firebase functions:log`
+- Verify Hebcal API is accessible
+- Ensure function has proper permissions
+
+**Authentication not working**
+- Verify auth providers enabled in Firebase Console
+- Check OAuth credentials are correct
+- Ensure authorized domains are whitelisted
+
+**Data not loading**
+- Check Firestore security rules
+- Verify user is member of tenant
+- Check browser console for errors
+
+## Contributing
+
+When contributing:
+1. Follow existing code style
+2. Add TypeScript types for new features
+3. Update translations for both languages
+4. Test on both LTR and RTL layouts
+5. Ensure Firestore rules are updated if needed
+
+## License
+
+Private project for Hebrew Birthday Management System.
+
+## Support
+
+For issues or questions, please check:
+1. [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for setup help
+2. Firebase Console logs for errors
+3. Browser console for client-side issues
+
 ---
 
-## 📞 Support
-
-### בעיה? בדוק:
-
-1. **[DEVELOPMENT_NOTES.md](./DEVELOPMENT_NOTES.md)** - רוב הבעיות מתועדות שם
-2. **[DEPENDENCIES.md](./DEPENDENCIES.md)** - אולי זה בעיית גרסה
-3. **Firebase Console Logs** - בדוק שגיאות
-4. **Emulator Logs** - הלוגים בטרמינל
-
----
-
-## 📄 License
-
-Private project - All rights reserved
-
----
-
-## 👥 Team
-
-**Developer:** [Your Name]  
-**Architecture:** Clean Architecture (Uncle Bob)  
-**Version:** 3.0.0
-
----
-
-**Built with ❤️ in Israel 🇮🇱**
+Built with ❤️ for Jewish communities worldwide
