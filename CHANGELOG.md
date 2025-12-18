@@ -4,11 +4,33 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [3.0.1] - 16 דצמבר 2024
+## [3.0.1] - 18 דצמבר 2024
 
 ### 🚨 Critical Fixes - תיקוני קריטיים
 
 #### 🐛 Fixed
+
+**באג #9: Bulk Sync מוחק Access Token** (18 דצמבר 2024)
+- **בעיה:** 
+  - `BulkSyncUseCase` מעדכן `accessToken: ''` ו-`expiresAt: 0` בתחילת וסוף Bulk Sync
+  - Frontend `refreshStatus()` קורא טוכן ריק → מציג "חיבור ליומן גוגל"
+  - אבל הסנכרון עובד! (Backend משתמש ב-refreshToken)
+  - משתמש לא רואה שהסנכרון הצליח עד שמתחבר מחדש
+- **תסמינים:**
+  - לוחצים Bulk Sync → מציג "הסנכרון התחיל"
+  - אחרי 2-3 שניות: כפתור "חיבור ליומן גוגל" מופיע
+  - הרשומות מסתנכרנות בהצלחה (ניתן לראות ביומן)
+  - אין ✓ ירוק ליד הרשומות עד התחברות מחדש
+  - קורה כל פעם ב-Bulk Sync, לא ב-Single Sync
+- **פתרון:**
+  - הסרת `accessToken: ''` ו-`expiresAt: 0` מ-`tokenRepo.save()`
+  - `{ merge: true }` ישמור את הערכים הקיימים של accessToken
+  - הסרת `error.code === 400` מבדיקת "טוכן מת" (יכול להיות Rate Limit זמני)
+- **קבצים:**
+  - `application/use-cases/sync/BulkSyncUseCase.ts` (שורות 35-40, 101-105)
+  - `infrastructure/google/GoogleAuthClient.ts` (שורה 56-57)
+- **השפעה:** Frontend נשאר מחובר במהלך Bulk Sync ✅
+- **חשיבות:** 🔴 קריטי
 
 **באג #6: לולאה אינסופית ב-onBirthdayWrite**
 - **בעיה:** `onBirthdayWrite` מעדכן Firestore → מפעיל `onBirthdayWrite` שוב → לולאה אינסופית

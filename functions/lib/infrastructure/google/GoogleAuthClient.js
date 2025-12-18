@@ -76,7 +76,6 @@ class GoogleAuthClient {
             functions.logger.error(`Failed to refresh token for user ${userId}:`, error);
             // ✅ שינוי 4: הבחנה בין טוקן מת לשגיאה זמנית
             const isTokenRevoked = error.message?.includes('invalid_grant') ||
-                error.code === 400 ||
                 error.response?.data?.error === 'invalid_grant';
             if (isTokenRevoked) {
                 functions.logger.warn(`Token revoked for user ${userId} - marking as disconnected`);

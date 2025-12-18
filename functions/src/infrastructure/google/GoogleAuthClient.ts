@@ -54,7 +54,6 @@ export class GoogleAuthClient {
       
       // ✅ שינוי 4: הבחנה בין טוקן מת לשגיאה זמנית
       const isTokenRevoked = error.message?.includes('invalid_grant') || 
-                             error.code === 400 ||
                              error.response?.data?.error === 'invalid_grant';
       
       if (isTokenRevoked) {

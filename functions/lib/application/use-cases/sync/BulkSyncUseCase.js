@@ -57,12 +57,11 @@ class BulkSyncUseCase {
             errors: []
         });
         // Update token status
+        // ✅ תיקון: לא מעדכנים accessToken/expiresAt - merge ישמור את הערכים הקיימים
         await this.tokenRepo.save(userId, {
             userId,
             syncStatus: 'IN_PROGRESS',
-            lastSyncStart: admin.firestore.FieldValue.serverTimestamp(),
-            accessToken: '', // Will be filled by existing data
-            expiresAt: 0
+            lastSyncStart: admin.firestore.FieldValue.serverTimestamp()
         });
         // Queue tasks in chunks
         const CHUNK_SIZE = 5;
@@ -109,11 +108,10 @@ class BulkSyncUseCase {
             const data = jDoc.data();
             if (data && data.processedItems >= data.totalItems) {
                 await jDoc.ref.update({ status: 'completed' });
+                // ✅ תיקון: לא מעדכנים accessToken/expiresAt - merge ישמור את הערכים הקיימים
                 await this.tokenRepo.save(userId, {
                     userId,
-                    syncStatus: 'IDLE',
-                    accessToken: '',
-                    expiresAt: 0
+                    syncStatus: 'IDLE'
                 });
             }
         }

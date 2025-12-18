@@ -46,6 +46,75 @@ export function createDependencies() {
 
 ---
 
+## 🔥 תיקונים קריטיים - 18 דצמבר 2024
+
+### ⚠️ Bulk Sync מוחק Access Token
+
+**הבעיה:**
+```typescript
+// BulkSyncUseCase.ts - שורות 35-41 (לפני התיקון)
+await this.tokenRepo.save(userId, {
+  userId,
+  syncStatus: 'IN_PROGRESS',
+  accessToken: '',  // ← מוחק את הטוכן!
+  expiresAt: 0      // ← מאפס תאריך תפוגה!
+});
+// ↓ Frontend refreshStatus() קורא את הטוכן
+// ↓ רואה accessToken ריק
+// ↓ מציג: "חיבור ליומן גוגל" במקום "יומן מחובר"
+// ↓ אבל הסנכרון ממשיך להצליח! (Backend משתמש ב-refreshToken)
+```
+
+**תסמינים:**
+- Bulk Sync מתחיל בהצלחה
+- אחרי 2-3 שניות: כפתור "חיבור ליומן גוגל" מופיע
+- הסנכרון ממשיך לעבוד בBackground
+- הרשומות מסתנכרנות ליומן ✅
+- אבל משתמש לא רואה את זה ❌
+- רק אחרי התחברות מחדש: V ירוק מופיע
+
+**הפתרון:**
+```typescript
+// ✅ BulkSyncUseCase.ts - שורות 35-40
+await this.tokenRepo.save(userId, {
+  userId,
+  syncStatus: 'IN_PROGRESS',
+  lastSyncStart: admin.firestore.FieldValue.serverTimestamp() as any
+  // ✅ תיקון: לא שולחים accessToken/expiresAt
+  // merge: true ישמור את הערכים הקיימים!
+});
+
+// ✅ BulkSyncUseCase.ts - שורות 101-105
+await this.tokenRepo.save(userId, {
+  userId,
+  syncStatus: 'IDLE'
+  // ✅ תיקון: לא שולחים accessToken/expiresAt
+});
+```
+
+**למה זה עבד:**
+- `TokenRepository.save()` משתמש ב-`set(..., { merge: true })`
+- שדות שלא נשלחו לא משתנים
+- `accessToken` ו-`expiresAt` נשארים בעינם ✅
+
+**קבצים:**
+- `functions/src/application/use-cases/sync/BulkSyncUseCase.ts:35-40, 101-105`
+
+**תיקון נוסף קשור:**
+```typescript
+// GoogleAuthClient.ts שורה 56-57
+// ✅ הסרת error.code === 400 מבדיקת "טוכן מת"
+// 400 יכול להיות Rate Limit זמני, לא בהכרח invalid_grant
+const isTokenRevoked = error.message?.includes('invalid_grant') || 
+                       error.response?.data?.error === 'invalid_grant';
+// הסרנו: || error.code === 400
+```
+
+**קבצים:**
+- `functions/src/infrastructure/google/GoogleAuthClient.ts:56-57`
+
+---
+
 ## 🔥 תיקונים קריטיים - 16 דצמבר 2024
 
 ### ⚠️ לולאה אינסופית ב-Firestore Triggers
