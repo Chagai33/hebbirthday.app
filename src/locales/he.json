@@ -75,6 +75,8 @@
     "disconnectConfirm": "האם אתה בטוח שברצונך לנתק את החיבור ליומן Google?",
     "syncingMultiple": "מסנכרן {{count}} ימי הולדת...",
     "syncedCount": "סונכרנו {{count}} ימי הולדת בהצלחה",
+    "syncStarted": "הסנכרון התחיל עבור {{count}} ימי הולדת. המערכת תעבד את הרשומות ברקע.",
+    "bulkSyncCompleted": "הסנכרון הושלם! סונכרנו {{count}} ימי הולדת בהצלחה ✓",
     "createCalendar": "צור יומן חדש",
     "calendarName": "שם יומן",
     "primaryCalendar": "יומן ראשי",

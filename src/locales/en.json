@@ -120,6 +120,8 @@
     "disconnectConfirm": "Are you sure you want to disconnect from Google Calendar?",
     "syncingMultiple": "Syncing {{count}} birthdays...",
     "syncedCount": "Synced {{count}} birthdays successfully",
+    "syncStarted": "Sync started for {{count}} birthdays. Processing in background.",
+    "bulkSyncCompleted": "Sync completed! {{count}} birthdays synced successfully ✓",
     "createCalendar": "Create Calendar",
     "calendarName": "Calendar Name",
     "primaryCalendar": "Primary Calendar",
