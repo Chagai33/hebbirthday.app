@@ -257,5 +257,35 @@ function getName(user: User | null): string | null {
 
 ---
 
+## ⚠️ React Hooks Dependencies (Frontend)
+
+**CRITICAL: Always include ALL dependencies in useMemo/useCallback/useEffect!**
+
+If you use a variable inside the hook, it MUST be in the dependency array.
+
+**Example:**
+```typescript
+// ❌ BAD - Missing dependency
+const filtered = useMemo(() => {
+  return items.filter(item => item.status === statusFilter);
+}, [items]);  // ← Missing statusFilter!
+// Result: UI won't update when statusFilter changes
+
+// ✅ GOOD - All dependencies included
+const filtered = useMemo(() => {
+  return items.filter(item => item.status === statusFilter);
+}, [items, statusFilter]);  // ← Complete!
+```
+
+**Symptoms of missing dependencies:**
+- State changes but UI doesn't update
+- Need page refresh to see changes
+- Inconsistent behavior
+- Works after second click
+
+**Always check:** Does the function use this variable? → Add to dependencies!
+
+---
+
 **Last Updated:** December 2024
 **For AI Models:** Hebcal immutability is the #1 gotcha - always assign return values!

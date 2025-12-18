@@ -535,6 +535,26 @@ grep -r "Workaround for emulator" functions/src/
 
 ## 📝 Best Practices שלמדנו
 
+### 0. React Hooks Dependencies
+```typescript
+// ❌ לעולם לא - חסר dependency
+const filtered = useMemo(() => {
+  return items.filter(item => item.status === statusFilter);
+}, [items]);  // ← חסר statusFilter!
+
+// ✅ תמיד - כל ה-dependencies
+const filtered = useMemo(() => {
+  return items.filter(item => item.status === statusFilter);
+}, [items, statusFilter]);  // ← מלא!
+```
+
+**חוק:** משתנה שנמצא **בתוך** הפונקציה חייב להיות **ב-dependencies**!
+
+**תסמינים אם חסר:**
+- State משתנה אבל UI לא מתעדכן
+- צריך refresh כדי לראות שינויים
+- עובד רק בלחיצה שנייה
+
 ### 1. Logging
 ```typescript
 // ✅ תמיד:

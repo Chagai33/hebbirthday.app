@@ -60,6 +60,39 @@ globs: ["src/**/*.ts", "src/**/*.tsx"]
 
 \- Place logic in Custom Hooks or Services (following Clean Architecture where possible).
 
+\### 🔴 CRITICAL: useMemo/useCallback Dependencies
+
+\*\*ALWAYS include ALL dependencies that affect the computation!\*\*
+
+\`\`\`typescript
+// ❌ WRONG - Missing syncStatusFilter dependency
+const filtered = useMemo(() => {
+  return items.filter(item => {
+    if (syncStatusFilter !== 'all') {  // ← Uses syncStatusFilter
+      return item.status === syncStatusFilter;
+    }
+    return true;
+  });
+}, [items]);  // ← Missing syncStatusFilter! Won't update on change!
+
+// ✅ CORRECT - All dependencies included
+const filtered = useMemo(() => {
+  return items.filter(item => {
+    if (syncStatusFilter !== 'all') {
+      return item.status === syncStatusFilter;
+    }
+    return true;
+  });
+}, [items, syncStatusFilter]);  // ← All dependencies ✅
+\`\`\`
+
+\*\*Symptoms if missing:\*\*
+\- State changes but UI doesn't update
+\- Need page refresh to see changes
+\- Inconsistent behavior
+
+\*\*Rule:\*\* If you use a variable inside useMemo/useCallback/useEffect, add it to dependencies!
+
 
 
 \## 🐛 Debugging

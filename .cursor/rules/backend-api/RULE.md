@@ -72,6 +72,26 @@ exports.myFunction = functions.https.onCall(async () => {
 3. **Timestamps:**
    - In code: `admin.firestore.FieldValue.serverTimestamp()`.
    - **Emulator Workaround:** Check `functions/src/interfaces/triggers/user-triggers.ts` for `new Date().toISOString()` usage before deploying.
+4. **Partial Updates with merge:true:**
+   - **DON'T send empty strings** if you want to preserve existing values!
+   - `{ merge: true }` only preserves fields you DON'T send.
+   - Sending `field: ''` or `field: 0` WILL update the field to that value.
+   
+**Example:**
+```typescript
+// ❌ WRONG - Will delete accessToken!
+await tokenRepo.save(userId, {
+  syncStatus: 'IN_PROGRESS',
+  accessToken: '',  // ← This UPDATES to empty string!
+  expiresAt: 0      // ← This UPDATES to 0!
+});
+
+// ✅ CORRECT - Omit fields you want to preserve
+await tokenRepo.save(userId, {
+  syncStatus: 'IN_PROGRESS'
+  // accessToken & expiresAt will remain unchanged
+});
+```
 
 ## 💉 Dependency Injection (DI)
 When adding a new function:

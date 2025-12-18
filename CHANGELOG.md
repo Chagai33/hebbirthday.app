@@ -32,6 +32,42 @@ All notable changes to this project will be documented in this file.
 - **השפעה:** Frontend נשאר מחובר במהלך Bulk Sync ✅
 - **חשיבות:** 🔴 קריטי
 
+**באג #10: useMemo חסר dependency → UI לא מתעדכן** (18 דצמבר 2024)
+- **בעיה:**
+  - הוספת `syncStatusFilter` state חדש
+  - `useMemo` משתמש ב-`syncStatusFilter` אבל לא כולל אותו ב-dependencies
+  - State משתנה אבל UI לא מתעדכן
+- **תסמינים:**
+  - לוחצים על פילטר "מסונכרן" → לא קורה כלום
+  - רק אחרי refresh הפילטר עובד
+- **פתרון:**
+  - הוספת `syncStatusFilter` ל-dependencies של `useMemo`
+  - `}, [enrichedBirthdays, searchTerm, sortBy, selectedGroupIds, genderFilter, syncStatusFilter]);`
+- **קובץ:** `components/birthdays/BirthdayList.tsx` (שורה 298)
+- **לקח:** תמיד בדוק dependencies ב-useMemo/useCallback/useEffect!
+- **חשיבות:** 🟡 בינוני (UX)
+
+#### ✨ Added
+
+**תכונה #4: Sync Status Filter** (18 דצמבר 2024)
+- **מטרה:** סינון רשומות לפי סטטוס סנכרון ליומן Google
+- **אפשרויות:**
+  - ✓ מסונכרן - רשומות עם `isSynced: true` ללא שגיאות
+  - ⚠️ שגיאה - רשומות עם `syncMetadata.status: 'ERROR' | 'PARTIAL_SYNC'`
+  - ○ לא מסונכרן - רשומות עם `isSynced: false` או `undefined`
+- **יישום:**
+  - State: `syncStatusFilter` עם localStorage persistence
+  - Logic: פילטור פשוט על נתוני השרת
+  - UI: 4 כפתורים בפאנל Filters (Sync Status → Groups → Gender)
+- **קבצים:**
+  - `components/birthdays/BirthdayList.tsx` (state + logic + UI)
+  - `locales/he.json` + `locales/en.json` (translations)
+- **יתרונות:**
+  - מציאה מהירה של רשומות עם שגיאות
+  - סינון רק מסונכרנות או לא מסונכרנות
+  - משולב בפילטרים הקיימים
+- **חשיבות:** 🟢 חשוב
+
 **באג #6: לולאה אינסופית ב-onBirthdayWrite**
 - **בעיה:** `onBirthdayWrite` מעדכן Firestore → מפעיל `onBirthdayWrite` שוב → לולאה אינסופית
 - **תסמינים:** 
