@@ -281,6 +281,10 @@
     "ageOldest": "Age (Oldest)"
   },
   "filter": {
+    "syncStatus": "Sync Status",
+    "synced": "Synced",
+    "syncError": "Error",
+    "notSynced": "Not Synced",
     "gender": "Gender",
     "all": "All",
     "male": "Males",

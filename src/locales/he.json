@@ -314,6 +314,10 @@
     "ageOldest": "גיל (המבוגר ביותר)"
   },
   "filter": {
+    "syncStatus": "סטטוס סנכרון",
+    "synced": "מסונכרן",
+    "syncError": "שגיאה",
+    "notSynced": "לא מסונכרן",
     "gender": "מגדר",
     "all": "הכל",
     "male": "גברים",

@@ -53,6 +53,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
   const [searchTerm, setSearchTerm] = useState(() => localStorage.getItem('birthday-search') || '');
   const [sortBy, setSortBy] = useState<'upcoming' | 'upcoming-latest' | 'upcoming-hebrew' | 'upcoming-hebrew-latest' | 'name-az' | 'name-za' | 'age-youngest' | 'age-oldest'>(() => (localStorage.getItem('birthday-sort') as any) || 'upcoming');
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>(() => (localStorage.getItem('birthday-gender') as any) || 'all');
+  const [syncStatusFilter, setSyncStatusFilter] = useState<'all' | 'synced' | 'error' | 'not-synced'>(() => (localStorage.getItem('birthday-sync-status') as any) || 'all');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [currentTime, setCurrentTime] = useState(Date.now());
 
@@ -159,6 +160,10 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
     localStorage.setItem('birthday-gender', genderFilter);
   }, [genderFilter]);
 
+  useEffect(() => {
+    localStorage.setItem('birthday-sync-status', syncStatusFilter);
+  }, [syncStatusFilter]);
+
   const locale = i18n.language === 'he' ? he : enUS;
 
   // חישוב hasUnsyncedChanges לכל הרשומות
@@ -221,6 +226,26 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       filtered = filtered.filter((b) => b.gender === genderFilter);
     }
 
+    // סינון לפי סטטוס סנכרון - רק נתונים מהשרת
+    if (syncStatusFilter !== 'all') {
+      filtered = filtered.filter((b) => {
+        if (syncStatusFilter === 'synced') {
+          // מסונכרן תקין = isSynced וללא שגיאה
+          return b.isSynced === true && 
+                 (!b.syncMetadata || (b.syncMetadata.status !== 'ERROR' && b.syncMetadata.status !== 'PARTIAL_SYNC'));
+        }
+        if (syncStatusFilter === 'error') {
+          // שגיאה = יש syncMetadata עם שגיאה
+          return b.syncMetadata?.status === 'ERROR' || b.syncMetadata?.status === 'PARTIAL_SYNC';
+        }
+        if (syncStatusFilter === 'not-synced') {
+          // לא מסונכרן = isSynced לא true
+          return b.isSynced !== true;
+        }
+        return true;
+      });
+    }
+
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -270,7 +295,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
     });
 
     return sorted;
-  }, [enrichedBirthdays, searchTerm, sortBy, selectedGroupIds, genderFilter]);
+  }, [enrichedBirthdays, searchTerm, sortBy, selectedGroupIds, genderFilter, syncStatusFilter]);
 
   const handleDelete = async (id: string) => {
     const birthdayToDelete = birthdays.find(b => b.id === id);
@@ -517,16 +542,16 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
           <button
             onClick={() => setShowGroupFilter(!showGroupFilter)}
             className={`px-3 sm:px-4 py-1.5 sm:py-2 border rounded-lg font-medium transition-colors flex items-center gap-1.5 sm:gap-2 text-sm whitespace-nowrap ${
-              selectedGroupIds.length > 0 || genderFilter !== 'all'
+              selectedGroupIds.length > 0 || genderFilter !== 'all' || syncStatusFilter !== 'all'
                 ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
                 : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
             }`}
           >
             <Filter className="w-4 h-4" />
             <span className="hidden sm:inline">{t('common.filters', 'Filters')}</span>
-            {(selectedGroupIds.length > 0 || genderFilter !== 'all') && (
+            {(selectedGroupIds.length > 0 || genderFilter !== 'all' || syncStatusFilter !== 'all') && (
               <span className="bg-white text-blue-600 px-1.5 py-0.5 rounded-full text-xs font-bold">
-                {selectedGroupIds.length + (genderFilter !== 'all' ? 1 : 0)}
+                {selectedGroupIds.length + (genderFilter !== 'all' ? 1 : 0) + (syncStatusFilter !== 'all' ? 1 : 0)}
               </span>
             )}
           </button>
@@ -766,15 +791,16 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
 
       {showGroupFilter && (
         <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 space-y-3 sm:space-y-4 max-h-[60vh] sm:max-h-none overflow-y-auto">
+          {/* Sync Status Filter */}
           <div>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm sm:text-base font-semibold text-gray-900 flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                {t('filter.gender', 'Gender')}
+                <Calendar className="w-4 h-4" />
+                {t('filter.syncStatus', 'סטטוס סנכרון')}
               </h3>
-              {genderFilter !== 'all' && (
+              {syncStatusFilter !== 'all' && (
                 <button
-                  onClick={() => setGenderFilter('all')}
+                  onClick={() => setSyncStatusFilter('all')}
                   className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium"
                 >
                   {t('common.clear', 'Clear')}
@@ -783,34 +809,44 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
             </div>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
               <button
-                onClick={() => setGenderFilter('all')}
+                onClick={() => setSyncStatusFilter('all')}
                 className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
-                  genderFilter === 'all'
+                  syncStatusFilter === 'all'
                     ? 'bg-gray-600 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                 }`}
               >
-                {t('filter.all', 'All')}
+                {t('filter.all', 'הכל')}
               </button>
               <button
-                onClick={() => setGenderFilter(genderFilter === 'male' ? 'all' : 'male')}
+                onClick={() => setSyncStatusFilter(syncStatusFilter === 'synced' ? 'all' : 'synced')}
                 className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
-                  genderFilter === 'male'
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'bg-white border-blue-300 text-blue-600 hover:border-blue-400'
+                  syncStatusFilter === 'synced'
+                    ? 'bg-green-600 border-green-600 text-white'
+                    : 'bg-white border-green-300 text-green-600 hover:border-green-400'
                 }`}
               >
-                {t('filter.male', 'Male')}
+                ✓ {t('filter.synced', 'מסונכרן')}
               </button>
               <button
-                onClick={() => setGenderFilter(genderFilter === 'female' ? 'all' : 'female')}
+                onClick={() => setSyncStatusFilter(syncStatusFilter === 'error' ? 'all' : 'error')}
                 className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
-                  genderFilter === 'female'
-                    ? 'bg-pink-600 border-pink-600 text-white'
-                    : 'bg-white border-pink-300 text-pink-600 hover:border-pink-400'
+                  syncStatusFilter === 'error'
+                    ? 'bg-red-600 border-red-600 text-white'
+                    : 'bg-white border-red-300 text-red-600 hover:border-red-400'
                 }`}
               >
-                {t('filter.female', 'Female')}
+                ⚠️ {t('filter.syncError', 'שגיאה')}
+              </button>
+              <button
+                onClick={() => setSyncStatusFilter(syncStatusFilter === 'not-synced' ? 'all' : 'not-synced')}
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
+                  syncStatusFilter === 'not-synced'
+                    ? 'bg-gray-600 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
+                }`}
+              >
+                ○ {t('filter.notSynced', 'לא מסונכרן')}
               </button>
             </div>
           </div>
@@ -875,6 +911,56 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
               </div>
             </div>
           )}
+
+          {/* Gender Filter - הועבר לאחרון */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm sm:text-base font-semibold text-gray-900 flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                {t('filter.gender', 'מין')}
+              </h3>
+              {genderFilter !== 'all' && (
+                <button
+                  onClick={() => setGenderFilter('all')}
+                  className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium"
+                >
+                  {t('common.clear', 'נקה')}
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
+              <button
+                onClick={() => setGenderFilter('all')}
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
+                  genderFilter === 'all'
+                    ? 'bg-gray-600 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
+                }`}
+              >
+                {t('filter.all', 'הכל')}
+              </button>
+              <button
+                onClick={() => setGenderFilter(genderFilter === 'male' ? 'all' : 'male')}
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
+                  genderFilter === 'male'
+                    ? 'bg-blue-600 border-blue-600 text-white'
+                    : 'bg-white border-blue-300 text-blue-600 hover:border-blue-400'
+                }`}
+              >
+                {t('filter.male', 'זכר')}
+              </button>
+              <button
+                onClick={() => setGenderFilter(genderFilter === 'female' ? 'all' : 'female')}
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
+                  genderFilter === 'female'
+                    ? 'bg-pink-600 border-pink-600 text-white'
+                    : 'bg-white border-pink-300 text-pink-600 hover:border-pink-400'
+                }`}
+              >
+                {t('filter.female', 'נקבה')}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
