@@ -106,6 +106,16 @@ class CalculateHebrewDataUseCase {
             // התאריך השתנה - חייב לחשב מחדש!
             return true;
         }
+        // בדיקה חדשה: אם יום ההולדת העברי הקרוב עבר - חייבים לחשב מחדש
+        if (afterData.next_upcoming_hebrew_birthday) {
+            const nextDate = new Date(afterData.next_upcoming_hebrew_birthday);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // איפוס שעות להשוואה נכונה
+            if (nextDate < today) {
+                functions.logger.log(`Hebrew birthday has passed for birthday, recalculating...`);
+                return true; // התאריך עבר - חשב מחדש!
+            }
+        }
         // התאריך לא השתנה - חשב רק אם אין תאריך עברי
         return !hasHebrew;
     }

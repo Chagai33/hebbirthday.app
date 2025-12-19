@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [3.0.2] - 19 דצמבר 2024
+
+### 🚨 Critical Fixes - תיקוני קריטיים
+
+#### 🐛 Fixed
+
+**באג #10: מינוס ימים בתאריכים עבריים** (19 דצמבר 2024)
+- **בעיה:**
+  - רשומות עם יום הולדת עברי שעבר מוצגות עם מינוס ימים (-1, -2, -3)
+  - הרשומות נשארות בראש הרשימה במקום לעבור לשנה הבאה
+  - קורה רק בממיון לפי "יום הולדת עברי קרוב", לא בלועזי
+- **סיבה שורשית:**
+  1. Scheduled function `updateNextBirthdayScheduled` כשלה עם שגיאת index חסר
+  2. Index חסר על `archived` + `next_upcoming_hebrew_birthday` ללא `tenant_id`
+  3. `shouldCalculate` לא בדק אם תאריך עברי עבר
+- **פתרון:**
+  - הוספת index חדש ל-`firestore.indexes.json` עבור scheduled function
+  - הוספת בדיקה ב-`shouldCalculate`: אם `next_upcoming_hebrew_birthday < today` → חשב מחדש
+  - כעת scheduled function רצה בהצלחה ומעדכנת תאריכים שעברו
+- **קבצים:**
+  - `firestore.indexes.json` (שורות 67-80) - index חדש
+  - `functions/src/application/use-cases/birthday/CalculateHebrewDataUseCase.ts` (שורות 100-111)
+
+---
+
 ## [3.0.1] - 18 דצמבר 2024
 
 ### 🚨 Critical Fixes - תיקוני קריטיים

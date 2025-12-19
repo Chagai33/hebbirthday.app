@@ -46,6 +46,95 @@ export function createDependencies() {
 
 ---
 
+## 🔥 תיקונים קריטיים - 19 דצמבר 2024
+
+### ⚠️ בעיית מינוס ימים בתאריכים עבריים
+
+**הבעיה:**
+רשומות עם יום הולדת עברי שעבר הוצגו עם **מינוס ימים** (למשל: -1, -2, -3) כשממיינים לפי "יום הולדת עברי קרוב".
+
+**תסמינים:**
+- יום הולדת עברי שחגג אתמול מוצג: "-1 ימים"
+- הרשומה נשארת בראש הרשימה במקום לעבור לשנה הבאה
+- קורה רק בממיון לפי עברי, לא בלועזי
+
+**הסיבה השורשית:**
+1. **Scheduled function לא רצה** - `updateNextBirthdayScheduled` כשלה עם שגיאת index:
+   ```
+   Error: 9 FAILED_PRECONDITION: The query requires an index
+   ```
+2. **Index חסר** - ה-query דרש index על `archived` + `next_upcoming_hebrew_birthday` ללא `tenant_id`
+3. **shouldCalculate לא בדק תאריך עבר** - גם כש-scheduled function הייתה רצה ומעדכנת `updated_at`, הפונקציה `shouldCalculate` הייתה מחזירה `false` כי:
+   - התאריך הלועזי לא השתנה
+   - לא הייתה בדיקה אם התאריך העברי עבר
+
+**הפתרון:**
+
+#### 1. הוספת Index חדש (firestore.indexes.json)
+```json
+{
+  "collectionGroup": "birthdays",
+  "queryScope": "COLLECTION",
+  "fields": [
+    {
+      "fieldPath": "archived",
+      "order": "ASCENDING"
+    },
+    {
+      "fieldPath": "next_upcoming_hebrew_birthday",
+      "order": "ASCENDING"
+    }
+  ]
+}
+```
+
+**למה:** scheduled function מחפשת birthdays עם תאריך עברי שעבר **בכל הטננטים** (ללא `tenant_id`).
+
+#### 2. תיקון shouldCalculate (CalculateHebrewDataUseCase.ts)
+```typescript
+// בדיקה חדשה: אם יום ההולדת העברי הקרוב עבר - חייבים לחשב מחדש
+if (afterData.next_upcoming_hebrew_birthday) {
+  const nextDate = new Date(afterData.next_upcoming_hebrew_birthday);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  if (nextDate < today) {
+    functions.logger.log(`Hebrew birthday has passed for birthday, recalculating...`);
+    return true;
+  }
+}
+```
+
+**למה:** כעת כש-scheduled function מעדכנת `updated_at`, ה-trigger `onBirthdayWrite` יבדוק אם התאריך העברי עבר ויחשב מחדש את `next_upcoming_hebrew_birthday` לשנה הבאה.
+
+**קבצים:**
+- `firestore.indexes.json:67-80` (index חדש)
+- `functions/src/application/use-cases/birthday/CalculateHebrewDataUseCase.ts:100-111` (בדיקת תאריך עבר)
+- `functions/src/interfaces/scheduled/update-birthdays.ts` (ללא שינוי - scheduled function קיימת)
+
+**איך לבדוק:**
+```bash
+# 1. Deploy indexes
+firebase deploy --only firestore:indexes
+
+# 2. Build backend
+cd functions && npm run build
+
+# 3. Deploy functions
+firebase deploy --only functions:onBirthdayWrite
+
+# 4. בדוק ב-Firebase Console logs:
+firebase functions:log --only updateNextBirthdayScheduled
+```
+
+**תוצאה צפויה:**
+- scheduled function רצה בהצלחה (אחרי שה-index נבנה)
+- רשומות עם תאריך עברי שעבר יחושבו מחדש
+- `next_upcoming_hebrew_birthday` יעודכן לשנה הבאה
+- לא יופיעו יותר מינוסים!
+
+---
+
 ## 🔥 תיקונים קריטיים - 18 דצמבר 2024
 
 ### ⚠️ Bulk Sync מוחק Access Token
