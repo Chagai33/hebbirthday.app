@@ -190,7 +190,7 @@ export const Dashboard = () => {
         lastNameMissing: t('validation.lastNameMissing', 'שם משפחה חסר'),
         birthDateRequired: t('validation.birthDateRequired', 'תאריך לידה הוא שדה חובה'),
         birthDateInvalid: t('validation.birthDateInvalid', 'תאריך לידה לא תקין'),
-        birthDateFuture: t('validation.birthDateFuture', 'תאריך לידה לא יכול להיות בעתיד'),
+        birthDateFuture: t('validation.futureDate', 'תאריך לידה לא יכול להיות בעתיד'),
         birthDateTooOld: t('validation.birthDateTooOld', 'תאריך לידה לא תקין (לפני 1900)'),
       });
 

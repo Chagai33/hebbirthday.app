@@ -472,7 +472,11 @@
     "duplicateVerification": {
       "title": "כפילות אפשרית",
       "message": "אדם עם שם דומה כבר קיים בקבוצה זו. האם להמשיך?",
-      "existingPerson": "אדם קיים"
+      "existingPerson": "אדם קיים",
+      "mergeMessage": "אדם זה כבר קיים בקבוצה אחרת. האם תרצה להוסיף אותו גם לקבוצה החדשה, במקום ליצור כפילות?",
+      "mergeMessageWithGroups": "אדם זה כבר קיים בקבוצה אחרת. האם תרצה להוסיף אותו גם לקבוצת {{groups}}, במקום ליצור כפילות?",
+      "alreadyInGroup": "אדם זה כבר קיים ב-{{groups}}. אין צורך להוסיף שוב.",
+      "mergeConfirm": "כן, הוסף"
     },
     "sunsetVerification": {
       "title": "אימות זמן לידה",
@@ -491,16 +495,8 @@
     "importError": "שגיאה בייבוא קובץ CSV",
     "passwordTooShort": "הסיסמה חייבת להכיל לפחות 6 תווים",
     "passwordsDontMatch": "הסיסמאות אינן תואמות",
-    "invalidPhoneNumber": "מספר טלפון לא תקין"
-  },
-  "modals": {
-    "duplicateVerification": {
-      "title": "כפילות אפשרית",
-      "mergeMessage": "אדם זה כבר קיים בקבוצה אחרת. האם תרצה להוסיף אותו גם לקבוצה החדשה, במקום ליצור כפילות?",
-      "mergeMessageWithGroups": "אדם זה כבר קיים בקבוצה אחרת. האם תרצה להוסיף אותו גם לקבוצת {{groups}}, במקום ליצור כפילות?",
-      "alreadyInGroup": "אדם זה כבר קיים ב-{{groups}}. אין צורך להוסיף שוב.",
-      "mergeConfirm": "כן, הוסף"
-    }
+    "invalidPhoneNumber": "מספר טלפון לא תקין",
+    "futureDate": "תאריך הלידה לא יכול להיות בעתיד"
   },
   "messages": {
     "birthdayAdded": "יום הולדת נוסף בהצלחה",
