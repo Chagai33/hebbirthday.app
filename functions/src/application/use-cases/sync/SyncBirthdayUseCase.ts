@@ -85,7 +85,8 @@ export class SyncBirthdayUseCase {
       prefs: currentData.calendar_preference_override || tenant?.default_calendar_preference,
       archived: currentData.archived,
       notes: currentData.notes,
-      groups: currentData.group_ids || []
+      groups: currentData.group_ids || [],
+      calendarId: calendarId // ✅ הוספת מזהה היומן לחתימה - פותר את הדילוג במעבר יומן
     };
     const currentDataHash = crypto.createHash('sha256')
       .update(JSON.stringify(dataToHash))
@@ -168,6 +169,7 @@ export class SyncBirthdayUseCase {
     // G. Execution
     const tasks: (() => Promise<any>)[] = [];
     const failedKeys: string[] = [];
+    const failedReasons: string[] = []; // ✅ מערך חדש לשמירת סיבות הכישלון
 
     // Create Tasks with Deterministic IDs
     creates.forEach(item => {
@@ -202,12 +204,14 @@ export class SyncBirthdayUseCase {
               );
               currentMap[item.key] = deterministicId;
               functions.logger.log(`Successfully restored/updated event ${deterministicId}`);
-            } catch (updateErr) {
+            } catch (updateErr: any) {
               functions.logger.error(`Failed to reconcile event ${deterministicId}`, updateErr);
               failedKeys.push(item.key);
+              failedReasons.push(updateErr.message); // ✅ שמירת השגיאה
             }
           } else {
             failedKeys.push(item.key);
+            failedReasons.push(e.message); // ✅ שמירת השגיאה
             throw e;
           }
         }
@@ -240,12 +244,14 @@ export class SyncBirthdayUseCase {
                 deterministicId
               );
               currentMap[item.key] = eventId;
-            } catch (e2) {
+            } catch (e2: any) {
               failedKeys.push(item.key);
+              failedReasons.push(e2.message); // ✅ שמירת השגיאה
               throw e2;
             }
           } else {
             failedKeys.push(item.key);
+            failedReasons.push(e.message); // ✅ שמירת השגיאה
             throw e;
           }
         }
@@ -263,6 +269,7 @@ export class SyncBirthdayUseCase {
             delete currentMap[item.key];
           } else {
             failedKeys.push(item.key);
+            failedReasons.push(e.message); // ✅ שמירת השגיאה
             throw e;
           }
         }
@@ -293,8 +300,8 @@ export class SyncBirthdayUseCase {
         lastAttemptAt: new Date().toISOString(),
         failedKeys,
         lastErrorMessage: failedKeys.length > 0 
-          ? `נכשלו ${failedKeys.length} אירועים מתוך ${desiredEvents.size}`
-          : null,  // ✅ שינוי 2: אכלוס lastErrorMessage
+          ? `נכשלו ${failedKeys.length} אירועים. שגיאה: ${failedReasons[0] || 'Unknown'}` // ✅ הצגת שגיאה אמיתית
+          : null,
         retryCount,
         dataHash: currentDataHash
       },
@@ -303,6 +310,3 @@ export class SyncBirthdayUseCase {
     });
   }
 }
-
-
-
