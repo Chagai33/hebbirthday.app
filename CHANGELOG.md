@@ -8,8 +8,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - **Bug #11: Scheduled Function Timing Issue**
-  - שינוי זמן ריצה של `updateNextBirthdayScheduled` מ-`every 24 hours` ל-`1 0 * * *`
-  - הפונקציה רצה כעת כל לילה ב-00:01 (שעון ישראל) במקום כל 24 שעות מהריצה הקודמת
+  - שינוי זמן ריצה של `updateNextBirthdayScheduled` מ-`every 24 hours` ל-`every day 00:00`
+  - הפונקציה רצה כעת כל לילה ב-00:00 חצות (שעון ישראל) במקום כל 24 שעות מהריצה הקודמת
   - מונע הצגת ימים שליליים במשך שעות רבות לאחר שיום הולדת עברי עבר
   - קובץ: `functions/src/interfaces/scheduled/update-birthdays.ts`
 
