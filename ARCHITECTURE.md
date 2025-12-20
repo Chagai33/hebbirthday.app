@@ -395,11 +395,32 @@ export const retryFailedSyncsFn = functions.pubsub
 **update-birthdays.ts**
 ```typescript
 export const updateNextBirthdayScheduledFn = functions.pubsub
-  .schedule('every 24 hours')
+  .schedule('1 0 * * *')  // כל לילה ב-00:01 (Asia/Jerusalem)
+  .timeZone('Asia/Jerusalem')
   .onRun(async () => {
-    // Update next_upcoming_hebrew_birthday
+    // מוצא רשומות ש-next_upcoming_hebrew_birthday < today
+    // מעדכן updated_at → מפעיל onBirthdayWrite trigger
+    // הטריגר מחשב מחדש את התאריכים העבריים
   });
 ```
+
+**מטרה:** עדכון אוטומטי של רשומות שיום ההולדת העברי שלהן עבר
+
+**זמן ריצה:** כל לילה ב-00:01 (שעון ישראל)
+
+**לוגיקה:**
+1. Query: `archived == false AND next_upcoming_hebrew_birthday < today`
+2. עדכון `updated_at` → מפעיל `onBirthdayWrite` trigger
+3. הטריגר מחשב מחדש את כל התאריכים העבריים
+
+**תלויות:**
+- Index: `birthdays (archived, next_upcoming_hebrew_birthday, __name__)`
+- Trigger: `onBirthdayWrite` עם `shouldCalculate()` logic
+
+**מגבלות:**
+- 500 רשומות per batch (Firestore limit)
+- 540 שניות timeout (9 דקות)
+- לא Idempotent (ריצה כפולה תגרום לחישובים מיותרים)
 
 ---
 

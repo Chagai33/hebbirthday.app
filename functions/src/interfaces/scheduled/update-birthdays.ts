@@ -7,7 +7,7 @@ import { createDependencies } from '../dependencies';
 const deps = createDependencies();
 
 export const updateNextBirthdayScheduledFn = functions.pubsub
-  .schedule('every 24 hours')
+  .schedule('every day 00:00')  // כל יום בחצות
   .timeZone('Asia/Jerusalem')
   .onRun(async (context) => {
     try {

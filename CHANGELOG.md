@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [3.0.3] - 20 דצמבר 2024
+
+### Fixed
+- **Bug #11: Scheduled Function Timing Issue**
+  - שינוי זמן ריצה של `updateNextBirthdayScheduled` מ-`every 24 hours` ל-`1 0 * * *`
+  - הפונקציה רצה כעת כל לילה ב-00:01 (שעון ישראל) במקום כל 24 שעות מהריצה הקודמת
+  - מונע הצגת ימים שליליים במשך שעות רבות לאחר שיום הולדת עברי עבר
+  - קובץ: `functions/src/interfaces/scheduled/update-birthdays.ts`
+
+---
+
 ## [3.0.2] - 19 דצמבר 2024
 
 ### 🚨 Critical Fixes - תיקוני קריטיים

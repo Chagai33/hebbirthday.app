@@ -40,7 +40,7 @@ const admin = __importStar(require("firebase-admin"));
 const dependencies_1 = require("../dependencies");
 const deps = (0, dependencies_1.createDependencies)();
 exports.updateNextBirthdayScheduledFn = functions.pubsub
-    .schedule('every 24 hours')
+    .schedule('every day 00:00') // כל יום בחצות
     .timeZone('Asia/Jerusalem')
     .onRun(async (context) => {
     try {
