@@ -120,6 +120,8 @@
     "disconnectConfirm": "Are you sure you want to disconnect from Google Calendar?",
     "syncingMultiple": "Syncing {{count}} birthdays...",
     "syncedCount": "Synced {{count}} birthdays successfully",
+    "syncStarted": "Sync started for {{count}} birthdays. Processing in background.",
+    "bulkSyncCompleted": "Sync completed! {{count}} birthdays synced successfully ✓",
     "createCalendar": "Create Calendar",
     "calendarName": "Calendar Name",
     "primaryCalendar": "Primary Calendar",
@@ -139,7 +141,7 @@
     "disconnectCalendarShort": "Disconnect",
     "deleteCalendar": "Delete Calendar",
     "deleteCalendarConfirm": "Are you sure you want to delete the calendar",
-    "deleteCalendarWarning": "This action will delete the calendar from Google Calendar. You can only delete calendars created by the app, that are not primary, and have no events. This action cannot be undone.",
+    "deleteCalendarWarning": "This action will delete the calendar from Google Calendar. You can only delete calendars created by the app that are not primary. This action cannot be undone.",
     "deleting": "Deleting...",
     "yesDelete": "Yes, Delete",
     "customCalendarDescription": "A custom calendar allows you to share birthdays with family and friends without exposing your personal calendar.",
@@ -279,6 +281,10 @@
     "ageOldest": "Age (Oldest)"
   },
   "filter": {
+    "syncStatus": "Sync Status",
+    "synced": "Synced",
+    "syncError": "Error",
+    "notSynced": "Not Synced",
     "gender": "Gender",
     "all": "All",
     "male": "Males",
@@ -435,7 +441,8 @@
     "passwordTooShort": "Password must be at least 6 characters",
     "passwordsDontMatch": "Passwords don't match",
     "calendarError": "Cannot open Google Calendar. Please try again.",
-    "invalidPhoneNumber": "Invalid phone number"
+    "invalidPhoneNumber": "Invalid phone number",
+    "futureDate": "Birth date cannot be in the future"
   },
   "messages": {
     "birthdayAdded": "Birthday added successfully",
@@ -495,13 +502,6 @@
     "deleteAccountConfirmDescription": "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
     "summaryOfData": "Summary of data to be deleted:",
     "confirmDelete": "Yes, delete account"
-  },
-  "modals": {
-    "duplicateVerification": {
-      "title": "Possible Duplicate",
-      "mergeMessage": "This person already exists in another group. Would you like to add them to the new group as well, instead of creating a duplicate?",
-      "mergeConfirm": "Yes, Add"
-    }
   },
   "help": {
     "title": "How does it work?",

@@ -75,6 +75,8 @@
     "disconnectConfirm": "האם אתה בטוח שברצונך לנתק את החיבור ליומן Google?",
     "syncingMultiple": "מסנכרן {{count}} ימי הולדת...",
     "syncedCount": "סונכרנו {{count}} ימי הולדת בהצלחה",
+    "syncStarted": "הסנכרון התחיל עבור {{count}} ימי הולדת. המערכת תעבד את הרשומות ברקע.",
+    "bulkSyncCompleted": "הסנכרון הושלם! סונכרנו {{count}} ימי הולדת בהצלחה ✓",
     "createCalendar": "צור יומן חדש",
     "calendarName": "שם יומן",
     "primaryCalendar": "יומן ראשי",
@@ -94,7 +96,7 @@
     "disconnectCalendarShort": "נתק",
     "deleteCalendar": "מחיקת יומן",
     "deleteCalendarConfirm": "האם אתה בטוח שברצונך למחוק את היומן",
-    "deleteCalendarWarning": "פעולה זו תמחק את היומן מ-Google Calendar. ניתן למחוק רק יומנים שנוצרו על ידי האפליקציה, שאינם נוכחיים, וללא אירועים. פעולה זו אינה ניתנת לביטול.",
+    "deleteCalendarWarning": "פעולה זו תמחק את היומן מ-Google Calendar. ניתן למחוק רק יומנים שנוצרו על ידי האפליקציה ושאינם נוכחיים. פעולה זו אינה ניתנת לביטול.",
     "deleting": "מוחק...",
     "yesDelete": "כן, מחק",
     "customCalendarDescription": "יומן מותאם אישית מאפשר לך לשתף את ימי ההולדת עם משפחה וחברים מבלי לחשוף את היומן האישי שלך.",
@@ -312,6 +314,10 @@
     "ageOldest": "גיל (המבוגר ביותר)"
   },
   "filter": {
+    "syncStatus": "סטטוס סנכרון",
+    "synced": "מסונכרן",
+    "syncError": "שגיאה",
+    "notSynced": "לא מסונכרן",
     "gender": "מגדר",
     "all": "הכל",
     "male": "גברים",
@@ -466,7 +472,11 @@
     "duplicateVerification": {
       "title": "כפילות אפשרית",
       "message": "אדם עם שם דומה כבר קיים בקבוצה זו. האם להמשיך?",
-      "existingPerson": "אדם קיים"
+      "existingPerson": "אדם קיים",
+      "mergeMessage": "אדם זה כבר קיים בקבוצה אחרת. האם תרצה להוסיף אותו גם לקבוצה החדשה, במקום ליצור כפילות?",
+      "mergeMessageWithGroups": "אדם זה כבר קיים בקבוצה אחרת. האם תרצה להוסיף אותו גם לקבוצת {{groups}}, במקום ליצור כפילות?",
+      "alreadyInGroup": "אדם זה כבר קיים ב-{{groups}}. אין צורך להוסיף שוב.",
+      "mergeConfirm": "כן, הוסף"
     },
     "sunsetVerification": {
       "title": "אימות זמן לידה",
@@ -485,16 +495,8 @@
     "importError": "שגיאה בייבוא קובץ CSV",
     "passwordTooShort": "הסיסמה חייבת להכיל לפחות 6 תווים",
     "passwordsDontMatch": "הסיסמאות אינן תואמות",
-    "invalidPhoneNumber": "מספר טלפון לא תקין"
-  },
-  "modals": {
-    "duplicateVerification": {
-      "title": "כפילות אפשרית",
-      "mergeMessage": "אדם זה כבר קיים בקבוצה אחרת. האם תרצה להוסיף אותו גם לקבוצה החדשה, במקום ליצור כפילות?",
-      "mergeMessageWithGroups": "אדם זה כבר קיים בקבוצה אחרת. האם תרצה להוסיף אותו גם לקבוצת {{groups}}, במקום ליצור כפילות?",
-      "alreadyInGroup": "אדם זה כבר קיים ב-{{groups}}. אין צורך להוסיף שוב.",
-      "mergeConfirm": "כן, הוסף"
-    }
+    "invalidPhoneNumber": "מספר טלפון לא תקין",
+    "futureDate": "תאריך הלידה לא יכול להיות בעתיד"
   },
   "messages": {
     "birthdayAdded": "יום הולדת נוסף בהצלחה",
