@@ -336,6 +336,7 @@
     "gender": "מגדר",
     "group": "קבוצה",
     "selectGroup": "בחר קבוצה",
+    "selectGroups": "בחר קבוצות",
     "noGroup": "ללא קבוצה",
     "hebrewDate": "תאריך עברי",
     "nextHebrewBirthday": "יום הולדת עברי הבא",
@@ -437,7 +438,15 @@
     "groupsSelected": "{{count}} קבוצות נבחרו",
     "groupSelected": "קבוצה אחת נבחרה",
     "unknownGroup": "קבוצה לא ידועה",
-    "noGroupsAvailable": "אין קבוצות זמינות"
+    "noGroupsAvailable": "אין קבוצות זמינות",
+    "assignToGroup": "הוספה לקבוצה",
+    "assignCount": "{{count}} רשומות נבחרו",
+    "assignedSuccess": "השיוך לקבוצה בוצע בהצלחה",
+    "createNewGroup": "צור קבוצה חדשה",
+    "createAndAssign": "צור ושייך",
+    "bulkAssignExplanation": "הקבוצות המסומנות הן הקבוצות הקיימות של הרשומות. ניתן להוסיף עוד או להסיר. כל הרשומות שנבחרו יקבלו את אותן הקבוצות.",
+    "bulkAssignExplanationAdd": "בחר קבוצות להוספה. הקבוצות שתבחר יתווספו לקבוצות הקיימות של כל רשומה.",
+    "noChangesDetected": "לא נעשו שינויים"
   },
   "wishlist": {
     "title": "רשימת המשאלות",
