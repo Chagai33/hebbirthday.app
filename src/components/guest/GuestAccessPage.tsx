@@ -462,11 +462,22 @@ export const GuestAccessPage: React.FC = () => {
                 <input
                   type="date"
                   value={
-                    formData.birthDateGregorian instanceof Date
+                    formData.birthDateGregorian instanceof Date && !isNaN(formData.birthDateGregorian.getTime())
                       ? formData.birthDateGregorian.toISOString().split('T')[0]
-                      : formData.birthDateGregorian || ''
+                      : ''
                   }
-                  onChange={e => handleFormChange('birthDateGregorian', new Date(e.target.value))}
+                  onChange={e => {
+                    const value = e.target.value;
+                    if (value) {
+                      const newDate = new Date(value);
+                      if (!isNaN(newDate.getTime())) {
+                        handleFormChange('birthDateGregorian', newDate);
+                      }
+                    } else {
+                      // Reset to empty/today when cleared
+                      handleFormChange('birthDateGregorian', new Date());
+                    }
+                  }}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   required
                 />
