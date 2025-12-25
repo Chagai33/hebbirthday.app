@@ -4,6 +4,71 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [3.0.5] - 25 דצמבר 2024
+
+### ✨ New Features
+
+**📘 מדריך משתמש מקיף (User Guide)**
+- מדריך Markdown מפורט: `USER_GUIDE.md` (510 שורות)
+- דף אינטראקטיבי חדש: `/guide` באפליקציה
+- **Sidebar Navigation** - ניווט עם 10 סקשנים
+- **חיפוש חכם** - עם debounce (500ms) וסינון real-time
+- **Scroll tracking** - סקשן פעיל מסומן אוטומטית
+- **Mobile responsive** - sidebar מתקפל, overlay, animations
+- **תוכן מפורט**: כל הפיצ'רים, הסברים, דוגמאות, טבלאות
+- **עיצוב מקצועי** - צבעי המותג, Callout boxes, RTL support
+- קומפוננטה: `src/components/pages/UserGuide.tsx`
+- Route: `/guide`
+- קישור בתפריט: AboutModal → "המדריך המלא"
+
+**תוכן המדריך כולל:**
+- 📥 איסוף נתונים: לינק חכם, Paste & Import, CSV
+- 📋 ניהול: טפסים, סטטוסים, "אחרי השקיעה"
+- 👥 קבוצות: היררכיה, הגדרות, multi-group
+- 📅 סנכרון: יומן ייעודי, מבנה אירוע, כלי ניהול
+- 🎁 משאלות: מבנה פריט, פורטל אורחים
+- 💰 דמי חנוכה: 5 צעדים, פרופילים
+- 💬 וואטסאפ: 4 אפשרויות, דוגמאות
+- ✨ פיצ'רים: מזלות, שפות, התראות
+- ⚙️ הגדרות: אבטחה, פרטיות
+
+### 🎨 UI/UX Improvements
+
+**AboutModal - ניקוי התפריט**
+- הוסרו: "תנאי שימוש" ו"מדיניות פרטיות" מהתפריט הראשי
+- הועברו לתחתית התפריט (footer area) - קישורים דיסקרטיים
+- נוסף קישור: "📘 המדריך המלא" (אייקון BookOpen בצבע סגול)
+- צמצום מ-11 ל-9 פריטים - פחות צפוף
+
+### 🌍 Translations
+
+**תרגומים חדשים**
+- `guide.*` - כל מבנה המדריך (עברית + אנגלית)
+- `guide.nav.*` - 10 כותרות ניווט
+- `guide.section1.*` - איסוף נתונים (3 שיטות מפורטות)
+- `guide.section2.*` - ניהול (sunset, statuses, tips)
+- `guide.section3.*` - סנכרון (dedicated calendar, event format, tools)
+- `guide.section4.*` - קבוצות (structure, settings)
+- `guide.section5.*` - משאלות (wishlist structure, portal steps)
+- `guide.section6.*` - דמי חנוכה (5 steps, profiles)
+- `guide.section7.*` - וואטסאפ (4 options)
+- `guide.section8.*` - פיצ'רים נוספים
+- `guide.section9.*` - הגדרות ואבטחה
+- קבצים: `he.json` (+~100 keys), `en.json` (+~100 keys)
+
+### 📚 Documentation Updates
+
+**README.md**
+- הוסף `USER_GUIDE.md` לרשימת התיעוד
+- עדכון "תכונות עיקריות" - פירוט מלא לפי קטגוריות
+
+**SYSTEM_OVERVIEW.md**
+- הוסף סקשן "User Documentation"
+- עדכון "Feature Highlights" עם כל הפיצ'רים החדשים
+- עדכון גרסה: 2.0.0 → 3.0.0
+
+---
+
 ## [3.0.4] - 25 דצמבר 2024
 
 ### ✨ New Features
