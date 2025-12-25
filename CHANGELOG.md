@@ -4,6 +4,44 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [3.0.4] - 25 דצמבר 2024
+
+### ✨ New Features
+
+**כפתור WhatsApp דינמי עם אפשרויות פורמט**
+- כפתור מפוצל חדש עם dropdown לבחירת פורמט:
+  - תאריכים עבריים בלבד
+  - תאריכים לועזיים בלבד
+  - שני הסוגים יחד
+- Checkbox להוספת יום בשבוע לתאריכים
+- שמירת העדפות ב-localStorage
+- קומפוננטה חדשה: `WhatsAppCopyButton.tsx`
+- קבצים: `BirthdayList.tsx`, `WhatsAppCopyButton.tsx`
+
+**שיפורי UI בפורטל האורחים (GuestAccessPage)**
+- הוספת כפתור החלפת שפה (עברית/English)
+- מסך טעינה ממותג עם לוגו HebBirthday וספינר
+- הקטנת הכותרת הראשית (קומפקטי יותר במובייל)
+- כפתור "הוסף יום הולדת" עם עיצוב מודרני (מסגרת עדינה)
+- שדה חיפוש עם כפתור X לאיפוס
+- מרכוז כותרת "ימי הולדת קיימים" במובייל
+- שדה תאריך לידה: שלושה dropdowns (יום/חודש/שנה) במקום date picker
+- מספר חודש בסוגריים ליד שם החודש (נובמבר (11))
+- קובץ: `GuestAccessPage.tsx`
+
+### 🌍 Translations
+
+**תרגומים חדשים**
+- הוספת אובייקט `zodiac` מלא ל-`en.json` עם כל 12 המזלות באנגלית
+- מפתחות תרגום חדשים לכפתור WhatsApp:
+  - `copyToWhatsapp`, `copyToWhatsappList`, `copied`
+  - `hebrewDates`, `gregorianDates`, `bothTypes`, `includeWeekday`
+  - `hebrewBirthday`, `gregorianBirthday`
+- המרת תאריך עברי לאנגלית (ז׳ טֵבֵת תשנ״ו → 7 Tevet 5756)
+- קבצים: `en.json`, `he.json`
+
+---
+
 ## [3.0.3] - 20 דצמבר 2024
 
 ### Fixed
