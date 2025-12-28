@@ -504,7 +504,13 @@
     "exampleComplex": "Complex names:",
     "pasteEmpty": "Text is empty or no valid dates found",
     "textImportSuccess": "Found {{count}} valid records",
-    "backToTextImport": "Back to text import"
+    "backToTextImport": "Back to text import",
+    "backToImportShort": "Back",
+    "validationErrors": "Found {{count}} errors:",
+    "maxLines": "maximum {{max}}",
+    "showAllErrors": "Show all {{count}} errors",
+    "tooManyChars": "Exceeded character limit ({{max}})",
+    "tooManyLines": "Exceeded line limit ({{max}})"
   },
   "messages": {
     "birthdayAdded": "Birthday added successfully",
@@ -527,6 +533,7 @@
     "totalRows": "Total Rows",
     "validRows": "Valid Rows",
     "invalidRows": "Invalid Rows",
+    "errorRows": "Errors",
     "duplicates": "Possible Duplicates",
     "selectAll": "Select All",
     "selected": "Selected",
@@ -551,7 +558,21 @@
     "addSubgroup": "Add Subgroup",
     "loadingGroups": "Loading groups...",
     "rowGroup": "Group",
-    "noGroup": "No Group (will use default)"
+    "noGroup": "No Group (will use default)",
+    "originalLine": "Original line",
+    "warningRows": "Rows with warnings",
+    "searchPlaceholder": "Search by name...",
+    "searchResults": "{{count}} results found",
+    "validation": {
+      "missingFirstName": "Missing first name",
+      "invalidFirstName": "Invalid first name",
+      "missingLastName": "Missing last name",
+      "invalidLastName": "Invalid last name",
+      "missingBirthDate": "Missing date",
+      "missingGender": "Missing gender"
+    },
+    "showIssuesOnly": "Needs attention ({{count}})",
+    "showAll": "Show all"
   },
   "settings": {
     "note1": "This setting applies to all groups in this tenant by default",
@@ -808,7 +829,7 @@
       "feature3": "Syncs to Google Calendar in a dedicated separate calendar",
       "feature4": "Manages wishlist for gifts",
       "feature5": "Calculates Hanukkah/Purim money by age groups",
-      "feature6": "Shares with family through smart links"
+      "feature6": "Allows family members to add birthdays themselves via dedicated share link"
     },
     "section1": {
       "title": "Data Collection - 3 Easy Ways",
@@ -825,9 +846,7 @@
       "paste": {
         "title": "2. Paste & Import",
         "intro": "Have a list written on notes or WhatsApp? The system recognizes the data automatically!",
-        "formats": "Supported Formats:",
         "detects": "What the system detects:",
-        "detect1": "Complex names: Ben David, Abu Hatzeira, Ibn Ezra",
         "detect2": "Gender: male/female or זכר/נקבה",
         "detect3": "After sunset: \"yes\", \"כן\", \"night\"",
         "detect4": "Notes: any text in parentheses",
@@ -837,18 +856,17 @@
         "title": "3. Import from Excel/CSV",
         "desc": "Have a ready spreadsheet? Import it with one click.",
         "columns": "Supported Columns:",
-        "col1": "First Name (required)",
-        "col2": "Last Name (required)",
-        "col3": "Birth Date (required)",
-        "col4": "Gender (optional)",
-        "col5": "After Sunset (optional)",
-        "col6": "Notes (optional)"
+        "col1": "First Name",
+        "col2": "Last Name",
+        "col3": "Birth Date",
+        "col4": "Gender",
+        "col5": "After Sunset",
+        "col6": "Notes"
       },
       "linkLimits": "Limitations:",
       "limit1": "Valid for 72 hours only",
       "limit2": "Maximum 50 entries per link",
-      "limit3": "Can reset and generate a new link",
-      "limit4": "Built-in bot protection"
+      "limit3": "Can reset and generate a new link"
     },
     "section2": {
       "title": "Birthday Management",
@@ -885,9 +903,9 @@
       "eventItem1": "New dress",
       "eventItem2": "Cooking book",
       "tools": "Advanced Management Tools:",
-      "tool1": "Sync History",
-      "tool2": "Clean Orphan Events",
-      "tool3": "Delete All Events",
+      "tool1": "Create New Calendar",
+      "tool2": "Sync History",
+      "tool3": "Delete Calendar",
       "tool4": "Disconnect Calendar"
     },
     "section4": {

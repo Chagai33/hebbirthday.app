@@ -19,7 +19,6 @@ import {
   Shield,
   AlertTriangle,
   ChevronUp,
-  CheckCircle,
   Clock,
   Globe,
   Link2,
@@ -196,8 +195,7 @@ export const UserGuide: React.FC = () => {
               {/* INTRO */}
               <section id="intro" className="mb-12 scroll-mt-20">
                 <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-100 rounded-xl p-6">
-                  <h2 className="text-xl font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <Star className="w-5 h-5 text-[#8e24aa]" />
+                  <h2 className="text-xl font-bold text-gray-900 mb-3">
                     {t('guide.intro.title', 'מהי המערכת?')}
                   </h2>
                   <p className="text-gray-700 leading-relaxed mb-4">
@@ -261,7 +259,6 @@ export const UserGuide: React.FC = () => {
                             <li>⏰ {t('guide.section1.limit1', 'תקף ל-72 שעות בלבד')}</li>
                             <li>📊 {t('guide.section1.limit2', 'מקסימום 50 הוספות לכל לינק')}</li>
                             <li>🔄 {t('guide.section1.limit3', 'ניתן לאפס ולהפיק לינק חדש')}</li>
-                            <li>🤖 {t('guide.section1.limit4', 'הגנה מובנית מפני בוטים')}</li>
                           </ul>
                         </div>
                       </div>
@@ -280,20 +277,9 @@ export const UserGuide: React.FC = () => {
                       {t('guide.section1.paste.intro', 'יש לכם רשימה כתובה בפתקים או בוואטסאפ? המערכת מזהה את הנתונים אוטומטית!')}
                     </p>
 
-                    <div className="bg-white rounded-lg p-4 mb-3">
-                      <h4 className="font-bold text-gray-900 mb-2 text-sm">{t('guide.section1.paste.formats', 'פורמטים נתמכים:')}</h4>
-                      <div className="grid grid-cols-2 gap-2 text-xs text-gray-700">
-                        <div className="font-mono bg-gray-50 p-2 rounded">DD/MM/YYYY → 15/03/1990</div>
-                        <div className="font-mono bg-gray-50 p-2 rounded">DD.MM.YY → 22.05.85</div>
-                        <div className="font-mono bg-gray-50 p-2 rounded">YYYY-MM-DD → 1990-03-15</div>
-                        <div className="font-mono bg-gray-50 p-2 rounded">D/M/YYYY → 5/3/1990</div>
-                      </div>
-                    </div>
-
                     <div className="bg-white rounded-lg p-4">
                       <h4 className="font-bold text-gray-900 mb-2 text-sm">{t('guide.section1.paste.detects', 'מה המערכת מזהה:')}</h4>
                       <ul className="space-y-1 text-sm text-gray-700">
-                        <li>✅ {t('guide.section1.paste.detect1', 'שמות מורכבים: בן דוד, אבו חצירה, אבן זוהר')}</li>
                         <li>✅ {t('guide.section1.paste.detect2', 'מגדר: זכר/נקבה או male/female')}</li>
                         <li>✅ {t('guide.section1.paste.detect3', 'אחרי שקיעה: "כן", "yes", "בלילה"')}</li>
                         <li>✅ {t('guide.section1.paste.detect4', 'הערות: כל טקסט בסוגריים')}</li>
@@ -316,12 +302,12 @@ export const UserGuide: React.FC = () => {
                     <div className="bg-white rounded-lg p-3">
                       <h4 className="font-bold text-gray-900 mb-2 text-sm">{t('guide.section1.csv.columns', 'עמודות נתמכות:')}</h4>
                       <ul className="space-y-1 text-xs text-gray-700">
-                        <li>✅ {t('guide.section1.csv.col1', 'שם פרטי (חובה)')}</li>
-                        <li>✅ {t('guide.section1.csv.col2', 'שם משפחה (חובה)')}</li>
-                        <li>✅ {t('guide.section1.csv.col3', 'תאריך לידה (חובה)')}</li>
-                        <li>⚪ {t('guide.section1.csv.col4', 'מגדר (אופציונלי)')}</li>
-                        <li>⚪ {t('guide.section1.csv.col5', 'אחרי שקיעה (אופציונלי)')}</li>
-                        <li>⚪ {t('guide.section1.csv.col6', 'הערות (אופציונלי)')}</li>
+                        <li>✅ {t('guide.section1.csv.col1', 'שם פרטי')}</li>
+                        <li>✅ {t('guide.section1.csv.col2', 'שם משפחה')}</li>
+                        <li>✅ {t('guide.section1.csv.col3', 'תאריך לידה')}</li>
+                        <li>⚪ {t('guide.section1.csv.col4', 'מגדר')}</li>
+                        <li>⚪ {t('guide.section1.csv.col5', 'אחרי שקיעה')}</li>
+                        <li>⚪ {t('guide.section1.csv.col6', 'הערות')}</li>
                       </ul>
                     </div>
                   </div>
@@ -458,24 +444,24 @@ export const UserGuide: React.FC = () => {
 
                 <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
                   <h3 className="font-bold text-gray-900 mb-3 text-sm">{t('guide.section3.eventFormat', 'מבנה האירוע ביומן:')}</h3>
-                  <div className="bg-gray-50 rounded-lg p-3 font-mono text-xs text-gray-700 space-y-1" dir="ltr">
+                  <div className={`bg-gray-50 rounded-lg p-3 font-mono text-xs text-gray-700 space-y-1 ${isHebrew ? 'text-right' : 'text-left'}`} dir={isHebrew ? 'rtl' : 'ltr'}>
                     <div className="text-blue-600 font-bold">📅 גילה | 40 | יום הולדת עברי</div>
                     <div className="text-gray-500">🗓️ 15 במרץ 2026</div>
                     <div className="text-gray-600">📝 {t('guide.section3.eventDesc', 'תיאור:')}</div>
-                    <div className="ms-4 text-gray-600">{t('guide.section3.eventBirth', 'תאריך לידה: י"ח באדר תשמ"ו')}</div>
-                    <div className="ms-4 text-gray-600">{t('guide.section3.eventAge', 'גיל: 40')}</div>
-                    <div className="ms-4 text-gray-600">{t('guide.section3.eventWishlist', 'רשימת משאלות:')}</div>
-                    <div className="ms-8 text-gray-500">• {t('guide.section3.eventItem1', 'שמלה חדשה')}</div>
-                    <div className="ms-8 text-gray-500">• {t('guide.section3.eventItem2', 'ספר בישול')}</div>
+                    <div className={`${isHebrew ? 'mr-4' : 'ms-4'} text-gray-600`}>{t('guide.section3.eventBirth', 'תאריך לידה: י"ח באדר תשמ"ו')}</div>
+                    <div className={`${isHebrew ? 'mr-4' : 'ms-4'} text-gray-600`}>{t('guide.section3.eventAge', 'גיל: 40')}</div>
+                    <div className={`${isHebrew ? 'mr-4' : 'ms-4'} text-gray-600`}>{t('guide.section3.eventWishlist', 'רשימת משאלות:')}</div>
+                    <div className={`${isHebrew ? 'mr-8' : 'ms-8'} text-gray-500`}>• {t('guide.section3.eventItem1', 'שמלה חדשה')}</div>
+                    <div className={`${isHebrew ? 'mr-8' : 'ms-8'} text-gray-500`}>• {t('guide.section3.eventItem2', 'ספר בישול')}</div>
                   </div>
                 </div>
 
                 <div className="bg-white border border-gray-200 rounded-lg p-4">
                   <h3 className="font-bold text-gray-900 mb-3 text-sm">{t('guide.section3.tools', 'כלי ניהול מתקדמים:')}</h3>
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-2 bg-blue-50 rounded border border-blue-200 text-blue-900">📜 {t('guide.section3.tool1', 'היסטוריית סנכרונים')}</div>
-                    <div className="p-2 bg-blue-50 rounded border border-blue-200 text-blue-900">🧹 {t('guide.section3.tool2', 'ניקוי אירועים יתומים')}</div>
-                    <div className="p-2 bg-red-50 rounded border border-red-200 text-red-900">🗑️ {t('guide.section3.tool3', 'מחיקת כל האירועים')}</div>
+                    <div className="p-2 bg-green-50 rounded border border-green-200 text-green-900">➕ {t('guide.section3.tool1', 'יצירת יומן חדש')}</div>
+                    <div className="p-2 bg-blue-50 rounded border border-blue-200 text-blue-900">📜 {t('guide.section3.tool2', 'היסטוריית סנכרונים')}</div>
+                    <div className="p-2 bg-red-50 rounded border border-red-200 text-red-900">🗑️ {t('guide.section3.tool3', 'מחיקת יומן')}</div>
                     <div className="p-2 bg-gray-100 rounded border text-gray-700">🔌 {t('guide.section3.tool4', 'ניתוק מהיומן')}</div>
                   </div>
                 </div>
