@@ -471,26 +471,26 @@ export const GuestAccessPage: React.FC = () => {
   // Error states
   if (state.error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex flex-col overflow-x-hidden">
         {/* Logo Header */}
         <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200 py-4">
-          <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
+          <div className="max-w-4xl mx-auto px-3 sm:px-4 flex items-center justify-between">
             <a 
               href={`${window.location.origin}/`}
-              className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity"
+              className="flex flex-col items-center gap-1 sm:gap-2 hover:opacity-80 transition-opacity flex-shrink min-w-0"
             >
-              <div className="text-2xl sm:text-3xl font-black tracking-tight leading-none inline-flex items-baseline" dir="ltr">
+              <div className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-none inline-flex items-baseline" dir="ltr">
                 <span className="text-[#8e24aa]">Heb</span>
                 <span className="text-[#304FFE]">Birthday</span>
-                <span className="text-gray-400 text-lg sm:text-xl ml-[1px]">.app</span>
+                <span className="text-gray-400 text-base sm:text-lg md:text-xl ml-[1px]">.app</span>
               </div>
-              <p className="text-xs sm:text-sm text-gray-600">
+              <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 text-center">
                 {t('app.taglinePart1')} <span className="text-[#8e24aa]">{t('app.taglineHebrew')}</span> {t('app.taglineOr')} <span className="text-[#304FFE]">{t('app.taglineGregorian')}</span>
               </p>
             </a>
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:border-purple-400 hover:text-purple-600 rounded-lg transition-all duration-200 shadow-sm hover:shadow"
+              className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:border-purple-400 hover:text-purple-600 rounded-lg transition-all duration-200 shadow-sm hover:shadow flex-shrink-0"
               title={currentLangLabel}
             >
               <Globe className="w-4 h-4" />
@@ -500,8 +500,8 @@ export const GuestAccessPage: React.FC = () => {
         </div>
 
         {/* Error Content */}
-        <div className="flex-1 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+        <div className="flex-1 flex items-center justify-center p-3 sm:p-4 overflow-x-hidden">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 text-center">
           {state.errorType === 'invalid_token' && (
             <>
               <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
@@ -586,26 +586,26 @@ export const GuestAccessPage: React.FC = () => {
 
   // Success state - Main guest portal
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex flex-col overflow-x-hidden">
       {/* Logo Header */}
       <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200 py-4">
-        <div className="max-w-4xl mx-auto px-4 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-3 sm:px-4 flex items-center justify-between">
           <a 
             href={`${window.location.origin}/`}
-            className="flex flex-col items-center gap-2 hover:opacity-80 transition-opacity"
+            className="flex flex-col items-center gap-1 sm:gap-2 hover:opacity-80 transition-opacity flex-shrink min-w-0"
           >
-            <div className="text-2xl sm:text-3xl font-black tracking-tight leading-none inline-flex items-baseline" dir="ltr">
+            <div className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-none inline-flex items-baseline" dir="ltr">
               <span className="text-[#8e24aa]">Heb</span>
               <span className="text-[#304FFE]">Birthday</span>
-              <span className="text-gray-400 text-lg sm:text-xl ml-[1px]">.app</span>
+              <span className="text-gray-400 text-base sm:text-lg md:text-xl ml-[1px]">.app</span>
             </div>
-            <p className="text-xs sm:text-sm text-gray-600">
+            <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 text-center">
               {t('app.taglinePart1')} <span className="text-[#8e24aa]">{t('app.taglineHebrew')}</span> {t('app.taglineOr')} <span className="text-[#304FFE]">{t('app.taglineGregorian')}</span>
             </p>
           </a>
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:border-purple-400 hover:text-purple-600 rounded-lg transition-all duration-200 shadow-sm hover:shadow"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:border-purple-400 hover:text-purple-600 rounded-lg transition-all duration-200 shadow-sm hover:shadow flex-shrink-0"
             title={currentLangLabel}
           >
             <Globe className="w-4 h-4" />
@@ -615,8 +615,8 @@ export const GuestAccessPage: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-4">
-        <div className="max-w-4xl mx-auto py-8">
+      <div className="flex-1 p-3 sm:p-4 overflow-x-hidden">
+        <div className="max-w-4xl mx-auto py-4 sm:py-8">
           {/* Header */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 sm:p-4 mb-4 text-center">
             <div className="flex flex-col items-center gap-2">

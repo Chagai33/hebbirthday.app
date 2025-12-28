@@ -5,6 +5,13 @@
 @layer base {
   html {
     scroll-padding-top: 64px;
+    overflow-x: hidden;
+  }
+  
+  body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
   }
 }
 
@@ -35,5 +42,12 @@
 
   .animate-fade-in {
     animation: fade-in 0.2s ease-out;
+  }
+  
+  /* Prevent horizontal overflow */
+  .overflow-wrap-anywhere {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
   }
 }
