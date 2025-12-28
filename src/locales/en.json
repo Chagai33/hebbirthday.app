@@ -82,7 +82,9 @@
     "guestAdded": "Added by guest",
     "botDetected": "Suspicious activity detected. Please try again.",
     "limitReached": "You've reached the addition limit for this link. Please contact the group admin.",
-    "tokenExpired": "This link has expired (72 hours). Please contact the group admin for a new link."
+    "tokenExpired": "This link has expired (72 hours). Please contact the group admin for a new link.",
+    "verifyHebrewDate": "Please verify that the Hebrew date is correct. If not, change 'Born after sunset' below.",
+    "verifyGregorianDate": "Verify that the corresponding Gregorian date is correct"
   },
   "common": {
     "save": "Save",
