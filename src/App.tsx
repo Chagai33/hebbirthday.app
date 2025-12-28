@@ -7,6 +7,7 @@ import { TenantProvider } from './contexts/TenantContext';
 import { GroupFilterProvider } from './contexts/GroupFilterContext';
 import { GoogleCalendarProvider } from './contexts/GoogleCalendarContext';
 import { ToastProvider } from './contexts/ToastContext';
+import { GuestNotificationsProvider } from './contexts/GuestNotificationsContext';
 import { TooltipProvider } from './components/common/Tooltip';
 import { ProtectedRoute } from './components/common/ProtectedRoute';
 import { Login } from './components/auth/Login';
@@ -78,52 +79,54 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ToastProvider>
-          <AuthProvider>
-            <TenantProvider>
-            <GoogleCalendarProvider>
-              <GroupFilterProvider>
-                <BrowserRouter>
-                  <ActionUrlHandler />
-                  <Routes>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/reset-password" element={<ResetPassword />} />
-                    <Route path="/terms" element={<TermsOfUse />} />
-                    <Route path="/privacy" element={<PrivacyPolicy />} />
-                    <Route path="/guide" element={<UserGuide />} />
-                    <Route path="/portal" element={<GuestPortal />} />
-                    <Route path="/guest/:groupId/:token" element={<GuestAccessPage />} />
-                    <Route
-                      path="/"
-                      element={
-                        <ProtectedRoute>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/groups"
-                      element={
-                        <ProtectedRoute>
-                          <GroupsPanel />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/gelt"
-                      element={
-                        <ProtectedRoute>
-                          <GeltPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
-                </BrowserRouter>
-              </GroupFilterProvider>
-            </GoogleCalendarProvider>
-          </TenantProvider>
-        </AuthProvider>
+          <GuestNotificationsProvider>
+            <AuthProvider>
+              <TenantProvider>
+              <GoogleCalendarProvider>
+                <GroupFilterProvider>
+                  <BrowserRouter>
+                    <ActionUrlHandler />
+                    <Routes>
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/register" element={<Register />} />
+                      <Route path="/reset-password" element={<ResetPassword />} />
+                      <Route path="/terms" element={<TermsOfUse />} />
+                      <Route path="/privacy" element={<PrivacyPolicy />} />
+                      <Route path="/guide" element={<UserGuide />} />
+                      <Route path="/portal" element={<GuestPortal />} />
+                      <Route path="/guest/:groupId/:token" element={<GuestAccessPage />} />
+                      <Route
+                        path="/"
+                        element={
+                          <ProtectedRoute>
+                            <Dashboard />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/groups"
+                        element={
+                          <ProtectedRoute>
+                            <GroupsPanel />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/gelt"
+                        element={
+                          <ProtectedRoute>
+                            <GeltPage />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                  </BrowserRouter>
+                </GroupFilterProvider>
+              </GoogleCalendarProvider>
+            </TenantProvider>
+          </AuthProvider>
+        </GuestNotificationsProvider>
       </ToastProvider>
     </TooltipProvider>
   </QueryClientProvider>

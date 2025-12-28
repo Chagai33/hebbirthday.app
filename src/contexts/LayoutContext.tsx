@@ -2,6 +2,7 @@ import React, { createContext, useContext } from 'react';
 
 interface LayoutContextType {
   openAboutModal: () => void;
+  openGroupsModal: () => void;
 }
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);

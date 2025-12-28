@@ -802,7 +802,7 @@ export const BirthdayForm = ({
                   validate: (value) => {
                     const date = new Date(value);
                     const now = new Date();
-                    now.setHours(0, 0, 0, 0);
+                    now.setHours(23, 59, 59, 999);
                     if (date > now) {
                       return t('validation.futureDate', 'Birth date cannot be in the future');
                     }

@@ -662,9 +662,6 @@ export const UserGuide: React.FC = () => {
 
               {/* Footer */}
               <div className="mt-16 pt-6 border-t border-gray-200 text-center">
-                <p className="text-gray-600 mb-2">
-                  {t('guide.footer.text', 'נבנה עם ❤️ בישראל 🇮🇱')}
-                </p>
                 <p className="text-sm text-gray-500">
                   © 2024-2025 HebBirthday | {t('guide.footer.rights', 'כל הזכויות שמורות')}
                 </p>

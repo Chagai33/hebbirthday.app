@@ -5,15 +5,18 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useGroupFilter } from '../../contexts/GroupFilterContext';
 import { useGroups } from '../../hooks/useGroups';
 import { useBirthdays } from '../../hooks/useBirthdays';
-import { LogOut, FolderTree, Filter, Settings, ChevronDown, ChevronUp, Menu, Calculator, Bell } from 'lucide-react';
+import { LogOut, FolderTree, Filter, Settings, ChevronDown, ChevronUp, Menu, Calculator, Bell, Globe } from 'lucide-react';
 import { useTranslatedRootGroupName } from '../../utils/groupNameTranslator';
 import { TenantSettings } from '../settings/TenantSettings';
 import { GuestActivityModal } from '../modals/GuestActivityModal';
 import { useLayoutContext } from '../../contexts/LayoutContext';
+import { useGuestNotifications } from '../../contexts/GuestNotificationsContext';
 import { CurrentDateDisplay } from '../common/CurrentDateDisplay';
+import { GroupsPanel } from '../groups/GroupsPanel';
 
 export const Header: React.FC = () => {
   const { openAboutModal } = useLayoutContext();
+  const { isNew } = useGuestNotifications();
   const { t, i18n } = useTranslation();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -22,11 +25,19 @@ export const Header: React.FC = () => {
   const [showGroupFilter, setShowGroupFilter] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showGuestActivity, setShowGuestActivity] = useState(false);
+  const [showGroupsPanel, setShowGroupsPanel] = useState(false);
   const { selectedGroupIds, toggleGroupFilter, clearGroupFilters } = useGroupFilter();
   const { data: allGroups = [] } = useGroups();
   const { data: birthdays = [] } = useBirthdays();
   const filterRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'he' : 'en';
+    i18n.changeLanguage(newLang);
+    document.documentElement.dir = newLang === 'he' ? 'rtl' : 'ltr';
+    document.documentElement.lang = newLang;
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -61,10 +72,10 @@ export const Header: React.FC = () => {
     return map;
   }, [birthdays, isPublicPage]);
 
-  // Count guest-added birthdays for notification badge
+  // Count guest-added birthdays for notification badge (only new ones)
   const guestBirthdaysCount = useMemo(() => {
-    return birthdays.filter(b => b.created_by_guest === true).length;
-  }, [birthdays]);
+    return birthdays.filter(b => b.created_by_guest === true && isNew(b.created_at)).length;
+  }, [birthdays, isNew]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -99,11 +110,18 @@ export const Header: React.FC = () => {
                   href="https://www.linkedin.com/in/chagai-yechiel/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-col items-start text-[10px] leading-tight text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap"
+                  className="hidden md:flex flex-col items-start text-[10px] leading-tight text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap"
                 >
                   <span>{t('common.developedBy')}</span>
-                <span>{i18n.language === 'he' ? 'חגי יחיאל' : 'Chagai Yechiel'}</span>
-              </a>
+                  <span>{i18n.language === 'he' ? 'חגי יחיאל' : 'Chagai Yechiel'}</span>
+                </a>
+                <button
+                  onClick={toggleLanguage}
+                  className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  title={i18n.language === 'he' ? t('common.switchToEnglish') : t('common.switchToHebrew')}
+                >
+                  <Globe className="w-5 h-5" />
+                </button>
                 <button
                   onClick={openAboutModal}
                   className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -149,11 +167,18 @@ export const Header: React.FC = () => {
                 href="https://www.linkedin.com/in/chagai-yechiel/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-start text-[10px] leading-tight text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap"
+                className="hidden md:flex flex-col items-start text-[10px] leading-tight text-gray-500 hover:text-gray-700 transition-colors whitespace-nowrap"
               >
                 <span>{t('common.developedBy')}</span>
                 <span>{i18n.language === 'he' ? 'חגי יחיאל' : 'Chagai Yechiel'}</span>
-                </a>
+              </a>
+              <button
+                onClick={toggleLanguage}
+                className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                title={i18n.language === 'he' ? t('common.switchToEnglish') : t('common.switchToHebrew')}
+              >
+                <Globe className="w-5 h-5" />
+              </button>
                 <button
                   onClick={openAboutModal}
                   className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -233,17 +258,9 @@ export const Header: React.FC = () => {
                       <button
                         onClick={() => {
                           setMobileMenuOpen(false);
-                          if (location.pathname === '/groups') {
-                            navigate('/');
-                          } else {
-                            navigate('/groups');
-                          }
+                          setShowGroupsPanel(true);
                         }}
-                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm ${
-                          location.pathname === '/groups'
-                            ? 'bg-blue-50 text-blue-700'
-                            : 'text-gray-700 hover:bg-gray-50'
-                        }`}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm text-gray-700 hover:bg-gray-50"
                       >
                         <FolderTree className="w-4 h-4" />
                         <span>{t('groups.manageGroups')}</span>
@@ -361,18 +378,8 @@ export const Header: React.FC = () => {
             {user && (
               <>
                 <button
-                  onClick={() => {
-                    if (location.pathname === '/groups') {
-                      navigate('/');
-                    } else {
-                      navigate('/groups');
-                    }
-                  }}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm ${
-                    location.pathname === '/groups'
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                  onClick={() => setShowGroupsPanel(true)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm text-gray-700 hover:bg-gray-100"
                 >
                   <FolderTree className="w-4 h-4" />
                   <span>{t('groups.manageGroups')}</span>
@@ -444,6 +451,12 @@ export const Header: React.FC = () => {
         isOpen={showGuestActivity}
         onClose={() => setShowGuestActivity(false)}
         birthdays={birthdays}
+      />
+    )}
+    {showGroupsPanel && (
+      <GroupsPanel
+        isModal={true}
+        onClose={() => setShowGroupsPanel(false)}
       />
     )}
     </header>

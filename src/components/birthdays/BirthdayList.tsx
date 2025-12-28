@@ -683,8 +683,9 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
-        <div className="flex-1 relative">
+      <div className="sticky top-[56px] sm:top-[64px] z-30 bg-gray-50 py-3 -mx-3 px-3 sm:-mx-6 sm:px-6 shadow-sm transition-all">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+          <div className="flex-1 relative">
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
           <input
             type="text"
@@ -745,7 +746,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       </div>
 
       {selectedIds.size > 0 && (
-        <div className="sticky top-14 sm:top-16 z-10 bg-white border border-slate-200 rounded-lg p-2.5 sm:p-4 shadow-lg">
+        <div className="bg-white border border-slate-200 rounded-lg p-2.5 sm:p-4 shadow-lg mt-3 sm:mt-4">
           <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 ${i18n.language === 'he' ? 'justify-start' : 'justify-start'}`}>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-blue-900 text-sm">
@@ -938,6 +939,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
           </div>
         </div>
       )}
+      </div>
 
       {showGroupFilter && (
         <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 space-y-3 sm:space-y-4 max-h-[60vh] sm:max-h-none overflow-y-auto">

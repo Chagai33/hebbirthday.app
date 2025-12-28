@@ -607,8 +607,6 @@ export const Dashboard = () => {
         onAdd={() => setShowForm(true)}
         onImport={() => fileInputRef.current?.click()}
         onTextImport={() => setShowTextImport(true)}
-        onCalendar={() => setShowCalendarModal(true)}
-        onGroups={() => navigate('/groups')}
         hidden={showForm || showCSVPreview || showCalendarModal || showZodiacStats || showTextImport}
       />
 

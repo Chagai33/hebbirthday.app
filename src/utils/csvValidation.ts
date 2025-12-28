@@ -90,6 +90,7 @@ export function validateAndEnrichCSVData(
   }
 ): CSVBirthdayRow[] {
   const now = new Date();
+  now.setHours(23, 59, 59, 999);
   const minYear = 1900;
   const maxYear = now.getFullYear();
 

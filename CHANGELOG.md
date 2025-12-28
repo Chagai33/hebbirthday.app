@@ -4,6 +4,139 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [3.0.6] - 28 דצמבר 2024
+
+### 🔔 פעילות אורחים - שיפורים משמעותיים
+
+**Accordion להיסטוריה**
+- היסטוריית פעילות אורחים מקופלת כברירת מחדל
+- כפתור להצגת/הסתרת היסטוריה עם מונה רשומות
+- שמירת מסך ראשי נקי וממוקד ברשומות חדשות
+- קומפוננטה: `GuestActivityModal.tsx`
+
+**בחירה מרובה ופעולות קבוצתיות**
+- Checkbox לכל רשומה (חדשה והיסטוריה)
+- כפתור "בחר הכל" / "בטל בחירה"
+- מחיקה קבוצתית של רשומות נבחרות
+- סימון נבחרים כנקראו (סלקטיבי)
+- מונה רשומות נבחרות
+- קומפוננטה: `GuestActivityModal.tsx`
+
+**הפרדה ויזואלית משופרת**
+- רשומות חדשות: רקע סגול-כחלחל עם גבול סגול
+- רקע לבן לרשומות היסטוריה
+- סקשן "חדש" עם נקודה כחולה מהבהבת
+
+### 🌐 החלפת שפה ושיפורי ניווט
+
+**כפתור החלפת שפה**
+- במובייל: כפתור Globe ב-Header (ליד תפריט המבורגר)
+- בדסקטופ: כפתור בתפריט AboutModal
+- הסתרת Developer Credit במובייל
+- קבצים: `Header.tsx`, `AboutModal.tsx`
+
+**כפתור משוב**
+- הועבר מכפתור נפרד לשורה התחתונה
+- מופיע כלינק טקסט: "תנאי השימוש • מדיניות פרטיות • משוב"
+- עיצוב נקי ואחיד
+- קובץ: `AboutModal.tsx`
+
+### 🎁 ניהול פורטל מתנות - מערכת חדשה
+
+**מסך ניהול ייעודי**
+- קומפוננטה חדשה: `GuestPortalManagement.tsx`
+- מודל צף (לא עמוד נפרד) - אחיד עם שאר האפליקציה
+- עיצוב רספונסיבי: `max-w-sm sm:max-w-2xl`
+
+**3 אייקוני שיתוף**
+- 🔗 קישור: העתקת URL פשוט
+- 💬 הודעה: העתקת טקסט מלא עם הסבר (למייל, SMS)
+- 💚 וואטסאפ: פתיחת שיתוף ישיר
+- פידבק ויזואלי: ✓ ירוק + "הועתק" למשך 2 שניות
+
+**הגדרות גישה**
+- הפעלה/השבתה ברמת הטננט
+- ניהול הרשאות לפי קבוצות (Accordion)
+- כפתור "שמור שינויים"
+- הסרת החלק הזה מ-TenantSettings
+
+**אבטחה**
+- הסרת tenant ID מ-URL של הפורטל
+- URL פשוט ונקי: `/portal` (במקום `/portal?tenant=xxx`)
+- זיהוי משתמשים לפי שם ותאריך לידה בלבד
+
+### 📱 שיפורי UI/UX
+
+**תיקון Header Sticky**
+- הסרת `overflow-x: hidden` מ-`body` ו-`html`
+- ה-Header עכשיו נשאר למעלה בגלילה
+- קובץ: `index.css`
+
+**שורת חיפוש ופילטרים Sticky**
+- שורת החיפוש והמיון נדבקת מתחת ל-Header
+- שורת הפעולות (כשיש בחירה) גם דביקה
+- `sticky top-[56px] sm:top-[64px] z-30` עם רקע וצל
+- שיפור חווית משתמש בגלילה בטבלאות ארוכות
+- קובץ: `BirthdayList.tsx`
+
+**גודל מסך הגדרות למובייל**
+- התאמת `TenantSettings` למסך קטן: `max-w-sm sm:max-w-2xl md:max-w-3xl`
+- הקטנת padding במובייל: `p-4 sm:p-6`
+- קובץ: `TenantSettings.tsx`
+
+**כפתור פעולות צף (FloatingDock)**
+- אנימציית Pulse Scale (נשימה כל 2 שניות)
+- חיזוק מסגרת: `border-blue-600` + `ring-4 ring-blue-100`
+- מושך יותר תשומת לב
+- קבצים: `FloatingDock.tsx`, `index.css`
+
+**ניהול קבוצות - המרה למודל**
+- שינוי מעמוד נפרד (`/groups`) למודל צף
+- אחידות עם כל המודלים באפליקציה
+- נפתח מתפריט המבורגר או ה-Header
+- כפתורי פעולות (מחק, ערוך, שתף) גלויים תמיד (לא רק ב-hover)
+- קבצים: `GroupsPanel.tsx`, `Header.tsx`, `AboutModal.tsx`
+
+### 🌍 תרגומים
+
+**מפתחות חדשים**
+- `common.selectAll`, `common.selected`, `common.deselectAll`
+- `common.linkCopied`, `common.copied`, `common.copy`
+- `common.saving`, `common.saveChanges`
+- `guestPortal.*` - כל מבנה ניהול הפורטל (12 מפתחות)
+- `guestPortal.title`, `manage`, `description`, `shareLink`, `copyLink`, `copyMessage`
+- `guestPortal.linkCopied`, `messageCopied`, `whatsapp`, `shareHint`
+- `guestPortal.accessSettings`, `accessDescription`, `groupPermissions`
+- קבצים: `he.json`, `en.json`
+
+### 🐛 תיקוני באגים
+
+**תיקון מבנה JSX**
+- תיקון `GuestActivityModal` - הוצאת interface וקומפוננטה מתוך functional component
+- תיקון `GroupsPanel` - הסרת `</div>` עודף
+- תיקון `Header` - מבנה div-ים תקין
+
+**ניקוי קוד**
+- הסרת ~280 שורות Guest Portal Settings מ-TenantSettings
+- הסרת imports מיותרים (Globe, Info מ-TenantSettings)
+- הסרת state מיותר: `isGuestPortalEnabled`, `showGroupExceptions`, `showInfoPopup`
+
+### 🔧 שינויים טכניים
+
+**קומפוננטות חדשות**
+- `GuestPortalManagement.tsx` (150+ שורות)
+- `GuestActivityItem` - sub-component ב-GuestActivityModal
+
+**Context שימושי**
+- שימוש ב-`GuestNotificationsContext` בכל מקום רלוונטי
+- ניהול מצב read/unread של התראות אורחים
+
+**אנימציות CSS**
+- הוספת `@keyframes pulse-scale` ל-`index.css`
+- class חדש: `.animate-pulse-scale`
+
+---
+
 ## [3.0.5] - 25 דצמבר 2024
 
 ### ✨ New Features

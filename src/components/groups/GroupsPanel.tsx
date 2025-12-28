@@ -66,7 +66,12 @@ const GROUP_COLORS = [
   '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e',
 ];
 
-export const GroupsPanel = () => {
+interface GroupsPanelProps {
+  isModal?: boolean;
+  onClose?: () => void;
+}
+
+export const GroupsPanel: React.FC<GroupsPanelProps> = ({ isModal = false, onClose }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { data: allGroups = [], isLoading } = useGroups();
@@ -267,6 +272,13 @@ export const GroupsPanel = () => {
   };
 
   if (isLoading) {
+    if (isModal) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      );
+    }
     return (
       <Layout>
         <div className="flex items-center justify-center py-12">
@@ -276,9 +288,9 @@ export const GroupsPanel = () => {
     );
   }
 
-  return (
-    <Layout>
-      <div className="space-y-2 sm:space-y-2.5 pb-24 sm:pb-0">
+  const content = (
+    <div className={`space-y-2 sm:space-y-2.5 ${isModal ? 'pb-4' : 'pb-24 sm:pb-0'}`}>
+      {!isModal && (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
           <div className="flex-1 min-w-0">
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">{t('groups.manageGroups')}</h2>
@@ -293,14 +305,17 @@ export const GroupsPanel = () => {
             <span className="hidden sm:inline">{t('common.back')}</span>
           </button>
         </div>
+      )}
 
-        {/* Mobile Floating Back Button */}
+      {/* Mobile Floating Back Button - Only if not modal */}
+      {!isModal && (
         <FloatingBackButton 
           onClick={() => navigate('/')} 
           position="bottom-left"
         />
+      )}
 
-        {rootGroups.length > 0 ? (
+      {rootGroups.length > 0 ? (
           <Fragment>
             {/* קבוצות העל - Grid responsive עם מספר עמודות משתנה לפי גודל המסך */}
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-1.5 sm:gap-2">
@@ -546,7 +561,45 @@ export const GroupsPanel = () => {
             onClose={() => hideToast(toast.id)}
           />
         ))}
-      </div>
+    </div>
+  );
+
+  if (isModal) {
+    return (
+      <>
+        <FloatingBackButton
+          onClick={onClose || (() => {})}
+          position={i18n.language === 'he' ? 'bottom-left' : 'bottom-right'}
+          className="z-[60]"
+        />
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-white z-10 px-4 sm:px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                {t('groups.manageGroups')}
+              </h2>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
+              </button>
+            </div>
+            <div className="p-4 sm:p-6">
+              {content}
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <Layout>
+      {content}
     </Layout>
   );
 };
@@ -675,7 +728,7 @@ const CategorySection = ({
                   <span className="text-[10px] sm:text-xs font-medium text-gray-600 bg-gray-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg whitespace-nowrap">
                     {isCountsLoading ? t('common.loading') : `(${groupCount})`}
                   </span>
-                  <div className="flex items-center gap-1 sm:gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 sm:gap-2">
                     <button
                       onClick={() => onShareGroup(group)}
                       className="p-1.5 sm:p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"

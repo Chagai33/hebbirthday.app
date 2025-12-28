@@ -1,13 +1,17 @@
 import React, { useState, useMemo } from 'react';
-import { X, Globe, MessageSquare, LogOut, Settings, Gift, Calculator, Bell, BookOpen } from 'lucide-react';
+import { X, Globe, MessageSquare, LogOut, Settings, Gift, Calculator, Bell, BookOpen, Users, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useGuestNotifications } from '../../contexts/GuestNotificationsContext';
 import { useBirthdays } from '../../hooks/useBirthdays';
 import { FloatingBackButton } from '../common/FloatingBackButton';
 import { TenantSettings } from '../settings/TenantSettings';
 import { InfoModal } from './InfoModal';
 import { GuestActivityModal } from './GuestActivityModal';
+import { GoogleCalendarModal } from './GoogleCalendarModal';
+import { GuestPortalManagement } from './GuestPortalManagement';
+import { GroupsPanel } from '../groups/GroupsPanel';
 
 interface AboutModalProps {
   isOpen: boolean;
@@ -17,16 +21,20 @@ interface AboutModalProps {
 export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
   const { t, i18n } = useTranslation();
   const { user, signOut } = useAuth();
+  const { isNew } = useGuestNotifications();
   const { data: birthdays = [] } = useBirthdays();
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showGuestActivity, setShowGuestActivity] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
+  const [showGuestPortalManagement, setShowGuestPortalManagement] = useState(false);
+  const [showGroupsPanel, setShowGroupsPanel] = useState(false);
 
   // Count guest-added birthdays for notification badge
   const guestBirthdaysCount = useMemo(() => {
-    return birthdays.filter(b => b.created_by_guest === true).length;
-  }, [birthdays]);
+    return birthdays.filter(b => b.created_by_guest === true && isNew(b.created_at)).length;
+  }, [birthdays, isNew]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -71,24 +79,31 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           <div className="flex flex-col gap-2 pt-4 border-t border-gray-100">
-             <button
+            {/* החלפת שפה - רק בדסקטופ */}
+            <button
               onClick={toggleLanguage}
-              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full text-start"
+              className="hidden md:flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full text-start"
             >
               <Globe className="w-5 h-5 text-blue-600" />
-              <span className="text-sm font-medium">{t('common.switchLanguage')}</span>
+              <span className="text-sm font-medium">
+                {i18n.language === 'he' ? t('common.switchToEnglish') : t('common.switchToHebrew')}
+              </span>
             </button>
 
+            {/* ניהול קבוצות */}
             {user && (
               <button
-                onClick={() => setShowSettings(true)}
+                onClick={() => {
+                  setShowGroupsPanel(true);
+                }}
                 className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full text-start"
               >
-                <Settings className="w-5 h-5 text-gray-600" />
-                <span className="text-sm font-medium">{t('tenant.settings')}</span>
+                <Users className="w-5 h-5 text-orange-600" />
+                <span className="text-sm font-medium">{t('groups.manageGroups')}</span>
               </button>
             )}
 
+            {/* התראות אורחים */}
             {user && (
               <button
                 onClick={() => {
@@ -106,33 +121,31 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               </button>
             )}
 
-            <button
-              onClick={() => setShowInfoModal(true)}
-              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full text-start"
-            >
-              <BookOpen className="w-5 h-5 text-blue-500" />
-              <span className="text-sm font-medium">{t('help.title')}</span>
-            </button>
+            {/* חיבור ליומן גוגל */}
+            {user && (
+              <button
+                onClick={() => setShowCalendarModal(true)}
+                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full text-start"
+              >
+                <Calendar className="w-5 h-5 text-blue-600" />
+                <span className="text-sm font-medium">{t('googleCalendar.connect')}</span>
+              </button>
+            )}
 
-            <Link
-              to="/guide"
-              onClick={onClose}
-              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <BookOpen className="w-5 h-5 text-[#8e24aa]" />
-              <span className="text-sm font-medium">{t('guide.menuTitle', 'המדריך המלא')}</span>
-            </Link>
+            {/* פורטל המתנות */}
+            {user && (
+              <button
+                onClick={() => {
+                  setShowGuestPortalManagement(true);
+                }}
+                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full text-start"
+              >
+                <Gift className="w-5 h-5 text-purple-500" />
+                <span className="text-sm font-medium">{t('guestPortal.manage', 'ניהול פורטל מתנות')}</span>
+              </button>
+            )}
 
-            <Link
-              to="/portal"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-            >
-              <Gift className="w-5 h-5 text-purple-500" />
-              <span className="text-sm font-medium">{t('guest.portalTitle', 'Wishlist Portal')}</span>
-            </Link>
-
+            {/* דמי חנוכה/פורים */}
             {user && (
               <Link
                 to="/gelt"
@@ -144,15 +157,35 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               </Link>
             )}
 
-            <a
-              href="https://docs.google.com/forms/d/e/1FAIpQLSf4M-3ytbYRAOIh9B7Bavgaw2WyGgDFP3PT7zgTmTMnUFXMrg/viewform"
-              target="_blank"
-              rel="noopener noreferrer"
+            {/* מדריך מקוצר */}
+            <button
+              onClick={() => setShowInfoModal(true)}
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full text-start"
+            >
+              <BookOpen className="w-5 h-5 text-teal-600" />
+              <span className="text-sm font-medium">{t('common.quickGuide', 'מדריך מקוצר')}</span>
+            </button>
+
+            {/* המדריך המלא */}
+            <Link
+              to="/guide"
+              onClick={onClose}
               className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
             >
-              <MessageSquare className="w-5 h-5 text-green-600" />
-              <span className="text-sm font-medium">{t('footer.feedback', 'Feedback')}</span>
-            </a>
+              <BookOpen className="w-5 h-5 text-purple-600" />
+              <span className="text-sm font-medium">{t('common.fullGuide', 'המדריך המלא')}</span>
+            </Link>
+
+            {/* הגדרות */}
+            {user && (
+              <button
+                onClick={() => setShowSettings(true)}
+                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full text-start"
+              >
+                <Settings className="w-5 h-5 text-gray-600" />
+                <span className="text-sm font-medium">{t('tenant.settings')}</span>
+              </button>
+            )}
 
             {user && (
               <button
@@ -182,6 +215,15 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
               >
                 {t('footer.privacyPolicy', 'מדיניות פרטיות')}
               </Link>
+              <span>•</span>
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLSf4M-3ytbYRAOIh9B7Bavgaw2WyGgDFP3PT7zgTmTMnUFXMrg/viewform"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-gray-700 transition-colors"
+              >
+                {t('footer.feedback', 'משוב')}
+              </a>
             </div>
             <div className="text-center text-xs text-gray-400">
               © {new Date().getFullYear()} All rights reserved
@@ -204,6 +246,32 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
         onClose={() => setShowGuestActivity(false)}
         birthdays={birthdays}
       />
+      <GoogleCalendarModal 
+        isOpen={showCalendarModal} 
+        onClose={() => setShowCalendarModal(false)}
+      />
+      {showGuestPortalManagement && (
+        <div onClick={(e) => e.stopPropagation()}>
+          <GuestPortalManagement
+            isOpen={showGuestPortalManagement}
+            onClose={() => {
+              setShowGuestPortalManagement(false);
+              onClose();
+            }}
+          />
+        </div>
+      )}
+      {showGroupsPanel && (
+        <div onClick={(e) => e.stopPropagation()}>
+          <GroupsPanel
+            isModal={true}
+            onClose={() => {
+              setShowGroupsPanel(false);
+              onClose();
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
