@@ -350,7 +350,21 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
   };
 
   const handleBulkDelete = async () => {
-    if (!window.confirm(t('common.confirmDelete'))) return;
+    // Check if any selected birthdays have synced events
+    const hasSyncedEvents = Array.from(selectedIds).some(id => {
+      const birthday = birthdays.find(b => b.id === id);
+      return birthday && (
+        (birthday.googleCalendarEventsMap && Object.keys(birthday.googleCalendarEventsMap).length > 0) ||
+        birthday.googleCalendarEventId || 
+        birthday.googleCalendarEventIds
+      );
+    });
+
+    const confirmMessage = hasSyncedEvents 
+      ? t('birthday.deleteConfirmWithCalendar', 'האם אתה בטוח? פעולה זו תמחק את יום ההולדת וגם תסיר את כל האירועים המקושרים מיומן Google.')
+      : t('common.confirmDelete', 'Are you sure?');
+
+    if (!window.confirm(confirmMessage)) return;
 
     const deletePromises = Array.from(selectedIds).map((id) =>
       deleteBirthday.mutateAsync(id)
