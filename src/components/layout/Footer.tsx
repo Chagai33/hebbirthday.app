@@ -88,7 +88,7 @@ export const Footer: React.FC = () => {
             )}
           </div>
           <div className="text-xs text-gray-500">
-            © {new Date().getFullYear()} hebbirthday. {t('footer.allRightsReserved', 'כל הזכויות שמורות')}
+            © {new Date().getFullYear()} HebBirthday.App. {t('footer.allRightsReserved', 'כל הזכויות שמורות')}
           </div>
         </div>
       </div>

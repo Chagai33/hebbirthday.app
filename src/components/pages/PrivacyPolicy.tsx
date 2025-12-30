@@ -10,7 +10,7 @@ export const PrivacyPolicy: React.FC = () => {
     <InfoPageLayout>
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-6 sm:p-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
-          {t('privacy.title', 'מדיניות פרטיות לאפליקציית "hebbirthday"')}
+          {t('privacy.title', 'מדיניות פרטיות לאפליקציית "HebBirthday.App"')}
         </h1>
         
         <p className="text-sm text-gray-600 mb-8">

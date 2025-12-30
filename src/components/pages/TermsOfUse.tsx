@@ -10,7 +10,7 @@ export const TermsOfUse: React.FC = () => {
     <InfoPageLayout>
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-6 sm:p-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
-          {t('terms.title', 'תנאי שימוש לאפליקציית "hebbirthday"')}
+          {t('terms.title', 'תנאי שימוש לאפליקציית "HebBirthday.App"')}
         </h1>
         
         <p className="text-sm text-gray-600 mb-8">
@@ -19,7 +19,7 @@ export const TermsOfUse: React.FC = () => {
 
         <div className="prose prose-sm max-w-none" dir={isHebrew ? 'rtl' : 'ltr'}>
           <p className="mb-4">
-            {t('terms.intro', 'ברוכים הבאים ל-"hebbirthday" (להלן: "האפליקציה" או "השירות"). השימוש באפליקציה, שירותיה ותכניה כפוף לתנאים המפורטים להלן ("תנאי השימוש"). אנא קרא אותם בעיון. שימושך באפליקציה, בכל דרך שהיא, מהווה הסכמה בלתי מסויגת לתנאים אלו. אם אינך מסכים לתנאי השימוש, כולם או חלקם, אינך רשאי לעשות שימוש באפליקציה.')}
+            {t('terms.intro', 'ברוכים הבאים ל-"HebBirthday.App" (להלן: "האפליקציה" או "השירות"). השימוש באפליקציה, שירותיה ותכניה כפוף לתנאים המפורטים להלן ("תנאי השימוש"). אנא קרא אותם בעיון. שימושך באפליקציה, בכל דרך שהיא, מהווה הסכמה בלתי מסויגת לתנאים אלו. אם אינך מסכים לתנאי השימוש, כולם או חלקם, אינך רשאי לעשות שימוש באפליקציה.')}
           </p>
 
           <section className="mb-6">

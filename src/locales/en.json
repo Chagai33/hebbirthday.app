@@ -761,9 +761,9 @@
     "modifiedAgesWarningDescription": "Manually modified ages will not be saved after refresh. Ages will automatically reset to the original age from birthdays."
   },
   "terms": {
-    "title": "Terms of Use for \"hebbirthday\"",
+    "title": "Terms of Use for \"HebBirthday.App\"",
     "lastUpdated": "Last Updated",
-    "intro": "Welcome to \"hebbirthday\" (the \"Application\" or \"Service\"). Use of the Application, its services, and its content is subject to the terms detailed below (\"Terms of Use\"). Please read them carefully. Your use of the Application, in any manner, constitutes your unconditional agreement to these terms. If you do not agree to the Terms of Use, in whole or in part, you may not use the Application.",
+    "intro": "Welcome to \"HebBirthday.App\" (the \"Application\" or \"Service\"). Use of the Application, its services, and its content is subject to the terms detailed below (\"Terms of Use\"). Please read them carefully. Your use of the Application, in any manner, constitutes your unconditional agreement to these terms. If you do not agree to the Terms of Use, in whole or in part, you may not use the Application.",
     "section1": {
       "title": "1. Definition of the Service",
       "content": "The Application provides a platform for managing, centralizing, and tracking birthdays. The Service allows users to create closed \"Organizations\" (Tenants), input birthday details (including Gregorian date, Hebrew date, gender, and \"after sunset\" status), and manage records in a collaborative environment based on permissions (Owner, Admin, Member). The Application includes automatic calculation of Hebrew dates and an option to sync with the user's personal Google Calendar."
