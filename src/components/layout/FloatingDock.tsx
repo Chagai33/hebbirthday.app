@@ -15,8 +15,14 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
   onTextImport,
   hidden = false,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  
+  // Determine position based on language
+  // Hebrew (RTL): left-6, English (LTR): right-6
+  const isHebrew = i18n.language === 'he';
+  const positionClass = isHebrew ? 'left-6' : 'right-6';
+  const menuAlignClass = isHebrew ? 'left-[0.5rem]' : 'right-[0.5rem]';
 
   // Order: Add (Bottom), Import, Text Import (Top)
   const menuItems = [
@@ -68,7 +74,7 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
             />
         )}
 
-        <div className="fixed bottom-6 left-6 z-40 sm:hidden flex flex-col-reverse items-center gap-4">
+        <div className={`fixed bottom-6 ${positionClass} z-40 sm:hidden flex flex-col-reverse items-center gap-4`}>
         {/* Main Toggle Button */}
         <button
             onClick={() => setIsOpen(!isOpen)}
@@ -89,12 +95,12 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
 
         {/* Menu Items */}
         <div 
-            className={`flex flex-col-reverse gap-3 absolute bottom-full mb-6 transition-all duration-200 
+            className={`flex flex-col-reverse gap-3 absolute bottom-full mb-6 transition-all duration-200 ${isHebrew ? 'left-2' : 'right-2'}
             ${isOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'}`}
-            style={{ paddingBottom: '1rem', left: '0.5rem' }}
+            style={{ paddingBottom: '1rem' }}
         >
             {menuItems.map((item) => (
-            <div key={item.id} className="flex items-center gap-3 group w-max">
+            <div key={item.id} className={`flex items-center gap-3 group w-max ${isHebrew ? '' : 'flex-row-reverse'}`}>
                  {/* Icon Button */}
                 <button
                     onClick={() => handleAction(item.onClick)}
