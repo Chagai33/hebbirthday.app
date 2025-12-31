@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useTodayHebrewDate } from '../../hooks/useTodayHebrewDate';
 import { formatInTenantTimezone } from '../../utils/dateUtils';
 import { useTenant } from '../../contexts/TenantContext';
+import { es } from 'date-fns/locale';
 
 export const CurrentDateDisplay: React.FC = () => {
   const { i18n } = useTranslation();

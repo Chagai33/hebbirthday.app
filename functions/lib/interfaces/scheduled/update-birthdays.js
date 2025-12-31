@@ -41,7 +41,7 @@ const dependencies_1 = require("../dependencies");
 const dateUtils_1 = require("../../utils/dateUtils");
 const deps = (0, dependencies_1.createDependencies)();
 exports.updateNextBirthdayScheduledFn = functions.pubsub
-    .schedule('every 1 hours') // Changed from 'every day 00:00' - run hourly
+    .schedule('0 * * * *') // Run every hour (at minute 0) - Cron syntax
     .timeZone('UTC') // Run on UTC (timezone-neutral)
     .onRun(async (context) => {
     try {

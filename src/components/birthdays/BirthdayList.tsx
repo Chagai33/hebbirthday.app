@@ -495,7 +495,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
 
     try {
       await navigator.clipboard.writeText(fullText);
-      showToast('התאריכים העבריים והמזלות הועתקו ללוח', 'success');
+      showToast(t('birthday.hebrewZodiacCopied', 'התאריכים העבריים והמזלות הועתקו ללוח'), 'success');
       setIsCopied(true);
       setTimeout(() => {
         setIsCopied(false);
@@ -507,7 +507,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
     }
   };
 
-  const handleQuickCopy = async (format: 'hebrew' | 'gregorian' | 'both') => {
+  const handleQuickCopy = async (copyFormat: 'hebrew' | 'gregorian' | 'both') => {
     const selectedBirthdays = filteredAndSortedBirthdays.filter(b => selectedIds.has(b.id));
 
     if (selectedBirthdays.length === 0) {
@@ -522,32 +522,32 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
 
       let result = `*${birthday.first_name} ${birthday.last_name}*\n`;
 
-      if (format === 'hebrew' || format === 'both') {
+      if (copyFormat === 'hebrew' || copyFormat === 'both') {
         const formattedHebrewDate = nextHebrewDate
-          ? format(nextHebrewDate, includeWeekday ? 'EEEE, d MMMM yyyy' : 'd MMMM yyyy', { locale: he })
+          ? format(nextHebrewDate, includeWeekday ? 'EEEE, d MMMM yyyy' : 'd MMMM yyyy', { locale: i18n.language.startsWith('he') ? he : enUS })
           : '';
-        const zodiacSign = calculations.hebrewSign ? t(`zodiac.${calculations.hebrewSign}`) : '';
+        const zodiacSign = calculations.hebrewSign ? t(`zodiac.${calculations.hebrewSign.toLowerCase()}`) : '';
 
-        result += `*תאריך לידה עברי:* ${birthday.birth_date_hebrew_string || ''}\n`;
-        result += `*מזל עברי:* ${zodiacSign}\n`;
-        result += `*יום הולדת עברי הבא:* ${formattedHebrewDate}\n`;
-        result += `*גיל:* ${calculations.ageAtNextHebrewBirthday}`;
+        result += `*${t('birthday.hebrewBirthDate')}:* ${birthday.birth_date_hebrew_string || ''}\n`;
+        result += `*${t('birthday.hebrewZodiac')}:* ${zodiacSign}\n`;
+        result += `*${t('birthday.nextHebrewBirthday')}:* ${formattedHebrewDate}\n`;
+        result += `*${t('birthday.age')}:* ${calculations.ageAtNextHebrewBirthday}`;
       }
 
-      if (format === 'both') {
+      if (copyFormat === 'both') {
         result += '\n';
       }
 
-      if (format === 'gregorian' || format === 'both') {
+      if (copyFormat === 'gregorian' || copyFormat === 'both') {
         const formattedGregorianDate = nextGregorianDate
-          ? format(nextGregorianDate, includeWeekday ? 'EEEE, d MMMM yyyy' : 'd MMMM yyyy', { locale: i18n.language === 'he' ? he : enUS })
+          ? format(nextGregorianDate, includeWeekday ? 'EEEE, d MMMM yyyy' : 'd MMMM yyyy', { locale: i18n.language.startsWith('he') ? he : enUS })
           : '';
-        const gregorianZodiac = calculations.gregorianSign ? t(`zodiac.${calculations.gregorianSign}`) : '';
+        const gregorianZodiac = calculations.gregorianSign ? t(`zodiac.${calculations.gregorianSign.toLowerCase()}`) : '';
 
-        result += `*תאריך לידה לועזי:* ${birthday.birth_date}\n`;
-        result += `*מזל לועזי:* ${gregorianZodiac}\n`;
-        result += `*יום הולדת לועזי הבא:* ${formattedGregorianDate}\n`;
-        result += `*גיל:* ${calculations.ageAtNextGregorianBirthday}`;
+        result += `*${t('birthday.gregorianBirthDate')}:* ${birthday.birth_date_gregorian}\n`;
+        result += `*${t('birthday.gregorianZodiac')}:* ${gregorianZodiac}\n`;
+        result += `*${t('birthday.nextGregorianBirthday')}:* ${formattedGregorianDate}\n`;
+        result += `*${t('birthday.age')}:* ${calculations.ageAtNextGregorianBirthday}`;
       }
 
       return result;
@@ -648,8 +648,8 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
           <button
             onClick={() => setShowGroupFilter(!showGroupFilter)}
             className={`px-3 sm:px-4 py-1.5 sm:py-2 border rounded-lg font-medium transition-colors flex items-center gap-1.5 sm:gap-2 text-sm whitespace-nowrap ${selectedGroupIds.length > 0 || genderFilter !== 'all' || syncStatusFilter !== 'all'
-                ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
-                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
+              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
           >
             <Filter className="w-4 h-4" />
@@ -901,8 +901,8 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 <button
                   onClick={() => setSyncStatusFilter('all')}
                   className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'all'
-                      ? 'bg-gray-600 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
+                    ? 'bg-gray-600 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                     }`}
                 >
                   {t('filter.all', 'הכל')}
@@ -910,8 +910,8 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 <button
                   onClick={() => setSyncStatusFilter(syncStatusFilter === 'synced' ? 'all' : 'synced')}
                   className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'synced'
-                      ? 'bg-green-600 border-green-600 text-white'
-                      : 'bg-white border-green-300 text-green-600 hover:border-green-400'
+                    ? 'bg-green-600 border-green-600 text-white'
+                    : 'bg-white border-green-300 text-green-600 hover:border-green-400'
                     }`}
                 >
                   ✓ {t('filter.synced', 'מסונכרן')}
@@ -919,8 +919,8 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 <button
                   onClick={() => setSyncStatusFilter(syncStatusFilter === 'error' ? 'all' : 'error')}
                   className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'error'
-                      ? 'bg-red-600 border-red-600 text-white'
-                      : 'bg-white border-red-300 text-red-600 hover:border-red-400'
+                    ? 'bg-red-600 border-red-600 text-white'
+                    : 'bg-white border-red-300 text-red-600 hover:border-red-400'
                     }`}
                 >
                   ⚠️ {t('filter.syncError', 'שגיאה')}
@@ -928,8 +928,8 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 <button
                   onClick={() => setSyncStatusFilter(syncStatusFilter === 'not-synced' ? 'all' : 'not-synced')}
                   className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'not-synced'
-                      ? 'bg-gray-600 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
+                    ? 'bg-gray-600 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                     }`}
                 >
                   ○ {t('filter.notSynced', 'לא מסונכרן')}
@@ -957,8 +957,8 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
               <button
                 onClick={() => setGenderFilter('all')}
                 className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${genderFilter === 'all'
-                    ? 'bg-gray-600 border-gray-600 text-white'
-                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
+                  ? 'bg-gray-600 border-gray-600 text-white'
+                  : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                   }`}
               >
                 {t('filter.all', 'All')}
@@ -966,8 +966,8 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
               <button
                 onClick={() => setGenderFilter(genderFilter === 'male' ? 'all' : 'male')}
                 className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${genderFilter === 'male'
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'bg-white border-blue-300 text-blue-600 hover:border-blue-400'
+                  ? 'bg-blue-600 border-blue-600 text-white'
+                  : 'bg-white border-blue-300 text-blue-600 hover:border-blue-400'
                   }`}
               >
                 {t('filter.male', 'Male')}
@@ -975,8 +975,8 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
               <button
                 onClick={() => setGenderFilter(genderFilter === 'female' ? 'all' : 'female')}
                 className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${genderFilter === 'female'
-                    ? 'bg-pink-600 border-pink-600 text-white'
-                    : 'bg-white border-pink-300 text-pink-600 hover:border-pink-400'
+                  ? 'bg-pink-600 border-pink-600 text-white'
+                  : 'bg-white border-pink-300 text-pink-600 hover:border-pink-400'
                   }`}
               >
                 {t('filter.female', 'Female')}
@@ -1001,8 +1001,8 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 <button
                   onClick={clearGroupFilters}
                   className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${selectedGroupIds.length === 0
-                      ? 'bg-gray-600 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
+                    ? 'bg-gray-600 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                     }`}
                 >
                   {t('filter.all', 'All')}
@@ -1010,8 +1010,8 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 <button
                   onClick={() => toggleGroupFilter('unassigned')}
                   className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 border-2 ${selectedGroupIds.includes('unassigned')
-                      ? 'bg-gray-200 border-gray-400 text-gray-900'
-                      : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
+                    ? 'bg-gray-200 border-gray-400 text-gray-900'
+                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                     }`}
                 >
                   <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border-2 border-dashed border-gray-400" />
@@ -1022,8 +1022,8 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     key={group.id}
                     onClick={() => toggleGroupFilter(group.id)}
                     className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 ${selectedGroupIds.includes(group.id)
-                        ? 'ring-2 ring-offset-1'
-                        : 'opacity-70 hover:opacity-100'
+                      ? 'ring-2 ring-offset-1'
+                      : 'opacity-70 hover:opacity-100'
                       }`}
                     style={{
                       backgroundColor: selectedGroupIds.includes(group.id) ? group.color : group.color + '40',
