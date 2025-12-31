@@ -165,7 +165,7 @@ export const Header: React.FC = () => {
             <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 ms-auto md:hidden">
               {/* החלפת שפה + המבורגר - צמודים */}
-              <div className="flex items-center gap-0.5">
+              <div className="flex items-center gap-0.5 ps-1">
                 <button
                   onClick={toggleLanguage}
                   className="px-1 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-0"
