@@ -1,30 +1,34 @@
 import { Birthday, BirthdayCalculations } from '../types';
 import { zodiacService } from './zodiac.service';
+import { getTenantNow } from '../utils/dateUtils';
 
 export const birthdayCalculationsService = {
   calculateAll(
     birthday: Birthday,
-    referenceDate: Date = new Date()
+    timezone: string = 'Asia/Jerusalem',
+    referenceDate?: Date
   ): BirthdayCalculations {
+
+    const today = referenceDate || getTenantNow(timezone);
 
     const gregAge = this.calculateCurrentGregorianAge(
       birthday.gregorian_year || 0,
       birthday.gregorian_month || 0,
       birthday.gregorian_day || 0,
-      referenceDate
+      today
     );
 
     const hebAge = this.calculateCurrentHebrewAge(
       birthday.hebrew_year || 0,
       birthday.next_upcoming_hebrew_birthday,
       birthday.next_upcoming_hebrew_year,
-      referenceDate
+      today
     );
 
     const nextGreg = this.calculateNextGregorianBirthday(
       birthday.gregorian_month || 0,
       birthday.gregorian_day || 0,
-      referenceDate
+      today
     );
 
     const nextHeb = birthday.next_upcoming_hebrew_birthday
@@ -44,7 +48,7 @@ export const birthdayCalculationsService = {
       ageAtNextHebrewBirthday: ageAtNextHeb,
       daysUntilGregorianBirthday: nextGreg.daysUntil,
       daysUntilHebrewBirthday: nextHeb
-        ? Math.ceil((nextHeb.getTime() - referenceDate.getTime()) / (1000 * 60 * 60 * 24))
+        ? Math.ceil((nextHeb.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
         : null,
       nextBirthdayType: this.determineNextBirthdayType(nextGreg.date, nextHeb),
       gregorianSign: zodiacService.getGregorianSign(new Date(birthday.birth_date_gregorian)),

@@ -20,6 +20,7 @@ export interface Tenant {
   is_guest_portal_enabled?: boolean;
   sharedCalendarId?: string | null;
   sharedCalendarName?: string | null;
+  last_birthday_process_date?: string; // Track last midnight processing (format: 'YYYY-MM-DD')
   created_at: string;
   updated_at: string;
 }
