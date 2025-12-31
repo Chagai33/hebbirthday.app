@@ -140,12 +140,12 @@ export const Header: React.FC = () => {
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-14 sm:h-16 gap-4">
+        <div className="flex justify-between items-center h-14 sm:h-16 gap-1 sm:gap-4">
           {/* שמאל - כותרת ומידע */}
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button
               onClick={() => navigate('/')}
-              className="flex flex-col items-start transition-opacity hover:opacity-80 -ms-1 pe-6"
+              className="flex flex-col items-start transition-opacity hover:opacity-80 -ms-1 pe-2 sm:pe-6"
             >
               <div className="text-xl sm:text-2xl font-black tracking-tight leading-none relative inline-flex items-baseline" dir="ltr">
                 <span className="text-[#8e24aa]">Heb</span>
@@ -163,12 +163,12 @@ export const Header: React.FC = () => {
           </div>
 
             <div className="flex items-center gap-2">
-            <div className="flex items-center gap-3 ms-auto md:hidden">
+            <div className="flex items-center gap-1 ms-auto md:hidden">
               {/* החלפת שפה + המבורגר - צמודים */}
               <div className="flex items-center gap-0.5">
                 <button
                   onClick={toggleLanguage}
-                  className="px-2 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-0"
+                  className="px-1 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-0"
                   title={i18n.language === 'he' ? t('common.switchToEnglish') : t('common.switchToHebrew')}
                 >
                   {i18n.language === 'he' ? 'EN' : 'HE'}

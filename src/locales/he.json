@@ -113,6 +113,7 @@
     "switchToPrimary": "עבור ליומן ראשי",
     "switchToCustom": "עבור ליומן מותאם אישית",
     "modalDescription": "התחבר ליומן Google כדי לסנכרן ימי הולדת אוטומטית.",
+    "connectedSuccessfully": "מחובר בהצלחה ליומן Google",
     "cleanupOrphans": "ניקוי אירועים יתומים (תיקון סנכרון)",
     "cleanupOrphansShort": "ניקוי יתומים",
     "cleanupOrphansShortMobile": "נקה",

@@ -194,6 +194,7 @@
     "switchToPrimary": "Switch to Primary Calendar",
     "switchToCustom": "Switch to Custom Calendar",
     "modalDescription": "Connect to Google Calendar to sync birthdays automatically.",
+    "connectedSuccessfully": "Successfully connected to Google Calendar",
     "cleanupOrphans": "Clean up orphaned events (fix sync)",
     "cleanupOrphansShort": "Clean orphans",
     "cleanupOrphansShortMobile": "Clean",
