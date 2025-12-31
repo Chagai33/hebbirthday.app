@@ -11,12 +11,14 @@ import { TenantSettings } from '../settings/TenantSettings';
 import { GuestActivityModal } from '../modals/GuestActivityModal';
 import { useLayoutContext } from '../../contexts/LayoutContext';
 import { useGuestNotifications } from '../../contexts/GuestNotificationsContext';
+import { useGoogleCalendar } from '../../contexts/GoogleCalendarContext';
 import { CurrentDateDisplay } from '../common/CurrentDateDisplay';
 import { GroupsPanel } from '../groups/GroupsPanel';
 
 export const Header: React.FC = () => {
   const { openAboutModal } = useLayoutContext();
   const { isNew } = useGuestNotifications();
+  const { needsCalendarSetup } = useGoogleCalendar();
   const { t, i18n } = useTranslation();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -173,9 +175,12 @@ export const Header: React.FC = () => {
                 </button>
                 <button
                   onClick={openAboutModal}
-                  className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors relative"
                 >
                   <Menu className="w-5 h-5" />
+                  {needsCalendarSetup && (
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border-2 border-white animate-pulse"></span>
+                  )}
                 </button>
               </div>
               {/* אווטאר - שמאל */}
@@ -235,10 +240,13 @@ export const Header: React.FC = () => {
                             setShowSettings(true);
                             setShowUserMenu(false);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors relative"
                         >
                           <Settings className="w-4 h-4 text-gray-500" />
                           <span>{t('tenant.settings')}</span>
+                          {needsCalendarSetup && (
+                            <span className="mr-auto w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                          )}
                         </button>
                       </div>
 
@@ -385,10 +393,13 @@ export const Header: React.FC = () => {
                             setShowSettings(true);
                             setMobileMenuOpen(false);
                           }}
-                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm text-gray-700 hover:bg-gray-50"
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm text-gray-700 hover:bg-gray-50 relative"
                         >
                           <Settings className="w-4 h-4" />
                           <span>{t('tenant.settings')}</span>
+                          {needsCalendarSetup && (
+                            <span className="mr-auto w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                          )}
                         </button>
                         <button
                           onClick={handleSignOut}
@@ -494,10 +505,13 @@ export const Header: React.FC = () => {
                             setShowSettings(true);
                             setShowUserMenu(false);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors relative"
                         >
                           <Settings className="w-4 h-4 text-gray-500" />
                           <span>{t('tenant.settings')}</span>
+                          {needsCalendarSetup && (
+                            <span className="mr-auto w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                          )}
                         </button>
                       </div>
 

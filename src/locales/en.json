@@ -247,6 +247,7 @@
     "setupRequired": "Setup Required",
     "primaryCalendarWarning": "The app is currently connected to the primary calendar. To sync birthdays, you must create or select a dedicated calendar.",
     "cannotSyncToPrimary": "Cannot sync to primary calendar. Please select a dedicated calendar.",
+    "calendarSetupRequired": "A dedicated calendar is required for syncing. Open Settings ← Sync to Google Calendar.",
     "syncInProgress": "Sync in progress...",
     "unsyncSelected": "Unsync",
     "confirmBulkUnsync": "Are you sure you want to unsync and delete from calendar for the selected records?",

@@ -384,8 +384,14 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       return;
     }
 
-    // Strict Mode Check
+    // Strict Mode Check - אל תצא מוקדם, תן ל-Context להציג את ההודעה
     if (calendarId === 'primary' || !calendarId) {
+      // תן ל-Context להציג את ההודעה ולהפעיל את needsCalendarSetup
+      try {
+        await syncSingleBirthday(birthdayId);
+      } catch (error) {
+        // ההודעה כבר הוצגה ע"י הקונטקסט
+      }
       if (onOpenCalendarSettings) {
         onOpenCalendarSettings();
       }
@@ -401,7 +407,10 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       }
     } catch (error: any) {
       logger.error('Error syncing birthday:', error);
-      showToast(error.message || 'שגיאה בסנכרון ליומן Google', 'error');
+      // אל תציג הודעה כאן אם זה היה בעיית primary calendar
+      if (!error.message?.includes('ליומן הראשי')) {
+        showToast(error.message || 'שגיאה בסנכרון ליומן Google', 'error');
+      }
     }
   };
 
@@ -421,8 +430,15 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       return;
     }
 
-    // Strict Mode Check
+    // Strict Mode Check - תן ל-Context להציג את ההודעה
     if (calendarId === 'primary' || !calendarId) {
+      const birthdaysToSync = Array.from(selectedIds);
+      // תן ל-Context להציג את ההודעה ולהפעיל את needsCalendarSetup
+      try {
+        await syncMultipleBirthdays(birthdaysToSync);
+      } catch (error) {
+        // ההודעה כבר הוצגה ע"י הקונטקסט
+      }
       if (onOpenCalendarSettings) {
         onOpenCalendarSettings();
       }
@@ -442,7 +458,10 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       setSelectedIds(new Set());
     } catch (error: any) {
       logger.error('Error bulk syncing birthdays:', error);
-      showToast(error.message || 'שגיאה בסנכרון המרובה', 'error');
+      // אל תציג הודעה כאן אם זה היה בעיית primary calendar
+      if (!error.message?.includes('ליומן הראשי')) {
+        showToast(error.message || 'שגיאה בסנכרון המרובה', 'error');
+      }
     }
   };
 

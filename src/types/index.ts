@@ -313,8 +313,10 @@ export interface GoogleCalendarContextType {
   userEmail: string | null;
   calendarId: string | null;
   calendarName: string | null;
-  syncStatus: 'IDLE' | 'IN_PROGRESS'; // Added
-  recentActivity: SyncHistoryItem[]; // Added
+  isPrimaryCalendar: boolean;
+  syncStatus: 'IDLE' | 'IN_PROGRESS' | 'DELETING';
+  recentActivity: SyncHistoryItem[];
+  needsCalendarSetup: boolean; // Added - מציין שהמשתמש צריך לבחור יומן ייעודי
   connectToGoogle: () => Promise<void>;
   syncSingleBirthday: (birthdayId: string) => Promise<SyncResult>;
   syncMultipleBirthdays: (birthdayIds: string[]) => Promise<BulkSyncResult>;

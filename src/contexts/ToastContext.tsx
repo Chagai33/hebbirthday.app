@@ -5,12 +5,14 @@ interface ToastState {
   message: string;
   type: ToastType;
   id: number;
+  duration?: number;
 }
 
 interface ToastContextType {
-  showToast: (message: string, type?: ToastType) => void;
+  showToast: (message: string, type?: ToastType, duration?: number) => void;
   success: (message: string) => void;
   error: (message: string) => void;
+  warning: (message: string) => void;
   info: (message: string) => void;
 }
 
@@ -31,9 +33,29 @@ interface ToastProviderProps {
 export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastState[]>([]);
 
-  const showToast = useCallback((message: string, type: ToastType = 'info') => {
-    const id = Date.now() + Math.random();
-    setToasts((prev) => [...prev, { message, type, id }]);
+  const showToast = useCallback((message: string, type: ToastType = 'info', duration?: number) => {
+    setToasts((prev) => {
+      // בדוק אם יש כבר הודעה זהה (אותו message ו-type)
+      const existingIndex = prev.findIndex(
+        (toast) => toast.message === message && toast.type === type
+      );
+      
+      // אם יש הודעה זהה, החלף אותה במקום להוסיף חדשה
+      if (existingIndex !== -1) {
+        const newToasts = [...prev];
+        newToasts[existingIndex] = {
+          message,
+          type,
+          id: Date.now() + Math.random(),
+          duration
+        };
+        return newToasts;
+      }
+      
+      // אחרת הוסף הודעה חדשה
+      const id = Date.now() + Math.random();
+      return [...prev, { message, type, id, duration }];
+    });
   }, []);
 
   const hideToast = useCallback((id: number) => {
@@ -42,10 +64,11 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
 
   const success = useCallback((message: string) => showToast(message, 'success'), [showToast]);
   const error = useCallback((message: string) => showToast(message, 'error'), [showToast]);
+  const warning = useCallback((message: string) => showToast(message, 'warning'), [showToast]);
   const info = useCallback((message: string) => showToast(message, 'info'), [showToast]);
 
   return (
-    <ToastContext.Provider value={{ showToast, success, error, info }}>
+    <ToastContext.Provider value={{ showToast, success, error, warning, info }}>
       {children}
       <div className="fixed bottom-4 right-4 z-50 space-y-2">
         {toasts.map((toast) => (
@@ -54,6 +77,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
             message={toast.message}
             type={toast.type}
             onClose={() => hideToast(toast.id)}
+            duration={toast.duration}
           />
         ))}
       </div>
