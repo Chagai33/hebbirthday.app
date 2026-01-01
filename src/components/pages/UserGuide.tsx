@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '../common/LanguageSwitcher';
 import { InfoPageLayout } from '../layout/InfoPageLayout';
-import { 
-  Menu,
-  X,
+import {
   ChevronRight,
   Download,
   Calendar,
@@ -51,6 +50,7 @@ export const UserGuide: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
+    // toggleLanguage removed - using LanguageSwitcher
     const handleScroll = () => {
       const sectionElements = sections.map(s => document.getElementById(s.id));
       for (let i = sectionElements.length - 1; i >= 0; i--) {
@@ -81,11 +81,11 @@ export const UserGuide: React.FC = () => {
         {/* Sidebar Navigation */}
         <aside
           className={`
-            fixed lg:sticky top-20 ${isHebrew ? 'right-0' : 'left-0'}
-            h-[calc(100vh-80px)] w-64 bg-white rounded-lg shadow-sm border border-gray-200 p-4
-            transition-transform duration-300 z-20 overflow-y-auto
+            fixed lg:sticky top - 20 ${isHebrew ? 'right-0' : 'left-0'}
+h - [calc(100vh - 80px)] w - 64 bg - white rounded - lg shadow - sm border border - gray - 200 p - 4
+transition - transform duration - 300 z - 20 overflow - y - auto
             ${isSidebarOpen ? 'translate-x-0' : isHebrew ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          `}
+`}
         >
           <nav className="space-y-1">
             {sections.map((section) => {
@@ -95,13 +95,13 @@ export const UserGuide: React.FC = () => {
                   key={section.id}
                   onClick={() => scrollToSection(section.id)}
                   className={`
-                    w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
+w - full flex items - center gap - 3 px - 3 py - 2.5 rounded - lg text - sm font - medium transition - all
                     ${isActive ? `${section.color} text-white shadow-md` : 'text-gray-700 hover:bg-gray-50'}
-                  `}
+`}
                 >
                   {section.icon}
                   <span className="flex-1 text-start">{t(section.titleKey)}</span>
-                  {isActive && <ChevronRight className={`w-4 h-4 ${isHebrew ? 'rotate-180' : ''}`} />}
+                  {isActive && <ChevronRight className={`w - 4 h - 4 ${isHebrew ? 'rotate-180' : ''} `} />}
                 </button>
               );
             })}
@@ -112,17 +112,12 @@ export const UserGuide: React.FC = () => {
         <main className="flex-1 min-w-0">
           {/* Mobile Menu Button - Sticky */}
           <div className="lg:hidden sticky top-16 z-20 mb-2 sm:mb-3">
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-3 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              {isSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
+            <LanguageSwitcher className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:border-purple-400 hover:text-purple-600 rounded-lg transition-all duration-200 shadow-sm hover:shadow" variant="minimal" />
           </div>
 
           <div className="bg-white rounded-lg shadow-sm p-4 sm:p-8">
             <div className="prose prose-sm max-w-none" dir={isHebrew ? 'rtl' : 'ltr'}>
-              
+
               {/* INTRO */}
               <section id="intro" className="mb-8 sm:mb-12 scroll-mt-20">
                 <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-100 rounded-xl p-4 sm:p-6">
@@ -132,10 +127,10 @@ export const UserGuide: React.FC = () => {
                   <p className="text-gray-700 leading-relaxed mb-6">
                     {t('guide.intro.desc', 'HebBirthday נועדה לגשר על הפער בין הלוח העברי לטכנולוגיה של ימינו. במקום לחשב ידנית מתי יוצא יום ההולדת העברי בכל שנה, המערכת עושה זאת אוטומטית.')}
                   </p>
-                  
+
                   <div className="space-y-3">
                     <h3 className="font-bold text-gray-900">{t('guide.intro.mainFeatures', 'פיצ\'רים מרכזיים:')}</h3>
-                    
+
                     <div className="space-y-2">
                       <div className="flex items-start gap-3">
                         <Calendar className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
@@ -201,7 +196,7 @@ export const UserGuide: React.FC = () => {
                     <p className="text-sm text-gray-700 leading-relaxed mb-4">
                       {t('guide.section1.link.desc', 'במקום לרדוף אחרי כל אחד בנפרד, שולחים לינק אחד בוואטסאפ הקבוצתי. כל אחד מקליד את הפרטים שלו בעצמו.')}
                     </p>
-                    
+
                     <div className="bg-white rounded-lg p-4 mb-4">
                       <h4 className="font-bold text-gray-900 mb-2 text-sm">{t('guide.section1.link.howItWorks', 'איך זה עובד?')}</h4>
                       <ol className="space-y-1 text-sm text-gray-700">
@@ -406,15 +401,15 @@ export const UserGuide: React.FC = () => {
 
                 <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
                   <h3 className="font-bold text-gray-900 mb-3 text-sm">{t('guide.section3.eventFormat', 'מבנה האירוע ביומן:')}</h3>
-                  <div className={`bg-gray-50 rounded-lg p-3 font-mono text-xs text-gray-700 space-y-1 ${isHebrew ? 'text-right' : 'text-left'}`} dir={isHebrew ? 'rtl' : 'ltr'}>
+                  <div className={`bg - gray - 50 rounded - lg p - 3 font - mono text - xs text - gray - 700 space - y - 1 ${isHebrew ? 'text-right' : 'text-left'} `} dir={isHebrew ? 'rtl' : 'ltr'}>
                     <div className="text-blue-600 font-bold">📅 גילה | 40 | יום הולדת עברי</div>
                     <div className="text-gray-500">🗓️ 15 במרץ 2026</div>
                     <div className="text-gray-600">📝 {t('guide.section3.eventDesc', 'תיאור:')}</div>
-                    <div className={`${isHebrew ? 'mr-4' : 'ms-4'} text-gray-600`}>{t('guide.section3.eventBirth', 'תאריך לידה: י"ח באדר תשמ"ו')}</div>
-                    <div className={`${isHebrew ? 'mr-4' : 'ms-4'} text-gray-600`}>{t('guide.section3.eventAge', 'גיל: 40')}</div>
-                    <div className={`${isHebrew ? 'mr-4' : 'ms-4'} text-gray-600`}>{t('guide.section3.eventWishlist', 'רשימת משאלות:')}</div>
-                    <div className={`${isHebrew ? 'mr-8' : 'ms-8'} text-gray-500`}>• {t('guide.section3.eventItem1', 'שמלה חדשה')}</div>
-                    <div className={`${isHebrew ? 'mr-8' : 'ms-8'} text-gray-500`}>• {t('guide.section3.eventItem2', 'ספר בישול')}</div>
+                    <div className={`${isHebrew ? 'mr-4' : 'ms-4'} text - gray - 600`}>{t('guide.section3.eventBirth', 'תאריך לידה: י"ח באדר תשמ"ו')}</div>
+                    <div className={`${isHebrew ? 'mr-4' : 'ms-4'} text - gray - 600`}>{t('guide.section3.eventAge', 'גיל: 40')}</div>
+                    <div className={`${isHebrew ? 'mr-4' : 'ms-4'} text - gray - 600`}>{t('guide.section3.eventWishlist', 'רשימת משאלות:')}</div>
+                    <div className={`${isHebrew ? 'mr-8' : 'ms-8'} text - gray - 500`}>• {t('guide.section3.eventItem1', 'שמלה חדשה')}</div>
+                    <div className={`${isHebrew ? 'mr-8' : 'ms-8'} text - gray - 500`}>• {t('guide.section3.eventItem2', 'ספר בישול')}</div>
                   </div>
                 </div>
 
@@ -520,9 +515,9 @@ export const UserGuide: React.FC = () => {
                 <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                   <h3 className="font-bold text-gray-900 mb-2">{t('guide.section7.example', 'דוגמת פלט:')}</h3>
                   <div className="bg-white rounded-lg p-3 text-sm font-mono text-gray-700" dir="rtl">
-                    🎂 ימי הולדת קרובים - מרץ 2026<br/><br/>
-                    • משה כהן - י״ח באדר (15/03) - יום שני<br/>
-                    • שרה לוי - כ״ב באדר (19/03) - יום שישי<br/>
+                    🎂 ימי הולדת קרובים - מרץ 2026<br /><br />
+                    • משה כהן - י״ח באדר (15/03) - יום שני<br />
+                    • שרה לוי - כ״ב באדר (19/03) - יום שישי<br />
                     • דוד ישראלי - כ״ה באדר (22/03) - יום שני
                   </div>
                 </div>

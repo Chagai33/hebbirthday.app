@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { authService } from '../../services/auth.service';
-import { Lock, Globe } from 'lucide-react';
+import { Lock } from 'lucide-react';
+import { LanguageSwitcher } from '../common/LanguageSwitcher';
 
 export const ResetPassword: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const oobCode = searchParams.get('oobCode');
@@ -25,7 +26,7 @@ export const ResetPassword: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     if (password !== confirmPassword) {
       setError(t('validation.passwordsDontMatch'));
       return;
@@ -65,10 +66,7 @@ export const ResetPassword: React.FC = () => {
     }
   };
 
-  const toggleLanguage = () => {
-    const newLang = i18n.language === 'he' ? 'en' : 'he';
-    i18n.changeLanguage(newLang);
-  };
+  // toggleLanguage removed - using LanguageSwitcher
 
   if (!oobCode) return null;
 
@@ -76,15 +74,9 @@ export const ResetPassword: React.FC = () => {
     <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-8 overflow-y-auto">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 relative">
         <div className="flex justify-end items-center mb-4">
-            <button
-            onClick={toggleLanguage}
-            className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            title={i18n.language === 'he' ? t('common.switchToEnglish') : t('common.switchToHebrew')}
-            >
-            <Globe className="w-5 h-5" />
-            </button>
+          <LanguageSwitcher className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" variant="minimal" />
         </div>
-        
+
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             {t('auth.resetPassword')}
@@ -93,7 +85,7 @@ export const ResetPassword: React.FC = () => {
 
         {success ? (
           <div className="text-center py-4">
-             <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>

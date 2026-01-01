@@ -14,12 +14,13 @@ import { useGuestNotifications } from '../../contexts/GuestNotificationsContext'
 import { useGoogleCalendar } from '../../contexts/GoogleCalendarContext';
 import { CurrentDateDisplay } from '../common/CurrentDateDisplay';
 import { GroupsPanel } from '../groups/GroupsPanel';
+import { LanguageSwitcher } from '../common/LanguageSwitcher';
 
 export const Header: React.FC = () => {
   const { openAboutModal } = useLayoutContext();
   const { isNew } = useGuestNotifications();
   const { needsCalendarSetup } = useGoogleCalendar();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,19 +38,7 @@ export const Header: React.FC = () => {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const mobileUserMenuRef = useRef<HTMLDivElement>(null);
 
-  const toggleLanguage = () => {
-    let newLang: string;
-    if (i18n.language === 'he') {
-      newLang = 'en';
-    } else if (i18n.language === 'en') {
-      newLang = 'es';
-    } else {
-      newLang = 'he';
-    }
-    i18n.changeLanguage(newLang);
-    document.documentElement.dir = newLang === 'he' ? 'rtl' : 'ltr';
-    document.documentElement.lang = newLang;
-  };
+  // toggleLanguage removed - now using LanguageSwitcher component
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -123,13 +112,7 @@ export const Header: React.FC = () => {
 
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-3 ms-auto">
-                <button
-                  onClick={toggleLanguage}
-                  className="md:hidden px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-0"
-                  title={i18n.language === 'he' ? 'English' : i18n.language === 'en' ? 'Español' : 'עברית'}
-                >
-                  {i18n.language === 'he' ? 'EN' : i18n.language === 'en' ? 'ES' : 'HE'}
-                </button>
+                <LanguageSwitcher className="md:hidden" />
                 <button
                   onClick={openAboutModal}
                   className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -173,13 +156,7 @@ export const Header: React.FC = () => {
             <div className="flex items-center gap-1 ms-auto md:hidden">
               {/* החלפת שפה + המבורגר - צמודים */}
               <div className="flex items-center gap-0.5 ps-1">
-                <button
-                  onClick={toggleLanguage}
-                  className="px-1 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-0"
-                  title={i18n.language === 'he' ? 'English' : i18n.language === 'en' ? 'Español' : 'עברית'}
-                >
-                  {i18n.language === 'he' ? 'EN' : i18n.language === 'en' ? 'ES' : 'HE'}
-                </button>
+                <LanguageSwitcher variant="minimal" />
                 <button
                   onClick={openAboutModal}
                   className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors relative"
@@ -422,13 +399,7 @@ export const Header: React.FC = () => {
 
             <div className="hidden md:flex items-center gap-2">
               {/* כפתור החלפת שפה - דסקטופ */}
-              <button
-                onClick={toggleLanguage}
-                className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-0"
-                title={i18n.language === 'he' ? 'English' : i18n.language === 'en' ? 'Español' : 'עברית'}
-              >
-                {i18n.language === 'he' ? 'EN' : i18n.language === 'en' ? 'ES' : 'HE'}
-              </button>
+              <LanguageSwitcher />
 
               {/* התראות אורחים - בצד ימין */}
               {user && (
