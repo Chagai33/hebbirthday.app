@@ -87,7 +87,7 @@ function createDependencies() {
     const syncBirthdayUseCase = new SyncBirthdayUseCase_1.SyncBirthdayUseCase(birthdayRepo, tenantRepo, wishlistRepo, groupRepo, authClient, calendarClient, eventBuilder);
     const removeSyncUseCase = new RemoveSyncUseCase_1.RemoveSyncUseCase(birthdayRepo, syncBirthdayUseCase);
     const bulkSyncUseCase = new BulkSyncUseCase_1.BulkSyncUseCase(birthdayRepo, tokenRepo, tasksClient, syncBirthdayUseCase, db);
-    const calculateHebrewDataUseCase = new CalculateHebrewDataUseCase_1.CalculateHebrewDataUseCase(hebcalService, birthdayRepo);
+    const calculateHebrewDataUseCase = new CalculateHebrewDataUseCase_1.CalculateHebrewDataUseCase(hebcalService, birthdayRepo, tenantRepo);
     const cleanupOrphanEventsUseCase = new CleanupOrphanEventsUseCase_1.CleanupOrphanEventsUseCase(calendarClient, authClient, db);
     const manageCalendarUseCase = new ManageCalendarUseCase_1.ManageCalendarUseCase(calendarClient, tokenRepo);
     const googleOAuthUseCase = new GoogleOAuthUseCase_1.GoogleOAuthUseCase(authClient, calendarClient, tokenRepo);

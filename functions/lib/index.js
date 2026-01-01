@@ -80,6 +80,7 @@ Object.defineProperty(exports, "updateNextBirthdayScheduled", { enumerable: true
 var user_triggers_1 = require("./interfaces/triggers/user-triggers");
 Object.defineProperty(exports, "onUserCreate", { enumerable: true, get: function () { return user_triggers_1.onUserCreateFn; } });
 // Legacy/External Functions (keep as-is)
+// export * from './migration'; // Removed: module missing
 var guestPortal_1 = require("./guestPortal");
 Object.defineProperty(exports, "guestPortalOps", { enumerable: true, get: function () { return guestPortal_1.guestPortalOps; } });
 // Guest Access (Magic Link)

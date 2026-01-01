@@ -71,7 +71,9 @@ export interface TenantData {
   name?: string;
   default_language?: string;
   default_calendar_preference?: string;
+  timezone?: string; // Correct timezone setting for the tenant
   created_at?: any;
+  last_birthday_process_date?: string; // Used for scheduled updates
   is_guest_portal_enabled?: boolean;
 }
 

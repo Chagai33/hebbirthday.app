@@ -37,18 +37,26 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CalculateHebrewDataUseCase = void 0;
 const functions = __importStar(require("firebase-functions"));
+const dateUtils_1 = require("../../../utils/dateUtils");
 class CalculateHebrewDataUseCase {
-    constructor(hebcalService, birthdayRepo) {
+    constructor(hebcalService, birthdayRepo, tenantRepo // Injected Dependency
+    ) {
         this.hebcalService = hebcalService;
         this.birthdayRepo = birthdayRepo;
+        this.tenantRepo = tenantRepo;
     }
-    async execute(birthdayId, birthDateGregorian, afterSunset) {
+    async execute(birthdayId, birthDateGregorian, afterSunset, tenantId // New parameter
+    ) {
         try {
             functions.logger.log(`Calculating Hebrew data for ${birthdayId}`);
+            // 1. Fetch Tenant Settings for Timezone
+            const tenant = await this.tenantRepo.findById(tenantId);
+            const timezone = tenant?.timezone || 'Asia/Jerusalem';
             const dateParts = birthDateGregorian.split('-');
             const bDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
             const hebcal = await this.hebcalService.fetchHebcalData(bDate, afterSunset);
-            const currHy = await this.hebcalService.getCurrentHebrewYear();
+            // 2. Pass timezone to hebcal service
+            const currHy = await this.hebcalService.getCurrentHebrewYear(timezone);
             const futures = await this.hebcalService.fetchNextHebrewBirthdays(currHy, hebcal.hm, hebcal.hd, 10);
             const updateData = {
                 birth_date_hebrew_string: hebcal.hebrew,
@@ -65,9 +73,11 @@ class CalculateHebrewDataUseCase {
                 _systemUpdate: true
             };
             if (futures.length > 0) {
-                const now = new Date();
-                now.setHours(0, 0, 0, 0);
-                const next = futures.find(f => f.gregorianDate >= now) || futures[0];
+                // 3. Use timezone-aware "now" for comparison
+                // We need to know if the birthday has passed *in the user's timezone*
+                const nowInTenant = (0, dateUtils_1.getTenantNow)(timezone);
+                nowInTenant.setHours(0, 0, 0, 0); // Reset time part for date comparison
+                const next = futures.find(f => f.gregorianDate >= nowInTenant) || futures[0];
                 updateData.next_upcoming_hebrew_birthday = next.gregorianDate.toISOString().split('T')[0];
                 updateData.next_upcoming_hebrew_year = next.hebrewYear;
                 updateData.future_hebrew_birthdays = futures.map(f => ({
@@ -107,13 +117,17 @@ class CalculateHebrewDataUseCase {
             return true;
         }
         // בדיקה חדשה: אם יום ההולדת העברי הקרוב עבר - חייבים לחשב מחדש
+        // Note: We can't actullay do a perfect check here without fetching the tenant timezone
+        // which effectively makes 'shouldCalculate' dependent on DB which we usually want to avoid in triggers pre-checks.
+        // However, the 'next_upcoming_hebrew_birthday' is stored as YYYY-MM-DD.
+        // We will do a looser check against UTC here, knowing the scheduled job catches edge cases.
         if (afterData.next_upcoming_hebrew_birthday) {
             const nextDate = new Date(afterData.next_upcoming_hebrew_birthday);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // איפוס שעות להשוואה נכונה
+            const today = new Date(); // UTC
+            today.setHours(0, 0, 0, 0);
             if (nextDate < today) {
                 functions.logger.log(`Hebrew birthday has passed for birthday, recalculating...`);
-                return true; // התאריך עבר - חשב מחדש!
+                return true;
             }
         }
         // התאריך לא השתנה - חשב רק אם אין תאריך עברי

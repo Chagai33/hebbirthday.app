@@ -54,7 +54,7 @@ export { updateNextBirthdayScheduledFn as updateNextBirthdayScheduled } from './
 export { onUserCreateFn as onUserCreate } from './interfaces/triggers/user-triggers';
 
 // Legacy/External Functions (keep as-is)
-export * from './migration';
+// export * from './migration'; // Removed: module missing
 export { guestPortalOps } from './guestPortal';
 
 // Guest Access (Magic Link)
