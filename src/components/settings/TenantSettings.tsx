@@ -158,6 +158,18 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
                             label={t('birthday.calendarPreference')}
                         />
 
+                        {/* Notes - Compact */}
+                        <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-700 space-y-1.5">
+                            <h4 className="font-semibold text-gray-900 text-sm">
+                                {t('common.notes', 'Notes')}:
+                            </h4>
+                            <ul className="list-disc list-inside space-y-0.5 text-xs">
+                                <li>{t('settings.note1', 'ההגדרה זו חלה בברירת מחדל על כל הקבוצות')}</li>
+                                <li>{t('settings.note2', 'קבוצות יכולות לעקוף הגדרה זו')}</li>
+                                <li>{t('settings.note3', 'רשומות בודדות יכולות לעקוף הגדרת קבוצה')}</li>
+                            </ul>
+                        </div>
+
                         {/* Timezone Selector - Compact */}
                         <div className="space-y-2 bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 rounded-lg p-3">
                             <div className="flex items-center gap-2">
@@ -191,18 +203,6 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
                                     {t('tenant.timezoneHint', 'כל החישובים והתאריכים מתבצעים לפי אזור זמן זה.')}
                                 </p>
                             </div>
-                        </div>
-
-                        {/* Notes - Compact */}
-                        <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-700 space-y-1.5">
-                            <h4 className="font-semibold text-gray-900 text-sm">
-                                {t('common.notes', 'Notes')}:
-                            </h4>
-                            <ul className="list-disc list-inside space-y-0.5 text-xs">
-                                <li>{t('settings.note1', 'ההגדרה זו חלה בברירת מחדל על כל הקבוצות')}</li>
-                                <li>{t('settings.note2', 'קבוצות יכולות לעקוף הגדרה זו')}</li>
-                                <li>{t('settings.note3', 'רשומות בודדות יכולות לעקוף הגדרת קבוצה')}</li>
-                            </ul>
                         </div>
 
                         {/* Action Buttons */}
