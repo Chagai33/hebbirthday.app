@@ -1,5 +1,5 @@
 "use strict";
-// Scheduled function - Update next birthdays daily
+// Scheduled function - Update next birthdays hourly for tenants at their local midnight
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -38,34 +38,49 @@ exports.updateNextBirthdayScheduledFn = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const dependencies_1 = require("../dependencies");
+const dateUtils_1 = require("../../utils/dateUtils");
 const deps = (0, dependencies_1.createDependencies)();
 exports.updateNextBirthdayScheduledFn = functions.pubsub
-    .schedule('every day 00:00') // כל יום בחצות
-    .timeZone('Asia/Jerusalem')
+    .schedule('0 * * * *') // Run every hour (at minute 0) - Cron syntax
+    .timeZone('UTC') // Run on UTC (timezone-neutral)
     .onRun(async (context) => {
     try {
-        const nowStr = new Date().toISOString().split('T')[0];
-        const snapshot = await deps.db
-            .collection('birthdays')
-            .where('archived', '==', false)
-            .where('next_upcoming_hebrew_birthday', '<', nowStr)
-            .get();
-        if (snapshot.empty)
+        // Get tenants whose local time is midnight AND haven't been processed today
+        const tenantsToUpdate = await (0, dateUtils_1.getTenantsNeedingBirthdayUpdate)();
+        if (tenantsToUpdate.length === 0) {
+            functions.logger.log('No tenants need processing at this hour');
             return null;
-        const batch = deps.db.batch();
-        let count = 0;
-        snapshot.docs.forEach((doc) => {
-            batch.update(doc.ref, {
-                updated_at: admin.firestore.FieldValue.serverTimestamp()
+        }
+        functions.logger.log(`Processing ${tenantsToUpdate.length} tenant(s) at their local midnight`);
+        // Process each tenant
+        for (const { id: tenantId, timezone } of tenantsToUpdate) {
+            const localDateString = (0, dateUtils_1.getCurrentDateString)(timezone);
+            // Find birthdays with outdated next_upcoming_hebrew_birthday
+            const snapshot = await deps.db
+                .collection('birthdays')
+                .where('tenant_id', '==', tenantId)
+                .where('archived', '==', false)
+                .where('next_upcoming_hebrew_birthday', '<', localDateString)
+                .get();
+            if (!snapshot.empty) {
+                const batch = deps.db.batch();
+                snapshot.docs.forEach((doc) => {
+                    batch.update(doc.ref, {
+                        updated_at: admin.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                await batch.commit();
+                functions.logger.log(`✅ Tenant ${tenantId} (${timezone}): Updated ${snapshot.size} birthday(s)`);
+            }
+            // Mark this tenant as processed for today (in their local time)
+            await deps.db.collection('tenants').doc(tenantId).update({
+                last_birthday_process_date: localDateString,
             });
-            count++;
-        });
-        await batch.commit();
-        functions.logger.log(`Scheduled update triggered for ${count} outdated birthdays`);
+        }
         return null;
     }
     catch (error) {
-        functions.logger.error('Error in scheduled update:', error);
+        functions.logger.error('Error in scheduled birthday update:', error);
         return null;
     }
 });

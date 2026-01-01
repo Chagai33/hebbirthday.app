@@ -45,9 +45,12 @@ export const GoogleCalendarModal: React.FC<GoogleCalendarModalProps> = ({ isOpen
             </div>
           )}
 
-          <p className="text-sm text-gray-600 text-center">
-            {t('googleCalendar.modalDescription')}
-          </p>
+          {!isConnected && (
+            <p className="text-sm text-gray-600 text-center">
+              {t('googleCalendar.modalDescription')}
+            </p>
+          )}
+          
           <div className="w-full flex justify-center">
              <GoogleCalendarButton initialStrictMode={initialStrictMode} />
           </div>

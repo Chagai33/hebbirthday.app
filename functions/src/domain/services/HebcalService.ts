@@ -4,23 +4,25 @@
 
 import { HDate } from '@hebcal/core';
 import { HebcalData, NextHebrewBirthday } from '../entities/types';
+import { getTenantNow } from '../../utils/dateUtils';
 
 export class HebcalService {
-  async getCurrentHebrewYear(): Promise<number> {
-    return new HDate().getFullYear();
+  async getCurrentHebrewYear(timezone: string = 'Asia/Jerusalem'): Promise<number> {
+    const now = getTenantNow(timezone);
+    return new HDate(now).getFullYear();
   }
 
   async fetchHebcalData(date: Date, afterSunset: boolean): Promise<HebcalData> {
     let hDate = new HDate(date);
-    
+
     if (afterSunset) {
       hDate = hDate.next(); // CRITICAL FIX: next() returns a NEW HDate object!
     }
-    
+
     return {
       // CRITICAL: render('he') במקור שורה 90 - renderGematriya()
       // מחזיר מחרוזת עברית מלאה כמו "כ״ו בכסלו תשע״ו"
-      hebrew: hDate.renderGematriya(), 
+      hebrew: hDate.renderGematriya(),
       hy: hDate.getFullYear(),
       hm: hDate.getMonthName(),
       hd: hDate.getDate()
@@ -28,13 +30,13 @@ export class HebcalService {
   }
 
   async fetchNextHebrewBirthdays(
-    currentYear: number, 
-    month: string, 
-    day: number, 
+    currentYear: number,
+    month: string,
+    day: number,
     count: number
   ): Promise<NextHebrewBirthday[]> {
     const results: NextHebrewBirthday[] = [];
-    
+
     for (let i = 0; i <= count; i++) {
       const nextYear = currentYear + i;
       try {

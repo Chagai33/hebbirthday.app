@@ -3,6 +3,7 @@ import { tenantService } from '../services/tenant.service';
 import { Tenant, TenantContextType, UserRole } from '../types';
 import { useAuth } from './AuthContext';
 import { logger } from '../utils/logger';
+import { detectBrowserTimezone } from '../utils/dateUtils';
 
 const TenantContext = createContext<TenantContextType | undefined>(undefined);
 
@@ -91,7 +92,15 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
   const createTenant = async (name: string): Promise<string> => {
     if (!user) throw new Error('No user signed in');
 
+    // Smart default: auto-detect browser timezone
+    const detectedTimezone = detectBrowserTimezone();
+
     const tenantId = await tenantService.createTenant(name, user.id);
+
+    // Immediately set timezone after creation
+    await tenantService.updateTenant(tenantId, {
+      timezone: detectedTimezone,
+    });
 
     const newTenant = await tenantService.getTenant(tenantId);
     if (newTenant) {

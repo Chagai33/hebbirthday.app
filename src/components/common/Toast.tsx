@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { X, CheckCircle, AlertCircle, Info } from 'lucide-react';
 
-export type ToastType = 'success' | 'error' | 'info';
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 interface ToastProps {
   message: string;
@@ -24,6 +24,8 @@ export const Toast = ({ message, type, onClose, duration = 3000 }: ToastProps) =
         return <CheckCircle className="w-5 h-5" />;
       case 'error':
         return <AlertCircle className="w-5 h-5" />;
+      case 'warning':
+        return <AlertCircle className="w-5 h-5" />;
       case 'info':
         return <Info className="w-5 h-5" />;
     }
@@ -35,6 +37,8 @@ export const Toast = ({ message, type, onClose, duration = 3000 }: ToastProps) =
         return 'bg-green-50 text-green-800 border-green-200';
       case 'error':
         return 'bg-red-50 text-red-800 border-red-200';
+      case 'warning':
+        return 'bg-amber-50 text-amber-800 border-amber-200';
       case 'info':
         return 'bg-blue-50 text-blue-800 border-blue-200';
     }

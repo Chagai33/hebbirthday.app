@@ -20,6 +20,7 @@ export interface Tenant {
   is_guest_portal_enabled?: boolean;
   sharedCalendarId?: string | null;
   sharedCalendarName?: string | null;
+  last_birthday_process_date?: string; // Track last midnight processing (format: 'YYYY-MM-DD')
   created_at: string;
   updated_at: string;
 }
@@ -180,6 +181,8 @@ export interface BirthdayCalculations {
   daysUntilGregorianBirthday: number;
   daysUntilHebrewBirthday: number | null;
   nextBirthdayType: 'gregorian' | 'hebrew' | 'same';
+  hebrewSign?: string;
+  gregorianSign?: string;
 }
 
 export interface EnrichedBirthday extends Birthday {
@@ -313,8 +316,10 @@ export interface GoogleCalendarContextType {
   userEmail: string | null;
   calendarId: string | null;
   calendarName: string | null;
-  syncStatus: 'IDLE' | 'IN_PROGRESS'; // Added
-  recentActivity: SyncHistoryItem[]; // Added
+  isPrimaryCalendar: boolean;
+  syncStatus: 'IDLE' | 'IN_PROGRESS' | 'DELETING';
+  recentActivity: SyncHistoryItem[];
+  needsCalendarSetup: boolean; // Added - מציין שהמשתמש צריך לבחור יומן ייעודי
   connectToGoogle: () => Promise<void>;
   syncSingleBirthday: (birthdayId: string) => Promise<SyncResult>;
   syncMultipleBirthdays: (birthdayIds: string[]) => Promise<BulkSyncResult>;

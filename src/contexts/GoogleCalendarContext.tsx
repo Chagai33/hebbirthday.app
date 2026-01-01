@@ -37,6 +37,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
   const [isPrimaryCalendar, setIsPrimaryCalendar] = useState<boolean>(false);
   const [syncStatus, setSyncStatus] = useState<'IDLE' | 'IN_PROGRESS' | 'DELETING'>('IDLE');
   const [recentActivity, setRecentActivity] = useState<SyncHistoryItem[]>([]);
+  const [needsCalendarSetup, setNeedsCalendarSetup] = useState<boolean>(false);
 
   useEffect(() => {
     if (user) {
@@ -77,6 +78,10 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       setCalendarId(status.calendarId || null);
       setCalendarName(status.calendarName || null);
       setIsPrimaryCalendar(!!status.isPrimary);
+      
+      // בדוק אם משתמש מחובר אבל לא בחר יומן ייעודי
+      const needsSetup = !!status.isConnected && (!status.calendarId || status.calendarId === 'primary');
+      setNeedsCalendarSetup(needsSetup);
       
     } catch (error) {
       logger.error('Error refreshing Google Calendar status:', error);
@@ -119,15 +124,10 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       throw new Error('Not connected to Google Calendar');
     }
 
-    if (calendarId === 'primary') {
+    if (calendarId === 'primary' || !calendarId) {
       const msg = t('googleCalendar.cannotSyncToPrimary', 'לא ניתן לסנכרן ליומן הראשי. אנא בחר יומן ייעודי.');
-      showToast(msg, 'error');
-      throw new Error(msg);
-    }
-
-    if (calendarId === 'primary') {
-      const msg = t('googleCalendar.cannotSyncToPrimary', 'לא ניתן לסנכרן ליומן הראשי. אנא בחר יומן ייעודי.');
-      showToast(msg, 'error');
+      showToast(msg, 'warning', 5000); // warning במקום error + זמן מוארך
+      setNeedsCalendarSetup(true); // הפעל את מצב ההתראה
       throw new Error(msg);
     }
 
@@ -159,15 +159,10 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       throw new Error('Not connected to Google Calendar');
     }
 
-    if (calendarId === 'primary') {
+    if (calendarId === 'primary' || !calendarId) {
       const msg = t('googleCalendar.cannotSyncToPrimary', 'לא ניתן לסנכרן ליומן הראשי. אנא בחר יומן ייעודי.');
-      showToast(msg, 'error');
-      throw new Error(msg);
-    }
-
-    if (calendarId === 'primary') {
-      const msg = t('googleCalendar.cannotSyncToPrimary', 'לא ניתן לסנכרן ליומן הראשי. אנא בחר יומן ייעודי.');
-      showToast(msg, 'error');
+      showToast(msg, 'warning', 5000); // warning במקום error + זמן מוארך
+      setNeedsCalendarSetup(true); // הפעל את מצב ההתראה
       throw new Error(msg);
     }
 
@@ -442,6 +437,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
     isPrimaryCalendar,
     syncStatus,
     recentActivity,
+    needsCalendarSetup,
     connectToGoogle,
     syncSingleBirthday,
     syncMultipleBirthdays,

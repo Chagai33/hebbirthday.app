@@ -11,12 +11,14 @@ import { TenantSettings } from '../settings/TenantSettings';
 import { GuestActivityModal } from '../modals/GuestActivityModal';
 import { useLayoutContext } from '../../contexts/LayoutContext';
 import { useGuestNotifications } from '../../contexts/GuestNotificationsContext';
+import { useGoogleCalendar } from '../../contexts/GoogleCalendarContext';
 import { CurrentDateDisplay } from '../common/CurrentDateDisplay';
 import { GroupsPanel } from '../groups/GroupsPanel';
 
 export const Header: React.FC = () => {
   const { openAboutModal } = useLayoutContext();
   const { isNew } = useGuestNotifications();
+  const { needsCalendarSetup } = useGoogleCalendar();
   const { t, i18n } = useTranslation();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -36,7 +38,14 @@ export const Header: React.FC = () => {
   const mobileUserMenuRef = useRef<HTMLDivElement>(null);
 
   const toggleLanguage = () => {
-    const newLang = i18n.language === 'en' ? 'he' : 'en';
+    let newLang: string;
+    if (i18n.language === 'he') {
+      newLang = 'en';
+    } else if (i18n.language === 'en') {
+      newLang = 'es';
+    } else {
+      newLang = 'he';
+    }
     i18n.changeLanguage(newLang);
     document.documentElement.dir = newLang === 'he' ? 'rtl' : 'ltr';
     document.documentElement.lang = newLang;
@@ -64,7 +73,7 @@ export const Header: React.FC = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showGroupFilter, mobileMenuOpen, showUserMenu]);
-  
+
   // Check if we're on a public page (terms, privacy) without user
   const isPublicPage = !user && (location.pathname === '/terms' || location.pathname === '/privacy');
 
@@ -114,13 +123,13 @@ export const Header: React.FC = () => {
 
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-3 ms-auto">
-              <button
-                onClick={toggleLanguage}
-                className="md:hidden px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-0"
-                title={i18n.language === 'he' ? t('common.switchToEnglish') : t('common.switchToHebrew')}
-              >
-                {i18n.language === 'he' ? 'EN' : 'HE'}
-              </button>
+                <button
+                  onClick={toggleLanguage}
+                  className="md:hidden px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-0"
+                  title={i18n.language === 'he' ? 'English' : i18n.language === 'en' ? 'Español' : 'עברית'}
+                >
+                  {i18n.language === 'he' ? 'EN' : i18n.language === 'en' ? 'ES' : 'HE'}
+                </button>
                 <button
                   onClick={openAboutModal}
                   className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -138,12 +147,12 @@ export const Header: React.FC = () => {
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-14 sm:h-16 gap-4">
+        <div className="flex justify-between items-center h-14 sm:h-16 gap-1 sm:gap-4">
           {/* שמאל - כותרת ומידע */}
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button
               onClick={() => navigate('/')}
-              className="flex flex-col items-start transition-opacity hover:opacity-80 -ms-1 pe-6"
+              className="flex flex-col items-start transition-opacity hover:opacity-80 -ms-1 pe-2 sm:pe-6"
             >
               <div className="text-xl sm:text-2xl font-black tracking-tight leading-none relative inline-flex items-baseline" dir="ltr">
                 <span className="text-[#8e24aa]">Heb</span>
@@ -160,22 +169,25 @@ export const Header: React.FC = () => {
             <CurrentDateDisplay />
           </div>
 
-            <div className="flex items-center gap-2">
-            <div className="flex items-center gap-3 ms-auto md:hidden">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 ms-auto md:hidden">
               {/* החלפת שפה + המבורגר - צמודים */}
-              <div className="flex items-center gap-0.5">
+              <div className="flex items-center gap-0.5 ps-1">
                 <button
                   onClick={toggleLanguage}
-                  className="px-2 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-0"
-                  title={i18n.language === 'he' ? t('common.switchToEnglish') : t('common.switchToHebrew')}
+                  className="px-1 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-0"
+                  title={i18n.language === 'he' ? 'English' : i18n.language === 'en' ? 'Español' : 'עברית'}
                 >
-                  {i18n.language === 'he' ? 'EN' : 'HE'}
+                  {i18n.language === 'he' ? 'EN' : i18n.language === 'en' ? 'ES' : 'HE'}
                 </button>
                 <button
                   onClick={openAboutModal}
-                  className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors relative"
                 >
                   <Menu className="w-5 h-5" />
+                  {needsCalendarSetup && (
+                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border-2 border-white animate-pulse"></span>
+                  )}
                 </button>
               </div>
               {/* אווטאר - שמאל */}
@@ -235,10 +247,13 @@ export const Header: React.FC = () => {
                             setShowSettings(true);
                             setShowUserMenu(false);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors relative"
                         >
                           <Settings className="w-4 h-4 text-gray-500" />
                           <span>{t('tenant.settings')}</span>
+                          {needsCalendarSetup && (
+                            <span className="mr-auto w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                          )}
                         </button>
                       </div>
 
@@ -293,11 +308,10 @@ export const Header: React.FC = () => {
                       <div className="relative">
                         <button
                           onClick={() => setShowGroupFilter(!showGroupFilter)}
-                          className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm ${
-                            selectedGroupIds.length > 0
-                              ? 'bg-blue-50 text-blue-700'
-                              : 'text-gray-700 hover:bg-gray-50'
-                          }`}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm ${selectedGroupIds.length > 0
+                            ? 'bg-blue-50 text-blue-700'
+                            : 'text-gray-700 hover:bg-gray-50'
+                            }`}
                         >
                           <div className="flex items-center gap-2">
                             <Filter className="w-4 h-4" />
@@ -311,7 +325,7 @@ export const Header: React.FC = () => {
                             <ChevronDown className={`w-3 h-3 transition-transform ${showGroupFilter ? 'rotate-180' : ''}`} />
                           )}
                         </button>
-                        
+
                         {showGroupFilter && (
                           <div className="mt-1 pl-4 border-l-2 border-gray-100 ml-2">
                             <GroupFilterDropdown
@@ -351,11 +365,10 @@ export const Header: React.FC = () => {
                             navigate('/gelt');
                           }
                         }}
-                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm ${
-                          location.pathname === '/gelt'
-                            ? 'bg-blue-50 text-blue-700'
-                            : 'text-gray-700 hover:bg-gray-50'
-                        }`}
+                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm ${location.pathname === '/gelt'
+                          ? 'bg-blue-50 text-blue-700'
+                          : 'text-gray-700 hover:bg-gray-50'
+                          }`}
                       >
                         <Calculator className="w-4 h-4" />
                         <span>{t('gelt.title')}</span>
@@ -385,10 +398,13 @@ export const Header: React.FC = () => {
                             setShowSettings(true);
                             setMobileMenuOpen(false);
                           }}
-                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm text-gray-700 hover:bg-gray-50"
+                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm text-gray-700 hover:bg-gray-50 relative"
                         >
                           <Settings className="w-4 h-4" />
                           <span>{t('tenant.settings')}</span>
+                          {needsCalendarSetup && (
+                            <span className="mr-auto w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                          )}
                         </button>
                         <button
                           onClick={handleSignOut}
@@ -409,9 +425,9 @@ export const Header: React.FC = () => {
               <button
                 onClick={toggleLanguage}
                 className="px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-0"
-                title={i18n.language === 'he' ? t('common.switchToEnglish') : t('common.switchToHebrew')}
+                title={i18n.language === 'he' ? 'English' : i18n.language === 'en' ? 'Español' : 'עברית'}
               >
-                {i18n.language === 'he' ? 'EN' : 'HE'}
+                {i18n.language === 'he' ? 'EN' : i18n.language === 'en' ? 'ES' : 'HE'}
               </button>
 
               {/* התראות אורחים - בצד ימין */}
@@ -494,10 +510,13 @@ export const Header: React.FC = () => {
                             setShowSettings(true);
                             setShowUserMenu(false);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors relative"
                         >
                           <Settings className="w-4 h-4 text-gray-500" />
                           <span>{t('tenant.settings')}</span>
+                          {needsCalendarSetup && (
+                            <span className="mr-auto w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                          )}
                         </button>
                       </div>
 
@@ -519,23 +538,23 @@ export const Header: React.FC = () => {
                 </div>
               )}
             </div>
+          </div>
         </div>
       </div>
-    </div>
-    {showSettings && <TenantSettings onClose={() => setShowSettings(false)} />}
-    {showGuestActivity && (
-      <GuestActivityModal
-        isOpen={showGuestActivity}
-        onClose={() => setShowGuestActivity(false)}
-        birthdays={birthdays}
-      />
-    )}
-    {showGroupsPanel && (
-      <GroupsPanel
-        isModal={true}
-        onClose={() => setShowGroupsPanel(false)}
-      />
-    )}
+      {showSettings && <TenantSettings onClose={() => setShowSettings(false)} />}
+      {showGuestActivity && (
+        <GuestActivityModal
+          isOpen={showGuestActivity}
+          onClose={() => setShowGuestActivity(false)}
+          birthdays={birthdays}
+        />
+      )}
+      {showGroupsPanel && (
+        <GroupsPanel
+          isModal={true}
+          onClose={() => setShowGroupsPanel(false)}
+        />
+      )}
     </header>
   );
 };
@@ -562,7 +581,7 @@ const GroupFilterDropdown: React.FC<GroupFilterDropdownProps> = ({
   const { t } = useTranslation();
   const rootGroups = allGroups.filter(g => g.is_root);
   const childGroups = allGroups.filter(g => !g.is_root);
-  
+
   const RootGroupLabel: React.FC<{ root: any }> = ({ root }) => {
     const translatedName = useTranslatedRootGroupName(root);
     return <span className="text-xs font-semibold text-gray-500 uppercase">{translatedName}</span>;
@@ -613,9 +632,8 @@ const GroupFilterDropdown: React.FC<GroupFilterDropdownProps> = ({
                   <button
                     key={group.id}
                     onClick={() => toggleGroupFilter(group.id)}
-                    className={`w-full px-6 py-2 text-start hover:bg-gray-50 flex items-center justify-between ${
-                      selectedGroupIds.includes(group.id) ? 'bg-blue-50' : ''
-                    }`}
+                    className={`w-full px-6 py-2 text-start hover:bg-gray-50 flex items-center justify-between ${selectedGroupIds.includes(group.id) ? 'bg-blue-50' : ''
+                      }`}
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-700">{group.name}</span>

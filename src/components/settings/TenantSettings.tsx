@@ -6,6 +6,7 @@ import { useTenant } from '../../contexts/TenantContext';
 import { CalendarPreferenceSelector } from './CalendarPreferenceSelector';
 import { CalendarPreference } from '../../types';
 import { Settings, Save, X, Trash2, AlertTriangle, Globe, Info, ChevronDown, ChevronUp, Users } from 'lucide-react';
+import { getSupportedTimezones, detectBrowserTimezone } from '../../utils/dateUtils';
 import { useToast } from '../../hooks/useToast';
 import { Toast } from '../common/Toast';
 import { httpsCallable } from 'firebase/functions';
@@ -28,11 +29,16 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
   const [preference, setPreference] = useState<CalendarPreference>(
     currentTenant?.default_calendar_preference || 'both'
   );
+  const [timezone, setTimezone] = useState<string>(
+    currentTenant?.timezone || detectBrowserTimezone()
+  );
   const [isSaving, setIsSaving] = useState(false);
+
+  const timezoneGroups = getSupportedTimezones();
 
   // Deletion State
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deletionSummary, setDeletionSummary] = useState<{groupsCount: number, birthdaysCount: number} | null>(null);
+  const [deletionSummary, setDeletionSummary] = useState<{ groupsCount: number, birthdaysCount: number } | null>(null);
   const [isCalculatingSummary, setIsCalculatingSummary] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -43,6 +49,7 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
     try {
       await updateTenant(currentTenant.id, {
         default_calendar_preference: preference,
+        timezone: timezone,
       });
       success(t('messages.tenantUpdated'));
       setTimeout(() => onClose(), 1000);
@@ -157,6 +164,42 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
               showDescription={true}
               label={t('birthday.calendarPreference')}
             />
+
+            {/* Timezone Selector */}
+            <div className="space-y-3 bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 rounded-xl p-4">
+              <div className="flex items-center gap-2">
+                <Globe className="w-5 h-5 text-indigo-600" />
+                <label className="text-sm font-semibold text-gray-800">
+                  {t('tenant.timezone', 'Timezone')}
+                </label>
+              </div>
+
+              <select
+                value={timezone}
+                onChange={(e) => setTimezone(e.target.value)}
+                className="w-full px-4 py-3 border border-indigo-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+              >
+                {Object.entries(timezoneGroups).map(([region, tzList]) => (
+                  tzList.length > 0 && (
+                    <optgroup key={region} label={region}>
+                      {tzList.map(tz => (
+                        <option key={tz} value={tz}>
+                          {tz.replace(/_/g, ' ')}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )
+                ))}
+              </select>
+
+              <div className="flex items-start gap-2 text-xs text-indigo-700 bg-indigo-100 rounded-lg p-2">
+                <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <p>
+                  {t('tenant.timezoneHint', 'All Hebrew date calculations and birthday processing will use this timezone. Detected: ')}
+                  <strong>{detectBrowserTimezone()}</strong>
+                </p>
+              </div>
+            </div>
 
             <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-700 space-y-2">
               <h4 className="font-semibold text-gray-900">

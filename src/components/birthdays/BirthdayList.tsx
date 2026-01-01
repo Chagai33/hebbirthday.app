@@ -79,7 +79,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
   // We determine visibility solely based on the Tenant Preference (Strict Mode).
   // Individual overrides are ignored for the main table layout to ensure consistency.
   const tenantPref = currentTenant?.default_calendar_preference || 'both';
-  
+
   // Show Hebrew if preference is Hebrew OR Both
   const showHebrewColumn = tenantPref === 'hebrew' || tenantPref === 'both';
   // Show Gregorian if preference is Gregorian OR Both
@@ -107,7 +107,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
     const savedSort = localStorage.getItem('birthday-sort');
     const currentPref = currentTenant?.default_calendar_preference;
     const prevPref = prevTenantPref.current;
-    
+
     // If there is no saved sort manually by the user, we apply the tenant default.
     if (!savedSort && currentPref) {
       if (currentPref === 'gregorian') {
@@ -117,24 +117,24 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
         setSortBy('upcoming-hebrew');
       }
     }
-    
+
     // Self-Correction Logic:
     // If the current sort is hidden by the new preference, we must switch it.
     if (currentPref) {
-        // If we just switched TO 'both' from another setting (transition event),
-        // we want to reset to the default Hebrew view for 'both'.
-        // We use prevPref check to ensure this only happens on the transition, not on every render.
-        if (currentPref === 'both' && prevPref && prevPref !== 'both') {
-            setSortBy('upcoming-hebrew');
-        }
-        // If Strict Hebrew, and current sort is Gregorian -> Force Hebrew
-        else if (currentPref === 'hebrew' && (sortBy === 'upcoming' || sortBy === 'upcoming-latest')) {
-            setSortBy('upcoming-hebrew');
-        }
-        // If Strict Gregorian, and current sort is Hebrew -> Force Gregorian
-        else if (currentPref === 'gregorian' && (sortBy.startsWith('upcoming-hebrew'))) {
-            setSortBy('upcoming');
-        }
+      // If we just switched TO 'both' from another setting (transition event),
+      // we want to reset to the default Hebrew view for 'both'.
+      // We use prevPref check to ensure this only happens on the transition, not on every render.
+      if (currentPref === 'both' && prevPref && prevPref !== 'both') {
+        setSortBy('upcoming-hebrew');
+      }
+      // If Strict Hebrew, and current sort is Gregorian -> Force Hebrew
+      else if (currentPref === 'hebrew' && (sortBy === 'upcoming' || sortBy === 'upcoming-latest')) {
+        setSortBy('upcoming-hebrew');
+      }
+      // If Strict Gregorian, and current sort is Hebrew -> Force Gregorian
+      else if (currentPref === 'gregorian' && (sortBy.startsWith('upcoming-hebrew'))) {
+        setSortBy('upcoming');
+      }
     }
 
     // Update the ref for the next run
@@ -188,10 +188,11 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
   }, [birthdays]);
 
   const enrichedBirthdays = useMemo(() => {
+    const timezone = currentTenant?.timezone || 'Asia/Jerusalem';
     return birthdays.map((birthday) => {
       const calculations = birthdayCalculationsService.calculateAll(
         birthday,
-        new Date()
+        timezone
       );
       // Get first group for preference calculation (or find best match)
       const groupIds = birthday.group_ids || (birthday.group_id ? [birthday.group_id] : []);
@@ -215,11 +216,11 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
     if (selectedGroupIds.length > 0) {
       filtered = filtered.filter((b) => {
         const bGroupIds = b.group_ids || (b.group_id ? [b.group_id] : []);
-        
+
         if (selectedGroupIds.includes('unassigned')) {
           return bGroupIds.length === 0 || selectedGroupIds.some(id => bGroupIds.includes(id));
         }
-        
+
         // Check if any of the selected groups match any of the birthday's groups
         return bGroupIds.length > 0 && selectedGroupIds.some(id => bGroupIds.includes(id));
       });
@@ -234,8 +235,8 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       filtered = filtered.filter((b) => {
         if (syncStatusFilter === 'synced') {
           // מסונכרן תקין = isSynced וללא שגיאה
-          return b.isSynced === true && 
-                 (!b.syncMetadata || (b.syncMetadata.status !== 'ERROR' && b.syncMetadata.status !== 'PARTIAL_SYNC'));
+          return b.isSynced === true &&
+            (!b.syncMetadata || (b.syncMetadata.status !== 'ERROR' && b.syncMetadata.status !== 'PARTIAL_SYNC'));
         }
         if (syncStatusFilter === 'error') {
           // שגיאה = יש syncMetadata עם שגיאה
@@ -302,15 +303,15 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
 
   const handleDelete = async (id: string) => {
     const birthday = birthdays.find(b => b.id === id);
-    
+
     // Check for synced events to show proper warning
     const hasSyncedEvents = birthday && (
       (birthday.googleCalendarEventsMap && Object.keys(birthday.googleCalendarEventsMap).length > 0) ||
-      birthday.googleCalendarEventId || 
+      birthday.googleCalendarEventId ||
       birthday.googleCalendarEventIds
     );
 
-    const confirmMessage = hasSyncedEvents 
+    const confirmMessage = hasSyncedEvents
       ? t('birthday.deleteConfirmWithCalendar', 'האם אתה בטוח? פעולה זו תמחק את יום ההולדת וגם תסיר את כל האירועים המקושרים מיומן Google.')
       : t('common.confirmDelete', 'Are you sure?');
 
@@ -355,12 +356,12 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       const birthday = birthdays.find(b => b.id === id);
       return birthday && (
         (birthday.googleCalendarEventsMap && Object.keys(birthday.googleCalendarEventsMap).length > 0) ||
-        birthday.googleCalendarEventId || 
+        birthday.googleCalendarEventId ||
         birthday.googleCalendarEventIds
       );
     });
 
-    const confirmMessage = hasSyncedEvents 
+    const confirmMessage = hasSyncedEvents
       ? t('birthday.deleteConfirmWithCalendar', 'האם אתה בטוח? פעולה זו תמחק את יום ההולדת וגם תסיר את כל האירועים המקושרים מיומן Google.')
       : t('common.confirmDelete', 'Are you sure?');
 
@@ -384,8 +385,14 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       return;
     }
 
-    // Strict Mode Check
+    // Strict Mode Check - אל תצא מוקדם, תן ל-Context להציג את ההודעה
     if (calendarId === 'primary' || !calendarId) {
+      // תן ל-Context להציג את ההודעה ולהפעיל את needsCalendarSetup
+      try {
+        await syncSingleBirthday(birthdayId);
+      } catch (error) {
+        // ההודעה כבר הוצגה ע"י הקונטקסט
+      }
       if (onOpenCalendarSettings) {
         onOpenCalendarSettings();
       }
@@ -401,7 +408,10 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       }
     } catch (error: any) {
       logger.error('Error syncing birthday:', error);
-      showToast(error.message || 'שגיאה בסנכרון ליומן Google', 'error');
+      // אל תציג הודעה כאן אם זה היה בעיית primary calendar
+      if (!error.message?.includes('ליומן הראשי')) {
+        showToast(error.message || 'שגיאה בסנכרון ליומן Google', 'error');
+      }
     }
   };
 
@@ -421,8 +431,15 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       return;
     }
 
-    // Strict Mode Check
+    // Strict Mode Check - תן ל-Context להציג את ההודעה
     if (calendarId === 'primary' || !calendarId) {
+      const birthdaysToSync = Array.from(selectedIds);
+      // תן ל-Context להציג את ההודעה ולהפעיל את needsCalendarSetup
+      try {
+        await syncMultipleBirthdays(birthdaysToSync);
+      } catch (error) {
+        // ההודעה כבר הוצגה ע"י הקונטקסט
+      }
       if (onOpenCalendarSettings) {
         onOpenCalendarSettings();
       }
@@ -442,7 +459,10 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       setSelectedIds(new Set());
     } catch (error: any) {
       logger.error('Error bulk syncing birthdays:', error);
-      showToast(error.message || 'שגיאה בסנכרון המרובה', 'error');
+      // אל תציג הודעה כאן אם זה היה בעיית primary calendar
+      if (!error.message?.includes('ליומן הראשי')) {
+        showToast(error.message || 'שגיאה בסנכרון המרובה', 'error');
+      }
     }
   };
 
@@ -457,10 +477,10 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
     const textParts = selectedBirthdays.map(birthday => {
       const calculations = birthday.calculations;
       const nextHebrewDate = calculations.nextHebrewBirthday;
-      
-      const formattedDate = nextHebrewDate 
-          ? format(nextHebrewDate, 'd MMMM yyyy', { locale: he }) 
-          : '';
+
+      const formattedDate = nextHebrewDate
+        ? format(nextHebrewDate, 'd MMMM yyyy', { locale: he })
+        : '';
 
       const zodiacSign = calculations.hebrewSign ? t(`zodiac.${calculations.hebrewSign}`) : '';
 
@@ -475,7 +495,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
 
     try {
       await navigator.clipboard.writeText(fullText);
-      showToast('התאריכים העבריים והמזלות הועתקו ללוח', 'success');
+      showToast(t('birthday.hebrewZodiacCopied', 'התאריכים העבריים והמזלות הועתקו ללוח'), 'success');
       setIsCopied(true);
       setTimeout(() => {
         setIsCopied(false);
@@ -487,7 +507,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
     }
   };
 
-  const handleQuickCopy = async (format: 'hebrew' | 'gregorian' | 'both') => {
+  const handleQuickCopy = async (copyFormat: 'hebrew' | 'gregorian' | 'both') => {
     const selectedBirthdays = filteredAndSortedBirthdays.filter(b => selectedIds.has(b.id));
 
     if (selectedBirthdays.length === 0) {
@@ -499,37 +519,37 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       const calculations = birthday.calculations;
       const nextHebrewDate = calculations.nextHebrewBirthday;
       const nextGregorianDate = calculations.nextGregorianBirthday;
-      
+
       let result = `*${birthday.first_name} ${birthday.last_name}*\n`;
-      
-      if (format === 'hebrew' || format === 'both') {
-        const formattedHebrewDate = nextHebrewDate 
-          ? format(nextHebrewDate, includeWeekday ? 'EEEE, d MMMM yyyy' : 'd MMMM yyyy', { locale: he })
+
+      if (copyFormat === 'hebrew' || copyFormat === 'both') {
+        const formattedHebrewDate = nextHebrewDate
+          ? format(nextHebrewDate, includeWeekday ? 'EEEE, d MMMM yyyy' : 'd MMMM yyyy', { locale: i18n.language.startsWith('he') ? he : enUS })
           : '';
-        const zodiacSign = calculations.hebrewSign ? t(`zodiac.${calculations.hebrewSign}`) : '';
-        
-        result += `*תאריך לידה עברי:* ${birthday.birth_date_hebrew_string || ''}\n`;
-        result += `*מזל עברי:* ${zodiacSign}\n`;
-        result += `*יום הולדת עברי הבא:* ${formattedHebrewDate}\n`;
-        result += `*גיל:* ${calculations.ageAtNextHebrewBirthday}`;
+        const zodiacSign = calculations.hebrewSign ? t(`zodiac.${calculations.hebrewSign.toLowerCase()}`) : '';
+
+        result += `*${t('birthday.hebrewBirthDate')}:* ${birthday.birth_date_hebrew_string || ''}\n`;
+        result += `*${t('birthday.hebrewZodiac')}:* ${zodiacSign}\n`;
+        result += `*${t('birthday.nextHebrewBirthday')}:* ${formattedHebrewDate}\n`;
+        result += `*${t('birthday.age')}:* ${calculations.ageAtNextHebrewBirthday}`;
       }
-      
-      if (format === 'both') {
+
+      if (copyFormat === 'both') {
         result += '\n';
       }
-      
-      if (format === 'gregorian' || format === 'both') {
+
+      if (copyFormat === 'gregorian' || copyFormat === 'both') {
         const formattedGregorianDate = nextGregorianDate
-          ? format(nextGregorianDate, includeWeekday ? 'EEEE, d MMMM yyyy' : 'd MMMM yyyy', { locale: i18n.language === 'he' ? he : enUS })
+          ? format(nextGregorianDate, includeWeekday ? 'EEEE, d MMMM yyyy' : 'd MMMM yyyy', { locale: i18n.language.startsWith('he') ? he : enUS })
           : '';
-        const gregorianZodiac = calculations.gregorianSign ? t(`zodiac.${calculations.gregorianSign}`) : '';
-        
-        result += `*תאריך לידה לועזי:* ${birthday.birth_date}\n`;
-        result += `*מזל לועזי:* ${gregorianZodiac}\n`;
-        result += `*יום הולדת לועזי הבא:* ${formattedGregorianDate}\n`;
-        result += `*גיל:* ${calculations.ageAtNextGregorianBirthday}`;
+        const gregorianZodiac = calculations.gregorianSign ? t(`zodiac.${calculations.gregorianSign.toLowerCase()}`) : '';
+
+        result += `*${t('birthday.gregorianBirthDate')}:* ${birthday.birth_date_gregorian}\n`;
+        result += `*${t('birthday.gregorianZodiac')}:* ${gregorianZodiac}\n`;
+        result += `*${t('birthday.nextGregorianBirthday')}:* ${formattedGregorianDate}\n`;
+        result += `*${t('birthday.age')}:* ${calculations.ageAtNextGregorianBirthday}`;
       }
-      
+
       return result;
     });
 
@@ -551,23 +571,23 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
 
   const handleBulkAssignGroup = async (groupIdsToAdd: string[]) => {
     const birthdaysToUpdate = birthdays.filter((b) => selectedIds.has(b.id));
-    
+
     // Using batch write for efficiency and atomicity
     const batch = writeBatch(db);
     let operationCount = 0;
 
     birthdaysToUpdate.forEach((birthday) => {
       const currentGroupIds = birthday.group_ids || (birthday.group_id ? [birthday.group_id] : []);
-      
+
       // MERGE mode: Add new groups to existing ones (no duplicates)
       const newGroupIds = Array.from(new Set([...currentGroupIds, ...groupIdsToAdd]));
-      
+
       // Check if there's actually a change (new groups were added)
       const hasChanged = newGroupIds.length !== currentGroupIds.length;
-      
+
       if (hasChanged) {
         const ref = doc(db, 'birthdays', birthday.id);
-        batch.update(ref, { 
+        batch.update(ref, {
           group_ids: newGroupIds,
           group_id: newGroupIds[0] || null, // Backward compatibility
           updated_at: serverTimestamp(),
@@ -578,10 +598,10 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
     });
 
     if (operationCount === 0) {
-        showToast(t('groups.noChangesDetected', 'לא נעשו שינויים'), 'info');
-        setShowAssignGroupModal(false);
-        setSelectedIds(new Set());
-        return;
+      showToast(t('groups.noChangesDetected', 'לא נעשו שינויים'), 'info');
+      setShowAssignGroupModal(false);
+      setSelectedIds(new Set());
+      return;
     }
 
     try {
@@ -627,11 +647,10 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
         <div className="flex gap-2">
           <button
             onClick={() => setShowGroupFilter(!showGroupFilter)}
-            className={`px-3 sm:px-4 py-1.5 sm:py-2 border rounded-lg font-medium transition-colors flex items-center gap-1.5 sm:gap-2 text-sm whitespace-nowrap ${
-              selectedGroupIds.length > 0 || genderFilter !== 'all' || syncStatusFilter !== 'all'
-                ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
-                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-            }`}
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 border rounded-lg font-medium transition-colors flex items-center gap-1.5 sm:gap-2 text-sm whitespace-nowrap ${selectedGroupIds.length > 0 || genderFilter !== 'all' || syncStatusFilter !== 'all'
+              ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
+              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+              }`}
           >
             <Filter className="w-4 h-4" />
             <span className="hidden sm:inline">{t('common.filters', 'Filters')}</span>
@@ -648,13 +667,13 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
             className={`px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${getSortSelectColor()} font-medium`}
           >
             {availableSortOptions.map(option => (
-              <option 
-                key={option.value} 
+              <option
+                key={option.value}
                 value={option.value}
                 className={
                   option.value.startsWith('upcoming-hebrew') ? 'text-[#8e24aa] font-medium' :
-                  option.value.startsWith('upcoming') ? 'text-blue-600 font-medium' :
-                  'text-gray-900'
+                    option.value.startsWith('upcoming') ? 'text-blue-600 font-medium' :
+                      'text-gray-900'
                 }
               >
                 {option.label}
@@ -688,10 +707,10 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                           return;
                         }
                         await exportBirthdaysToCSV(
-                          selectedBirthdays, 
-                          groups, 
+                          selectedBirthdays,
+                          groups,
                           currentTenant.id,
-                          `birthdays-${new Date().toISOString().split('T')[0]}.csv`, 
+                          `birthdays-${new Date().toISOString().split('T')[0]}.csv`,
                           i18n.language
                         );
                         showToast(t('birthday.exportSuccess', 'הייצוא הושלם בהצלחה'), 'success');
@@ -706,13 +725,13 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     <span className="hidden sm:inline">{t('birthday.exportSelected')}</span>
                   </button>
                   {showHebrewColumn && (
-                  <WhatsAppCopyButton
-                    onCopy={handleCopyToClipboard}
-                    onQuickCopy={handleQuickCopy}
-                    isCopied={isCopied}
-                    includeWeekday={includeWeekday}
-                    onIncludeWeekdayChange={setIncludeWeekday}
-                  />
+                    <WhatsAppCopyButton
+                      onCopy={handleCopyToClipboard}
+                      onQuickCopy={handleQuickCopy}
+                      isCopied={isCopied}
+                      includeWeekday={includeWeekday}
+                      onIncludeWeekdayChange={setIncludeWeekday}
+                    />
                   )}
                   <button
                     onClick={() => setShowAssignGroupModal(true)}
@@ -792,10 +811,10 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                           return;
                         }
                         await exportBirthdaysToCSV(
-                          selectedBirthdays, 
-                          groups, 
+                          selectedBirthdays,
+                          groups,
                           currentTenant.id,
-                          `birthdays-${new Date().toISOString().split('T')[0]}.csv`, 
+                          `birthdays-${new Date().toISOString().split('T')[0]}.csv`,
                           i18n.language
                         );
                         showToast(t('birthday.exportSuccess', 'הייצוא הושלם בהצלחה'), 'success');
@@ -810,13 +829,13 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     <span className="hidden sm:inline">{t('birthday.exportSelected')}</span>
                   </button>
                   {showHebrewColumn && (
-                  <WhatsAppCopyButton
-                    onCopy={handleCopyToClipboard}
-                    onQuickCopy={handleQuickCopy}
-                    isCopied={isCopied}
-                    includeWeekday={includeWeekday}
-                    onIncludeWeekdayChange={setIncludeWeekday}
-                  />
+                    <WhatsAppCopyButton
+                      onCopy={handleCopyToClipboard}
+                      onQuickCopy={handleQuickCopy}
+                      isCopied={isCopied}
+                      includeWeekday={includeWeekday}
+                      onIncludeWeekdayChange={setIncludeWeekday}
+                    />
                   )}
                   {isConnected && (
                     <button
@@ -881,41 +900,37 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 <button
                   onClick={() => setSyncStatusFilter('all')}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
-                    syncStatusFilter === 'all'
-                      ? 'bg-gray-600 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
-                  }`}
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'all'
+                    ? 'bg-gray-600 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
+                    }`}
                 >
                   {t('filter.all', 'הכל')}
                 </button>
                 <button
                   onClick={() => setSyncStatusFilter(syncStatusFilter === 'synced' ? 'all' : 'synced')}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
-                    syncStatusFilter === 'synced'
-                      ? 'bg-green-600 border-green-600 text-white'
-                      : 'bg-white border-green-300 text-green-600 hover:border-green-400'
-                  }`}
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'synced'
+                    ? 'bg-green-600 border-green-600 text-white'
+                    : 'bg-white border-green-300 text-green-600 hover:border-green-400'
+                    }`}
                 >
                   ✓ {t('filter.synced', 'מסונכרן')}
                 </button>
                 <button
                   onClick={() => setSyncStatusFilter(syncStatusFilter === 'error' ? 'all' : 'error')}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
-                    syncStatusFilter === 'error'
-                      ? 'bg-red-600 border-red-600 text-white'
-                      : 'bg-white border-red-300 text-red-600 hover:border-red-400'
-                  }`}
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'error'
+                    ? 'bg-red-600 border-red-600 text-white'
+                    : 'bg-white border-red-300 text-red-600 hover:border-red-400'
+                    }`}
                 >
                   ⚠️ {t('filter.syncError', 'שגיאה')}
                 </button>
                 <button
                   onClick={() => setSyncStatusFilter(syncStatusFilter === 'not-synced' ? 'all' : 'not-synced')}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
-                    syncStatusFilter === 'not-synced'
-                      ? 'bg-gray-600 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
-                  }`}
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'not-synced'
+                    ? 'bg-gray-600 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
+                    }`}
                 >
                   ○ {t('filter.notSynced', 'לא מסונכרן')}
                 </button>
@@ -941,31 +956,28 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
               <button
                 onClick={() => setGenderFilter('all')}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
-                  genderFilter === 'all'
-                    ? 'bg-gray-600 border-gray-600 text-white'
-                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
-                }`}
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${genderFilter === 'all'
+                  ? 'bg-gray-600 border-gray-600 text-white'
+                  : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
+                  }`}
               >
                 {t('filter.all', 'All')}
               </button>
               <button
                 onClick={() => setGenderFilter(genderFilter === 'male' ? 'all' : 'male')}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
-                  genderFilter === 'male'
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'bg-white border-blue-300 text-blue-600 hover:border-blue-400'
-                }`}
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${genderFilter === 'male'
+                  ? 'bg-blue-600 border-blue-600 text-white'
+                  : 'bg-white border-blue-300 text-blue-600 hover:border-blue-400'
+                  }`}
               >
                 {t('filter.male', 'Male')}
               </button>
               <button
                 onClick={() => setGenderFilter(genderFilter === 'female' ? 'all' : 'female')}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
-                  genderFilter === 'female'
-                    ? 'bg-pink-600 border-pink-600 text-white'
-                    : 'bg-white border-pink-300 text-pink-600 hover:border-pink-400'
-                }`}
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${genderFilter === 'female'
+                  ? 'bg-pink-600 border-pink-600 text-white'
+                  : 'bg-white border-pink-300 text-pink-600 hover:border-pink-400'
+                  }`}
               >
                 {t('filter.female', 'Female')}
               </button>
@@ -988,21 +1000,19 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 <button
                   onClick={clearGroupFilters}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${
-                    selectedGroupIds.length === 0
-                      ? 'bg-gray-600 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
-                  }`}
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${selectedGroupIds.length === 0
+                    ? 'bg-gray-600 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
+                    }`}
                 >
                   {t('filter.all', 'All')}
                 </button>
                 <button
                   onClick={() => toggleGroupFilter('unassigned')}
-                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 border-2 ${
-                    selectedGroupIds.includes('unassigned')
-                      ? 'bg-gray-200 border-gray-400 text-gray-900'
-                      : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
-                  }`}
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 border-2 ${selectedGroupIds.includes('unassigned')
+                    ? 'bg-gray-200 border-gray-400 text-gray-900'
+                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
+                    }`}
                 >
                   <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border-2 border-dashed border-gray-400" />
                   {t('birthday.unassigned')}
@@ -1011,11 +1021,10 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   <button
                     key={group.id}
                     onClick={() => toggleGroupFilter(group.id)}
-                    className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 ${
-                      selectedGroupIds.includes(group.id)
-                        ? 'ring-2 ring-offset-1'
-                        : 'opacity-70 hover:opacity-100'
-                    }`}
+                    className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 ${selectedGroupIds.includes(group.id)
+                      ? 'ring-2 ring-offset-1'
+                      : 'opacity-70 hover:opacity-100'
+                      }`}
                     style={{
                       backgroundColor: selectedGroupIds.includes(group.id) ? group.color : group.color + '40',
                       color: selectedGroupIds.includes(group.id) ? 'white' : group.color,
@@ -1090,7 +1099,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   // We use strict global visibility for columns structure, but local preference for "content emphasis" if needed,
                   // or we just render based on strict columns.
                   // Actually, if strict mode is ON (e.g. Hebrew Only), we just show Hebrew data.
-                  
+
                   return (
                     <tr
                       key={birthday.id}
@@ -1125,30 +1134,30 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                           )}
                         </div>
                       </td>
-                    <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-700">
-                      <div className="flex flex-col gap-0.5 sm:gap-1">
-                        {showGregorianColumn && (
-                          <span>{format(new Date(birthday.birth_date_gregorian), 'dd/MM/yyyy', { locale })}</span>
-                        )}
-                        {showHebrewColumn && (
-                          <span className={showGregorianColumn ? "text-[10px] sm:text-xs text-gray-500" : ""}>
-                            {(() => {
-                              if (birthday.birth_date_hebrew_string) {
-                                return birthday.birth_date_hebrew_string;
-                              }
-                              // בדיקה אם זו רשומה חדשה (נוצרה ב-30 שניות האחרונות)
-                              const createdAt = new Date(birthday.created_at).getTime();
-                              const isRecent = (currentTime - createdAt) < 30000; // 30 שניות
-                              
-                              return isRecent 
-                                ? (i18n.language === 'he' ? 'מחשב...' : 'Calculating...')
-                                : (i18n.language === 'he' ? 'לא זמין' : 'Not available');
-                            })()}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-semibold">
+                      <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-700">
+                        <div className="flex flex-col gap-0.5 sm:gap-1">
+                          {showGregorianColumn && (
+                            <span>{format(new Date(birthday.birth_date_gregorian), 'dd/MM/yyyy', { locale })}</span>
+                          )}
+                          {showHebrewColumn && (
+                            <span className={showGregorianColumn ? "text-[10px] sm:text-xs text-gray-500" : ""}>
+                              {(() => {
+                                if (birthday.birth_date_hebrew_string) {
+                                  return birthday.birth_date_hebrew_string;
+                                }
+                                // בדיקה אם זו רשומה חדשה (נוצרה ב-30 שניות האחרונות)
+                                const createdAt = new Date(birthday.created_at).getTime();
+                                const isRecent = (currentTime - createdAt) < 30000; // 30 שניות
+
+                                return isRecent
+                                  ? (i18n.language === 'he' ? 'מחשב...' : 'Calculating...')
+                                  : (i18n.language === 'he' ? 'לא זמין' : 'Not available');
+                              })()}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm font-semibold">
                         <div className="flex flex-col gap-1">
                           {showGregorianColumn && (
                             <Tooltip
@@ -1205,115 +1214,115 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                             </Tooltip>
                           )}
                         </div>
-                    </td>
-                    {showGregorianColumn && (
-                    <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-700">
-                        <button
-                          onClick={() => {
-                            setSelectedBirthday(birthday);
-                            setShowGregorianModal(true);
-                          }}
-                          className="flex flex-col gap-0.5 sm:gap-1 text-start hover:bg-blue-50 p-1 sm:p-2 rounded transition-colors"
-                        >
-                          <div className="flex items-center gap-1 sm:gap-2">
-                            <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
-                            <span className="font-medium">
-                              {format(birthday.calculations.nextGregorianBirthday, 'dd/MM/yyyy', { locale })}
+                      </td>
+                      {showGregorianColumn && (
+                        <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-700">
+                          <button
+                            onClick={() => {
+                              setSelectedBirthday(birthday);
+                              setShowGregorianModal(true);
+                            }}
+                            className="flex flex-col gap-0.5 sm:gap-1 text-start hover:bg-blue-50 p-1 sm:p-2 rounded transition-colors"
+                          >
+                            <div className="flex items-center gap-1 sm:gap-2">
+                              <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
+                              <span className="font-medium">
+                                {format(birthday.calculations.nextGregorianBirthday, 'dd/MM/yyyy', { locale })}
+                              </span>
+                            </div>
+                            <span className="text-[10px] sm:text-xs text-blue-600">
+                              {t('birthday.ageAtNextGregorian')}: {birthday.calculations.ageAtNextGregorianBirthday}
                             </span>
-                          </div>
-                          <span className="text-[10px] sm:text-xs text-blue-600">
-                            {t('birthday.ageAtNextGregorian')}: {birthday.calculations.ageAtNextGregorianBirthday}
-                          </span>
-                          <span className="text-[10px] sm:text-xs text-gray-500">
-                            ({birthday.calculations.daysUntilGregorianBirthday} {t('birthday.days')})
-                          </span>
-                        </button>
-                    </td>
-                    )}
-                    {showHebrewColumn && (
-                    <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-700">
-                      {birthday.calculations.nextHebrewBirthday ? (
-                        <button
-                          onClick={() => {
-                            setSelectedBirthday(birthday);
-                            setShowFutureModal(true);
-                          }}
-                          className="flex flex-col gap-0.5 sm:gap-1 text-start hover:bg-[#8e24aa]/10 p-1 sm:p-2 rounded transition-colors"
-                        >
-                          <div className="flex items-center gap-1 sm:gap-2">
-                            <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 text-[#8e24aa]" />
-                            <span className="font-medium">
-                              {format(birthday.calculations.nextHebrewBirthday, 'dd/MM/yyyy', { locale })}
-                            </span>
-                          </div>
-                          <span className="text-[10px] sm:text-xs text-[#8e24aa]">
-                            {t('birthday.ageAtNextHebrew')}: {birthday.calculations.ageAtNextHebrewBirthday}
-                          </span>
-                          {birthday.calculations.daysUntilHebrewBirthday !== null && (
                             <span className="text-[10px] sm:text-xs text-gray-500">
-                              ({birthday.calculations.daysUntilHebrewBirthday} {t('birthday.days', 'days')})
+                              ({birthday.calculations.daysUntilGregorianBirthday} {t('birthday.days')})
                             </span>
-                          )}
-                        </button>
-                      ) : (
-                        <span className="text-gray-400">-</span>
+                          </button>
+                        </td>
                       )}
-                    </td>
-                    )}
-                    <td className="px-2 sm:px-6 py-2 sm:py-4 min-w-[140px]">
-                      <div className="flex items-center justify-end gap-0.5 sm:gap-1 opacity-70 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                        <button
-                          onClick={() => {
-                            setSelectedBirthday(birthday);
-                            setShowWishlistModal(true);
-                          }}
-                          className="p-1 sm:p-2 text-pink-600 hover:bg-pink-100 rounded-lg transition-all hover:scale-110"
-                          title={t('wishlist.title')}
-                        >
-                          <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </button>
-                        {isConnected && (
-                          <div className="mx-1">
-                            <SyncStatusButton
-                              birthday={birthday}
-                              isPendingChange={unsyncedMap.get(birthday.id)}
-                              isLoading={isSyncing}
-                              isDisabled={isSyncing}
-                              onSync={handleSyncToCalendar}
-                              onRemove={handleRemoveFromCalendar}
-                            />
-                          </div>
-                        )}
-                        {(!birthday.group_ids || birthday.group_ids.length === 0) && (
+                      {showHebrewColumn && (
+                        <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-700">
+                          {birthday.calculations.nextHebrewBirthday ? (
+                            <button
+                              onClick={() => {
+                                setSelectedBirthday(birthday);
+                                setShowFutureModal(true);
+                              }}
+                              className="flex flex-col gap-0.5 sm:gap-1 text-start hover:bg-[#8e24aa]/10 p-1 sm:p-2 rounded transition-colors"
+                            >
+                              <div className="flex items-center gap-1 sm:gap-2">
+                                <CalendarDays className="w-3 h-3 sm:w-4 sm:h-4 text-[#8e24aa]" />
+                                <span className="font-medium">
+                                  {format(birthday.calculations.nextHebrewBirthday, 'dd/MM/yyyy', { locale })}
+                                </span>
+                              </div>
+                              <span className="text-[10px] sm:text-xs text-[#8e24aa]">
+                                {t('birthday.ageAtNextHebrew')}: {birthday.calculations.ageAtNextHebrewBirthday}
+                              </span>
+                              {birthday.calculations.daysUntilHebrewBirthday !== null && (
+                                <span className="text-[10px] sm:text-xs text-gray-500">
+                                  ({birthday.calculations.daysUntilHebrewBirthday} {t('birthday.days', 'days')})
+                                </span>
+                              )}
+                            </button>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                      )}
+                      <td className="px-2 sm:px-6 py-2 sm:py-4 min-w-[140px]">
+                        <div className="flex items-center justify-end gap-0.5 sm:gap-1 opacity-70 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                           <button
-                            onClick={() => onEdit(birthday)}
-                            className="p-1 sm:p-2 text-orange-600 hover:bg-orange-100 rounded-lg transition-all hover:scale-110 animate-pulse"
-                            title={t('birthday.reassign')}
+                            onClick={() => {
+                              setSelectedBirthday(birthday);
+                              setShowWishlistModal(true);
+                            }}
+                            className="p-1 sm:p-2 text-pink-600 hover:bg-pink-100 rounded-lg transition-all hover:scale-110"
+                            title={t('wishlist.title')}
                           >
-                            <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           </button>
-                        )}
-                        {birthday.group_ids && birthday.group_ids.length > 0 && (
+                          {isConnected && (
+                            <div className="mx-1">
+                              <SyncStatusButton
+                                birthday={birthday}
+                                isPendingChange={unsyncedMap.get(birthday.id)}
+                                isLoading={isSyncing}
+                                isDisabled={isSyncing}
+                                onSync={handleSyncToCalendar}
+                                onRemove={handleRemoveFromCalendar}
+                              />
+                            </div>
+                          )}
+                          {(!birthday.group_ids || birthday.group_ids.length === 0) && (
+                            <button
+                              onClick={() => onEdit(birthday)}
+                              className="p-1 sm:p-2 text-orange-600 hover:bg-orange-100 rounded-lg transition-all hover:scale-110 animate-pulse"
+                              title={t('birthday.reassign')}
+                            >
+                              <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            </button>
+                          )}
+                          {birthday.group_ids && birthday.group_ids.length > 0 && (
+                            <button
+                              onClick={() => onEdit(birthday)}
+                              className="p-1 sm:p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all hover:scale-110"
+                              title={t('common.edit')}
+                            >
+                              <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            </button>
+                          )}
                           <button
-                            onClick={() => onEdit(birthday)}
-                            className="p-1 sm:p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all hover:scale-110"
-                            title={t('common.edit')}
+                            onClick={() => handleDelete(birthday.id)}
+                            className="p-1 sm:p-2 text-red-600 hover:bg-red-100 rounded-lg transition-all hover:scale-110"
+                            title={t('common.delete')}
                           >
-                            <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           </button>
-                        )}
-                        <button
-                          onClick={() => handleDelete(birthday.id)}
-                          className="p-1 sm:p-2 text-red-600 hover:bg-red-100 rounded-lg transition-all hover:scale-110"
-                          title={t('common.delete')}
-                        >
-                          <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

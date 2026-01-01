@@ -5,9 +5,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HebcalService = void 0;
 const core_1 = require("@hebcal/core");
+const dateUtils_1 = require("../../utils/dateUtils");
 class HebcalService {
-    async getCurrentHebrewYear() {
-        return new core_1.HDate().getFullYear();
+    async getCurrentHebrewYear(timezone = 'Asia/Jerusalem') {
+        const now = (0, dateUtils_1.getTenantNow)(timezone);
+        return new core_1.HDate(now).getFullYear();
     }
     async fetchHebcalData(date, afterSunset) {
         let hDate = new core_1.HDate(date);

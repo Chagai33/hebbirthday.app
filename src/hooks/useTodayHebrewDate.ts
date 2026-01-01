@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { HDate, HebrewCalendar, gematriya, Locale } from '@hebcal/core';
+import { getTenantHebrewNow } from '../utils/dateUtils';
+import { useTenant } from '../contexts/TenantContext';
 
 interface HebcalResponse {
   gy: number;
@@ -13,21 +15,20 @@ interface HebcalResponse {
 }
 
 export const useTodayHebrewDate = () => {
+  const { currentTenant } = useTenant();
+  const timezone = currentTenant?.timezone || 'Asia/Jerusalem';
+
   return useQuery({
-    queryKey: ['todayHebrewDate'],
+    queryKey: ['todayHebrewDate', timezone],
     queryFn: async () => {
-      const now = new Date();
-      
-      // Simple logic to advance to next Hebrew day if it's evening (after 19:00)
-      if (now.getHours() >= 19) {
-        now.setDate(now.getDate() + 1);
-      }
-      
+      // SINGLE SOURCE OF TRUTH for current time with Hebrew day transition
+      const now = getTenantHebrewNow(timezone);
+
       const hd = new HDate(now);
-      
+
       // Get events for this Hebrew date (in Israel = true)
       const events = HebrewCalendar.getHolidaysOnDate(hd, true) || [];
-      
+
       // Format manually to ensure Hebrew letters (Gematriya)
       const day = gematriya(hd.getDate());
       const month = Locale.gettext(hd.getMonthName(), 'he'); // Returns "כִּסְלֵו"

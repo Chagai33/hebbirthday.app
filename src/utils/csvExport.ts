@@ -62,7 +62,7 @@ function formatWishlist(wishlistItems: WishlistItem[], language: string): string
   if (!wishlistItems || wishlistItems.length === 0) {
     return '';
   }
-  
+
   const priorityLabel = language === 'he' ? 'עדיפות' : 'Priority';
   return wishlistItems
     .map(item => `${item.item_name} (${priorityLabel}: ${formatPriority(item.priority, language)})`)
@@ -70,10 +70,10 @@ function formatWishlist(wishlistItems: WishlistItem[], language: string): string
 }
 
 export async function exportBirthdaysToCSV(
-  birthdays: Birthday[], 
+  birthdays: Birthday[],
   groups: Group[],
   tenantId: string,
-  filename: string = 'birthdays.csv', 
+  filename: string = 'birthdays.csv',
   language: string = 'en'
 ) {
   const headers = language === 'he' ? [
@@ -117,7 +117,7 @@ export async function exportBirthdaysToCSV(
   ];
 
   // טעינת wishlist items לכל הרשומות (מקבילית)
-  const wishlistPromises = birthdays.map(birthday => 
+  const wishlistPromises = birthdays.map(birthday =>
     wishlistService.getItemsForBirthday(birthday.id, tenantId).catch(() => [])
   );
   const wishlistsArray = await Promise.all(wishlistPromises);
@@ -136,7 +136,7 @@ export async function exportBirthdaysToCSV(
     // חישוב מזלות - נסה להשתמש ב-calculations אם קיים, אחרת חשב ישירות
     let gregorianSign = '';
     let hebrewSign = '';
-    
+
     // בדיקה אם יש enriched birthday עם calculations
     const enrichedBirthday = birthday as any;
     if (enrichedBirthday.calculations) {
@@ -144,7 +144,7 @@ export async function exportBirthdaysToCSV(
       gregorianSign = calculations.gregorianSign || '';
       hebrewSign = calculations.hebrewSign || '';
     }
-    
+
     // אם אין calculations, חשב ישירות
     if (!gregorianSign) {
       try {
@@ -153,16 +153,16 @@ export async function exportBirthdaysToCSV(
         gregorianSign = '';
       }
     }
-    
+
     if (!hebrewSign && birthday.hebrew_month) {
       hebrewSign = zodiacService.getHebrewSign(birthday.hebrew_month);
     }
 
     // תרגום מזלות לפי שפה
-    const gregorianSignName = gregorianSign 
+    const gregorianSignName = gregorianSign
       ? (language === 'he' ? getZodiacSignNameHe(gregorianSign) : getZodiacSignNameEn(gregorianSign))
       : '';
-    const hebrewSignName = hebrewSign 
+    const hebrewSignName = hebrewSign
       ? (language === 'he' ? getZodiacSignNameHe(hebrewSign) : getZodiacSignNameEn(hebrewSign))
       : '';
 
@@ -177,7 +177,7 @@ export async function exportBirthdaysToCSV(
       }
     } else {
       // חישוב ישיר אם אין calculations
-      const calculations = birthdayCalculationsService.calculateAll(birthday, new Date());
+      const calculations = birthdayCalculationsService.calculateAll(birthday, 'Asia/Jerusalem', new Date());
       if (calculations.nextGregorianBirthday) {
         nextGregorianStr = calculations.nextGregorianBirthday.toISOString().split('T')[0];
       }
@@ -187,7 +187,7 @@ export async function exportBirthdaysToCSV(
     const groupIds = birthday.group_ids || (birthday.group_id ? [birthday.group_id] : []);
     const groupNames: string[] = [];
     let groupCalendarPreference = '';
-    
+
     groupIds.forEach(groupId => {
       const group = groupsMap.get(groupId);
       if (group) {
@@ -198,7 +198,7 @@ export async function exportBirthdaysToCSV(
         }
       }
     });
-    
+
     const groupName = groupNames.join(', '); // Join multiple group names
 
     // קבלת wishlist
@@ -439,26 +439,26 @@ export function parseCSVFile(csvText: string): CSVBirthdayData[] {
       lastName,
       birthDate,
       afterSunset: afterSunsetValue === 'yes' ||
-                   afterSunsetValue === 'true' ||
-                   afterSunsetValue === '1' ||
-                   afterSunsetValue === 'כן',
+        afterSunsetValue === 'true' ||
+        afterSunsetValue === '1' ||
+        afterSunsetValue === 'כן',
       gender: genderValue === 'male' || genderValue === 'זכר' || genderValue === 'ז'
         ? 'male'
         : genderValue === 'female' || genderValue === 'נקבה' || genderValue === 'נ'
-        ? 'female'
-        : genderValue === 'other' || genderValue === 'אחר'
-        ? 'other'
-        : undefined,
+          ? 'female'
+          : genderValue === 'other' || genderValue === 'אחר'
+            ? 'other'
+            : undefined,
       groupId: groupId || undefined,
       groupName: groupName || undefined,
       notes: notes || undefined,
       calendarPreference: calPrefValue === 'gregorian' || calPrefValue === 'לועזי'
         ? 'gregorian'
         : calPrefValue === 'hebrew' || calPrefValue === 'עברי'
-        ? 'hebrew'
-        : calPrefValue === 'both' || calPrefValue === 'שניהם'
-        ? 'both'
-        : undefined,
+          ? 'hebrew'
+          : calPrefValue === 'both' || calPrefValue === 'שניהם'
+            ? 'both'
+            : undefined,
       wishlist: wishlist || undefined
     });
   }

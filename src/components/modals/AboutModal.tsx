@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGuestNotifications } from '../../contexts/GuestNotificationsContext';
+import { useGoogleCalendar } from '../../contexts/GoogleCalendarContext';
 import { useBirthdays } from '../../hooks/useBirthdays';
 import { FloatingBackButton } from '../common/FloatingBackButton';
 import { TenantSettings } from '../settings/TenantSettings';
@@ -22,6 +23,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const { isNew } = useGuestNotifications();
+  const { needsCalendarSetup } = useGoogleCalendar();
   const { data: birthdays = [] } = useBirthdays();
   const [showSettings, setShowSettings] = useState(false);
   const [showInfoModal, setShowInfoModal] = useState(false);
@@ -108,10 +110,13 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
             {user && (
               <button
                 onClick={() => setShowCalendarModal(true)}
-                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full text-start"
+                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors w-full text-start relative"
               >
                 <Calendar className="w-5 h-5 text-blue-600" />
                 <span className="text-sm font-medium">{t('googleCalendar.connect')}</span>
+                {needsCalendarSetup && (
+                  <span className="mr-auto w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                )}
               </button>
             )}
 
