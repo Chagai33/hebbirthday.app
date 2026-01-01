@@ -195,8 +195,7 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
               <div className="flex items-start gap-2 text-xs text-indigo-700 bg-indigo-100 rounded-lg p-2">
                 <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <p>
-                  {t('tenant.timezoneHint', 'All Hebrew date calculations and birthday processing will use this timezone. Detected: ')}
-                  <strong>{detectBrowserTimezone()}</strong>
+                  {t('tenant.timezoneHint', 'Calculations are performed strictly according to the timezone selected in this field.')}
                 </p>
               </div>
             </div>
@@ -258,81 +257,85 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
             </div>
           </div>
         </div>
-      </div>
+      </div >
 
       {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex flex-col items-center text-center mb-6">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-                <AlertTriangle className="w-8 h-8 text-red-600" />
+      {
+        showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+              <div className="flex flex-col items-center text-center mb-6">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                  <AlertTriangle className="w-8 h-8 text-red-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  {t('settings.deleteAccountConfirmTitle', 'Are you absolutely sure?')}
+                </h3>
+                <p className="text-gray-600">
+                  {t('settings.deleteAccountConfirmDescription', 'This action cannot be undone. This will permanently delete your account and remove your data from our servers.')}
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
-                {t('settings.deleteAccountConfirmTitle', 'Are you absolutely sure?')}
-              </h3>
-              <p className="text-gray-600">
-                {t('settings.deleteAccountConfirmDescription', 'This action cannot be undone. This will permanently delete your account and remove your data from our servers.')}
-              </p>
-            </div>
 
-            {isCalculatingSummary ? (
-              <div className="flex justify-center py-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-              </div>
-            ) : deletionSummary ? (
-              <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
-                <h4 className="font-medium text-gray-900 mb-2">
-                  {t('settings.summaryOfData', 'Summary of data to be deleted:')}
-                </h4>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li className="flex justify-between">
-                    <span>{t('common.groups', 'Groups')}:</span>
-                    <span className="font-medium">{deletionSummary.groupsCount}</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>{t('common.birthdays', 'Birthdays')}:</span>
-                    <span className="font-medium">{deletionSummary.birthdaysCount}</span>
-                  </li>
-                </ul>
-              </div>
-            ) : null}
+              {isCalculatingSummary ? (
+                <div className="flex justify-center py-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                </div>
+              ) : deletionSummary ? (
+                <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+                  <h4 className="font-medium text-gray-900 mb-2">
+                    {t('settings.summaryOfData', 'Summary of data to be deleted:')}
+                  </h4>
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    <li className="flex justify-between">
+                      <span>{t('common.groups', 'Groups')}:</span>
+                      <span className="font-medium">{deletionSummary.groupsCount}</span>
+                    </li>
+                    <li className="flex justify-between">
+                      <span>{t('common.birthdays', 'Birthdays')}:</span>
+                      <span className="font-medium">{deletionSummary.birthdaysCount}</span>
+                    </li>
+                  </ul>
+                </div>
+              ) : null}
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium"
-                disabled={isDeleting}
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                onClick={handleConfirmDelete}
-                disabled={isDeleting || isCalculatingSummary}
-                className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 font-medium flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {isDeleting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    {t('common.deleting', 'Deleting...')}
-                  </>
-                ) : (
-                  t('settings.confirmDelete', 'Yes, delete account')
-                )}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 font-medium"
+                  disabled={isDeleting}
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  disabled={isDeleting || isCalculatingSummary}
+                  className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {isDeleting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      {t('common.deleting', 'Deleting...')}
+                    </>
+                  ) : (
+                    t('settings.confirmDelete', 'Yes, delete account')
+                  )}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
-      {toasts.map((toast) => (
-        <Toast
-          key={toast.id}
-          message={toast.message}
-          type={toast.type}
-          onClose={() => hideToast(toast.id)}
-        />
-      ))}
+      {
+        toasts.map((toast) => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            onClose={() => hideToast(toast.id)}
+          />
+        ))
+      }
     </>
   );
 };
