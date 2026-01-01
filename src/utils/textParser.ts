@@ -73,6 +73,8 @@ const AFTER_SUNSET_KEYWORDS = [
   'בערב',
   'כן', // "כן" מתייחס ל-afterSunset
   'yes',
+  'si',
+  'sí',
 ];
 
 // Common two-part last name prefixes in Hebrew
@@ -98,6 +100,13 @@ const GENDER_KEYWORDS = {
     'male',
     'm',
     'boy',
+    'man',
+    'he',
+    'masculino',
+    'hombre',
+    'h',
+    'chico',
+    'el',
   ],
   female: [
     'נקבה',
@@ -105,6 +114,12 @@ const GENDER_KEYWORDS = {
     'female',
     'f',
     'girl',
+    'woman',
+    'she',
+    'femenino',
+    'mujer',
+    'chica',
+    'la',
   ],
 };
 
@@ -163,10 +178,10 @@ export const TEXT_IMPORT_LIMITS = {
  */
 function isValidName(name: string): boolean {
   if (!name || name.length < TEXT_IMPORT_LIMITS.MIN_NAME_LENGTH) return false;
-  
+
   // Remove spaces for validation
   const cleanName = name.replace(/\s/g, '');
-  
+
   // Check if has at least 2 unique characters (for names longer than 2 chars)
   if (cleanName.length > 2) {
     const uniqueChars = new Set(cleanName.split(''));
@@ -174,13 +189,13 @@ function isValidName(name: string): boolean {
       return false; // Only one character repeated
     }
   }
-  
+
   // Check for sequence of same character (3+ times in a row)
   const repeatedPattern = /(.)\1{2,}/;
   if (repeatedPattern.test(cleanName)) {
     return false; // Has 3+ same characters in a row
   }
-  
+
   return true;
 }
 
@@ -206,7 +221,7 @@ function normalizeDate(match: string, format: string): string {
     switch (format) {
       case 'YYYY-MM-DD':
         return match; // Already in correct format
-      
+
       case 'DD/MM/YYYY':
       case 'DD-MM-YYYY': {
         const separator = match.includes('/') ? '/' : match.includes('.') ? '.' : '-';
@@ -216,7 +231,7 @@ function normalizeDate(match: string, format: string): string {
         year = parts[2];
         break;
       }
-      
+
       case 'YYYY/MM/DD': {
         const parts = match.split('/');
         year = parts[0];
@@ -224,7 +239,7 @@ function normalizeDate(match: string, format: string): string {
         day = parts[2].padStart(2, '0');
         break;
       }
-      
+
       case 'DD/MM/YY': {
         const separator = match.includes('/') ? '/' : '.';
         const parts = match.split(separator);
@@ -233,7 +248,7 @@ function normalizeDate(match: string, format: string): string {
         year = expandTwoDigitYear(parts[2]);
         break;
       }
-      
+
       case 'D/M/YYYY': {
         const separator = match.includes('/') ? '/' : '.';
         const parts = match.split(separator);
@@ -242,7 +257,7 @@ function normalizeDate(match: string, format: string): string {
         year = parts[2];
         break;
       }
-      
+
       case 'D/M/YY': {
         const separator = match.includes('/') ? '/' : '.';
         const parts = match.split(separator);
@@ -251,7 +266,7 @@ function normalizeDate(match: string, format: string): string {
         year = expandTwoDigitYear(parts[2]);
         break;
       }
-      
+
       default:
         return match;
     }
@@ -288,14 +303,14 @@ function extractDate(line: string): DateMatch | null {
 function extractNotes(text: string): { notes: string; cleanText: string } {
   const parenthesesPattern = /\(([^)]+)\)/g;
   const matches = Array.from(text.matchAll(parenthesesPattern));
-  
+
   if (matches.length === 0) {
     return { notes: '', cleanText: text };
   }
 
   const notes = matches.map(m => m[1]).join('; ');
   const cleanText = text.replace(parenthesesPattern, '').trim();
-  
+
   return { notes, cleanText };
 }
 
@@ -304,7 +319,7 @@ function extractNotes(text: string): { notes: string; cleanText: string } {
  */
 function detectAfterSunset(text: string): boolean {
   const lowerText = text.toLowerCase();
-  return AFTER_SUNSET_KEYWORDS.some(keyword => 
+  return AFTER_SUNSET_KEYWORDS.some(keyword =>
     lowerText.includes(keyword.toLowerCase())
   );
 }
@@ -316,21 +331,21 @@ function detectAfterSunset(text: string): boolean {
 function detectGender(text: string): 'male' | 'female' | undefined {
   const lowerText = text.toLowerCase();
   const words = lowerText.split(/\s+/);
-  
+
   // Check for male keywords
   for (const keyword of GENDER_KEYWORDS.male) {
     if (words.includes(keyword.toLowerCase())) {
       return 'male';
     }
   }
-  
+
   // Check for female keywords
   for (const keyword of GENDER_KEYWORDS.female) {
     if (words.includes(keyword.toLowerCase())) {
       return 'female';
     }
   }
-  
+
   return undefined;
 }
 
@@ -418,8 +433,8 @@ function parseLine(line: string, lineNumber: number): CSVBirthdayData | null {
   }
 
   // Remove the date from the text
-  let remainingText = trimmedLine.substring(0, dateMatch.position) + 
-                      trimmedLine.substring(dateMatch.position + dateMatch.fullMatch.length);
+  let remainingText = trimmedLine.substring(0, dateMatch.position) +
+    trimmedLine.substring(dateMatch.position + dateMatch.fullMatch.length);
   remainingText = remainingText.trim();
 
   // Detect gender and after sunset BEFORE removing anything
@@ -432,22 +447,22 @@ function parseLine(line: string, lineNumber: number): CSVBirthdayData | null {
     const regex = new RegExp(keyword, 'gi');
     remainingText = remainingText.replace(regex, ' ');
   }
-  
+
   // Split into words and filter out single-word keywords
   let words = remainingText.split(/\s+/).filter(w => w.trim());
-  
+
   // Remove single-word after sunset keywords
   const singleWordAfterSunset = AFTER_SUNSET_KEYWORDS
     .filter(k => !k.includes(' '))
     .map(k => k.toLowerCase());
   words = words.filter(word => !singleWordAfterSunset.includes(word.toLowerCase()));
-  
+
   // Remove gender keywords (זכר, נקבה, male, female, etc.)
   // Note: "בן"/"בר"/"בת" are NOT in gender keywords - they're part of names
   const allGenderKeywords = [...GENDER_KEYWORDS.male, ...GENDER_KEYWORDS.female]
     .map(k => k.toLowerCase());
   words = words.filter(word => !allGenderKeywords.includes(word.toLowerCase()));
-  
+
   remainingText = words.join(' ').trim();
 
   // Extract notes from parentheses (after removing keywords)
@@ -486,7 +501,7 @@ function parseLine(line: string, lineNumber: number): CSVBirthdayData | null {
       lineNumber,
     };
   }
-  
+
   if (lastName && !isValidName(lastName)) {
     return {
       firstName,
@@ -568,13 +583,13 @@ export interface LineValidationError {
 export function validateText(text: string): LineValidationError[] {
   const errors: LineValidationError[] = [];
   const lines = text.split('\n');
-  
+
   lines.forEach((line, index) => {
     const trimmed = line.trim();
     if (!trimmed) return; // Skip empty lines
-    
+
     const lineNumber = index + 1;
-    
+
     // Check if line is too long
     if (trimmed.length > 200) {
       errors.push({
@@ -585,7 +600,7 @@ export function validateText(text: string): LineValidationError[] {
       });
       return;
     }
-    
+
     // Check if has valid date
     const dateMatch = extractDate(trimmed);
     if (!dateMatch) {
@@ -597,29 +612,29 @@ export function validateText(text: string): LineValidationError[] {
       });
       return;
     }
-    
+
     // Extract and validate names
-    let remainingText = trimmed.substring(0, dateMatch.position) + 
-                        trimmed.substring(dateMatch.position + dateMatch.fullMatch.length);
+    let remainingText = trimmed.substring(0, dateMatch.position) +
+      trimmed.substring(dateMatch.position + dateMatch.fullMatch.length);
     remainingText = remainingText.trim();
-    
+
     // Remove keywords and parse names
     const multiWordKeywords = AFTER_SUNSET_KEYWORDS.filter(k => k.includes(' '));
     for (const keyword of multiWordKeywords) {
       const regex = new RegExp(keyword, 'gi');
       remainingText = remainingText.replace(regex, ' ');
     }
-    
+
     let words = remainingText.split(/\s+/).filter(w => w.trim());
     const singleWordAfterSunset = AFTER_SUNSET_KEYWORDS.filter(k => !k.includes(' ')).map(k => k.toLowerCase());
     words = words.filter(word => !singleWordAfterSunset.includes(word.toLowerCase()));
     const allGenderKeywords = [...GENDER_KEYWORDS.male, ...GENDER_KEYWORDS.female].map(k => k.toLowerCase());
     words = words.filter(word => !allGenderKeywords.includes(word.toLowerCase()));
-    
+
     remainingText = words.join(' ').trim();
     const { cleanText } = extractNotes(remainingText);
     const { firstName, lastName } = parseNames(cleanText);
-    
+
     if (!firstName || !isValidName(firstName)) {
       errors.push({
         lineNumber,
@@ -636,7 +651,7 @@ export function validateText(text: string): LineValidationError[] {
       });
     }
   });
-  
+
   return errors;
 }
 
