@@ -686,7 +686,9 @@
     "passwordTooShort": "הסיסמה חייבת להכיל לפחות 6 תווים",
     "passwordsDontMatch": "הסיסמאות אינן תואמות",
     "invalidPhoneNumber": "מספר טלפון לא תקין",
-    "futureDate": "תאריך הלידה לא יכול להיות בעתיד"
+    "futureDate": "תאריך הלידה לא יכול להיות בעתיד",
+    "minLength": "נא להזין לפחות 2 תווים",
+    "noWhitespace": "שדה זה לא יכול להכיל רווחים בלבד"
   },
   "import": {
     "pasteTitle": "הדבק רשימת ימי הולדת",

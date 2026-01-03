@@ -358,6 +358,31 @@ export const GuestAccessPage: React.FC = () => {
       return;
     }
 
+    // Validate firstName and lastName: minimum 2 characters and no whitespace-only
+    const trimmedFirstName = formData.firstName.trim();
+    const trimmedLastName = formData.lastName.trim();
+
+    if (trimmedFirstName.length === 0) {
+      alert(t('validation.noWhitespace', 'שדה זה לא יכול להכיל רווחים בלבד'));
+      return;
+    }
+
+    if (trimmedFirstName.length < 2) {
+      alert(t('validation.minLength', 'נא להזין לפחות 2 תווים') + ' (שם פרטי)');
+      return;
+    }
+
+    if (trimmedLastName.length === 0) {
+      alert(t('validation.noWhitespace', 'שדה זה לא יכול להכיל רווחים בלבד'));
+      return;
+    }
+
+    if (trimmedLastName.length < 2) {
+      alert(t('validation.minLength', 'נא להזין לפחות 2 תווים') + ' (שם משפחה)');
+      return;
+    }
+
+
     // Check for duplicates
     const duplicate = checkForDuplicates();
     if (duplicate) {

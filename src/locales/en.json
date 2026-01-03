@@ -549,7 +549,9 @@
     "passwordsDontMatch": "Passwords don't match",
     "calendarError": "Cannot open Google Calendar. Please try again.",
     "invalidPhoneNumber": "Invalid phone number",
-    "futureDate": "Birth date cannot be in the future"
+    "futureDate": "Birth date cannot be in the future",
+    "minLength": "Please enter at least 2 characters",
+    "noWhitespace": "This field cannot contain only whitespace"
   },
   "import": {
     "pasteTitle": "Paste Birthday List",
