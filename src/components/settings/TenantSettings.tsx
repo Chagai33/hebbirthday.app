@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useTenant } from '../../contexts/TenantContext';
 import { CalendarPreferenceSelector } from './CalendarPreferenceSelector';
 import { CalendarPreference } from '../../types';
-import { Settings, Save, X, Trash2, AlertTriangle, Globe, Info } from 'lucide-react';
+import { Settings, Save, X, Trash2, AlertTriangle, Globe, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import { getSupportedTimezones, detectBrowserTimezone } from '../../utils/dateUtils';
 import { useToast } from '../../hooks/useToast';
 import { Toast } from '../common/Toast';
@@ -31,6 +31,7 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
         currentTenant?.timezone || detectBrowserTimezone()
     );
     const [isSaving, setIsSaving] = useState(false);
+    const [isDangerZoneOpen, setIsDangerZoneOpen] = useState(false);
 
     const timezoneGroups = getSupportedTimezones();
 
@@ -225,30 +226,43 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
                             </button>
                         </div>
 
-                        {/* Danger Zone - Compact */}
+                        {/* Danger Zone - Compact & Collapsible */}
                         <div className="border-t border-gray-200 pt-4 mt-4">
-                            <h3 className="text-base font-semibold text-red-600 mb-3 flex items-center gap-2">
-                                <AlertTriangle className="w-4 h-4" />
-                                {t('settings.dangerZone', 'Danger Zone')}
-                            </h3>
-                            <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center justify-between gap-3">
-                                <div className="flex-1 min-w-0">
-                                    <h4 className="font-medium text-red-900 text-sm mb-0.5">
-                                        {t('settings.deleteAccount', 'Delete Account')}
-                                    </h4>
-                                    <p className="text-xs text-red-700">
-                                        {t('settings.deleteAccountDescription', 'מחיקה סופית של החשבון')}
-                                    </p>
+                            <button
+                                onClick={() => setIsDangerZoneOpen(!isDangerZoneOpen)}
+                                className="w-full flex items-center justify-between group"
+                            >
+                                <h3 className="text-base font-semibold text-red-600 mb-3 flex items-center gap-2 group-hover:text-red-700 transition-colors">
+                                    <AlertTriangle className="w-4 h-4" />
+                                    {t('settings.dangerZone', 'Danger Zone')}
+                                </h3>
+                                {isDangerZoneOpen ? (
+                                    <ChevronUp className="w-5 h-5 text-gray-400 group-hover:text-gray-600 mb-3" />
+                                ) : (
+                                    <ChevronDown className="w-5 h-5 text-gray-400 group-hover:text-gray-600 mb-3" />
+                                )}
+                            </button>
+
+                            {isDangerZoneOpen && (
+                                <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center justify-between gap-3 animate-fadeIn">
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="font-medium text-red-900 text-sm mb-0.5">
+                                            {t('settings.deleteAccount', 'Delete Account')}
+                                        </h4>
+                                        <p className="text-xs text-red-700">
+                                            {t('settings.deleteAccountDescription', 'מחיקה סופית של החשבון')}
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handlePrepareDelete}
+                                        className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors flex items-center gap-1.5 text-sm flex-shrink-0"
+                                    >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                        {t('common.delete', 'Delete')}
+                                    </button>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={handlePrepareDelete}
-                                    className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors flex items-center gap-1.5 text-sm flex-shrink-0"
-                                >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                    {t('common.delete', 'Delete')}
-                                </button>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </div>
