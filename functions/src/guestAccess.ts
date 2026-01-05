@@ -72,11 +72,11 @@ async function checkRateLimit(ip: string): Promise<{ allowed: boolean; waitSecon
 async function recordFailedAttempt(ip: string) {
   console.log(`Recording failed guest access attempt for IP: ${ip}`);
   const rateLimitRef = db.collection('rate_limits').doc(ip.replace(/\./g, '_'));
-  
+
   await db.runTransaction(async (t) => {
     const doc = await t.get(rateLimitRef);
     let attempts = 1;
-    
+
     if (doc.exists) {
       attempts = (doc.data()?.attempts || 0) + 1;
     }
@@ -111,14 +111,14 @@ async function recordFailedAttempt(ip: string) {
 async function verifyGuestToken(groupId: string, token: string): Promise<{ isValid: boolean; groupData?: any; error?: string }> {
   try {
     const groupDoc = await db.collection('groups').doc(groupId).get();
-    
+
     if (!groupDoc.exists) {
       console.log(`Group ${groupId} not found`);
       return { isValid: false, error: 'GROUP_NOT_FOUND' };
     }
 
     const groupData = groupDoc.data();
-    
+
     // Check if guest access is enabled
     if (groupData?.is_guest_access_enabled !== true) {
       console.log(`Guest access disabled for group ${groupId}`);
@@ -135,7 +135,7 @@ async function verifyGuestToken(groupId: string, token: string): Promise<{ isVal
     if (groupData?.guest_token_expires_at) {
       const expiresAt = new Date(groupData.guest_token_expires_at);
       const now = new Date();
-      
+
       if (now > expiresAt) {
         console.log(`Token expired for group ${groupId}. Expired at: ${expiresAt.toISOString()}`);
         return { isValid: false, error: 'TOKEN_EXPIRED' };
@@ -157,11 +157,11 @@ async function verifyGuestToken(groupId: string, token: string): Promise<{ isVal
 async function getGroupBirthdays(groupId: string, token: string, ip: string) {
   // Step 1: Verify token
   const { isValid, groupData, error } = await verifyGuestToken(groupId, token);
-  
+
   if (!isValid || !groupData) {
     // Record failed attempt for rate limiting
     await recordFailedAttempt(ip);
-    
+
     // Return specific error messages for better UX
     let errorMessage = 'Invalid token or guest access is disabled for this group';
     if (error === 'TOKEN_EXPIRED') {
@@ -169,7 +169,7 @@ async function getGroupBirthdays(groupId: string, token: string, ip: string) {
     } else if (error === 'ACCESS_DISABLED') {
       errorMessage = 'Guest access has been disabled for this group by the admin.';
     }
-    
+
     throw new functions.https.HttpsError(
       'permission-denied',
       errorMessage
@@ -248,31 +248,31 @@ async function addBirthdayAsGuest(
 
   // Step 2: Verify token and get group data
   const { isValid, groupData, error } = await verifyGuestToken(groupId, token);
-  
+
   if (!isValid || !groupData) {
     await recordFailedAttempt(ip);
-    
+
     let errorMessage = 'Invalid token or guest access is disabled for this group';
     if (error === 'TOKEN_EXPIRED') {
       errorMessage = 'This guest link has expired (72-hour limit). Please contact the group admin for a new link.';
     } else if (error === 'ACCESS_DISABLED') {
       errorMessage = 'Guest access has been disabled for this group by the admin.';
     }
-    
+
     throw new functions.https.HttpsError('permission-denied', errorMessage);
   }
 
   // Step 3: Check contribution limit (default 50)
   const contributionLimit = groupData.guest_contribution_limit || 50;
-  
+
   // Count existing birthdays created with this token
   const existingBirthdaysSnapshot = await db.collection('birthdays')
     .where('guest_token_used', '==', token)
     .where('archived', '==', false)
     .get();
-  
+
   const currentCount = existingBirthdaysSnapshot.size;
-  
+
   if (currentCount >= contributionLimit) {
     console.log(`Contribution limit reached for token ${token} (${currentCount}/${contributionLimit})`);
     throw new functions.https.HttpsError(
@@ -284,6 +284,18 @@ async function addBirthdayAsGuest(
   // Step 4: Validate birthday data
   if (!birthdayData.firstName || !birthdayData.lastName || !birthdayData.birthDateGregorian) {
     throw new functions.https.HttpsError('invalid-argument', 'Missing required birthday fields');
+  }
+
+  // Validate firstName and lastName: minimum 2 characters and no whitespace-only
+  const trimmedFirstName = birthdayData.firstName.trim();
+  const trimmedLastName = birthdayData.lastName.trim();
+
+  if (trimmedFirstName.length < 2) {
+    throw new functions.https.HttpsError('invalid-argument', 'First name must be at least 2 characters');
+  }
+
+  if (trimmedLastName.length < 2) {
+    throw new functions.https.HttpsError('invalid-argument', 'Last name must be at least 2 characters');
   }
 
   // Parse date
@@ -377,14 +389,14 @@ export const guestAccessOps = functions.https.onCall(async (data: GuestAccessReq
 
     if (!isValid) {
       await recordFailedAttempt(ipStr);
-      
+
       let errorMessage = 'Invalid token or guest access is disabled';
       if (error === 'TOKEN_EXPIRED') {
         errorMessage = 'This guest link has expired (72-hour limit).';
       } else if (error === 'ACCESS_DISABLED') {
         errorMessage = 'Guest access has been disabled for this group.';
       }
-      
+
       throw new functions.https.HttpsError('permission-denied', errorMessage);
     }
 

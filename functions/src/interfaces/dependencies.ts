@@ -42,12 +42,12 @@ export interface Dependencies {
   authClient: GoogleAuthClient;
   calendarClient: GoogleCalendarClient;
   tasksClient: TasksClient;
-  
+
   // Domain
   zodiacService: ZodiacService;
   hebcalService: HebcalService;
   eventBuilder: EventBuilderService;
-  
+
   // Application
   syncBirthdayUseCase: SyncBirthdayUseCase;
   removeSyncUseCase: RemoveSyncUseCase;
@@ -64,19 +64,19 @@ export function createDependencies(): Dependencies {
   if (_dependencies) return _dependencies;
 
   const db = admin.firestore();
-  
+
   // Config - moved here to avoid timeout during module initialization
   const GOOGLE_CLIENT_ID = functions.config().google?.client_id || '';
   const GOOGLE_CLIENT_SECRET = functions.config().google?.client_secret || '';
   const GOOGLE_REDIRECT_URI = functions.config().google?.redirect_uri || 'postmessage';
-  
+
   // Infrastructure Layer
   const birthdayRepo = new BirthdayRepository(db);
   const tenantRepo = new TenantRepository(db);
   const tokenRepo = new TokenRepository(db);
   const wishlistRepo = new WishlistRepository(db);
   const groupRepo = new GroupRepository(db);
-  
+
   const authClient = new GoogleAuthClient(
     tokenRepo,
     GOOGLE_CLIENT_ID,
@@ -85,12 +85,12 @@ export function createDependencies(): Dependencies {
   );
   const calendarClient = new GoogleCalendarClient(authClient);
   const tasksClient = new TasksClient(PROJECT_ID, LOCATION, QUEUE);
-  
+
   // Domain Layer
   const zodiacService = new ZodiacService();
   const hebcalService = new HebcalService();
   const eventBuilder = new EventBuilderService(zodiacService);
-  
+
   // Application Layer
   const syncBirthdayUseCase = new SyncBirthdayUseCase(
     birthdayRepo,
@@ -101,12 +101,12 @@ export function createDependencies(): Dependencies {
     calendarClient,
     eventBuilder
   );
-  
+
   const removeSyncUseCase = new RemoveSyncUseCase(
     birthdayRepo,
     syncBirthdayUseCase
   );
-  
+
   const bulkSyncUseCase = new BulkSyncUseCase(
     birthdayRepo,
     tokenRepo,
@@ -114,29 +114,30 @@ export function createDependencies(): Dependencies {
     syncBirthdayUseCase,
     db
   );
-  
+
   const calculateHebrewDataUseCase = new CalculateHebrewDataUseCase(
     hebcalService,
-    birthdayRepo
+    birthdayRepo,
+    tenantRepo
   );
-  
+
   const cleanupOrphanEventsUseCase = new CleanupOrphanEventsUseCase(
     calendarClient,
     authClient,
     db
   );
-  
+
   const manageCalendarUseCase = new ManageCalendarUseCase(
     calendarClient,
     tokenRepo
   );
-  
+
   const googleOAuthUseCase = new GoogleOAuthUseCase(
     authClient,
     calendarClient,
     tokenRepo
   );
-  
+
   _dependencies = {
     db,
     birthdayRepo,
@@ -158,7 +159,7 @@ export function createDependencies(): Dependencies {
     manageCalendarUseCase,
     googleOAuthUseCase
   };
-  
+
   return _dependencies;
 }
 

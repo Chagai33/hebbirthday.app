@@ -387,7 +387,7 @@
     "defaultCalendarPreference": "העדפת לוח שנה ברירת מחדל",
     "preferenceDescription": "זה משפיע על אופן הצגת ימי ההולדת במערכת",
     "timezone": "אזור זמן",
-    "timezoneHint": "כל חישובי התאריכים העבריים ועיבוד ימי ההולדת יתבצעו באזור זמן זה. זיהוי אוטומטי: ",
+    "timezoneHint": "כל חישובי התאריכים העבריים ועיבוד ימי ההולדת יתבצעו באזור זמן זה.",
     "guestPortalAccess": "גישה לפורטל אורחים",
     "guestPortalDescription": "אפשר לאורחים לגשת ולנהל את המשאלות שלהם דרך הפורטל הציבורי.",
     "guestPortalExceptionNote": "זוהי הגדרה גלובלית. ניתן להחריג קבוצות ספציפיות בעמוד ניהול קבוצות.",
@@ -686,7 +686,9 @@
     "passwordTooShort": "הסיסמה חייבת להכיל לפחות 6 תווים",
     "passwordsDontMatch": "הסיסמאות אינן תואמות",
     "invalidPhoneNumber": "מספר טלפון לא תקין",
-    "futureDate": "תאריך הלידה לא יכול להיות בעתיד"
+    "futureDate": "תאריך הלידה לא יכול להיות בעתיד",
+    "minLength": "נא להזין לפחות 2 תווים",
+    "noWhitespace": "שדה זה לא יכול להכיל רווחים בלבד"
   },
   "import": {
     "pasteTitle": "הדבק רשימת ימי הולדת",
@@ -695,11 +697,11 @@
     "pasteInstructionDate": "כל שורה צריכה להכיל שם ותאריך (לדוגמה: משה כהן 15/03/1990)",
     "pasteInstructionFormat": "תומך בפורמטים: DD/MM/YYYY, DD.MM.YY, YYYY-MM-DD ועוד",
     "pasteInstructionNames": "תומך בשמות מורכבים ושמות משפחה דו-חלקיים (בן דוד, אבו חצירה, וכו')",
-    "pasteInstructionGender": "ציין \"זכר\"/\"נקבה\" (או \"male\"/\"female\") לזיהוי מגדר",
+    "pasteInstructionGender": "ציין \"זכר\"/\"נקבה\" (או \"m\"/\"f\") לזיהוי מגדר (תומך גם באנגלית וספרדית)",
     "pasteInstructionSunset": "כתוב \"כן\" או \"yes\" עבור לידה אחרי שקיעה (ברירת מחדל: לא)",
     "pasteInstructionNotes": "הערות בסוגריים יועברו אוטומטית לשדה ההערות",
     "pasteInstructionSmart": "המערכת מסירה אוטומטית תארים (הרב, ד\"ר) ומילות מפתח",
-    "pastePlaceholder": "לדוגמה:\nמשה כהן 15/03/1990 זכר\nשרה לוי 22.05.85 נקבה כן\nדוד ישראלי 1985-12-10 (חבר טוב)",
+    "pastePlaceholder": "לדוגמה:\nמשה כהן 15/03/1990 זכר\nשרה לוי 22.05.85 נקבה כן\nCarlos Ruiz 10/10/1990 hombre\nדוד ישראלי 1985-12-10 (חבר טוב)",
     "pasteLineCount": "{{count}} שורות",
     "pasteCharacters": "תווים",
     "pasteAnalyze": "נתח רשימה",

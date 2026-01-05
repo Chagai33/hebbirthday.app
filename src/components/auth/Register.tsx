@@ -3,12 +3,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { Mail, Lock, User, UserPlus, Globe, Gift, BookOpen } from 'lucide-react';
+import { Mail, Lock, User, UserPlus, Gift, BookOpen } from 'lucide-react';
 import { DeveloperCredit } from '../common/DeveloperCredit';
+import { LanguageSwitcher } from '../common/LanguageSwitcher';
 import { analyticsService } from '../../services/analytics.service';
 
 export const Register: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { signUp, signInWithGoogle, loading: authLoading, user } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ export const Register: React.FC = () => {
   const [showTermsError, setShowTermsError] = useState(false);
   const [showEmailForm, setShowEmailForm] = useState(false); // Added email form toggle
   const termsRef = useRef<HTMLDivElement>(null);
-  
+
   const from = (location.state as any)?.from?.pathname || '/';
 
   useEffect(() => {
@@ -45,7 +46,7 @@ export const Register: React.FC = () => {
   }, [location.state]);
 
   const getErrorMessage = (code: string) => {
-    const errorKey = `auth.errors.${code}`;
+    const errorKey = `auth.errors.${code} `;
     const message = t(errorKey);
     return message === errorKey ? t('auth.errors.default') : message;
   };
@@ -114,39 +115,25 @@ export const Register: React.FC = () => {
 
   const loading = isSubmitting || authLoading;
 
-  const toggleLanguage = () => {
-    const prevLang = i18n.language;
-    const newLang = prevLang === 'he' ? 'en' : 'he';
-    i18n.changeLanguage(newLang);
-    // Track language switch
-    analyticsService.trackEvent('User', 'Change_Language', `${prevLang}_to_${newLang}`);
-  };
-
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-8 overflow-y-auto">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 relative">
         <div className="flex justify-end items-center gap-1 mb-4">
-            <button
+          <button
             onClick={() => navigate('/guide')}
             className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
             title={t('guide.title')}
-            >
+          >
             <BookOpen className="w-5 h-5" />
-            </button>
-            <button
+          </button>
+          <button
             onClick={() => navigate('/portal')}
             className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
             title={t('guest.portalTitle')}
-            >
+          >
             <Gift className="w-5 h-5" />
-            </button>
-            <button
-            onClick={toggleLanguage}
-            className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            title={i18n.language === 'he' ? t('common.switchToEnglish') : t('common.switchToHebrew')}
-            >
-            <Globe className="w-5 h-5" />
-            </button>
+          </button>
+          <LanguageSwitcher className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" variant="minimal" />
         </div>
         <div className="text-center mb-8">
           <div className="flex flex-col items-center justify-center mb-6">
@@ -198,37 +185,37 @@ export const Register: React.FC = () => {
         </button>
 
         <div ref={termsRef} className="flex flex-col gap-1 mb-4">
-            <div className="flex items-start gap-2">
-              <input
-                type="checkbox"
-                id="acceptTerms"
-                checked={acceptedTerms}
-                onChange={(e) => {
-                  setAcceptedTerms(e.target.checked);
-                  if (e.target.checked) setShowTermsError(false);
-                }}
-                className="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                // required - Removed native required to allow custom error handling
-                aria-invalid={showTermsError}
-                aria-describedby="terms-error"
-              />
-              <label htmlFor="acceptTerms" className="text-sm text-gray-700 cursor-pointer">
-                {t('auth.acceptTerms', 'I confirm that I have read and agree to the')}{' '}
-                <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 underline" onClick={(e) => e.stopPropagation()}>
-                  {t('footer.termsOfUse', 'Terms of Use')}
-                </a>
-                {' '}{t('auth.and', 'and')}{' '}
-                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 underline" onClick={(e) => e.stopPropagation()}>
-                  {t('footer.privacyPolicy', 'Privacy Policy')}
-                </a>
-                .
-              </label>
-            </div>
-            {showTermsError && (
-              <p id="terms-error" className="text-sm text-red-600 ms-6">
-                {t('auth.mustAcceptTerms', 'You must accept the Terms of Use and Privacy Policy')}
-              </p>
-            )}
+          <div className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              id="acceptTerms"
+              checked={acceptedTerms}
+              onChange={(e) => {
+                setAcceptedTerms(e.target.checked);
+                if (e.target.checked) setShowTermsError(false);
+              }}
+              className="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              // required - Removed native required to allow custom error handling
+              aria-invalid={showTermsError}
+              aria-describedby="terms-error"
+            />
+            <label htmlFor="acceptTerms" className="text-sm text-gray-700 cursor-pointer">
+              {t('auth.acceptTerms', 'I confirm that I have read and agree to the')}{' '}
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 underline" onClick={(e) => e.stopPropagation()}>
+                {t('footer.termsOfUse', 'Terms of Use')}
+              </a>
+              {' '}{t('auth.and', 'and')}{' '}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 underline" onClick={(e) => e.stopPropagation()}>
+                {t('footer.privacyPolicy', 'Privacy Policy')}
+              </a>
+              .
+            </label>
+          </div>
+          {showTermsError && (
+            <p id="terms-error" className="text-sm text-red-600 ms-6">
+              {t('auth.mustAcceptTerms', 'You must accept the Terms of Use and Privacy Policy')}
+            </p>
+          )}
         </div>
 
         <div className="relative my-6">
@@ -243,101 +230,101 @@ export const Register: React.FC = () => {
         </div>
 
         {!showEmailForm ? (
-            <button
-                type="button"
-                onClick={() => {
-                    if (!acceptedTerms) {
-                        handleTermsError();
-                        return;
-                    }
-                    setShowEmailForm(true);
-                }}
-                className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
-            >
-                <Mail className="w-5 h-5" />
-                {t('auth.signUpWithEmail')}
-            </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (!acceptedTerms) {
+                handleTermsError();
+                return;
+              }
+              setShowEmailForm(true);
+            }}
+            className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
+          >
+            <Mail className="w-5 h-5" />
+            {t('auth.signUpWithEmail')}
+          </button>
         ) : (
-            <form onSubmit={handleSubmit} className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+          <form onSubmit={handleSubmit} className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t('auth.displayName')}
-                </label>
-                <div className="relative">
+              </label>
+              <div className="relative">
                 <User className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
-                    type="text"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    className="w-full ps-10 pe-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    autoComplete="name"
-                    required
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="w-full ps-10 pe-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  autoComplete="name"
+                  required
                 />
-                </div>
+              </div>
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t('auth.email')}
-                </label>
-                <div className="relative">
+              </label>
+              <div className="relative">
                 <Mail className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full ps-10 pe-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    autoComplete="email"
-                    required
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full ps-10 pe-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  autoComplete="email"
+                  required
                 />
-                </div>
+              </div>
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t('auth.password')}
-                </label>
-                <div className="relative">
+              </label>
+              <div className="relative">
                 <Lock className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full ps-10 pe-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    autoComplete="new-password"
-                    required
-                    minLength={6}
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full ps-10 pe-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  autoComplete="new-password"
+                  required
+                  minLength={6}
                 />
-                </div>
+              </div>
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t('auth.confirmPassword')}
-                </label>
-                <div className="relative">
+              </label>
+              <div className="relative">
                 <Lock className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full ps-10 pe-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    autoComplete="new-password"
-                    required
-                    minLength={6}
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full ps-10 pe-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  autoComplete="new-password"
+                  required
+                  minLength={6}
                 />
-                </div>
+              </div>
             </div>
 
             <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-                <UserPlus className="w-5 h-5" />
-                {loading ? t('common.loading') : t('auth.signUp')}
+              <UserPlus className="w-5 h-5" />
+              {loading ? t('common.loading') : t('auth.signUp')}
             </button>
-            </form>
+          </form>
         )}
 
 

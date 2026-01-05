@@ -46,7 +46,8 @@ export const onBirthdayWriteFn = functions.firestore
         updateData = await deps.calculateHebrewDataUseCase.execute(
           context.params.birthdayId,
           afterData.birth_date_gregorian,
-          afterData.after_sunset || false
+          afterData.after_sunset || false,
+          afterData.tenant_id // Pass tenantId for timezone lookup
         );
         return null; // Return early, don't continue to sync
       } catch (e) {
@@ -56,13 +57,13 @@ export const onBirthdayWriteFn = functions.firestore
 
     // 3. Smart Sync
     const finalData = { ...afterData, ...updateData };
-    
+
     // ✅ דלג על system updates כדי למנוע לולאה אינסופית
     if (afterData._systemUpdate) {
       functions.logger.log('Skipping sync - system update detected');
       return null;
     }
-    
+
     if (finalData.tenant_id && finalData.isSynced === true) {
       try {
         await deps.syncBirthdayUseCase.execute(

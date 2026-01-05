@@ -49,7 +49,7 @@ const numberToHebrewYear = (year: number): string => {
   const unitsMap = ['', 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט'];
 
   let res = hundredsMap[hundreds] + tensMap[tens] + unitsMap[units];
-  
+
   if (res.length > 1) {
     res = res.slice(0, -1) + '"' + res.slice(-1);
   } else {
@@ -174,19 +174,19 @@ export const BirthdayForm = ({
   // Sync Hebrew -> Gregorian
   useEffect(() => {
     if (inputType === 'hebrew') {
-       try {
-           const hd = new HDate(hebrewDay, hebrewMonth, hebrewYear);
-           const greg = hd.greg();
-           const dateString = formatDateForInput(greg.toISOString());
-           
-           // Update Form
-           // Note: setValue is available from useForm hook which is initialized below.
-           // However, this useEffect is placed BEFORE useForm initialization in the current code structure
-           // which causes the "Cannot access 'setValue' before initialization" error.
-           // The fix is to move this useEffect AFTER useForm initialization.
-       } catch (e) {
-           console.error('Invalid Hebrew Date', e);
-       }
+      try {
+        const hd = new HDate(hebrewDay, hebrewMonth, hebrewYear);
+        const greg = hd.greg();
+        const dateString = formatDateForInput(greg.toISOString());
+
+        // Update Form
+        // Note: setValue is available from useForm hook which is initialized below.
+        // However, this useEffect is placed BEFORE useForm initialization in the current code structure
+        // which causes the "Cannot access 'setValue' before initialization" error.
+        // The fix is to move this useEffect AFTER useForm initialization.
+      } catch (e) {
+        console.error('Invalid Hebrew Date', e);
+      }
     }
   }, [hebrewDay, hebrewMonth, hebrewYear, inputType]); // Removed setValue from dependency temporarily to explain the fix
 
@@ -231,13 +231,13 @@ export const BirthdayForm = ({
 
   const initialGroupIds = useMemo(() => {
     if (editBirthday) {
-        if (editBirthday.group_ids && editBirthday.group_ids.length > 0) {
-            return editBirthday.group_ids;
-        }
-        if (editBirthday.group_id) {
-            return [editBirthday.group_id];
-        }
-        return [];
+      if (editBirthday.group_ids && editBirthday.group_ids.length > 0) {
+        return editBirthday.group_ids;
+      }
+      if (editBirthday.group_id) {
+        return [editBirthday.group_id];
+      }
+      return [];
     }
     return defaultGroupId ? [defaultGroupId] : [];
   }, [editBirthday, defaultGroupId]);
@@ -251,42 +251,42 @@ export const BirthdayForm = ({
   } = useForm<BirthdayFormData>({
     defaultValues: editBirthday
       ? {
-          firstName: editBirthday.first_name,
-          lastName: editBirthday.last_name,
-          birthDateGregorian: formatDateForInput(editBirthday.birth_date_gregorian) as any,
-          afterSunset: editBirthday.after_sunset,
-          gender: editBirthday.gender,
-          groupIds: initialGroupIds,
-          calendarPreferenceOverride: editBirthday.calendar_preference_override || undefined,
-          notes: editBirthday.notes,
-        }
+        firstName: editBirthday.first_name,
+        lastName: editBirthday.last_name,
+        birthDateGregorian: formatDateForInput(editBirthday.birth_date_gregorian) as any,
+        afterSunset: editBirthday.after_sunset,
+        gender: editBirthday.gender,
+        groupIds: initialGroupIds,
+        calendarPreferenceOverride: editBirthday.calendar_preference_override || undefined,
+        notes: editBirthday.notes,
+      }
       : {
-          groupIds: initialGroupIds,
-          birthDateGregorian: initialDateString as any,
-        },
+        groupIds: initialGroupIds,
+        birthDateGregorian: initialDateString as any,
+      },
   });
 
   // Sync Hebrew -> Gregorian (Moved here to access setValue)
   useEffect(() => {
     if (inputType === 'hebrew') {
-       try {
-           const hd = new HDate(hebrewDay, hebrewMonth, hebrewYear);
-           const greg = hd.greg();
-           const dateString = formatDateForInput(greg.toISOString());
-           
-           // Update Form
-           setValue('birthDateGregorian', dateString as any, { shouldValidate: true });
-           
-           // Update Gregorian State (so if they switch back, it's consistent)
-           const parts = parseDateString(dateString);
-           if (parts) {
-               setSelectedDay(parts.day);
-               setSelectedMonth(parts.month);
-               setSelectedYear(parts.year);
-           }
-       } catch (e) {
-           console.error('Invalid Hebrew Date', e);
-       }
+      try {
+        const hd = new HDate(hebrewDay, hebrewMonth, hebrewYear);
+        const greg = hd.greg();
+        const dateString = formatDateForInput(greg.toISOString());
+
+        // Update Form
+        setValue('birthDateGregorian', dateString as any, { shouldValidate: true });
+
+        // Update Gregorian State (so if they switch back, it's consistent)
+        const parts = parseDateString(dateString);
+        if (parts) {
+          setSelectedDay(parts.day);
+          setSelectedMonth(parts.month);
+          setSelectedYear(parts.year);
+        }
+      } catch (e) {
+        console.error('Invalid Hebrew Date', e);
+      }
     }
   }, [hebrewDay, hebrewMonth, hebrewYear, inputType, setValue]);
 
@@ -298,7 +298,7 @@ export const BirthdayForm = ({
 
   const rootGroups = allGroups.filter(g => g.is_root);
   const childGroups = allGroups.filter(g => !g.is_root);
-  
+
   // Helper function to get translated root group name
   const getTranslatedRootName = (group: any): string => {
     if (!group.is_root || !group.type) return group.name;
@@ -310,7 +310,7 @@ export const BirthdayForm = ({
     const key = translationKeys[group.type];
     return key ? t(key) : group.name;
   };
-  
+
   // Create a map of root group IDs to translated names for optgroup labels
   const translatedRootNamesMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -325,12 +325,12 @@ export const BirthdayForm = ({
   // When editing, show all groups (root + child) for flexibility
   const groupOptions = useMemo<GroupOption[]>(() => {
     const options: GroupOption[] = [];
-    
+
     if (editBirthday) {
       // When editing: show all groups (root + child)
       rootGroups.forEach(root => {
         const rootName = translatedRootNamesMap.get(root.id) || root.name;
-        
+
         options.push({
           id: root.id,
           name: rootName,
@@ -362,7 +362,7 @@ export const BirthdayForm = ({
         });
       });
     }
-    
+
     return options;
   }, [rootGroups, childGroups, translatedRootNamesMap, editBirthday]);
 
@@ -441,44 +441,44 @@ export const BirthdayForm = ({
   const handleMerge = async () => {
     setShowDuplicateModal(false);
     if (pendingData && duplicates.length > 0) {
-        try {
-            const master = duplicates[0];
-            const newGroups = pendingData.groupIds || [];
-            const existingGroups = master.group_ids || (master.group_id ? [master.group_id] : []);
-            
-            // Combine unique groups
-            const combinedGroups = Array.from(new Set([...existingGroups, ...newGroups]));
-            
-            // Call update on the existing birthday
-            await updateBirthday.mutateAsync({
-                birthdayId: master.id,
-                data: {
-                    groupIds: combinedGroups,
-                    // Optionally update other fields if they are newer/better, 
-                    // but for a "Merge" action, usually we just add the group.
-                }
-            });
-            
-            showSuccess(t('messages.birthdayMerged', 'Person updated with new groups successfully'));
-            onSuccess();
-            onClose();
-        } catch (error) {
-            showError(t('common.error'));
-            logger.error('Error merging birthday:', error);
-        }
+      try {
+        const master = duplicates[0];
+        const newGroups = pendingData.groupIds || [];
+        const existingGroups = master.group_ids || (master.group_id ? [master.group_id] : []);
+
+        // Combine unique groups
+        const combinedGroups = Array.from(new Set([...existingGroups, ...newGroups]));
+
+        // Call update on the existing birthday
+        await updateBirthday.mutateAsync({
+          birthdayId: master.id,
+          data: {
+            groupIds: combinedGroups,
+            // Optionally update other fields if they are newer/better, 
+            // but for a "Merge" action, usually we just add the group.
+          }
+        });
+
+        showSuccess(t('messages.birthdayMerged', 'Person updated with new groups successfully'));
+        onSuccess();
+        onClose();
+      } catch (error) {
+        showError(t('common.error'));
+        logger.error('Error merging birthday:', error);
+      }
     }
   };
 
   const handleDuplicateConfirm = () => {
-      // This is "Create Anyway" logic (Not recommended but maybe needed as fallback?)
-      // Actually, based on the plan, we should PREFER merge.
-      // But what if it IS a different person? 
-      // The modal now should probably offer "Merge" as primary.
-      // Let's assume the modal now has a "Merge" button which calls handleMerge.
-      // If they close, it cancels.
-      // If we want to support "Create New" despite duplicate, we need another button.
-      // For now, we'll implement handleMerge as the primary action for the modal's "Confirm".
-      handleMerge(); 
+    // This is "Create Anyway" logic (Not recommended but maybe needed as fallback?)
+    // Actually, based on the plan, we should PREFER merge.
+    // But what if it IS a different person? 
+    // The modal now should probably offer "Merge" as primary.
+    // Let's assume the modal now has a "Merge" button which calls handleMerge.
+    // If they close, it cancels.
+    // If we want to support "Create New" despite duplicate, we need another button.
+    // For now, we'll implement handleMerge as the primary action for the modal's "Confirm".
+    handleMerge();
   };
 
   const handleSunsetConfirm = (afterSunset: boolean) => {
@@ -523,11 +523,11 @@ export const BirthdayForm = ({
       setShowCreateGroupModal(false);
       setNewGroupName('');
       setSelectedParentGroup('');
-      
+
       // Automatically select the new group
       const currentIds = watch('groupIds') || [];
       setValue('groupIds', [...currentIds, groupId], { shouldValidate: true });
-      
+
       showSuccess(t('messages.groupCreated', 'Group created successfully'));
     } catch (error) {
       logger.error('Error creating group:', error);
@@ -545,14 +545,14 @@ export const BirthdayForm = ({
   // Check for conflicting preferences among selected groups
   const conflictingPreferences = useMemo(() => {
     if (selectedGroupIds.length <= 1) return false;
-    
+
     const selectedGroups = allGroups.filter(g => selectedGroupIds.includes(g.id));
     if (selectedGroups.length === 0) return false;
 
     const preferences = selectedGroups
       .map(g => g.calendar_preference || 'both')
       .filter((v, i, a) => a.indexOf(v) === i); // Unique values
-      
+
     return preferences.length > 1;
   }, [selectedGroupIds, allGroups]);
 
@@ -589,6 +589,15 @@ export const BirthdayForm = ({
                 <input
                   {...register('firstName', {
                     required: t('validation.required'),
+                    validate: (value) => {
+                      if (!value || value.trim().length === 0) {
+                        return t('validation.noWhitespace');
+                      }
+                      if (value.trim().length < 2) {
+                        return t('validation.minLength');
+                      }
+                      return true;
+                    }
                   })}
                   className="w-full px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
@@ -604,6 +613,15 @@ export const BirthdayForm = ({
                 <input
                   {...register('lastName', {
                     required: t('validation.required'),
+                    validate: (value) => {
+                      if (!value || value.trim().length === 0) {
+                        return t('validation.noWhitespace');
+                      }
+                      if (value.trim().length < 2) {
+                        return t('validation.minLength');
+                      }
+                      return true;
+                    }
                   })}
                   className="w-full px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
@@ -621,180 +639,178 @@ export const BirthdayForm = ({
               {/* Tabs */}
               <div className="flex p-1 bg-gray-100 rounded-lg mb-2">
                 <button
-                    type="button"
-                    className={`flex-1 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${
-                        inputType === 'gregorian' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'
+                  type="button"
+                  className={`flex-1 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${inputType === 'gregorian' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'
                     }`}
-                    onClick={() => setInputType('gregorian')}
+                  onClick={() => setInputType('gregorian')}
                 >
-                    {t('guest.gregorianDate', 'Gregorian Date')}
+                  {t('guest.gregorianDate', 'Gregorian Date')}
                 </button>
                 <button
-                    type="button"
-                    className={`flex-1 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${
-                        inputType === 'hebrew' ? 'bg-white shadow text-purple-600' : 'text-gray-500 hover:text-gray-700'
+                  type="button"
+                  className={`flex-1 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${inputType === 'hebrew' ? 'bg-white shadow text-purple-600' : 'text-gray-500 hover:text-gray-700'
                     }`}
-                    onClick={() => setInputType('hebrew')}
+                  onClick={() => setInputType('hebrew')}
                 >
-                    {t('guest.hebrewDate', 'Hebrew Date')}
+                  {t('guest.hebrewDate', 'Hebrew Date')}
                 </button>
               </div>
 
               {inputType === 'gregorian' ? (
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                    <div>
-                      <select
-                        value={selectedDay}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          const day = val ? parseInt(val) : '';
-                          setSelectedDay(day);
-                          const dateString = getDateString(day, selectedMonth, selectedYear);
-                          setValue('birthDateGregorian', dateString as any, { shouldValidate: true });
-                        }}
-                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                      >
-                        <option value="">{t('common.day')}</option>
-                        {days.map((day) => (
-                          <option key={day} value={day}>
-                            {day}
-                          </option>
-                        ))}
-                      </select>
-                      <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
-                        {t('common.day')}
-                      </label>
-                    </div>
-                    <div>
-                      <select
-                        value={selectedMonth}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          const month = val ? parseInt(val) : '';
-                          setSelectedMonth(month);
-                          
-                          let day = selectedDay;
-                          if (val && selectedYear) {
-                            const daysInMonth = getDaysInMonth(month as number, selectedYear as number);
-                            if (typeof day === 'number' && day > daysInMonth) {
-                              day = daysInMonth;
-                              setSelectedDay(day);
-                            }
-                          }
-
-                          const dateString = getDateString(day, month, selectedYear);
-                          setValue('birthDateGregorian', dateString as any, { shouldValidate: true });
-                        }}
-                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                      >
-                        <option value="">{t('common.month')}</option>
-                        {months.map((month) => {
-                          const date = new Date(2000, month - 1, 1);
-                          const monthName = date.toLocaleDateString(i18n.language === 'he' ? 'he-IL' : 'en-US', { month: 'long' });
-                          return (
-                            <option key={month} value={month}>
-                              {monthName}
-                            </option>
-                          );
-                        })}
-                      </select>
-                      <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
-                        {t('common.month')}
-                      </label>
-                    </div>
-                    <div>
-                      <select
-                        value={selectedYear}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          const year = val ? parseInt(val) : '';
-                          setSelectedYear(year);
-                          
-                          let day = selectedDay;
-                          if (val && selectedMonth) {
-                            const daysInMonth = getDaysInMonth(selectedMonth as number, year as number);
-                            if (typeof day === 'number' && day > daysInMonth) {
-                              day = daysInMonth;
-                              setSelectedDay(day);
-                            }
-                          }
-
-                          const dateString = getDateString(day, selectedMonth, year);
-                          setValue('birthDateGregorian', dateString as any, { shouldValidate: true });
-                        }}
-                        className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                      >
-                        <option value="">{t('common.year')}</option>
-                        {years.map((year) => (
-                          <option key={year} value={year}>
-                            {year}
-                          </option>
-                        ))}
-                      </select>
-                      <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
-                        {t('common.year')}
-                      </label>
-                    </div>
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                  <div>
+                    <select
+                      value={selectedDay}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const day = val ? parseInt(val) : '';
+                        setSelectedDay(day);
+                        const dateString = getDateString(day, selectedMonth, selectedYear);
+                        setValue('birthDateGregorian', dateString as any, { shouldValidate: true });
+                      }}
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    >
+                      <option value="">{t('common.day')}</option>
+                      {days.map((day) => (
+                        <option key={day} value={day}>
+                          {day}
+                        </option>
+                      ))}
+                    </select>
+                    <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
+                      {t('common.day')}
+                    </label>
                   </div>
+                  <div>
+                    <select
+                      value={selectedMonth}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const month = val ? parseInt(val) : '';
+                        setSelectedMonth(month);
+
+                        let day = selectedDay;
+                        if (val && selectedYear) {
+                          const daysInMonth = getDaysInMonth(month as number, selectedYear as number);
+                          if (typeof day === 'number' && day > daysInMonth) {
+                            day = daysInMonth;
+                            setSelectedDay(day);
+                          }
+                        }
+
+                        const dateString = getDateString(day, month, selectedYear);
+                        setValue('birthDateGregorian', dateString as any, { shouldValidate: true });
+                      }}
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    >
+                      <option value="">{t('common.month')}</option>
+                      {months.map((month) => {
+                        const date = new Date(2000, month - 1, 1);
+                        const monthName = date.toLocaleDateString(i18n.language === 'he' ? 'he-IL' : 'en-US', { month: 'long' });
+                        return (
+                          <option key={month} value={month}>
+                            {monthName}
+                          </option>
+                        );
+                      })}
+                    </select>
+                    <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
+                      {t('common.month')}
+                    </label>
+                  </div>
+                  <div>
+                    <select
+                      value={selectedYear}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const year = val ? parseInt(val) : '';
+                        setSelectedYear(year);
+
+                        let day = selectedDay;
+                        if (val && selectedMonth) {
+                          const daysInMonth = getDaysInMonth(selectedMonth as number, year as number);
+                          if (typeof day === 'number' && day > daysInMonth) {
+                            day = daysInMonth;
+                            setSelectedDay(day);
+                          }
+                        }
+
+                        const dateString = getDateString(day, selectedMonth, year);
+                        setValue('birthDateGregorian', dateString as any, { shouldValidate: true });
+                      }}
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    >
+                      <option value="">{t('common.year')}</option>
+                      {years.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                    </select>
+                    <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
+                      {t('common.year')}
+                    </label>
+                  </div>
+                </div>
               ) : (
-                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                    {/* Hebrew Day */}
-                    <div>
-                        <select 
-                            value={hebrewDay} 
-                            onChange={(e) => setHebrewDay(Number(e.target.value))}
-                            className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-center"
-                            dir={i18n.language === 'he' ? "rtl" : "ltr"}
-                        >
-                            {Array.from({ length: 30 }, (_, i) => i + 1).map(d => (
-                                <option key={d} value={d}>
-                                    {i18n.language === 'he' ? numberToHebrewLetter(d) : d}
-                                </option>
-                            ))}
-                        </select>
-                        <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
-                          {t('common.day')}
-                        </label>
-                    </div>
-
-                    {/* Hebrew Month */}
-                    <div>
-                        <select 
-                            value={hebrewMonth} 
-                            onChange={(e) => setHebrewMonth(e.target.value)}
-                            className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-center"
-                            dir={i18n.language === 'he' ? "rtl" : "ltr"}
-                        >
-                            {getHebrewMonths().map((m, idx) => (
-                                <option key={m} value={HEBREW_MONTHS_EN[idx]}>
-                                    {m}
-                                </option>
-                            ))}
-                        </select>
-                        <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
-                          {t('common.month')}
-                        </label>
-                    </div>
-
-                    {/* Hebrew Year */}
-                    <div>
-                        <select
-                            value={hebrewYear}
-                            onChange={(e) => setHebrewYear(Number(e.target.value))}
-                            className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-center"
-                            dir="ltr"
-                        >
-                            {HEBREW_YEAR_RANGE.map(y => (
-                                <option key={y} value={y}>
-                                    {y} {i18n.language === 'he' ? `(${numberToHebrewYear(y)})` : ''}
-                                </option>
-                            ))}
-                        </select>
-                        <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
-                          {t('common.year')}
-                        </label>
-                    </div>
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                  {/* Hebrew Day */}
+                  <div>
+                    <select
+                      value={hebrewDay}
+                      onChange={(e) => setHebrewDay(Number(e.target.value))}
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-center"
+                      dir={i18n.language === 'he' ? "rtl" : "ltr"}
+                    >
+                      {Array.from({ length: 30 }, (_, i) => i + 1).map(d => (
+                        <option key={d} value={d}>
+                          {i18n.language === 'he' ? numberToHebrewLetter(d) : d}
+                        </option>
+                      ))}
+                    </select>
+                    <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
+                      {t('common.day')}
+                    </label>
                   </div>
+
+                  {/* Hebrew Month */}
+                  <div>
+                    <select
+                      value={hebrewMonth}
+                      onChange={(e) => setHebrewMonth(e.target.value)}
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-center"
+                      dir={i18n.language === 'he' ? "rtl" : "ltr"}
+                    >
+                      {getHebrewMonths().map((m, idx) => (
+                        <option key={m} value={HEBREW_MONTHS_EN[idx]}>
+                          {m}
+                        </option>
+                      ))}
+                    </select>
+                    <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
+                      {t('common.month')}
+                    </label>
+                  </div>
+
+                  {/* Hebrew Year */}
+                  <div>
+                    <select
+                      value={hebrewYear}
+                      onChange={(e) => setHebrewYear(Number(e.target.value))}
+                      className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-center"
+                      dir="ltr"
+                    >
+                      {HEBREW_YEAR_RANGE.map(y => (
+                        <option key={y} value={y}>
+                          {y} {i18n.language === 'he' ? `(${numberToHebrewYear(y)})` : ''}
+                        </option>
+                      ))}
+                    </select>
+                    <label className="block text-[10px] sm:text-xs text-gray-500 mt-0.5 text-center">
+                      {t('common.year')}
+                    </label>
+                  </div>
+                </div>
               )}
 
               <input
@@ -872,7 +888,7 @@ export const BirthdayForm = ({
                   </button>
                   {showSunsetTooltip && (
                     <>
-                      <div 
+                      <div
                         className="fixed inset-0 z-10"
                         onClick={() => setShowSunsetTooltip(false)}
                       />
@@ -889,12 +905,12 @@ export const BirthdayForm = ({
             <div className="flex gap-1.5 sm:gap-2 items-start">
               <div className="flex-1">
                 <MultiSelectGroups
-                    groups={groupOptions}
-                    selectedIds={watch('groupIds')}
-                    onChange={(ids) => setValue('groupIds', ids, { shouldValidate: true })}
-                    label={t('birthday.group') + ' *'}
-                    error={errors.groupIds ? String(errors.groupIds.message) : undefined} // Type check workaround
-                    placeholder={t('birthday.selectGroup')}
+                  groups={groupOptions}
+                  selectedIds={watch('groupIds')}
+                  onChange={(ids) => setValue('groupIds', ids, { shouldValidate: true })}
+                  label={t('birthday.group') + ' *'}
+                  error={errors.groupIds ? String(errors.groupIds.message) : undefined} // Type check workaround
+                  placeholder={t('birthday.selectGroup')}
                 />
                 {/* Hidden field for validation if needed, but MultiSelect uses setValue */}
                 <input type="hidden" {...register('groupIds', { required: t('birthday.selectGroup') })} />
@@ -938,62 +954,60 @@ export const BirthdayForm = ({
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                     {t('birthday.calendarPreference')}
                   </label>
-              <div className="space-y-1 sm:space-y-2">
-                {firstSelectedGroup && firstSelectedGroup.calendar_preference && !conflictingPreferences && (
-                  <div className="text-xs text-gray-600 bg-gray-50 p-1.5 sm:p-2 rounded">
-                    {t('birthday.groupPreference', 'Group preference')} ({firstSelectedGroup.name}): <span className="font-semibold">{t(`birthday.${firstSelectedGroup.calendar_preference}`)}</span>
+                  <div className="space-y-1 sm:space-y-2">
+                    {firstSelectedGroup && firstSelectedGroup.calendar_preference && !conflictingPreferences && (
+                      <div className="text-xs text-gray-600 bg-gray-50 p-1.5 sm:p-2 rounded">
+                        {t('birthday.groupPreference', 'Group preference')} ({firstSelectedGroup.name}): <span className="font-semibold">{t(`birthday.${firstSelectedGroup.calendar_preference}`)}</span>
+                      </div>
+                    )}
+                    {conflictingPreferences && !calendarPreferenceOverride && (
+                      <div className="text-xs text-red-600 bg-red-50 p-1.5 sm:p-2 rounded border border-red-200">
+                        {t('birthday.preferenceConflict', 'Selected groups have conflicting preferences. Please select a manual setting.')}
+                      </div>
+                    )}
+                    <select
+                      {...register('calendarPreferenceOverride', {
+                        required: conflictingPreferences ? t('birthday.selectPreferenceRequired') : false
+                      })}
+                      className={`w-full px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-base border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${conflictingPreferences && !calendarPreferenceOverride ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                        }`}
+                    >
+                      <option value="" disabled={conflictingPreferences}>
+                        {conflictingPreferences
+                          ? t('common.select', 'Select')
+                          : t('birthday.useGroupDefault', 'Use group default')}
+                      </option>
+                      <option value="gregorian">{t('birthday.gregorianOnly')}</option>
+                      <option value="hebrew">{t('birthday.hebrewOnly')}</option>
+                      <option value="both">{t('birthday.both')}</option>
+                    </select>
+                    {errors.calendarPreferenceOverride && (
+                      <p className="text-red-500 text-xs mt-0.5 sm:mt-1">{errors.calendarPreferenceOverride.message}</p>
+                    )}
+                    {!conflictingPreferences && (
+                      <p className="text-xs text-gray-500 leading-tight">
+                        {t('birthday.preferenceExplanation', 'This setting overrides the group preference for this person only')}
+                      </p>
+                    )}
                   </div>
-                )}
-                {conflictingPreferences && !calendarPreferenceOverride && (
-                  <div className="text-xs text-red-600 bg-red-50 p-1.5 sm:p-2 rounded border border-red-200">
-                    {t('birthday.preferenceConflict', 'Selected groups have conflicting preferences. Please select a manual setting.')}
-                  </div>
-                )}
-                <select
-                  {...register('calendarPreferenceOverride', {
-                    required: conflictingPreferences ? t('birthday.selectPreferenceRequired') : false
-                  })}
-                  className={`w-full px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-base border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    conflictingPreferences && !calendarPreferenceOverride ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                  }`}
-                >
-                  <option value="" disabled={conflictingPreferences}>
-                    {conflictingPreferences 
-                      ? t('common.select', 'Select') 
-                      : t('birthday.useGroupDefault', 'Use group default')}
-                  </option>
-                  <option value="gregorian">{t('birthday.gregorianOnly')}</option>
-                  <option value="hebrew">{t('birthday.hebrewOnly')}</option>
-                  <option value="both">{t('birthday.both')}</option>
-                </select>
-                {errors.calendarPreferenceOverride && (
-                  <p className="text-red-500 text-xs mt-0.5 sm:mt-1">{errors.calendarPreferenceOverride.message}</p>
-                )}
-                {!conflictingPreferences && (
-                  <p className="text-xs text-gray-500 leading-tight">
-                    {t('birthday.preferenceExplanation', 'This setting overrides the group preference for this person only')}
-                  </p>
-                )}
-              </div>
-            </div>
+                </div>
 
-            <div>
-              <div className="flex justify-between items-end mb-0.5 sm:mb-1">
-                <label className="block text-xs sm:text-sm font-medium text-gray-700">
-                  {t('birthday.notes')}
-                </label>
-                <span className={`text-xs ${
-                  (watch('notes')?.length || 0) >= 190 ? 'text-red-500 font-medium' : 'text-gray-400'
-                }`}>
-                  {watch('notes')?.length || 0}/200
-                </span>
-              </div>
-              <textarea
-                {...register('notes')}
-                rows={1}
-                maxLength={200}
-                className="w-full px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-              />
+                <div>
+                  <div className="flex justify-between items-end mb-0.5 sm:mb-1">
+                    <label className="block text-xs sm:text-sm font-medium text-gray-700">
+                      {t('birthday.notes')}
+                    </label>
+                    <span className={`text-xs ${(watch('notes')?.length || 0) >= 190 ? 'text-red-500 font-medium' : 'text-gray-400'
+                      }`}>
+                      {watch('notes')?.length || 0}/200
+                    </span>
+                  </div>
+                  <textarea
+                    {...register('notes')}
+                    rows={1}
+                    maxLength={200}
+                    className="w-full px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  />
                   <p className="text-xs text-gray-500 mt-1">
                     {t('birthday.notesSyncHint')}
                   </p>

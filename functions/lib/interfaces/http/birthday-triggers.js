@@ -66,7 +66,8 @@ exports.onBirthdayWriteFn = functions.firestore
     let updateData = {};
     if (shouldCalculate) {
         try {
-            updateData = await deps.calculateHebrewDataUseCase.execute(context.params.birthdayId, afterData.birth_date_gregorian, afterData.after_sunset || false);
+            updateData = await deps.calculateHebrewDataUseCase.execute(context.params.birthdayId, afterData.birth_date_gregorian, afterData.after_sunset || false, afterData.tenant_id // Pass tenantId for timezone lookup
+            );
             return null; // Return early, don't continue to sync
         }
         catch (e) {

@@ -549,7 +549,9 @@
     "passwordsDontMatch": "Passwords don't match",
     "calendarError": "Cannot open Google Calendar. Please try again.",
     "invalidPhoneNumber": "Invalid phone number",
-    "futureDate": "Birth date cannot be in the future"
+    "futureDate": "Birth date cannot be in the future",
+    "minLength": "Please enter at least 2 characters",
+    "noWhitespace": "This field cannot contain only whitespace"
   },
   "import": {
     "pasteTitle": "Paste Birthday List",
@@ -559,11 +561,11 @@
     "pasteInstructionDate": "Each line should contain a name and date (e.g., John Smith 15/03/1990)",
     "pasteInstructionFormat": "Supports formats: DD/MM/YYYY, DD.MM.YY, YYYY-MM-DD, and more",
     "pasteInstructionNames": "Supports compound names and two-part surnames (Ben David, Abu Hatzeira, etc.)",
-    "pasteInstructionGender": "Specify \"male\"/\"female\" (or \"זכר\"/\"נקבה\") for gender detection",
+    "pasteInstructionGender": "Specify \"male\"/\"female\" (or \"m\"/\"f\") for gender detection (supports Hebrew/Spanish too)",
     "pasteInstructionSunset": "Write \"yes\" or \"כן\" for after sunset birth (default: no)",
     "pasteInstructionNotes": "Notes in parentheses will be automatically added to notes field",
     "pasteInstructionSmart": "System automatically removes titles (Rabbi, Dr.) and keywords",
-    "pastePlaceholder": "Example:\nJohn Smith 15/03/1990 male\nSarah Cohen 22.05.85 female yes\nDavid Israeli 1985-12-10 (good friend)",
+    "pastePlaceholder": "Example:\nJohn Smith 15/03/1990 male\nSarah Cohen 22.05.85 female yes\nCarlos Ruiz 10/10/1990 hombre\nDavid Israeli 1985-12-10 (good friend)",
     "pasteLineCount": "{{count}} lines",
     "pasteCharacters": "characters",
     "pasteAnalyze": "Analyze List",

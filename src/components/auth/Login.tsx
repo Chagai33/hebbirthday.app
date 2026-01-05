@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
-import { Mail, Lock, LogIn, Globe, Gift, BookOpen } from 'lucide-react';
+import { Mail, Lock, LogIn, Gift, BookOpen } from 'lucide-react';
 import { ForgotPasswordModal } from './ForgotPasswordModal';
 import { authService } from '../../services/auth.service';
 import { DeveloperCredit } from '../common/DeveloperCredit';
+import { LanguageSwitcher } from '../common/LanguageSwitcher';
 
 export const Login: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { user, signIn, signInWithGoogle, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -53,10 +54,10 @@ export const Login: React.FC = () => {
             setError(getErrorMessage(err.message));
           }
         } catch {
-           setError(getErrorMessage(err.message));
+          setError(getErrorMessage(err.message));
         }
       } else {
-         setError(getErrorMessage(err.message));
+        setError(getErrorMessage(err.message));
       }
       setIsSubmitting(false);
     }
@@ -75,10 +76,7 @@ export const Login: React.FC = () => {
 
   const loading = isSubmitting || authLoading;
 
-  const toggleLanguage = () => {
-    const newLang = i18n.language === 'he' ? 'en' : 'he';
-    i18n.changeLanguage(newLang);
-  };
+  // toggleLanguage removed - using LanguageSwitcher
 
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-8 overflow-y-auto">
@@ -98,13 +96,7 @@ export const Login: React.FC = () => {
           >
             <Gift className="w-5 h-5" />
           </button>
-          <button
-            onClick={toggleLanguage}
-            className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            title={i18n.language === 'he' ? t('common.switchToEnglish') : t('common.switchToHebrew')}
-          >
-            <Globe className="w-5 h-5" />
-          </button>
+          <LanguageSwitcher className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" variant="minimal" />
         </div>
         <div className="text-center mb-8">
           <div className="flex flex-col items-center justify-center mb-6">
@@ -122,7 +114,7 @@ export const Login: React.FC = () => {
           </h1>
         </div>
 
-          {error && (
+        {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
             {error}
           </div>
@@ -156,68 +148,68 @@ export const Login: React.FC = () => {
         </button>
 
         {!showEmailForm ? (
-            <button
-                type="button"
-                onClick={() => setShowEmailForm(true)}
-                className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
-            >
-                <Mail className="w-5 h-5" />
-                {t('auth.signInWithEmail')}
-            </button>
+          <button
+            type="button"
+            onClick={() => setShowEmailForm(true)}
+            className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
+          >
+            <Mail className="w-5 h-5" />
+            {t('auth.signInWithEmail')}
+          </button>
         ) : (
-            <form onSubmit={handleSubmit} className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+          <form onSubmit={handleSubmit} className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t('auth.email')}
-                </label>
-                <div className="relative">
+              </label>
+              <div className="relative">
                 <Mail className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full ps-10 pe-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    autoComplete="email"
-                    required
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full ps-10 pe-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  autoComplete="email"
+                  required
                 />
-                </div>
+              </div>
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t('auth.password')}
-                </label>
-                <div className="relative">
+              </label>
+              <div className="relative">
                 <Lock className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full ps-10 pe-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    autoComplete="current-password"
-                    required
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full ps-10 pe-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  autoComplete="current-password"
+                  required
                 />
-                </div>
-                <div className="flex justify-end mt-1">
+              </div>
+              <div className="flex justify-end mt-1">
                 <button
-                    type="button"
-                    onClick={() => setShowForgotPassword(true)}
-                    className="text-xs text-blue-600 hover:text-blue-700"
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-xs text-blue-600 hover:text-blue-700"
                 >
-                    {t('auth.forgotPassword', 'שכחת סיסמה?')}
+                  {t('auth.forgotPassword', 'שכחת סיסמה?')}
                 </button>
-                </div>
+              </div>
             </div>
 
             <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-                <LogIn className="w-5 h-5" />
-                {loading ? t('common.loading') : t('auth.signIn')}
+              <LogIn className="w-5 h-5" />
+              {loading ? t('common.loading') : t('auth.signIn')}
             </button>
-            </form>
+          </form>
         )}
 
         <p className="mt-6 text-center text-sm text-gray-600">

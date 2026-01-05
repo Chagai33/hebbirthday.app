@@ -39,7 +39,7 @@ export const Dashboard = () => {
   const initializeRootGroups = useInitializeRootGroups();
   const queryClient = useQueryClient();
   const { success, error: showError } = useToast();
-  
+
   // Ref for the hidden file input
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -51,7 +51,7 @@ export const Dashboard = () => {
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showTextImport, setShowTextImport] = useState(false);
   const [originalPastedText, setOriginalPastedText] = useState<string>('');
-  
+
   const [isStatsExpanded, setIsStatsExpanded] = useState(() => {
     const saved = localStorage.getItem('stats-expanded');
     return saved !== null ? JSON.parse(saved) : true;
@@ -76,7 +76,7 @@ export const Dashboard = () => {
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(b.id);
     });
-    
+
     const duplicates = new Set<string>();
     map.forEach(ids => {
       if (ids.length > 1) {
@@ -196,21 +196,21 @@ export const Dashboard = () => {
   // פונקציה לפרסור Wishlist
   const parseWishlist = (wishlistStr: string | undefined): Array<{ name: string; priority: 'high' | 'medium' | 'low' }> => {
     if (!wishlistStr || !wishlistStr.trim()) return [];
-    
+
     const items: Array<{ name: string; priority: 'high' | 'medium' | 'low' }> = [];
     const parts = wishlistStr.split(';').map(p => p.trim()).filter(p => p);
-    
+
     for (const part of parts) {
       // פורמט: "שם פריט (עדיפות: X)" או "שם פריט (Priority: X)"
       const priorityMatch = part.match(/\(.*?(?:עדיפות|Priority|priority):\s*([^)]+)\)/i);
       const priorityStr = priorityMatch ? priorityMatch[1].trim().toLowerCase() : 'medium';
-      
+
       // חילוץ שם הפריט (הכל לפני הסוגריים)
       const nameMatch = part.match(/^([^(]+)/);
       const name = nameMatch ? nameMatch[1].trim() : part.trim();
-      
+
       if (!name) continue;
-      
+
       // תרגום עדיפות
       let priority: 'high' | 'medium' | 'low' = 'medium';
       if (priorityStr === 'high' || priorityStr === 'גבוהה' || priorityStr === 'גבוה') {
@@ -218,17 +218,17 @@ export const Dashboard = () => {
       } else if (priorityStr === 'low' || priorityStr === 'נמוכה' || priorityStr === 'נמוך') {
         priority = 'low';
       }
-      
+
       items.push({ name, priority });
     }
-    
+
     return items;
   };
 
   // פונקציה לחיפוש קבוצה לפי שם
   const findGroupByName = (groupName: string | undefined): string | undefined => {
     if (!groupName || !groupName.trim()) return undefined;
-    
+
     const normalizedName = groupName.trim().toLowerCase();
     const found = allGroups.find(g => g.name.toLowerCase() === normalizedName);
     return found?.id;
@@ -308,7 +308,7 @@ export const Dashboard = () => {
       // All failed
       showError(t('messages.importError', 'שגיאה בייבוא הקובץ'));
     }
-    
+
     setShowCSVPreview(false);
   };
 
@@ -330,7 +330,7 @@ export const Dashboard = () => {
       <div className="space-y-3 sm:space-y-4">
         {/* Divider עדין מעל הסטטיסטיקה */}
         <div className="border-t border-gray-200"></div>
-        
+
         {/* שורה עם חץ קטן וכרטיסי סטטיסטיקה */}
         <div className="flex items-center gap-2">
           <button
@@ -347,11 +347,10 @@ export const Dashboard = () => {
               <span className="font-medium">{t('dashboard.statistics', 'סטטיסטיקה')}</span>
             )}
           </button>
-          
+
           <div
-            className={`flex-1 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 transition-all duration-300 ease-in-out overflow-hidden ${
-              isStatsExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
-            }`}
+            className={`flex-1 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 transition-all duration-300 ease-in-out overflow-hidden ${isStatsExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+              }`}
           >
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-sm border border-blue-200 p-1.5 sm:p-2.5 hover:shadow-md transition-all">
               <div className="flex flex-row items-center justify-between gap-1">
@@ -424,7 +423,7 @@ export const Dashboard = () => {
 
         {/* Divider עדין מעל אזור הפעולות */}
         <div className="border-t border-gray-200"></div>
-        
+
         {/* Toolbar קומפקטי לכפתורים */}
         <div className="hidden sm:flex items-center gap-2 sm:gap-3 py-2">
           {i18n.language === 'he' ? (
@@ -457,10 +456,10 @@ export const Dashboard = () => {
                 <Upload className="w-4 h-4" />
                 <span>{t('birthday.importCSV', 'Import CSV')}</span>
               </label>
-              
+
               {/* Separator */}
               <div className="h-8 w-px bg-gray-300 mx-1" />
-              
+
               {/* קבוצה 2: Google Calendar */}
               <div className="flex items-center">
                 <GoogleCalendarButton isCompact={true} onManageClick={() => setShowCalendarModal(true)} />
@@ -472,10 +471,10 @@ export const Dashboard = () => {
               <div className="flex items-center">
                 <GoogleCalendarButton isCompact={true} onManageClick={() => setShowCalendarModal(true)} />
               </div>
-              
+
               {/* Separator */}
               <div className="h-8 w-px bg-gray-300 mx-1" />
-              
+
               {/* קבוצה 2: פעולות ראשיות */}
               <label className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg font-medium transition-all cursor-pointer text-sm">
                 <input
@@ -507,7 +506,7 @@ export const Dashboard = () => {
             </>
           )}
         </div>
-        
+
         <div className="space-y-3 sm:space-y-4">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
@@ -526,7 +525,7 @@ export const Dashboard = () => {
       {showForm && (
         <BirthdayForm
           onClose={handleCloseForm}
-          onSuccess={() => {}}
+          onSuccess={() => { }}
           editBirthday={editBirthday}
         />
       )}
@@ -562,9 +561,9 @@ export const Dashboard = () => {
         hidden={showForm || showCSVPreview || showCalendarModal || showZodiacStats || showTextImport}
       />
 
-      <GoogleCalendarModal 
-        isOpen={showCalendarModal} 
-        onClose={() => setShowCalendarModal(false)} 
+      <GoogleCalendarModal
+        isOpen={showCalendarModal}
+        onClose={() => setShowCalendarModal(false)}
       />
     </Layout>
   );
