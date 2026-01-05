@@ -5,6 +5,7 @@ import { Group } from '../../types';
 import { MultiSelectGroups } from '../common/MultiSelectGroups';
 import { useCreateGroup } from '../../hooks/useGroups';
 import { logger } from '../../utils/logger';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 interface AssignGroupModalProps {
   isOpen: boolean;
@@ -28,6 +29,10 @@ export const AssignGroupModal = ({
   const [newGroupParentId, setNewGroupParentId] = useState('');
 
   const createGroup = useCreateGroup();
+
+  // Accessibility: Focus management
+  const modalFocusRef = useFocusTrap(isOpen, onClose);
+  useFocusReturn(isOpen);
 
   // Reset state when modal opens/closes - modal always opens empty (add mode)
   useEffect(() => {
@@ -151,8 +156,12 @@ export const AssignGroupModal = ({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200"
+        ref={modalFocusRef}
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[calc(100vh-2rem)] overflow-y-auto p-6 animate-in fade-in zoom-in duration-200"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="assign-group-modal-title"
       >
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
@@ -160,7 +169,7 @@ export const AssignGroupModal = ({
               <FolderPlus className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 id="assign-group-modal-title" className="text-xl font-bold text-gray-900">
                 {t('groups.assignToGroup', 'הוספה לקבוצה')}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
@@ -170,9 +179,10 @@ export const AssignGroupModal = ({
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors rounded-full p-1 hover:bg-gray-100"
+            className="p-3 text-gray-500 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            aria-label={t('common.close')}
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { X, Info, AlertCircle, Sparkles } from 'lucide-react';
 import { Birthday } from '../../types';
 import { zodiacService } from '../../services/zodiac.service';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 interface ZodiacStatsModalProps {
   isOpen: boolean;
@@ -16,6 +17,10 @@ export const ZodiacStatsModal: React.FC<ZodiacStatsModalProps> = ({
   birthdays,
 }) => {
   const { t } = useTranslation();
+
+  // Accessibility: Focus management
+  const modalFocusRef = useFocusTrap(isOpen, onClose);
+  useFocusReturn(isOpen);
 
   const stats = useMemo(() => {
     const gregorianCounts: Record<string, number> = {};
@@ -53,15 +58,16 @@ export const ZodiacStatsModal: React.FC<ZodiacStatsModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+      <div ref={modalFocusRef} className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full p-6 max-h-[calc(100vh-2rem)] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="zodiac-stats-modal-title">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <h2 id="zodiac-stats-modal-title" className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Info className="w-6 h-6 text-blue-600" />
             {t('zodiac.statsTitle', 'סטטיסטיקת מזלות')}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-3 text-gray-500 hover:text-gray-600 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            aria-label={t('common.close')}
           >
             <X className="w-6 h-6" />
           </button>

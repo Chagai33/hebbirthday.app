@@ -10,6 +10,7 @@ import {
   useDeleteWishlistItem,
 } from '../../hooks/useWishlist';
 import { analyticsService } from '../../services/analytics.service';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 interface WishlistModalProps {
   isOpen: boolean;
@@ -31,6 +32,10 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
     description: '',
     priority: 'medium' as WishlistPriority,
   });
+
+  // Accessibility: Focus management
+  const modalFocusRef = useFocusTrap(isOpen, onClose);
+  useFocusReturn(isOpen);
 
   // Track wishlist usage when modal opens
   React.useEffect(() => {
@@ -120,7 +125,7 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <div ref={modalFocusRef} className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" role="dialog" aria-modal="true" aria-labelledby="wishlist-modal-title">
         <div className="bg-gradient-to-r from-pink-500 to-purple-600 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -128,7 +133,7 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
                 <Gift className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold">
+                <h2 id="wishlist-modal-title" className="text-2xl font-bold">
                   {t('wishlist.title')}
                 </h2>
                 <p className="text-pink-100 text-sm">
@@ -141,7 +146,8 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
+              className="p-3 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              aria-label={t('common.close')}
             >
               <X className="w-6 h-6" />
             </button>

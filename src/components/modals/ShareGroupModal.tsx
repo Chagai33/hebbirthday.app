@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { X, Link as LinkIcon, Copy, Check, RefreshCw, AlertCircle, Share2 } from 'lucide-react';
 import { Group } from '../../types';
 import { groupService } from '../../services/group.service';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 interface ShareGroupModalProps {
   group: Group;
@@ -17,6 +18,10 @@ export const ShareGroupModal: React.FC<ShareGroupModalProps> = ({ group, onClose
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedWhatsApp, setCopiedWhatsApp] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Accessibility: Focus management
+  const modalFocusRef = useFocusTrap(true, onClose);
+  useFocusReturn(true);
 
   // Generate guest link URL
   const guestLink = guestToken
@@ -118,7 +123,7 @@ ${guestLink}
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto my-auto">
+      <div ref={modalFocusRef} className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[calc(100vh-2rem)] overflow-y-auto my-auto" role="dialog" aria-modal="true" aria-labelledby="share-group-modal-title">
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
@@ -129,7 +134,7 @@ ${guestLink}
               <Share2 className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: group.color }} />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-base sm:text-xl font-bold text-gray-900 truncate">
+              <h2 id="share-group-modal-title" className="text-base sm:text-xl font-bold text-gray-900 truncate">
                 {t('groups.shareGroupTitle', 'שיתוף קבוצה - {{name}}', { name: group.name })}
               </h2>
               <p className="text-xs sm:text-sm text-gray-600 truncate">
@@ -139,7 +144,8 @@ ${guestLink}
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
+            className="p-3 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            aria-label={t('common.close')}
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>

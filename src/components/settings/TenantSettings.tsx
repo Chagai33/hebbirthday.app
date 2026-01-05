@@ -12,6 +12,7 @@ import { Toast } from '../common/Toast';
 import { httpsCallable } from 'firebase/functions';
 import { functions, auth } from '../../config/firebase';
 import { signOut } from 'firebase/auth';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 
 interface TenantSettingsProps {
@@ -40,6 +41,13 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
     const [deletionSummary, setDeletionSummary] = useState<{ groupsCount: number, birthdaysCount: number } | null>(null);
     const [isCalculatingSummary, setIsCalculatingSummary] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    // Accessibility: Focus management for main settings modal
+    const settingsFocusRef = useFocusTrap(true, onClose);
+    useFocusReturn(true);
+
+    // Accessibility: Focus management for delete confirmation modal
+    const deleteFocusRef = useFocusTrap(showDeleteConfirm, () => setShowDeleteConfirm(false));
 
     const handleSave = async () => {
         if (!currentTenant) return;
@@ -110,7 +118,7 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
                 className="z-[60]"
             />
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-2xl shadow-2xl max-w-sm sm:max-w-md w-full p-4 sm:p-5 max-h-[90vh] overflow-y-auto">
+                <div ref={settingsFocusRef} className="bg-white rounded-2xl shadow-2xl max-w-sm sm:max-w-md w-full p-4 sm:p-5 max-h-[90vh] overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="tenant-settings-modal-title">
                     {/* Header - Compact */}
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
@@ -118,7 +126,7 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
                                 <Settings className="w-5 h-5 text-blue-600" />
                             </div>
                             <div>
-                                <h2 className="text-xl font-bold text-gray-900">
+                                <h2 id="tenant-settings-modal-title" className="text-xl font-bold text-gray-900">
                                     {t('tenant.settings')}
                                 </h2>
                                 <p className="text-xs text-gray-600">{currentTenant.name}</p>
@@ -127,6 +135,7 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
                         <button
                             onClick={onClose}
                             className="text-gray-400 hover:text-gray-600 transition-colors p-1.5 hover:bg-gray-100 rounded-lg"
+                            aria-label={t('common.close')}
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -271,12 +280,12 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+                    <div ref={deleteFocusRef} className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6" role="dialog" aria-modal="true" aria-labelledby="delete-account-modal-title">
                         <div className="flex flex-col items-center text-center mb-6">
                             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
                                 <AlertTriangle className="w-8 h-8 text-red-600" />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">
+                            <h3 id="delete-account-modal-title" className="text-xl font-bold text-gray-900 mb-2">
                                 {t('settings.deleteAccountConfirmTitle', 'Are you absolutely sure?')}
                             </h3>
                             <p className="text-gray-600">

@@ -3,6 +3,7 @@ import { X, ArrowLeft, ArrowRight, AlertTriangle } from 'lucide-react';
 import { GoogleCalendarButton } from '../calendar/GoogleCalendarButton';
 import { useTranslation } from 'react-i18next';
 import { useGoogleCalendar } from '../../contexts/GoogleCalendarContext';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 interface GoogleCalendarModalProps {
   isOpen: boolean;
@@ -14,16 +15,21 @@ export const GoogleCalendarModal: React.FC<GoogleCalendarModalProps> = ({ isOpen
   const { t, i18n } = useTranslation();
   const { isConnected, isPrimaryCalendar } = useGoogleCalendar();
 
+  // Accessibility: Focus management
+  const modalFocusRef = useFocusTrap(isOpen, onClose);
+  useFocusReturn(isOpen); // Will work correctly with the improved hook
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-slide-in" onClick={(e) => e.stopPropagation()}>
+      <div ref={modalFocusRef} className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[calc(100vh-2rem)] overflow-y-auto p-6 animate-slide-in" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="google-calendar-modal-title">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900">{t('googleCalendar.title')}</h2>
+          <h2 id="google-calendar-modal-title" className="text-xl font-bold text-gray-900">{t('googleCalendar.title')}</h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-3 text-gray-500 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            aria-label={t('common.close')}
           >
             <X className="w-5 h-5" />
           </button>

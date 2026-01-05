@@ -16,6 +16,7 @@ import { Toast } from '../common/Toast';
 import { useToast } from '../../hooks/useToast';
 import { HDate } from '@hebcal/core';
 import { analyticsService } from '../../services/analytics.service';
+import { useFocusTrap } from '../../hooks/useAccessibility';
 
 // --- Hebrew Format Helpers ---
 const HEBREW_MONTHS_HE = [
@@ -98,6 +99,9 @@ export const BirthdayForm = ({
   const [hasUnsyncedChanges, setHasUnsyncedChanges] = useState(false);
   const [showSunsetTooltip, setShowSunsetTooltip] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Accessibility: Focus trap for form modal
+  const formFocusRef = useFocusTrap(true, onClose);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -559,14 +563,15 @@ export const BirthdayForm = ({
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start sm:items-center justify-center z-50 p-2 sm:p-4 pt-3 sm:pt-4 pb-20 sm:pb-4 overflow-hidden" onClick={onClose}>
-        <div className="bg-white rounded-lg sm:rounded-2xl shadow-2xl max-w-2xl w-full p-3 sm:p-6 max-h-[calc(100vh-6rem)] sm:max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div ref={formFocusRef} className="bg-white rounded-lg sm:rounded-2xl shadow-2xl max-w-2xl w-full p-3 sm:p-6 max-h-[calc(100vh-6rem)] sm:max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="birthday-form-title">
           <div className="flex items-center justify-between mb-2 sm:mb-6">
-            <h2 className="text-base sm:text-2xl font-bold text-gray-900">
+            <h2 id="birthday-form-title" className="text-base sm:text-2xl font-bold text-gray-900">
               {editBirthday ? t('birthday.editBirthday') : t('birthday.addBirthday')}
             </h2>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+              className="text-gray-400 hover:text-gray-600 transition-colors p-3"
+              aria-label={t('common.close')}
             >
               <X className="w-4 h-4 sm:w-6 sm:h-6" />
             </button>
@@ -583,12 +588,13 @@ export const BirthdayForm = ({
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
               <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">
+                <label htmlFor="firstName" className="block text-xs sm:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">
                   {t('birthday.firstName')} *
                 </label>
                 <input
+                  id="firstName"
                   {...register('firstName', {
-                    required: t('validation.required'),
+                    required: t('validation.firstNameRequired'),
                     validate: (value) => {
                       if (!value || value.trim().length === 0) {
                         return t('validation.noWhitespace');
@@ -600,19 +606,23 @@ export const BirthdayForm = ({
                     }
                   })}
                   className="w-full px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  aria-invalid={!!errors.firstName}
+                  aria-describedby={errors.firstName ? 'firstName-error' : undefined}
+                  aria-required="true"
                 />
                 {errors.firstName && (
-                  <p className="text-red-500 text-xs mt-0.5 sm:mt-1">{errors.firstName.message}</p>
+                  <p id="firstName-error" className="text-red-500 text-xs mt-0.5 sm:mt-1" role="alert">{errors.firstName.message}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">
+                <label htmlFor="lastName" className="block text-xs sm:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">
                   {t('birthday.lastName')} *
                 </label>
                 <input
+                  id="lastName"
                   {...register('lastName', {
-                    required: t('validation.required'),
+                    required: t('validation.lastNameRequired'),
                     validate: (value) => {
                       if (!value || value.trim().length === 0) {
                         return t('validation.noWhitespace');
@@ -624,9 +634,12 @@ export const BirthdayForm = ({
                     }
                   })}
                   className="w-full px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  aria-invalid={!!errors.lastName}
+                  aria-describedby={errors.lastName ? 'lastName-error' : undefined}
+                  aria-required="true"
                 />
                 {errors.lastName && (
-                  <p className="text-red-500 text-xs mt-0.5 sm:mt-1">{errors.lastName.message}</p>
+                  <p id="lastName-error" className="text-red-500 text-xs mt-0.5 sm:mt-1" role="alert">{errors.lastName.message}</p>
                 )}
               </div>
             </div>
@@ -637,9 +650,13 @@ export const BirthdayForm = ({
               </label>
 
               {/* Tabs */}
-              <div className="flex p-1 bg-gray-100 rounded-lg mb-2">
+              <div className="flex p-1 bg-gray-100 rounded-lg mb-2" role="tablist">
                 <button
                   type="button"
+                  role="tab"
+                  id="gregorian-tab"
+                  aria-selected={inputType === 'gregorian'}
+                  aria-controls="gregorian-panel"
                   className={`flex-1 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${inputType === 'gregorian' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'
                     }`}
                   onClick={() => setInputType('gregorian')}
@@ -648,6 +665,10 @@ export const BirthdayForm = ({
                 </button>
                 <button
                   type="button"
+                  role="tab"
+                  id="hebrew-tab"
+                  aria-selected={inputType === 'hebrew'}
+                  aria-controls="hebrew-panel"
                   className={`flex-1 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${inputType === 'hebrew' ? 'bg-white shadow text-purple-600' : 'text-gray-500 hover:text-gray-700'
                     }`}
                   onClick={() => setInputType('hebrew')}
@@ -657,9 +678,13 @@ export const BirthdayForm = ({
               </div>
 
               {inputType === 'gregorian' ? (
-                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <div id="gregorian-panel" className="grid grid-cols-3 gap-2 sm:gap-3">
                   <div>
+                    <label htmlFor="gregorian-day" className="sr-only">
+                      {t('common.day')}
+                    </label>
                     <select
+                      id="gregorian-day"
                       value={selectedDay}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -669,6 +694,8 @@ export const BirthdayForm = ({
                         setValue('birthDateGregorian', dateString as any, { shouldValidate: true });
                       }}
                       className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                      aria-invalid={!!errors.birthDateGregorian}
+                      aria-describedby={errors.birthDateGregorian ? 'birthDate-error' : undefined}
                     >
                       <option value="">{t('common.day')}</option>
                       {days.map((day) => (
@@ -682,7 +709,11 @@ export const BirthdayForm = ({
                     </label>
                   </div>
                   <div>
+                    <label htmlFor="gregorian-month" className="sr-only">
+                      {t('common.month')}
+                    </label>
                     <select
+                      id="gregorian-month"
                       value={selectedMonth}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -719,7 +750,11 @@ export const BirthdayForm = ({
                     </label>
                   </div>
                   <div>
+                    <label htmlFor="gregorian-year" className="sr-only">
+                      {t('common.year')}
+                    </label>
                     <select
+                      id="gregorian-year"
                       value={selectedYear}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -753,10 +788,14 @@ export const BirthdayForm = ({
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <div id="hebrew-panel" className="grid grid-cols-3 gap-2 sm:gap-3">
                   {/* Hebrew Day */}
                   <div>
+                    <label htmlFor="hebrew-day" className="sr-only">
+                      {t('common.day')}
+                    </label>
                     <select
+                      id="hebrew-day"
                       value={hebrewDay}
                       onChange={(e) => setHebrewDay(Number(e.target.value))}
                       className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-center"
@@ -775,7 +814,11 @@ export const BirthdayForm = ({
 
                   {/* Hebrew Month */}
                   <div>
+                    <label htmlFor="hebrew-month" className="sr-only">
+                      {t('common.month')}
+                    </label>
                     <select
+                      id="hebrew-month"
                       value={hebrewMonth}
                       onChange={(e) => setHebrewMonth(e.target.value)}
                       className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-center"
@@ -794,7 +837,11 @@ export const BirthdayForm = ({
 
                   {/* Hebrew Year */}
                   <div>
+                    <label htmlFor="hebrew-year" className="sr-only">
+                      {t('common.year')}
+                    </label>
                     <select
+                      id="hebrew-year"
                       value={hebrewYear}
                       onChange={(e) => setHebrewYear(Number(e.target.value))}
                       className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-center"
@@ -817,7 +864,7 @@ export const BirthdayForm = ({
                 type="hidden"
                 value={getDateString(selectedDay, selectedMonth, selectedYear)}
                 {...register('birthDateGregorian', {
-                  required: t('validation.required'),
+                  required: t('validation.birthDateRequired'),
                   validate: (value) => {
                     const date = new Date(value);
                     const now = new Date();
@@ -831,7 +878,7 @@ export const BirthdayForm = ({
                 })}
               />
               {errors.birthDateGregorian && (
-                <p className="text-red-500 text-xs mt-0.5 sm:mt-1">
+                <p id="birthDate-error" className="text-red-500 text-xs mt-0.5 sm:mt-1" role="alert">
                   {errors.birthDateGregorian.message}
                 </p>
               )}
@@ -839,16 +886,17 @@ export const BirthdayForm = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
               <div>
-                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
+                <label id="gender-label" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                   {t('birthday.gender')} *
                 </label>
-                <div className="flex gap-1.5 sm:gap-3">
+                <div role="radiogroup" aria-labelledby="gender-label" className="flex gap-1.5 sm:gap-3">
                   <label className={`flex-1 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 border-2 rounded-lg cursor-pointer transition-colors ${errors.gender ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-blue-500 hover:bg-blue-50'}`}>
                     <input
                       type="radio"
                       value="male"
-                      {...register('gender', { required: t('validation.required') })}
+                      {...register('gender', { required: t('validation.genderRequired') })}
                       className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600"
+                      aria-required="true"
                     />
                     <span className="text-xs sm:text-base font-medium">{t('common.male')}</span>
                   </label>
@@ -856,14 +904,15 @@ export const BirthdayForm = ({
                     <input
                       type="radio"
                       value="female"
-                      {...register('gender', { required: t('validation.required') })}
+                      {...register('gender', { required: t('validation.genderRequired') })}
                       className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600"
+                      aria-required="true"
                     />
                     <span className="text-xs sm:text-base font-medium">{t('common.female')}</span>
                   </label>
                 </div>
                 {errors.gender && (
-                  <p className="text-red-500 text-xs mt-0.5 sm:mt-1">{errors.gender.message}</p>
+                  <p id="gender-error" className="text-red-500 text-xs mt-0.5 sm:mt-1" role="alert">{errors.gender.message}</p>
                 )}
               </div>
 
@@ -883,6 +932,7 @@ export const BirthdayForm = ({
                     type="button"
                     onClick={() => setShowSunsetTooltip(!showSunsetTooltip)}
                     className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                    aria-label={t('birthday.sunsetInfo', 'Information about after sunset')}
                   >
                     <Info className="w-4 h-4" />
                   </button>
@@ -913,7 +963,7 @@ export const BirthdayForm = ({
                   placeholder={t('birthday.selectGroup')}
                 />
                 {/* Hidden field for validation if needed, but MultiSelect uses setValue */}
-                <input type="hidden" {...register('groupIds', { required: t('birthday.selectGroup') })} />
+                <input type="hidden" {...register('groupIds', { required: t('validation.groupRequired') })} />
               </div>
               <div className="mt-6 sm:mt-7">
                 <button
@@ -921,6 +971,7 @@ export const BirthdayForm = ({
                   onClick={() => setShowCreateGroupModal(true)}
                   className="px-2 sm:px-3 py-1.5 sm:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors flex items-center gap-1 text-xs sm:text-sm font-medium h-[38px] sm:h-[42px]"
                   title={t('groups.createSubgroup', 'Create subgroup')}
+                  aria-label={t('groups.createSubgroup', 'Create subgroup')}
                 >
                   <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
@@ -932,6 +983,8 @@ export const BirthdayForm = ({
                 type="button"
                 onClick={() => setShowAdvanced(!showAdvanced)}
                 className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 transition-colors font-medium bg-blue-50 px-3 py-1.5 rounded-full"
+                aria-expanded={showAdvanced}
+                aria-controls="advanced-options-panel"
               >
                 {showAdvanced ? (
                   <>
@@ -949,7 +1002,7 @@ export const BirthdayForm = ({
 
             {/* האזור המוסתר - נפתח רק כש-showAdvanced הוא true */}
             {showAdvanced && (
-              <div className="space-y-2 sm:space-y-4 border-t border-gray-100 pt-4 mt-2">
+              <div id="advanced-options-panel" className="space-y-2 sm:space-y-4 border-t border-gray-100 pt-4 mt-2">
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">
                     {t('birthday.calendarPreference')}

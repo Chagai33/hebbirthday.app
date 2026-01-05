@@ -28,7 +28,9 @@ export const MultiSelectGroups: React.FC<MultiSelectGroupsProps> = ({
 }) => {
     const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
+    const [focusedIndex, setFocusedIndex] = useState<number>(-1);
     const containerRef = useRef<HTMLDivElement>(null);
+    const listboxRef = useRef<HTMLDivElement>(null);
     
     const defaultPlaceholder = placeholder || t('groups.selectGroups');
 
@@ -42,6 +44,81 @@ export const MultiSelectGroups: React.FC<MultiSelectGroupsProps> = ({
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+
+    // Handle keyboard navigation in listbox
+    useEffect(() => {
+        if (!isOpen) {
+            setFocusedIndex(-1);
+            return;
+        }
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Only handle keys if focus is within the listbox or on the trigger button
+            const isInListbox = listboxRef.current?.contains(document.activeElement as Node);
+            const isOnButton = containerRef.current?.querySelector('button')?.contains(document.activeElement as Node);
+            
+            if (!isInListbox && !isOnButton) return;
+            if (!listboxRef.current) return;
+
+            const focusableItems = listboxRef.current.querySelectorAll('[role="option"]:not([aria-disabled="true"])');
+            const currentIndex = focusedIndex;
+
+            switch (e.key) {
+                case 'ArrowDown': {
+                    e.preventDefault();
+                    const nextIndex = currentIndex < focusableItems.length - 1 ? currentIndex + 1 : 0;
+                    setFocusedIndex(nextIndex);
+                    (focusableItems[nextIndex] as HTMLElement)?.focus();
+                    break;
+                }
+                case 'ArrowUp': {
+                    e.preventDefault();
+                    const prevIndex = currentIndex > 0 ? currentIndex - 1 : focusableItems.length - 1;
+                    setFocusedIndex(prevIndex);
+                    (focusableItems[prevIndex] as HTMLElement)?.focus();
+                    break;
+                }
+                case 'Home': {
+                    e.preventDefault();
+                    setFocusedIndex(0);
+                    (focusableItems[0] as HTMLElement)?.focus();
+                    break;
+                }
+                case 'End': {
+                    e.preventDefault();
+                    const lastIndex = focusableItems.length - 1;
+                    setFocusedIndex(lastIndex);
+                    (focusableItems[lastIndex] as HTMLElement)?.focus();
+                    break;
+                }
+                case 'Escape': {
+                    // Only close dropdown, don't propagate to parent modal
+                    if (isInListbox || isOnButton) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsOpen(false);
+                        // Return focus to trigger button
+                        const button = containerRef.current?.querySelector('button');
+                        button?.focus();
+                    }
+                    break;
+                }
+                case 'Tab': {
+                    // Close dropdown and allow Tab to continue naturally
+                    if (isInListbox) {
+                        setIsOpen(false);
+                        // Don't preventDefault - let Tab move to next field
+                    }
+                    break;
+                }
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('keydown', handleKeyDown);
+        }
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, focusedIndex]);
 
     const toggleSelection = (id: string) => {
         const newSelection = selectedIds.includes(id)
@@ -65,12 +142,16 @@ export const MultiSelectGroups: React.FC<MultiSelectGroupsProps> = ({
 
     return (
         <div className="relative" ref={containerRef}>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">
+            <label htmlFor="multiselect-trigger" className="block text-xs sm:text-sm font-medium text-gray-700 mb-0.5 sm:mb-1">
                 {label}
             </label>
             <button
+                id="multiselect-trigger"
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
+                aria-expanded={isOpen}
+                aria-haspopup="listbox"
+                aria-describedby={error ? "multiselect-error" : undefined}
                 className={`w-full px-2 sm:px-4 py-1.5 sm:py-2 text-left bg-white border rounded-lg flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     error ? 'border-red-500' : 'border-gray-300'
                 }`}
@@ -78,41 +159,59 @@ export const MultiSelectGroups: React.FC<MultiSelectGroupsProps> = ({
                 <span className={`text-sm sm:text-base truncate block ${selectedCount === 0 ? 'text-gray-500' : 'text-gray-900'}`}>
                     {displayText}
                 </span>
-                {isOpen ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+                {isOpen ? <ChevronUp className="w-4 h-4 text-gray-500" aria-hidden="true" /> : <ChevronDown className="w-4 h-4 text-gray-500" aria-hidden="true" />}
             </button>
+
+            {/* Live region for selection feedback */}
+            <div aria-live="polite" aria-atomic="true" className="sr-only">
+                {selectedCount > 0 ? t('groups.selectionSummary', { count: selectedCount, text: displayText }) : t('groups.noSelection')}
+            </div>
             
             {error && (
-                 <p className="text-red-500 text-xs mt-0.5 sm:mt-1">{error}</p>
+                 <p id="multiselect-error" className="text-red-500 text-xs mt-0.5 sm:mt-1" role="alert">{error}</p>
             )}
 
             {isOpen && (
-                <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                <div ref={listboxRef} className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto" role="listbox" aria-multiselectable="true">
                     {groups.length === 0 ? (
                         <div className="p-3 text-sm text-gray-500 text-center">{t('groups.noGroupsAvailable')}</div>
                     ) : (
-                        groups.map(group => {
+                        groups.map((group) => {
                             const isRoot = group.isRoot === true;
                             const isSelected = selectedIds.includes(group.id);
                             const isDisabled = isRoot;
                             
+                            const selectionStatus = isSelected && !isDisabled ? t('common.selected') : t('common.notSelected');
+
                             return (
-                                <div 
+                                <div
                                     key={group.id}
                                     onClick={() => !isDisabled && toggleSelection(group.id)}
-                                    className={`flex items-center px-3 py-2 transition-colors border-b border-gray-50 last:border-0 ${
-                                        isDisabled 
-                                            ? 'bg-gray-100 cursor-not-allowed opacity-60' 
+                                    onKeyDown={(e) => {
+                                        if (!isDisabled && (e.key === 'Enter' || e.key === ' ')) {
+                                            e.preventDefault();
+                                            toggleSelection(group.id);
+                                        }
+                                    }}
+                                    role="option"
+                                    aria-selected={isSelected && !isDisabled}
+                                    aria-disabled={isDisabled}
+                                    aria-label={t('groups.selectGroupItem', { name: group.name, status: selectionStatus })}
+                                    tabIndex={isDisabled ? -1 : 0}
+                                    className={`flex items-center px-3 py-3 transition-colors border-b border-gray-50 last:border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-blue-50 min-h-[44px] ${
+                                        isDisabled
+                                            ? 'bg-gray-100 cursor-not-allowed opacity-60'
                                             : 'cursor-pointer hover:bg-gray-50'
                                     }`}
                                 >
                                     <div className={`w-5 h-5 border rounded flex items-center justify-center mr-3 flex-shrink-0 ${
                                         isSelected && !isDisabled
-                                            ? 'bg-blue-600 border-blue-600' 
+                                            ? 'bg-blue-600 border-blue-600'
                                             : isDisabled
                                             ? 'border-gray-300 bg-gray-200'
                                             : 'border-gray-300'
                                     }`}>
-                                        {isSelected && !isDisabled && <Check className="w-3 h-3 text-white" />}
+                                        {isSelected && !isDisabled && <Check className="w-3 h-3 text-white" aria-hidden="true" />}
                                     </div>
                                     <div className="flex-1">
                                         <div className={`text-sm font-medium ${

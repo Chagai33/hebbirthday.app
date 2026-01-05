@@ -8,6 +8,7 @@ import { useGroups, useCreateGroup } from '../../hooks/useGroups';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTenant } from '../../contexts/TenantContext';
 import { analyticsService } from '../../services/analytics.service';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 interface CSVImportPreviewModalProps {
   isOpen: boolean;
@@ -42,6 +43,10 @@ export const CSVImportPreviewModal = ({
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showOnlyIssues, setShowOnlyIssues] = useState(false);
+
+  // Accessibility: Focus management
+  const modalFocusRef = useFocusTrap(isOpen, onClose);
+  useFocusReturn(isOpen);
 
   // Helper function to check if a name has invalid patterns (repeated characters)
   const isInvalidName = (name: string): boolean => {
@@ -302,14 +307,14 @@ export const CSVImportPreviewModal = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
+      <div ref={modalFocusRef} className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[calc(100vh-2rem)] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="csv-import-modal-title">
         <div className="p-4 sm:p-6 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
               <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div className="min-w-0">
-              <h2 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">
+              <h2 id="csv-import-modal-title" className="text-lg sm:text-2xl font-bold text-gray-900 truncate">
                 {t('csvImport.previewTitle', 'תצוגה מקדימה - ייבוא קובץ')}
               </h2>
               <p className="text-xs sm:text-sm text-gray-600 mt-0.5 hidden sm:block">
@@ -319,8 +324,9 @@ export const CSVImportPreviewModal = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/50 rounded-lg transition-colors flex-shrink-0"
+            className="p-3 hover:bg-white/50 rounded-lg transition-colors flex-shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             disabled={isImporting}
+            aria-label={t('common.close')}
           >
             <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
           </button>
@@ -492,7 +498,7 @@ export const CSVImportPreviewModal = ({
               </button>
             )}
             <div className="relative flex-1">
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
               <input
                 type="text"
                 value={searchQuery}
@@ -504,7 +510,7 @@ export const CSVImportPreviewModal = ({
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-600"
                 >
                   <X className="w-4 h-4" />
                 </button>

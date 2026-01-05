@@ -85,6 +85,8 @@ export interface Birthday {
   hebrew_month?: string;
   hebrew_day?: number;
   calendar_preference_override?: CalendarPreference | null;
+  created_by_guest?: boolean;
+  created_at?: string;
   notes?: string;
   archived: boolean;
   googleCalendarEventId?: string | null;

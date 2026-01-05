@@ -48,6 +48,12 @@ export const Footer: React.FC = () => {
             >
               {t('footer.privacyPolicy', 'מדיניות פרטיות')}
             </Link>
+            <Link
+              to="/accessibility"
+              className="text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              {t('footer.accessibility', 'הצהרת נגישות')}
+            </Link>
             <button
               onClick={handleFeedback}
               className="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1"

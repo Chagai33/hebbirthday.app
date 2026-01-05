@@ -4,6 +4,7 @@ import { X, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { he, enUS } from 'date-fns/locale';
 import { HebrewBirthdayDate } from '../../types';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 interface FutureBirthdaysModalProps {
   isOpen: boolean;
@@ -23,6 +24,10 @@ export const FutureBirthdaysModal: React.FC<FutureBirthdaysModalProps> = ({
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'he' ? he : enUS;
 
+  // Accessibility: Focus management
+  const modalFocusRef = useFocusTrap(isOpen, onClose);
+  useFocusReturn(isOpen);
+
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -37,16 +42,21 @@ export const FutureBirthdaysModal: React.FC<FutureBirthdaysModalProps> = ({
       onClick={handleBackdropClick}
     >
       <div 
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[80vh] overflow-y-auto"
+        ref={modalFocusRef}
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[calc(100vh-2rem)] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="future-birthdays-modal-title"
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 id="future-birthdays-modal-title" className="text-2xl font-bold text-gray-900">
             {t('birthday.futureBirthdays')}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-3 text-gray-500 hover:text-gray-600 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            aria-label={t('common.close')}
           >
             <X className="w-6 h-6" />
           </button>

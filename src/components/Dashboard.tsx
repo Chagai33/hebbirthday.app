@@ -337,6 +337,8 @@ export const Dashboard = () => {
             onClick={() => setIsStatsExpanded(!isStatsExpanded)}
             className="flex items-center gap-1.5 flex-shrink-0 px-2 py-1 text-gray-500 hover:text-gray-700 transition-colors text-xs"
             title={isStatsExpanded ? t('common.collapse', 'סגור') : t('common.expand', 'פתח')}
+            aria-expanded={isStatsExpanded}
+            aria-controls="dashboard-stats-grid"
           >
             {isStatsExpanded ? (
               <ChevronUp className="w-3.5 h-3.5" />
@@ -349,6 +351,7 @@ export const Dashboard = () => {
           </button>
 
           <div
+            id="dashboard-stats-grid"
             className={`flex-1 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 transition-all duration-300 ease-in-out overflow-hidden ${isStatsExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
               }`}
           >
@@ -413,6 +416,7 @@ export const Dashboard = () => {
                   onClick={() => setShowZodiacStats(true)}
                   className="p-0.5 text-pink-400 hover:text-pink-600 hover:bg-pink-200 rounded-full transition-colors flex-shrink-0"
                   title={t('zodiac.statsTitle', 'סטטיסטיקת מזלות')}
+                  aria-label={t('zodiac.statsTitle')}
                 >
                   <Info className="w-4 h-4" />
                 </button>

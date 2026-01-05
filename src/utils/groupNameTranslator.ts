@@ -1,14 +1,12 @@
 import { Group } from '../types';
+import { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 
 /**
- * Hook to get translated root group name
- * For root groups with type (family, friends, work), returns the translated name
- * For other groups, returns the original name from the database
+ * פונקציה טהורה לתרגום שם קבוצת שורש.
+ * בטוחה לשימוש בתוך לוגיקה תנאית כי היא אינה Hook.
  */
-export const useTranslatedRootGroupName = (group: Group): string => {
-  const { t } = useTranslation();
-  
+export const getTranslatedGroupName = (group: any, t: any): string => {
   if (!group.is_root || !group.type) {
     return group.name;
   }
@@ -25,5 +23,13 @@ export const useTranslatedRootGroupName = (group: Group): string => {
   }
 
   return t(translationKey);
+};
+
+/**
+ * Hook קיים לשימוש בקומפוננטות פשוטות (שומר על תאימות לאחור).
+ */
+export const useTranslatedRootGroupName = (group: Group): string => {
+  const { t } = useTranslation();
+  return getTranslatedGroupName(group, t);
 };
 

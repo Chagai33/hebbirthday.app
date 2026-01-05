@@ -234,6 +234,15 @@ async function addBirthdayAsGuest(groupId, token, birthdayData, ip) {
     if (!birthdayData.firstName || !birthdayData.lastName || !birthdayData.birthDateGregorian) {
         throw new functions.https.HttpsError('invalid-argument', 'Missing required birthday fields');
     }
+    // Validate firstName and lastName: minimum 2 characters and no whitespace-only
+    const trimmedFirstName = birthdayData.firstName.trim();
+    const trimmedLastName = birthdayData.lastName.trim();
+    if (trimmedFirstName.length < 2) {
+        throw new functions.https.HttpsError('invalid-argument', 'First name must be at least 2 characters');
+    }
+    if (trimmedLastName.length < 2) {
+        throw new functions.https.HttpsError('invalid-argument', 'Last name must be at least 2 characters');
+    }
     // Parse date
     const birthDate = new Date(birthdayData.birthDateGregorian);
     if (isNaN(birthDate.getTime())) {

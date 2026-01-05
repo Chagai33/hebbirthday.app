@@ -112,6 +112,7 @@
     "other": "Otro",
     "actions": "Acciones",
     "selected": "seleccionado",
+    "notSelected": "no seleccionado",
     "clear": "Limpiar",
     "confirmDelete": "¿Estás seguro?",
     "noResults": "No se encontraron resultados",
@@ -133,6 +134,7 @@
     "month": "Mes",
     "year": "Año",
     "menu": "Menú",
+    "notifications": "Notificaciones",
     "note": "Nota",
     "moreInfo": "Más Información",
     "birthDate": "Fecha de Nacimiento",
@@ -143,6 +145,8 @@
     "deleteSelected": "Eliminar Seleccionados",
     "markSelectedAsRead": "Marcar Seleccionados como Leídos",
     "selectAll": "Seleccionar Todo",
+    "selectRow": "Seleccionar a {{name}}",
+    "statsTitle": "Estadísticas",
     "deselectAll": "Deseleccionar Todo",
     "linkCopied": "¡Enlace copiado!",
     "advancedOptions": "Opciones Avanzadas (calendario, notas)",
@@ -165,7 +169,12 @@
     "shareHint": "El botón de mensaje copia el texto completo con explicación",
     "accessSettings": "Configuración de Acceso al Portal",
     "accessDescription": "Permitir a los invitados acceder y gestionar sus listas de deseos a través del portal público.",
-    "groupPermissions": "Gestionar Permisos por Grupos"
+    "groupPermissions": "Gestionar Permisos por Grupos",
+    "enablePortal": "Habilitar portal de invitados",
+    "toggleGroupFor": "Habilitar portal para {{groupName}}",
+    "copyLinkAction": "Copiar URL del portal al portapapeles",
+    "copyMessageAction": "Copiar mensaje con enlace del portal al portapapeles",
+    "shareWhatsAppAction": "Compartir enlace del portal en WhatsApp"
   },
   "googleCalendar": {
     "title": "Google Calendar",
@@ -430,7 +439,9 @@
     "notesSyncHint": "Las notas se mostrarán en la descripción del evento de Google Calendar si eliges sincronizar",
     "deleteConfirmWithCalendar": "¿Estás seguro? Esta acción eliminará el cumpleaños y también removerá todos los eventos vinculados de Google Calendar.",
     "exportSuccess": "Datos exportados exitosamente",
-    "hebrewZodiacCopied": "Fechas hebreas y signos zodiacales copiados al portapapeles"
+    "hebrewZodiacCopied": "Fechas hebreas y signos zodiacales copiados al portapapeles",
+    "viewDetails": "Ver detalles de {{name}}",
+    "resultsFound": "Encontrados {{count}} cumpleaños"
   },
   "groups": {
     "title": "Grupos",
@@ -471,6 +482,9 @@
     "unknownGroup": "Grupo Desconocido",
     "noGroupsAvailable": "No hay grupos disponibles",
     "rootGroup": "Grupo Principal",
+    "selectGroupItem": "{{name}} - {{status}}",
+    "selectionSummary": "{{count}} grupos seleccionados: {{text}}",
+    "noSelection": "No hay grupos seleccionados",
     "underGroup": "Bajo",
     "assignToGroup": "Agregar al Grupo"
   },
@@ -543,6 +557,11 @@
   },
   "validation": {
     "required": "Este campo es obligatorio",
+    "firstNameRequired": "El nombre es obligatorio",
+    "lastNameRequired": "El apellido es obligatorio",
+    "birthDateRequired": "La fecha de nacimiento es obligatoria",
+    "genderRequired": "El género es obligatorio",
+    "groupRequired": "La selección de grupo es obligatoria",
     "importSuccess": "Importación completada exitosamente",
     "importError": "Error al importar archivo CSV",
     "invalidEmail": "Dirección de correo electrónico inválida",
@@ -1096,6 +1115,62 @@
     "privacyLink": "Política de Privacidad",
     "accept": "Aceptar y Continuar",
     "decline": "Cerrar"
+  },
+  "accessibility": {
+    "title": "Declaración de Accesibilidad - HebBirthday.App",
+    "lastUpdated": "Última Actualización",
+    "intro": "En HebBirthday, damos suma importancia a hacer nuestros servicios accesibles para todos, incluyendo personas con discapacidades. Operamos con la creencia de que todos merecen el derecho a disfrutar de una experiencia de navegación igualitaria, cómoda e independiente.",
+    "level": {
+      "title": "Nivel de Accesibilidad",
+      "text": "El sitio web es accesible de acuerdo con las pautas de accesibilidad en el Estándar Israelí 5568 (\"Pautas para Accesibilidad de Contenido Web\") en el nivel AA, y de acuerdo con las pautas internacionales del documento WCAG 2.2."
+    },
+    "adjustments": {
+      "title": "Ajustes Realizados",
+      "keyboard": "Navegación por Teclado:",
+      "keyboardDesc": "El sitio soporta completamente la navegación usando solo el teclado (usando las teclas Tab, Enter y Esc).",
+      "skiplink": "Enlace de Salto:",
+      "skiplinkDesc": "Se ha incorporado un enlace \"saltar al contenido\", permitiendo a los usuarios saltar los menús de navegación directamente al contenido principal.",
+      "focus": "Gestión de Foco:",
+      "focusDesc": "Se implementa \"trampa de foco\" en modales y menús para prevenir pérdida de orientación.",
+      "screenreader": "Soporte de Lector de Pantalla:",
+      "screenreaderDesc": "Uso de HTML Semántico y etiquetas ARIA para una lectura adecuada de contenido, formularios y errores.",
+      "contrast": "Contraste:",
+      "contrastDesc": "Adherencia a proporciones de contraste que cumplen con estándares para máxima legibilidad.",
+      "languages": "Idiomas:",
+      "languagesDesc": "El sitio soporta RTL (hebreo) y idiomas adicionales con actualización dinámica del idioma del documento."
+    },
+    "limitations": {
+      "title": "Limitaciones de Accesibilidad",
+      "text": "A pesar de nuestros esfuerzos por hacer todas las páginas del sitio accesibles, puede haber partes que aún no se han hecho completamente accesibles (por ejemplo, componentes incorporados de terceros). Si encuentra un problema, agradeceríamos que nos lo reporte."
+    },
+    "standards": {
+      "title": "Estándares y Métodos de Accesibilidad",
+      "wcag": "Cumplimiento WCAG 2.2 Nivel AA",
+      "keyboard": "Navegación Completa por Teclado",
+      "screenreader": "Soporte de Lector de Pantalla",
+      "contrast": "Contraste de Color Óptimo",
+      "focus": "Indicadores de Foco Claros"
+    },
+    "coordinator": {
+      "title": "Detalles del Coordinador de Accesibilidad",
+      "intro": "Para cualquier pregunta, solicitud o reporte de un mal funcionamiento, puede contactar al coordinador de accesibilidad:",
+      "name": "Nombre:",
+      "nameValue": "Chagai Yechiel",
+      "email": "Correo Electrónico:"
+    },
+    "contact": {
+      "title": "Métodos de Contacto Adicionales",
+      "text": "Si encontró un problema de accesibilidad o tiene sugerencias para mejorar, nos encantaría saber de usted:",
+      "email": "Correo Electrónico",
+      "form": "Formulario de Comentarios",
+      "formLink": "Enviar Comentarios"
+    },
+    "ongoing": {
+      "title": "Mejora Continua",
+      "text": "Invertimos esfuerzos continuos para mejorar la accesibilidad de la aplicación y asegurar que cumple con los estándares más recientes. Realizamos verificaciones regulares de accesibilidad e implementamos comentarios de los usuarios para garantizar la mejor experiencia de usuario posible para todos."
+    },
+    "updateDate": "Fecha de Actualización de la Declaración:",
+    "updateDateValue": "Diciembre 2025"
   },
   "privacy": {
     "title": "Política de Privacidad para \"HebBirthday.App\"",

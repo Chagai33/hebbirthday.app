@@ -264,6 +264,7 @@
     "other": "אחר",
     "actions": "פעולות",
     "selected": "נבחרו",
+    "notSelected": "לא נבחר",
     "clear": "נקה הכל",
     "confirmDelete": "האם אתה בטוח?",
     "noResults": "לא נמצאו תוצאות",
@@ -287,6 +288,7 @@
     "month": "חודש",
     "year": "שנה",
     "menu": "תפריט",
+    "notifications": "התראות",
     "note": "הערה",
     "moreInfo": "מידע נוסף",
     "birthDate": "תאריך לידה",
@@ -318,7 +320,12 @@
     "shareHint": "כפתור ההודעה מעתיק טקסט מלא עם הסבר",
     "accessSettings": "הגדרות גישה לפורטל",
     "accessDescription": "אפשר לאורחים לגשת ולנהל את המשאלות שלהם דרך הפורטל הציבורי.",
-    "groupPermissions": "ניהול הרשאות לפי קבוצות"
+    "groupPermissions": "ניהול הרשאות לפי קבוצות",
+    "enablePortal": "הפעל פורטל מתנות לאורחים",
+    "toggleGroupFor": "הפעל פורטל לקבוצה {{groupName}}",
+    "copyLinkAction": "העתק קישור לפורטל ללוח",
+    "copyMessageAction": "העתק הודעה עם קישור לפורטל ללוח",
+    "shareWhatsAppAction": "שתף קישור לפורטל בוואטסאפ"
   },
   "auth": {
     "signIn": "התחבר",
@@ -543,6 +550,9 @@
     "noGroupsYet": "טרם נוצרו קבוצות",
     "createFirstGroup": "צור את הקבוצה הראשונה שלך",
     "rootGroup": "קבוצה ראשית",
+    "selectGroupItem": "{{name}} - {{status}}",
+    "selectionSummary": "{{count}} קבוצות נבחרו: {{text}}",
+    "noSelection": "לא נבחרו קבוצות",
     "underGroup": "תחת",
     "filterByGroup": "סינון לפי קבוצה",
     "allGroups": "כל הקבוצות",
@@ -680,6 +690,11 @@
   },
   "validation": {
     "required": "שדה זה הוא חובה",
+    "firstNameRequired": "שם פרטי הוא שדה חובה",
+    "lastNameRequired": "שם משפחה הוא שדה חובה",
+    "birthDateRequired": "תאריך לידה הוא שדה חובה",
+    "genderRequired": "מגדר הוא שדה חובה",
+    "groupRequired": "בחירת קבוצה היא שדה חובה",
     "invalidEmail": "כתובת דואר אלקטרוני לא תקינה",
     "importSuccess": "ייבוא הושלם בהצלחה",
     "importError": "שגיאה בייבוא קובץ CSV",
@@ -1198,6 +1213,62 @@
       "text": "נבנה עם ❤️ בישראל 🇮🇱",
       "rights": "כל הזכויות שמורות"
     }
+  },
+  "accessibility": {
+    "title": "הצהרת נגישות - HebBirthday.App",
+    "lastUpdated": "תאריך עדכון אחרון",
+    "intro": "אנו ב-HebBirthday רואים חשיבות עליונה בהנגשת שירותינו לכלל האוכלוסייה, לרבות אנשים עם מוגבלויות. אנו פועלים מתוך אמונה כי לכל אדם מגיעה הזכות ליהנות מחוויית גלישה שוויונית, נוחה ועצמאית.",
+    "level": {
+      "title": "רמת הנגישות",
+      "text": "האתר מונגש בהתאם להנחיות הנגישות בתקן הישראלי 5568 (\"קווים מנחים לנגישות תכנים באינטרנט\") ברמה AA, וזאת בהתאם להנחיות הבינלאומיות של מסמך WCAG 2.2."
+    },
+    "adjustments": {
+      "title": "התאמות שבוצעו",
+      "keyboard": "ניווט מקלדת:",
+      "keyboardDesc": "האתר תומך באופן מלא בניווט באמצעות המקלדת בלבד (שימוש במקשי Tab, Enter ו-Esc).",
+      "skiplink": "קישור דילוג:",
+      "skiplinkDesc": "הוטמע קישור \"דלג לתוכן\" המאפשר דילוג על תפריטי הניווט ישירות לתוכן המרכזי.",
+      "focus": "ניהול פוקוס:",
+      "focusDesc": "מיושמת \"מלכודת פוקוס\" במודלים ובתפריטים כדי למנוע אובדן התמצאות.",
+      "screenreader": "תמיכה בקוראי מסך:",
+      "screenreaderDesc": "שימוש ב-Semantic HTML ובתגיות ARIA להקראה נכונה של תכנים, טפסים ושגיאות.",
+      "contrast": "ניגודיות:",
+      "contrastDesc": "הקפדה על יחס ניגודיות העומד בתקן לקריאות מקסימלית.",
+      "languages": "שפות:",
+      "languagesDesc": "האתר תומך ב-RTL (עברית) ובשפות נוספות עם עדכון דינמי של שפת המסמך."
+    },
+    "limitations": {
+      "title": "סייגי נגישות",
+      "text": "למרות מאמצינו להנגיש את כלל דפי האתר, ייתכן שיתגלו חלקים שטרם הונגשו במלואם (למשל רכיבים המוטמעים מצד שלישי). אם נתקלתם בבעיה, נשמח אם תדווחו לנו."
+    },
+    "standards": {
+      "title": "תקנים ושיטות נגישות",
+      "wcag": "תאימות ל-WCAG 2.2 רמה AA",
+      "keyboard": "ניווט מקלדת מלא",
+      "screenreader": "תמיכה בקוראי מסך",
+      "contrast": "ניגודיות צבעים מיטבית",
+      "focus": "אינדיקציות פוקוס ברורות"
+    },
+    "coordinator": {
+      "title": "פרטי רכז נגישות",
+      "intro": "לכל שאלה, בקשה או דיווח על תקלה, ניתן לפנות לרכז הנגישות:",
+      "name": "שם:",
+      "nameValue": "חגי יחיאל",
+      "email": "אימייל:"
+    },
+    "contact": {
+      "title": "דרכי יצירת קשר נוספות",
+      "text": "אם נתקלת בבעיית נגישות או יש לך הצעות לשיפור, נשמח לשמוע ממך:",
+      "email": "דוא\"ל",
+      "form": "טופס משוב",
+      "formLink": "שלח משוב"
+    },
+    "ongoing": {
+      "title": "שיפור מתמיד",
+      "text": "אנו משקיעים מאמצים מתמידים לשיפור הנגישות של האפליקציה ולוודא שהיא עומדת בתקנים העדכניים ביותר. אנו מבצעים בדיקות נגישות שוטפות ומיישמים משוב ממשתמשים כדי להבטיח חוויית שימוש מיטבית לכולם."
+    },
+    "updateDate": "תאריך עדכון ההצהרה:",
+    "updateDateValue": "דצמבר 2025"
   },
   "cookies": {
     "message": "אנחנו משתמשים בעוגיות לשיפור החוויה. השימוש באתר מהווה הסכמה לכך.",

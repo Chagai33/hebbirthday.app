@@ -15,6 +15,7 @@ import { useGoogleCalendar } from '../../contexts/GoogleCalendarContext';
 import { CurrentDateDisplay } from '../common/CurrentDateDisplay';
 import { GroupsPanel } from '../groups/GroupsPanel';
 import { LanguageSwitcher } from '../common/LanguageSwitcher';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 export const Header: React.FC = () => {
   const { openAboutModal } = useLayoutContext();
@@ -38,6 +39,10 @@ export const Header: React.FC = () => {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const mobileUserMenuRef = useRef<HTMLDivElement>(null);
 
+  // Accessibility: Focus management for mobile menu
+  const mobileMenuFocusRef = useFocusTrap(mobileMenuOpen, () => setMobileMenuOpen(false));
+  useFocusReturn(mobileMenuOpen);
+
   // toggleLanguage removed - now using LanguageSwitcher component
 
   useEffect(() => {
@@ -55,11 +60,28 @@ export const Header: React.FC = () => {
       }
     }
 
+    // Handle Escape key for non-trapped menus (filter, userMenu)
+    // Note: mobileMenu uses useFocusTrap which handles Escape internally
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.stopPropagation(); // Prevent bubbling to parent components
+        if (showUserMenu) setShowUserMenu(false);
+        if (showGroupFilter) setShowGroupFilter(false);
+      }
+    }
+
     if (showGroupFilter || mobileMenuOpen || showUserMenu) {
       document.addEventListener("mousedown", handleClickOutside);
     }
+    
+    // Only add Escape listener for non-trapped menus
+    if (showUserMenu || showGroupFilter) {
+      document.addEventListener("keydown", handleEscape);
+    }
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
     };
   }, [showGroupFilter, mobileMenuOpen, showUserMenu]);
 
@@ -116,6 +138,7 @@ export const Header: React.FC = () => {
                 <button
                   onClick={openAboutModal}
                   className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label={t('common.menu')}
                 >
                   <Menu className="w-6 h-6" />
                 </button>
@@ -160,6 +183,7 @@ export const Header: React.FC = () => {
                 <button
                   onClick={openAboutModal}
                   className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors relative"
+                  aria-label={t('common.menu')}
                 >
                   <Menu className="w-5 h-5" />
                   {needsCalendarSetup && (
@@ -173,6 +197,9 @@ export const Header: React.FC = () => {
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                    aria-expanded={showUserMenu}
+                    aria-haspopup="true"
+                    aria-label={t('common.userMenu', 'User menu')}
                   >
                     {user.photo_url ? (
                       <img
@@ -258,6 +285,8 @@ export const Header: React.FC = () => {
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-1"
+                aria-expanded={mobileMenuOpen}
+                aria-label={t('common.menu')}
               >
                 <span className="text-sm font-medium text-gray-700">
                   {t('common.menu')}
@@ -271,7 +300,7 @@ export const Header: React.FC = () => {
 
               {/* Dropdown Menu */}
               {mobileMenuOpen && (
-                <div className="absolute top-full mt-2 end-0 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50 w-64">
+                <div ref={mobileMenuFocusRef} className="absolute top-full mt-2 end-0 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50 w-64">
                   {user && (
                     <div className="px-4 py-2 border-b border-gray-200 mb-2">
                       <span className="text-sm font-semibold text-gray-700 block truncate">
@@ -403,22 +432,23 @@ export const Header: React.FC = () => {
 
               {/* התראות אורחים - בצד ימין */}
               {user && (
-                <button
-                  onClick={() => setShowGuestActivity(true)}
-                  className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                  title={t('dashboard.guestNotifications', 'התראות אורחים')}
-                >
-                  <Bell className="w-5 h-5" />
-                  {guestBirthdaysCount > 0 && (
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-                  )}
-                </button>
+              <button
+                onClick={() => setShowGuestActivity(true)}
+                className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label={t('dashboard.guestNotifications', 'התראות אורחים')}
+              >
+                <Bell className="w-5 h-5" />
+                {guestBirthdaysCount > 0 && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+                )}
+              </button>
               )}
 
               {/* תפריט המבורגר - צמוד לאווטאר */}
               <button
                 onClick={openAboutModal}
                 className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label={t('common.menu')}
               >
                 <Menu className="w-5 h-5" />
               </button>
@@ -429,6 +459,9 @@ export const Header: React.FC = () => {
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     className="flex items-center gap-2 p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+                    aria-expanded={showUserMenu}
+                    aria-haspopup="true"
+                    aria-label={t('common.userMenu', 'User menu')}
                   >
                     {user.photo_url ? (
                       <img

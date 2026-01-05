@@ -632,6 +632,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full ps-9 sm:ps-10 pe-8 sm:pe-10 py-1.5 sm:py-2 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            aria-label={t('common.search')}
           />
           {searchTerm && (
             <button
@@ -651,6 +652,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
               ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
               : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
+            aria-expanded={showGroupFilter}
           >
             <Filter className="w-4 h-4" />
             <span className="hidden sm:inline">{t('common.filters', 'Filters')}</span>
@@ -661,7 +663,11 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
             )}
           </button>
 
+          <label htmlFor="birthday-sort-select" className="sr-only">
+            {t('sort.sortBy', 'Sort by')}
+          </label>
           <select
+            id="birthday-sort-select"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
             className={`px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${getSortSelectColor()} font-medium`}
@@ -904,6 +910,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     ? 'bg-gray-600 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                     }`}
+                  aria-pressed={syncStatusFilter === 'all'}
                 >
                   {t('filter.all', 'הכל')}
                 </button>
@@ -913,6 +920,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     ? 'bg-green-600 border-green-600 text-white'
                     : 'bg-white border-green-300 text-green-600 hover:border-green-400'
                     }`}
+                  aria-pressed={syncStatusFilter === 'synced'}
                 >
                   ✓ {t('filter.synced', 'מסונכרן')}
                 </button>
@@ -922,6 +930,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     ? 'bg-red-600 border-red-600 text-white'
                     : 'bg-white border-red-300 text-red-600 hover:border-red-400'
                     }`}
+                  aria-pressed={syncStatusFilter === 'error'}
                 >
                   ⚠️ {t('filter.syncError', 'שגיאה')}
                 </button>
@@ -931,6 +940,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     ? 'bg-gray-600 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                     }`}
+                  aria-pressed={syncStatusFilter === 'not-synced'}
                 >
                   ○ {t('filter.notSynced', 'לא מסונכרן')}
                 </button>
@@ -960,6 +970,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   ? 'bg-gray-600 border-gray-600 text-white'
                   : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                   }`}
+                aria-pressed={genderFilter === 'all'}
               >
                 {t('filter.all', 'All')}
               </button>
@@ -969,6 +980,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   ? 'bg-blue-600 border-blue-600 text-white'
                   : 'bg-white border-blue-300 text-blue-600 hover:border-blue-400'
                   }`}
+                aria-pressed={genderFilter === 'male'}
               >
                 {t('filter.male', 'Male')}
               </button>
@@ -978,6 +990,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   ? 'bg-pink-600 border-pink-600 text-white'
                   : 'bg-white border-pink-300 text-pink-600 hover:border-pink-400'
                   }`}
+                aria-pressed={genderFilter === 'female'}
               >
                 {t('filter.female', 'Female')}
               </button>
@@ -1004,6 +1017,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     ? 'bg-gray-600 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                     }`}
+                  aria-pressed={selectedGroupIds.length === 0}
                 >
                   {t('filter.all', 'All')}
                 </button>
@@ -1013,6 +1027,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     ? 'bg-gray-200 border-gray-400 text-gray-900'
                     : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                     }`}
+                  aria-pressed={selectedGroupIds.includes('unassigned')}
                 >
                   <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border-2 border-dashed border-gray-400" />
                   {t('birthday.unassigned')}
@@ -1025,6 +1040,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                       ? 'ring-2 ring-offset-1'
                       : 'opacity-70 hover:opacity-100'
                       }`}
+                    aria-pressed={selectedGroupIds.includes(group.id)}
                     style={{
                       backgroundColor: selectedGroupIds.includes(group.id) ? group.color : group.color + '40',
                       color: selectedGroupIds.includes(group.id) ? 'white' : group.color,
@@ -1044,6 +1060,10 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
         </div>
       )}
 
+      {/* Live region for screen reader announcements */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {t('birthday.resultsFound', 'Found {{count}} birthdays', { count: filteredAndSortedBirthdays.length })}
+      </div>
 
       <div className="bg-white rounded-lg sm:rounded-xl shadow-sm sm:shadow-md border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
@@ -1059,6 +1079,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     }
                     onChange={toggleSelectAll}
                     className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    aria-label={t('common.selectAll')}
                   />
                 </th>
                 <th className="px-2 sm:px-6 py-2 sm:py-4 text-start text-xs sm:text-sm font-bold text-gray-900">
@@ -1114,13 +1135,18 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                           checked={selectedIds.has(birthday.id)}
                           onChange={() => toggleSelect(birthday.id)}
                           className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                          aria-label={t('common.selectRow', { name: `${birthday.first_name} ${birthday.last_name}` })}
                         />
                       </td>
-                      <td className="px-2 sm:px-6 py-2 sm:py-4 cursor-pointer" onClick={() => {
-                        setSelectedBirthday(birthday);
-                        setShowQuickActionsModal(true);
-                      }}>
-                        <div className="flex items-center gap-1.5 sm:gap-3">
+                      <td className="px-2 sm:px-6 py-2 sm:py-4">
+                        <button
+                          onClick={() => {
+                            setSelectedBirthday(birthday);
+                            setShowQuickActionsModal(true);
+                          }}
+                          className="flex items-center gap-1.5 sm:gap-3 text-start hover:bg-blue-50 p-2 rounded transition-colors w-full min-h-[44px]"
+                          aria-label={t('birthday.viewDetails', 'View details for {{name}}', { name: `${birthday.first_name} ${birthday.last_name}` })}
+                        >
                           <span className="text-xs sm:text-sm font-medium text-gray-900">
                             {birthday.first_name} {birthday.last_name}
                           </span>
@@ -1132,7 +1158,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                               </div>
                             </div>
                           )}
-                        </div>
+                        </button>
                       </td>
                       <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-700">
                         <div className="flex flex-col gap-0.5 sm:gap-1">
@@ -1276,7 +1302,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                               setSelectedBirthday(birthday);
                               setShowWishlistModal(true);
                             }}
-                            className="p-1 sm:p-2 text-pink-600 hover:bg-pink-100 rounded-lg transition-all hover:scale-110"
+                            className="p-3 text-pink-600 hover:bg-pink-100 rounded-lg transition-all hover:scale-110"
                             title={t('wishlist.title')}
                           >
                             <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -1296,7 +1322,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                           {(!birthday.group_ids || birthday.group_ids.length === 0) && (
                             <button
                               onClick={() => onEdit(birthday)}
-                              className="p-1 sm:p-2 text-orange-600 hover:bg-orange-100 rounded-lg transition-all hover:scale-110 animate-pulse"
+                              className="p-3 text-orange-600 hover:bg-orange-100 rounded-lg transition-all hover:scale-110 animate-pulse"
                               title={t('birthday.reassign')}
                             >
                               <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -1305,7 +1331,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                           {birthday.group_ids && birthday.group_ids.length > 0 && (
                             <button
                               onClick={() => onEdit(birthday)}
-                              className="p-1 sm:p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all hover:scale-110"
+                              className="p-3 text-blue-600 hover:bg-blue-100 rounded-lg transition-all hover:scale-110"
                               title={t('common.edit')}
                             >
                               <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -1313,7 +1339,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                           )}
                           <button
                             onClick={() => handleDelete(birthday.id)}
-                            className="p-1 sm:p-2 text-red-600 hover:bg-red-100 rounded-lg transition-all hover:scale-110"
+                            className="p-3 text-red-600 hover:bg-red-100 rounded-lg transition-all hover:scale-110"
                             title={t('common.delete')}
                           >
                             <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />

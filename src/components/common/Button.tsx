@@ -13,6 +13,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   // For polymorphic support (minimal version for label support)
   as?: React.ElementType;
   htmlFor?: string; // For label
+  'aria-label'?: string;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -68,6 +69,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ${className}
         `}
         disabled={isLoading || disabled}
+        aria-busy={isLoading}
         {...props}
       >
         {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}

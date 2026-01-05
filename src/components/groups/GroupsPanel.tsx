@@ -1,34 +1,37 @@
 import { logger } from "../../utils/logger";
 import { Fragment, useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
 import { useNavigate } from 'react-router-dom';
-import { useGroups, useCreateGroup, useUpdateGroup, useDeleteGroup, useInitializeRootGroups } from '../../hooks/useGroups';
+import { useGroups, useDeleteGroup, useInitializeRootGroups } from '../../hooks/useGroups';
 import { useBirthdays } from '../../hooks/useBirthdays';
 import { groupService } from '../../services/group.service';
 import { Layout } from '../layout/Layout';
 import { Group, GroupType } from '../../types';
-import { Plus, Edit, Trash2, X, ArrowRight, ArrowLeft, Globe, Share2 } from 'lucide-react';
-import { Toast } from '../common/Toast';
+import { Plus, Edit, Trash2, X, ArrowRight, ArrowLeft, Share2 } from 'lucide-react';
 import { useToast } from '../../hooks/useToast';
 import { DeleteGroupModal } from '../modals/DeleteGroupModal';
 import { ShareGroupModal } from '../modals/ShareGroupModal';
+import { GroupFormModal } from '../modals/GroupFormModal';
 import { useTranslatedRootGroupName } from '../../utils/groupNameTranslator';
 import { FloatingBackButton } from '../common/FloatingBackButton';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 interface RootGroupButtonProps {
   rootGroup: Group;
   isActive: boolean;
   childGroupsCount: number;
   onClick: () => void;
+  t: TFunction;
 }
 
-const RootGroupButton: React.FC<RootGroupButtonProps> = ({ rootGroup, isActive, childGroupsCount, onClick }) => {
+const RootGroupButton: React.FC<RootGroupButtonProps> = ({ rootGroup, isActive, childGroupsCount, onClick, t }) => {
   const translatedName = useTranslatedRootGroupName(rootGroup);
   
   return (
     <button
       onClick={onClick}
-      className={`group relative flex flex-col items-center justify-center gap-0.5 p-1 sm:p-1.5 rounded-lg border-2 transition-all shadow-sm hover:shadow-md ${
+      className={`group relative flex flex-col items-center justify-center gap-0.5 p-3 sm:p-3 rounded-lg border-2 transition-all shadow-sm hover:shadow-md focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
         isActive
           ? 'border-transparent text-white shadow-md scale-105'
           : 'border-gray-200 text-gray-700 hover:border-gray-300 bg-white/80 backdrop-blur-sm'
@@ -38,6 +41,7 @@ const RootGroupButton: React.FC<RootGroupButtonProps> = ({ rootGroup, isActive, 
           ? `linear-gradient(135deg, ${rootGroup.color}, ${rootGroup.color}e6)`
           : `${rootGroup.color}10`,
       }}
+      aria-label={`${translatedName} (${childGroupsCount} ${t('groups.subgroups', 'subgroups')})`}
     >
       <div 
         className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center ${
@@ -60,46 +64,30 @@ const RootGroupButton: React.FC<RootGroupButtonProps> = ({ rootGroup, isActive, 
   );
 };
 
-const GROUP_COLORS = [
-  '#ef4444', '#f97316', '#f59e0b', '#84cc16',
-  '#10b981', '#14b8a6', '#06b6d4', '#3b82f6',
-  '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e',
-];
-
 interface GroupsPanelProps {
   isModal?: boolean;
   onClose?: () => void;
 }
 
 export const GroupsPanel: React.FC<GroupsPanelProps> = ({ isModal = false, onClose }) => {
+  // Accessibility: Focus management for modal - must be called before all other hooks
+  const modalFocusRef = useFocusTrap(isModal, onClose || (() => {}));
+  useFocusReturn(isModal);
+
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { data: allGroups = [], isLoading } = useGroups();
   const { data: birthdays = [], isLoading: isBirthdaysLoading } = useBirthdays();
-  const createGroup = useCreateGroup();
-  const updateGroup = useUpdateGroup();
   const deleteGroup = useDeleteGroup();
   const initializeRootGroups = useInitializeRootGroups();
-  const { toasts, hideToast, success, error } = useToast();
+  const { success, error } = useToast();
 
   const [activeRootId, setActiveRootId] = useState<string | null>(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
   const [deletingGroup, setDeletingGroup] = useState<{ id: string; name: string; tenant_id: string } | null>(null);
   const [sharingGroup, setSharingGroup] = useState<Group | null>(null);
   const [deleteRecordCount, setDeleteRecordCount] = useState(0);
-  const [formData, setFormData] = useState<{
-    name: string;
-    color: string;
-    calendarPreference?: 'gregorian' | 'hebrew' | 'both';
-    isGuestPortalEnabled: boolean;
-  }>({
-    name: '',
-    color: GROUP_COLORS[0],
-    calendarPreference: 'both',
-    isGuestPortalEnabled: true,
-  });
 
   const rootGroups = useMemo(() => {
     const order: Record<GroupType, number> = {
@@ -179,68 +167,13 @@ export const GroupsPanel: React.FC<GroupsPanelProps> = ({ isModal = false, onClo
   }, [rootGroups.length, allGroups.length, isLoading, initializeRootGroups]);
 
   const handleOpenForm = (parentId: string, group?: Group) => {
-    if (group) {
-      setEditingGroup(group);
-      setFormData({
-        name: group.name,
-        color: group.color,
-        calendarPreference: group.calendar_preference || 'both',
-        isGuestPortalEnabled: group.is_guest_portal_enabled ?? true,
-      });
-    } else {
-      setEditingGroup(null);
-      setFormData({
-        name: '',
-        color: GROUP_COLORS[0],
-        calendarPreference: 'both',
-        isGuestPortalEnabled: true,
-      });
-    }
+    setEditingGroup(group || null);
     setSelectedParentId(parentId);
-    setIsFormOpen(true);
   };
 
   const handleCloseForm = () => {
-    setIsFormOpen(false);
     setEditingGroup(null);
     setSelectedParentId(null);
-    setFormData({
-      name: '',
-      color: GROUP_COLORS[0],
-      calendarPreference: 'both',
-      isGuestPortalEnabled: true,
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name.trim()) return;
-
-    try {
-      if (editingGroup) {
-        await updateGroup.mutateAsync({
-          groupId: editingGroup.id,
-          data: {
-            ...formData,
-            is_guest_portal_enabled: formData.isGuestPortalEnabled,
-          },
-        });
-        success(t('groups.groupUpdated'));
-      } else if (selectedParentId) {
-        await createGroup.mutateAsync({
-          name: formData.name,
-          parentId: selectedParentId,
-          color: formData.color,
-          calendarPreference: formData.calendarPreference,
-          is_guest_portal_enabled: formData.isGuestPortalEnabled,
-        });
-        success(t('groups.groupCreated'));
-      }
-      handleCloseForm();
-    } catch (err) {
-      error(t('common.error'));
-      logger.error('Error saving group:', err);
-    }
   };
 
   const handleDeleteClick = async (group: Group) => {
@@ -318,21 +251,23 @@ export const GroupsPanel: React.FC<GroupsPanelProps> = ({ isModal = false, onClo
       {rootGroups.length > 0 ? (
           <Fragment>
             {/* קבוצות העל - Grid responsive עם מספר עמודות משתנה לפי גודל המסך */}
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-1.5 sm:gap-2">
+            <ul className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-1.5 sm:gap-2" role="list">
               {rootGroups.map((rootGroup) => {
                 const isActive = rootGroup.id === activeRootId;
                 const childGroups = childGroupsMap.get(rootGroup.id) ?? [];
                 return (
-                  <RootGroupButton
-                    key={rootGroup.id}
-                    rootGroup={rootGroup}
-                    isActive={isActive}
-                    childGroupsCount={childGroups.length}
-                    onClick={() => setActiveRootId(rootGroup.id)}
-                  />
+                  <li key={rootGroup.id}>
+                    <RootGroupButton
+                      rootGroup={rootGroup}
+                      isActive={isActive}
+                      childGroupsCount={childGroups.length}
+                      onClick={() => setActiveRootId(rootGroup.id)}
+                      t={t}
+                    />
+                  </li>
                 );
               })}
-            </div>
+            </ul>
 
             {activeRootId && (
               <>
@@ -372,171 +307,13 @@ export const GroupsPanel: React.FC<GroupsPanelProps> = ({ isModal = false, onClo
           </div>
         )}
 
-        {isFormOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4">
-            <div className="bg-white rounded-lg sm:rounded-xl shadow-xl max-w-md w-full p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-3 sm:mb-4">
-                <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
-                  {editingGroup ? t('groups.editGroup') : t('groups.addGroup')}
-                </h3>
-                <button
-                  onClick={handleCloseForm}
-                  className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors flex-shrink-0"
-                >
-                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-                    {t('groups.groupName')}
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder={t('groups.groupName')}
-                    required
-                    autoFocus
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-                    {t('groups.groupColor')}
-                  </label>
-                  <div className="grid grid-cols-6 gap-1.5 sm:gap-2">
-                    {GROUP_COLORS.map((color) => (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => setFormData({ ...formData, color })}
-                        className={`w-full aspect-square rounded-md sm:rounded-lg border-2 transition-all ${
-                          formData.color === color
-                            ? 'border-gray-900 scale-110'
-                            : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-                    {t('birthday.calendarPreference')}
-                  </label>
-                  <select
-                    value={formData.calendarPreference}
-                    onChange={(e) => setFormData({ ...formData, calendarPreference: e.target.value as 'gregorian' | 'hebrew' | 'both' })}
-                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="both">{t('birthday.both')}</option>
-                    <option value="gregorian">{t('birthday.gregorianOnly')}</option>
-                    <option value="hebrew">{t('birthday.hebrewOnly')}</option>
-                  </select>
-                    <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
-                    {t('groups.preferenceExplanation')}
-                  </p>
-                </div>
-
-                {/* Guest Portal Toggle */}
-                <div className={`flex items-start gap-3 border rounded-lg p-3 ${
-                   (() => {
-                       // Check if parent has portal disabled
-                       if (selectedParentId) {
-                           const parent = allGroups.find(g => g.id === selectedParentId);
-                           if (parent && parent.is_guest_portal_enabled === false) {
-                               return "bg-amber-50 border-amber-200";
-                           }
-                       }
-                       return "bg-purple-50 border-purple-100";
-                   })()
-                }`}>
-                    <div className={`mt-0.5 ${
-                       (() => {
-                           if (selectedParentId) {
-                               const parent = allGroups.find(g => g.id === selectedParentId);
-                               if (parent && parent.is_guest_portal_enabled === false) {
-                                   return "text-amber-600";
-                               }
-                           }
-                           return "text-purple-600";
-                       })()
-                    }`}>
-                        <Globe className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                            <label className="text-sm font-medium text-gray-900">
-                                {t('groups.guestPortalAccess', 'Guest Portal Access')}
-                            </label>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    className="sr-only peer"
-                                    checked={formData.isGuestPortalEnabled}
-                                    onChange={(e) => setFormData({ ...formData, isGuestPortalEnabled: e.target.checked })}
-                                />
-                                <div className={`w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all ${
-                                    (() => {
-                                       if (selectedParentId) {
-                                           const parent = allGroups.find(g => g.id === selectedParentId);
-                                           if (parent && parent.is_guest_portal_enabled === false) {
-                                               return "peer-focus:ring-amber-300 peer-checked:bg-amber-500";
-                                           }
-                                       }
-                                       return "peer-focus:ring-purple-300 peer-checked:bg-purple-600";
-                                    })()
-                                }`}></div>
-                            </label>
-                        </div>
-                        
-                        {/* Description / Warning */}
-                        {(() => {
-                             if (selectedParentId) {
-                                 const parent = allGroups.find(g => g.id === selectedParentId);
-                                 if (parent && parent.is_guest_portal_enabled === false) {
-                                     return (
-                                         <p className="text-xs text-amber-700 mt-1 font-medium">
-                                             ⚠️ גישה חסומה: קבוצת האב ({useTranslatedRootGroupName(parent)}) חוסמת גישה לפורטל. הפעלת המתג תהיה אפקטיבית רק כשהאב יופעל.
-                                         </p>
-                                     );
-                                 }
-                             }
-                             return (
-                                 <p className="text-xs text-gray-500 mt-1">
-                                     {t('groups.guestPortalDescription', 'Allow access to birthdays in this group via the guest portal.')}
-                                 </p>
-                             );
-                        })()}
-                    </div>
-                </div>
-
-                <div className="flex gap-2 sm:gap-3 justify-end pt-2">
-                  <button
-                    type="button"
-                    onClick={handleCloseForm}
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors"
-                  >
-                    {t('common.cancel')}
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={createGroup.isPending || updateGroup.isPending}
-                    className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {createGroup.isPending || updateGroup.isPending
-                      ? t('common.loading')
-                      : t('common.save')}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        <GroupFormModal
+          isOpen={!!(editingGroup !== null || selectedParentId)}
+          onClose={handleCloseForm}
+          editingGroup={editingGroup}
+          parentId={selectedParentId || undefined}
+          allGroups={allGroups}
+        />
 
         <DeleteGroupModal
           isOpen={!!deletingGroup}
@@ -552,15 +329,6 @@ export const GroupsPanel: React.FC<GroupsPanelProps> = ({ isModal = false, onClo
             onClose={() => setSharingGroup(null)}
           />
         )}
-
-        {toasts.map((toast) => (
-          <Toast
-            key={toast.id}
-            message={toast.message}
-            type={toast.type}
-            onClose={() => hideToast(toast.id)}
-          />
-        ))}
     </div>
   );
 
@@ -573,17 +341,22 @@ export const GroupsPanel: React.FC<GroupsPanelProps> = ({ isModal = false, onClo
           className="z-[60]"
         />
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-          <div 
-            className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto"
+          <div
+            ref={modalFocusRef}
+            className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[calc(100vh-2rem)] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="groups-panel-title"
           >
             <div className="sticky top-0 bg-white z-10 px-4 sm:px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+              <h2 id="groups-panel-title" className="text-xl sm:text-2xl font-bold text-gray-900">
                 {t('groups.manageGroups')}
               </h2>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg"
+                className="text-gray-500 hover:text-gray-600 transition-colors p-3 hover:bg-gray-100 rounded-lg focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                aria-label={t('common.close')}
               >
                 <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
@@ -633,12 +406,6 @@ const CategorySection = ({
     return sum + (countsByGroup.get(group.id) ?? 0);
   }, 0);
 
-  const childGroupsText = `(${childGroups.length})`;
-
-  const recordCountText = isCountsLoading
-    ? t('common.loading')
-    : `(${totalRecords})`;
-
   return (
     <div 
       className="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden"
@@ -669,7 +436,8 @@ const CategorySection = ({
         </div>
         <button
           onClick={onAddGroup}
-          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg text-xs sm:text-sm font-medium transition-all shadow-sm flex-shrink-0"
+          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 rounded-lg text-xs sm:text-sm font-medium transition-all shadow-sm flex-shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+          aria-label={t('groups.addGroup')}
         >
           <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-500" />
           <span className="hidden sm:inline">{t('groups.addGroup')}</span>
@@ -699,18 +467,18 @@ const CategorySection = ({
             </button>
           </div>
         ) : (
-          <div className="grid gap-2 sm:gap-3 md:gap-4">
+          <ul className="grid gap-2 sm:gap-3 md:gap-4" role="list">
             {childGroups.map((group) => {
               const groupCount = countsByGroup.get(group.id) ?? 0;
               return (
-              <div
-                key={group.id}
-                className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200 hover:shadow-lg transition-all hover:-translate-y-0.5 group"
-                style={{
-                  borderRightColor: group.color,
-                  borderRightWidth: '3px'
-                }}
-              >
+              <li key={group.id}>
+                <div
+                  className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200 hover:shadow-lg transition-all hover:-translate-y-0.5 group"
+                  style={{
+                    borderRightColor: group.color,
+                    borderRightWidth: '3px'
+                  }}
+                >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                     <div
@@ -731,32 +499,33 @@ const CategorySection = ({
                   <div className="flex items-center gap-1 sm:gap-2">
                     <button
                       onClick={() => onShareGroup(group)}
-                      className="p-1.5 sm:p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                      title={t('groups.shareGroup', 'שתף קבוצה')}
+                      className="p-3 sm:p-3 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+                      aria-label={`${t('groups.shareGroup', 'שתף קבוצה')} ${group.name}`}
                     >
-                      <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <Share2 className="w-4 h-4 sm:w-4 sm:h-4" />
                     </button>
                     <button
                       onClick={() => onEditGroup(group)}
-                      className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                      title={t('common.edit')}
+                      className="p-3 sm:p-3 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      aria-label={`${t('common.edit')} ${group.name}`}
                     >
-                      <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <Edit className="w-4 h-4 sm:w-4 sm:h-4" />
                     </button>
                     <button
                       onClick={() => onDeleteGroup(group)}
-                      className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title={t('common.delete')}
+                      className="p-3 sm:p-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                      aria-label={`${t('common.delete')} ${group.name}`}
                     >
-                      <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      <Trash2 className="w-4 h-4 sm:w-4 sm:h-4" />
                     </button>
                   </div>
                   </div>
                 </div>
-              </div>
+                </div>
+              </li>
             );
             })}
-          </div>
+          </ul>
         )}
       </div>
     </div>
