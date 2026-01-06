@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LanguageSwitcher } from '../common/LanguageSwitcher';
 import { InfoPageLayout } from '../layout/InfoPageLayout';
+import { Footer } from '../common/Footer';
 import {
   ChevronRight,
   Download,
@@ -18,6 +18,7 @@ import {
   AlertTriangle,
   Clock,
   Globe,
+  Menu,
   Link2,
   FileText,
   Mail
@@ -69,7 +70,7 @@ export const UserGuide: React.FC = () => {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      window.scrollTo({ top: element.offsetTop - 100, behavior: 'smooth' });
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setIsSidebarOpen(false);
     }
   };
@@ -81,11 +82,11 @@ export const UserGuide: React.FC = () => {
         {/* Sidebar Navigation */}
         <aside
           className={`
-            fixed lg:sticky top - 20 ${isHebrew ? 'right-0' : 'left-0'}
-h - [calc(100vh - 80px)] w - 64 bg - white rounded - lg shadow - sm border border - gray - 200 p - 4
-transition - transform duration - 300 z - 20 overflow - y - auto
+            fixed lg:sticky top-20 ${isHebrew ? 'right-0' : 'left-0'}
+            h-[calc(100vh-80px)] w-64 bg-white rounded-lg shadow-sm border border-gray-200 p-4
+            transition-transform duration-300 z-50 overflow-y-auto
             ${isSidebarOpen ? 'translate-x-0' : isHebrew ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0'}
-`}
+          `}
         >
           <nav className="space-y-1">
             {sections.map((section) => {
@@ -95,13 +96,13 @@ transition - transform duration - 300 z - 20 overflow - y - auto
                   key={section.id}
                   onClick={() => scrollToSection(section.id)}
                   className={`
-w - full flex items - center gap - 3 px - 3 py - 2.5 rounded - lg text - sm font - medium transition - all
+                    w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
                     ${isActive ? `${section.color} text-white shadow-md` : 'text-gray-700 hover:bg-gray-50'}
-`}
+                  `}
                 >
                   {section.icon}
                   <span className="flex-1 text-start">{t(section.titleKey)}</span>
-                  {isActive && <ChevronRight className={`w - 4 h - 4 ${isHebrew ? 'rotate-180' : ''} `} />}
+                  {isActive && <ChevronRight className={`w-4 h-4 ${isHebrew ? 'rotate-180' : ''}`} />}
                 </button>
               );
             })}
@@ -110,16 +111,11 @@ w - full flex items - center gap - 3 px - 3 py - 2.5 rounded - lg text - sm font
 
         {/* Main Content */}
         <main className="flex-1 min-w-0">
-          {/* Mobile Menu Button - Sticky */}
-          <div className="lg:hidden sticky top-16 z-20 mb-2 sm:mb-3">
-            <LanguageSwitcher className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:border-purple-400 hover:text-purple-600 rounded-lg transition-all duration-200 shadow-sm hover:shadow" variant="minimal" />
-          </div>
-
           <div className="bg-white rounded-lg shadow-sm p-4 sm:p-8">
             <div className="prose prose-sm max-w-none" dir={isHebrew ? 'rtl' : 'ltr'}>
 
               {/* INTRO */}
-              <section id="intro" className="mb-8 sm:mb-12 scroll-mt-20">
+              <section id="intro" className="mb-8 sm:mb-12 scroll-mt-24">
                 <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-100 rounded-xl p-4 sm:p-6">
                   <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
                     {t('guide.intro.title', 'על המערכת')}
@@ -177,7 +173,7 @@ w - full flex items - center gap - 3 px - 3 py - 2.5 rounded - lg text - sm font
               </section>
 
               {/* IMPORT */}
-              <section id="import" className="mb-12 scroll-mt-20">
+              <section id="import" className="mb-12 scroll-mt-24">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3 pb-3 border-b-2 border-blue-200">
                   <Download className="w-6 h-6 text-blue-600" />
                   {t('guide.section1.title', 'איסוף המידע - 3 דרכים קלות')}
@@ -272,7 +268,7 @@ w - full flex items - center gap - 3 px - 3 py - 2.5 rounded - lg text - sm font
               </section>
 
               {/* MANAGE */}
-              <section id="manage" className="mb-12 scroll-mt-20">
+              <section id="manage" className="mb-12 scroll-mt-24">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3 pb-3 border-b-2 border-indigo-200">
                   <Calendar className="w-6 h-6 text-indigo-600" />
                   {t('guide.section2.title', 'ניהול ימי הולדת')}
@@ -326,7 +322,7 @@ w - full flex items - center gap - 3 px - 3 py - 2.5 rounded - lg text - sm font
               </section>
 
               {/* GROUPS */}
-              <section id="groups" className="mb-12 scroll-mt-20">
+              <section id="groups" className="mb-12 scroll-mt-24">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3 pb-3 border-b-2 border-cyan-200">
                   <Users className="w-6 h-6 text-cyan-600" />
                   {t('guide.section4.title', 'קבוצות וארגון')}
@@ -367,7 +363,7 @@ w - full flex items - center gap - 3 px - 3 py - 2.5 rounded - lg text - sm font
               </section>
 
               {/* SYNC */}
-              <section id="sync" className="mb-12 scroll-mt-20">
+              <section id="sync" className="mb-12 scroll-mt-24">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3 pb-3 border-b-2 border-green-200">
                   <Calendar className="w-6 h-6 text-green-600" />
                   {t('guide.section3.title', 'סנכרון ליומן Google')}
@@ -401,15 +397,15 @@ w - full flex items - center gap - 3 px - 3 py - 2.5 rounded - lg text - sm font
 
                 <div className="bg-white border border-gray-200 rounded-lg p-4 mb-4">
                   <h3 className="font-bold text-gray-900 mb-3 text-sm">{t('guide.section3.eventFormat', 'מבנה האירוע ביומן:')}</h3>
-                  <div className={`bg - gray - 50 rounded - lg p - 3 font - mono text - xs text - gray - 700 space - y - 1 ${isHebrew ? 'text-right' : 'text-left'} `} dir={isHebrew ? 'rtl' : 'ltr'}>
+                  <div className={`bg-gray-50 rounded-lg p-3 font-mono text-xs text-gray-700 space-y-1 ${isHebrew ? 'text-right' : 'text-left'}`} dir={isHebrew ? 'rtl' : 'ltr'}>
                     <div className="text-blue-600 font-bold">📅 גילה | 40 | יום הולדת עברי</div>
                     <div className="text-gray-500">🗓️ 15 במרץ 2026</div>
                     <div className="text-gray-600">📝 {t('guide.section3.eventDesc', 'תיאור:')}</div>
-                    <div className={`${isHebrew ? 'mr-4' : 'ms-4'} text - gray - 600`}>{t('guide.section3.eventBirth', 'תאריך לידה: י"ח באדר תשמ"ו')}</div>
-                    <div className={`${isHebrew ? 'mr-4' : 'ms-4'} text - gray - 600`}>{t('guide.section3.eventAge', 'גיל: 40')}</div>
-                    <div className={`${isHebrew ? 'mr-4' : 'ms-4'} text - gray - 600`}>{t('guide.section3.eventWishlist', 'רשימת משאלות:')}</div>
-                    <div className={`${isHebrew ? 'mr-8' : 'ms-8'} text - gray - 500`}>• {t('guide.section3.eventItem1', 'שמלה חדשה')}</div>
-                    <div className={`${isHebrew ? 'mr-8' : 'ms-8'} text - gray - 500`}>• {t('guide.section3.eventItem2', 'ספר בישול')}</div>
+                    <div className={`${isHebrew ? 'mr-4' : 'ms-4'} text-gray-600`}>{t('guide.section3.eventBirth', 'תאריך לידה: י"ח באדר תשמ"ו')}</div>
+                    <div className={`${isHebrew ? 'mr-4' : 'ms-4'} text-gray-600`}>{t('guide.section3.eventAge', 'גיל: 40')}</div>
+                    <div className={`${isHebrew ? 'mr-4' : 'ms-4'} text-gray-600`}>{t('guide.section3.eventWishlist', 'רשימת משאלות:')}</div>
+                    <div className={`${isHebrew ? 'mr-8' : 'ms-8'} text-gray-500`}>• {t('guide.section3.eventItem1', 'שמלה חדשה')}</div>
+                    <div className={`${isHebrew ? 'mr-8' : 'ms-8'} text-gray-500`}>• {t('guide.section3.eventItem2', 'ספר בישול')}</div>
                   </div>
                 </div>
 
@@ -425,7 +421,7 @@ w - full flex items - center gap - 3 px - 3 py - 2.5 rounded - lg text - sm font
               </section>
 
               {/* WISHLIST */}
-              <section id="wishlist" className="mb-12 scroll-mt-20">
+              <section id="wishlist" className="mb-12 scroll-mt-24">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3 pb-3 border-b-2 border-pink-200">
                   <Gift className="w-6 h-6 text-pink-600" />
                   {t('guide.section5.title', 'רשימת משאלות ופורטל מתנות')}
@@ -484,7 +480,7 @@ w - full flex items - center gap - 3 px - 3 py - 2.5 rounded - lg text - sm font
               </section>
 
               {/* SYNC - continued with detailed content */}
-              <section id="whatsapp" className="mb-12 scroll-mt-20">
+              <section id="whatsapp" className="mb-12 scroll-mt-24">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3 pb-3 border-b-2 border-emerald-200">
                   <MessageCircle className="w-6 h-6 text-emerald-600" />
                   {t('guide.section7.title', 'כפתור הוואטסאפ החכם')}
@@ -524,7 +520,7 @@ w - full flex items - center gap - 3 px - 3 py - 2.5 rounded - lg text - sm font
               </section>
 
               {/* GELT */}
-              <section id="gelt" className="mb-12 scroll-mt-20">
+              <section id="gelt" className="mb-12 scroll-mt-24">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3 pb-3 border-b-2 border-orange-200">
                   <Calculator className="w-6 h-6 text-orange-600" />
                   {t('guide.section6.title', 'מחשבון דמי חנוכה/פורים')}
@@ -577,7 +573,7 @@ w - full flex items - center gap - 3 px - 3 py - 2.5 rounded - lg text - sm font
               </section>
 
               {/* FEATURES */}
-              <section id="features" className="mb-12 scroll-mt-20">
+              <section id="features" className="mb-12 scroll-mt-24">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3 pb-3 border-b-2 border-teal-200">
                   <Sparkles className="w-6 h-6 text-teal-600" />
                   {t('guide.section8.title', 'פיצ\'רים נוספים')}
@@ -617,7 +613,7 @@ w - full flex items - center gap - 3 px - 3 py - 2.5 rounded - lg text - sm font
               </section>
 
               {/* SETTINGS */}
-              <section id="settings" className="mb-12 scroll-mt-20">
+              <section id="settings" className="mb-12 scroll-mt-24">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3 pb-3 border-b-2 border-gray-200">
                   <Settings className="w-6 h-6 text-gray-600" />
                   {t('guide.section9.title', 'הגדרות ופרטיות')}
@@ -655,20 +651,27 @@ w - full flex items - center gap - 3 px - 3 py - 2.5 rounded - lg text - sm font
                 </div>
               </section>
 
-              {/* Footer */}
-              <div className="mt-16 pt-6 border-t border-gray-200 text-center">
-                <p className="text-sm text-gray-500">
-                  © 2024-2025 HebBirthday | {t('guide.footer.rights', 'כל הזכויות שמורות')}
-                </p>
-              </div>
             </div>
           </div>
+          <div className="mt-16">
+            <Footer />
+          </div>
         </main>
+
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className={`lg:hidden fixed top-20 ${isHebrew ? 'left-4' : 'right-4'} z-40 w-10 h-10 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg transition-all duration-200 flex items-center justify-center`}
+          aria-label={t('guide.nav.openMenu')}
+          aria-expanded={isSidebarOpen}
+        >
+          <Menu className="w-5 h-5" />
+        </button>
 
         {/* Mobile Sidebar Overlay */}
         {isSidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/50 z-10 lg:hidden"
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}

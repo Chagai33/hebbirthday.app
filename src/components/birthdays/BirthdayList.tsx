@@ -323,7 +323,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
   const handleRefresh = async (id: string) => {
     try {
       await refreshHebrewData.mutateAsync(id);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.code === 'functions/resource-exhausted') {
         alert(t('birthday.refreshLimitReached', 'יותר מדי רענונים. המתן 30 שניות.'));
       } else {
@@ -406,7 +406,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       } else {
         showToast(result.error || 'שגיאה בסנכרון ליומן Google', 'error');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error syncing birthday:', error);
       // אל תציג הודעה כאן אם זה היה בעיית primary calendar
       if (!error.message?.includes('ליומן הראשי')) {
@@ -419,7 +419,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
     try {
       await removeBirthdayFromCalendar(birthdayId);
       showToast('יום ההולדת הוסר מיומן Google', 'success');
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error removing birthday from calendar:', error);
       showToast(error.message || 'שגיאה בהסרת יום ההולדת מיומן Google', 'error');
     }
@@ -457,7 +457,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
         );
       }
       setSelectedIds(new Set());
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error bulk syncing birthdays:', error);
       // אל תציג הודעה כאן אם זה היה בעיית primary calendar
       if (!error.message?.includes('ליומן הראשי')) {
@@ -726,6 +726,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                       }
                     }}
                     className="px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    aria-label={t('birthday.exportSelected')}
                   >
                     <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('birthday.exportSelected')}</span>
@@ -830,6 +831,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                       }
                     }}
                     className="px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    aria-label={t('birthday.exportSelected')}
                   >
                     <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('birthday.exportSelected')}</span>
@@ -1067,7 +1069,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
 
       <div className="bg-white rounded-lg sm:rounded-xl shadow-sm sm:shadow-md border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full" role="table">
             <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
               <tr>
                 <th className="px-2 sm:px-6 py-2 sm:py-4 text-start">
@@ -1135,7 +1137,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                           checked={selectedIds.has(birthday.id)}
                           onChange={() => toggleSelect(birthday.id)}
                           className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-                          aria-label={t('common.selectRow', { name: `${birthday.first_name} ${birthday.last_name}` })}
+                          aria-label={t('birthday.selectRow')}
                         />
                       </td>
                       <td className="px-2 sm:px-6 py-2 sm:py-4">
@@ -1329,21 +1331,23 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                             </button>
                           )}
                           {birthday.group_ids && birthday.group_ids.length > 0 && (
-                            <button
-                              onClick={() => onEdit(birthday)}
-                              className="p-3 text-blue-600 hover:bg-blue-100 rounded-lg transition-all hover:scale-110"
-                              title={t('common.edit')}
-                            >
-                              <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                            </button>
-                          )}
                           <button
-                            onClick={() => handleDelete(birthday.id)}
-                            className="p-3 text-red-600 hover:bg-red-100 rounded-lg transition-all hover:scale-110"
-                            title={t('common.delete')}
+                            onClick={() => onEdit(birthday)}
+                            className="p-3 text-blue-600 hover:bg-blue-100 rounded-lg transition-all hover:scale-110"
+                            title={t('common.edit')}
+                            aria-label={t('birthday.editName', { name: birthday.first_name })}
                           >
-                            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           </button>
+                          )}
+                        <button
+                          onClick={() => handleDelete(birthday.id)}
+                          className="p-3 text-red-600 hover:bg-red-100 rounded-lg transition-all hover:scale-110"
+                          title={t('common.delete')}
+                          aria-label={t('birthday.deleteName', { name: birthday.first_name })}
+                        >
+                          <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        </button>
                         </div>
                       </td>
                     </tr>

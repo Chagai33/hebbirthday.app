@@ -26,29 +26,29 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
 
   // Order: Add (Bottom), Import, Text Import (Top)
   const menuItems = [
-    { 
+    {
         id: 'add',
-        icon: Plus, 
-        label: t('birthday.addBirthday'), 
-        onClick: onAdd, 
-        color: 'text-blue-600', 
+        icon: Plus,
+        label: t('birthday.addBirthday'),
+        onClick: onAdd,
+        color: 'text-blue-600',
         bgColor: 'bg-blue-50',
         borderColor: 'border-blue-200'
     },
-    { 
+    {
         id: 'import',
-        icon: Upload, 
-        label: t('birthday.importCSV'), 
-        onClick: onImport, 
+        icon: Upload,
+        label: t('birthday.importCSV'),
+        onClick: onImport,
         color: 'text-green-600',
         bgColor: 'bg-green-50',
         borderColor: 'border-green-200'
     },
-    { 
+    {
         id: 'textImport',
-        icon: FileText, 
-        label: t('birthday.pasteImport'), 
-        onClick: onTextImport, 
+        icon: FileText,
+        label: t('birthday.pasteImport'),
+        onClick: onTextImport,
         color: 'text-purple-600',
         bgColor: 'bg-purple-50',
         borderColor: 'border-purple-200'

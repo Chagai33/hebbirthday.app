@@ -38,6 +38,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
   const [syncStatus, setSyncStatus] = useState<'IDLE' | 'IN_PROGRESS' | 'DELETING'>('IDLE');
   const [recentActivity, setRecentActivity] = useState<SyncHistoryItem[]>([]);
   const [needsCalendarSetup, setNeedsCalendarSetup] = useState<boolean>(false);
+  const [statusAnnouncement, setStatusAnnouncement] = useState<string>('');
 
   useEffect(() => {
     if (user) {
@@ -50,8 +51,28 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       setCalendarName(null);
       setSyncStatus('IDLE');
       setRecentActivity([]);
+      setStatusAnnouncement('');
     }
   }, [user]);
+
+  // Announce status changes to screen readers
+  useEffect(() => {
+    let announcement = '';
+
+    if (syncStatus === 'IN_PROGRESS') {
+      announcement = t('googleCalendar.syncInProgress');
+    } else if (syncStatus === 'DELETING') {
+      announcement = t('googleCalendar.deleting');
+    } else if (isConnected && syncStatus === 'IDLE') {
+      announcement = t('googleCalendar.connected');
+    } else if (!isConnected) {
+      announcement = t('googleCalendar.notConnected');
+    }
+
+    if (announcement) {
+      setStatusAnnouncement(announcement);
+    }
+  }, [syncStatus, isConnected, t]);
 
   const refreshStatus = async () => {
     if (!user) return;
@@ -109,7 +130,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       await refreshStatus();
 
       showToast(t('googleCalendar.connected'), 'success');
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error connecting to Google Calendar:', error);
       showToast(error.message || t('googleCalendar.syncError'), 'error');
       throw error;
@@ -144,7 +165,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       }
 
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error syncing birthday:', error);
       showToast(error.message || t('googleCalendar.syncError'), 'error');
       throw error;
@@ -194,7 +215,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       setTimeout(refreshStatus, 5000);
 
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error syncing multiple birthdays:', error);
       showToast(error.message || t('googleCalendar.syncError'), 'error');
       throw error;
@@ -216,7 +237,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
           showToast(t('googleCalendar.cleanupSuccess', { count: result.deletedCount }), 'success');
       }
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error cleaning orphans:', error);
       showToast(error.message || t('common.error'), 'error');
       throw error;
@@ -235,7 +256,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
         setIsSyncing(true);
         const result = await googleCalendarService.previewDeletion(tenantId);
         return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
         logger.error('Error previewing deletion:', error);
         showToast(error.message || t('common.error'), 'error');
         throw error;
@@ -254,7 +275,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       setIsSyncing(true);
       await googleCalendarService.removeBirthdayFromCalendar(birthdayId);
       // ✅ Toast מוצג בקומפוננטה - אין צורך כאן
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error removing birthday:', error);
       showToast(error.message || t('common.error'), 'error');
       throw error;
@@ -274,7 +295,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       const result = await googleCalendarService.deleteAllSyncedEvents(tenantId);
       showToast(result.message || 'Cleanup job started in background', 'success');
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error deleting all synced events:', error);
       showToast(error.message || t('common.error'), 'error');
       throw error;
@@ -296,7 +317,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       setSyncStatus('IDLE');
       setRecentActivity([]);
       showToast(t('googleCalendar.disconnectedSuccess'), 'success');
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error disconnecting:', error);
       showToast(error.message || t('common.error'), 'error');
       throw error;
@@ -323,7 +344,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       
       showToast(t('googleCalendar.createdSuccess'), 'success');
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error creating calendar:', error);
       showToast(error.message || t('common.error'), 'error');
       throw error;
@@ -357,7 +378,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       await googleCalendarService.updateCalendarSelection(selectedCalendarId, selectedCalendarName);
       
       showToast(t('googleCalendar.calendarSelectionUpdated'), 'success');
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Rollback on error
       setCalendarId(prevId);
       setCalendarName(prevName);
@@ -381,7 +402,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       setIsSyncing(true);
       const calendars = await googleCalendarService.listCalendars();
       return calendars;
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error listing calendars:', error);
       showToast(error.message || t('common.error'), 'error');
       throw error;
@@ -403,7 +424,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       
       // רענון רשימת היומנים אחרי מחיקה
       await listCalendars();
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error deleting calendar:', error);
       showToast(error.message || t('common.error'), 'error');
       throw error;
@@ -420,7 +441,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       try {
           await googleCalendarService.resetBirthdaySyncData(birthdayId);
           showToast(t('googleCalendar.syncDataReset'), 'success');
-      } catch (error: any) {
+      } catch (error: unknown) {
           logger.error('Error resetting sync data:', error);
           showToast(error.message, 'error');
           throw error;
@@ -438,6 +459,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
     syncStatus,
     recentActivity,
     needsCalendarSetup,
+    statusAnnouncement,
     connectToGoogle,
     syncSingleBirthday,
     syncMultipleBirthdays,

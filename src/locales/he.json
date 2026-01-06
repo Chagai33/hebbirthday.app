@@ -265,6 +265,7 @@
     "copyToWhatsapp": "העתק",
     "copyToWhatsappList": "העתק רשימת ימי הולדת לוואטסאפ",
     "copied": "הועתק!",
+    "selectColor": "בחר צבע {{color}}",
     "filter": "סינון",
     "filters": "פילטרים",
     "close": "סגור",
@@ -526,7 +527,10 @@
     "possibleDuplicate": "כפילות אפשרית",
     "deleteConfirmWithCalendar": "האם אתה בטוח? פעולה זו תמחק את יום ההולדת וגם תסיר את כל האירועים המקושרים מיומן Google.",
     "exportSuccess": "הייצוא הושלם בהצלחה",
-    "hebrewZodiacCopied": "התאריכים העבריים והמזלות הועתקו ללוח"
+    "hebrewZodiacCopied": "התאריכים העבריים והמזלות הועתקו ללוח",
+    "editName": "עריכת יום הולדת של {{name}}",
+    "deleteName": "מחיקת יום הולדת של {{name}}",
+    "selectRow": "בחר שורה"
   },
   "zodiac": {
     "aries": "טלה",
@@ -637,7 +641,9 @@
     "addedBy": "נוסף על ידי אורח",
     "undo": "בטל",
     "undoSuccess": "יום ההולדת הוסר בהצלחה",
-    "guestAddedIndicator": "נוסף על ידי אורח"
+    "guestAddedIndicator": "נוסף על ידי אורח",
+    "shareGroup": "שתף קבוצת {{name}}",
+    "editGroup": "ערוך קבוצת {{name}}"
   },
   "wishlist": {
     "title": "רשימת המשאלות",
@@ -837,6 +843,7 @@
   "footer": {
     "termsOfUse": "תנאי שימוש",
     "privacyPolicy": "מדיניות פרטיות",
+    "accessibility": "הצהרת נגישות",
     "feedback": "משוב",
     "feedbackOpenNewWindow": "פתח טופס משוב בחלון חדש",
     "deleteAccount": "מחק חשבון",
@@ -1066,7 +1073,9 @@
       "gelt": "דמי חנוכה/פורים",
       "whatsapp": "כפתור וואטסאפ",
       "features": "פיצ'רים נוספים",
-      "settings": "הגדרות ופרטיות"
+      "settings": "הגדרות ופרטיות",
+      "menu": "תפריט המדריך",
+      "openMenu": "פתח תפריט המדריך"
     },
     "title": "📘 המדריך המלא",
     "subtitle": "לא שוכחים אף תאריך - עברי או לועזי 🎂",

@@ -322,6 +322,7 @@ export interface GoogleCalendarContextType {
   syncStatus: 'IDLE' | 'IN_PROGRESS' | 'DELETING';
   recentActivity: SyncHistoryItem[];
   needsCalendarSetup: boolean; // Added - מציין שהמשתמש צריך לבחור יומן ייעודי
+  statusAnnouncement: string;
   connectToGoogle: () => Promise<void>;
   syncSingleBirthday: (birthdayId: string) => Promise<SyncResult>;
   syncMultipleBirthdays: (birthdayIds: string[]) => Promise<BulkSyncResult>;

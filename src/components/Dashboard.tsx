@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Layout } from './layout/Layout';
 import { BirthdayList } from './birthdays/BirthdayList';
 import { BirthdayForm } from './birthdays/BirthdayForm';
@@ -86,6 +86,9 @@ export const Dashboard = () => {
     });
     return duplicates;
   }, [allBirthdays]);
+
+  // Context-aware visibility: Hide FAB when any modal is open
+  const isAnyModalOpen = showForm || showCSVPreview || showCalendarModal || showZodiacStats || showTextImport;
 
   useEffect(() => {
     if (currentTenant && user && !isLoadingGroups && rootGroups.length === 0 && !initializeRootGroups.isPending) {
@@ -371,7 +374,7 @@ export const Dashboard = () => {
                   <p className="text-[8px] leading-tight sm:text-xs text-blue-700 font-medium mb-0.5 truncate">
                     {t('dashboard.totalBirthdays')}
                   </p>
-                  <p className="text-base sm:text-2xl font-bold text-blue-900">{stats.totalBirthdays}</p>
+                  <p className="text-base sm:text-2xl font-bold text-blue-900" aria-live="polite">{stats.totalBirthdays}</p>
                 </div>
               </div>
             </div>
@@ -529,6 +532,36 @@ export const Dashboard = () => {
         </div>
       </div>
 
+      {/* Minimalist legal footer */}
+      <footer className="mt-auto py-6 text-center border-t border-gray-100">
+        <ul className="flex justify-center gap-4 text-xs text-gray-400" role="list">
+          <li>
+            <Link
+              to="/terms"
+              className="hover:text-gray-600 transition-colors"
+            >
+              {t('footer.termsOfUse')}
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/privacy"
+              className="hover:text-gray-600 transition-colors"
+            >
+              {t('footer.privacyPolicy')}
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/accessibility"
+              className="hover:text-gray-600 transition-colors"
+            >
+              {t('footer.accessibility')}
+            </Link>
+          </li>
+        </ul>
+      </footer>
+
       {showForm && (
         <BirthdayForm
           onClose={handleCloseForm}
@@ -563,9 +596,7 @@ export const Dashboard = () => {
         onAdd={() => setShowForm(true)}
         onImport={() => fileInputRef.current?.click()}
         onTextImport={() => setShowTextImport(true)}
-        onCalendar={() => setShowCalendarModal(true)}
-        onGroups={() => navigate('/groups')}
-        hidden={showForm || showCSVPreview || showCalendarModal || showZodiacStats || showTextImport}
+        hidden={isAnyModalOpen}
       />
 
       <GoogleCalendarModal

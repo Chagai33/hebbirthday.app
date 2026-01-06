@@ -58,6 +58,10 @@ export const GuestLayout: React.FC<{ children: React.ReactNode }> = ({ children 
             <button onClick={() => navigate('/privacy')} className="hover:text-gray-800 transition-colors">
               {t('footer.privacyPolicy')}
             </button>
+            <span className="text-gray-300">|</span>
+            <button onClick={() => navigate('/accessibility')} className="hover:text-gray-800 transition-colors">
+              {t('footer.accessibility')}
+            </button>
           </div>
           <div className="mt-2">
             &copy; {new Date().getFullYear()} HebBirthday

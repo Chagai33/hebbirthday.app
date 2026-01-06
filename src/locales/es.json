@@ -111,6 +111,7 @@
     "copyToWhatsapp": "Copiar",
     "copyToWhatsappList": "Copiar lista de cumpleaños a WhatsApp",
     "copied": "¡Copiado!",
+    "selectColor": "Seleccionar color {{color}}",
     "yes": "Sí",
     "no": "No",
     "male": "Masculino",
@@ -460,7 +461,10 @@
     "exportSuccess": "Datos exportados exitosamente",
     "hebrewZodiacCopied": "Fechas hebreas y signos zodiacales copiados al portapapeles",
     "viewDetails": "Ver detalles de {{name}}",
-    "resultsFound": "Encontrados {{count}} cumpleaños"
+    "resultsFound": "Encontrados {{count}} cumpleaños",
+    "editName": "Editar cumpleaños de {{name}}",
+    "deleteName": "Eliminar cumpleaños de {{name}}",
+    "selectRow": "Seleccionar fila"
   },
   "groups": {
     "title": "Grupos",
@@ -505,7 +509,9 @@
     "selectionSummary": "{{count}} grupos seleccionados: {{text}}",
     "noSelection": "No hay grupos seleccionados",
     "underGroup": "Bajo",
-    "assignToGroup": "Agregar al Grupo"
+    "assignToGroup": "Agregar al Grupo",
+    "shareGroup": "Compartir grupo {{name}}",
+    "editGroup": "Editar grupo {{name}}"
   },
   "wishlist": {
     "title": "Lista de Deseos",
@@ -711,6 +717,7 @@
   "footer": {
     "termsOfUse": "Términos de Uso",
     "privacyPolicy": "Política de Privacidad",
+    "accessibility": "Declaración de Accesibilidad",
     "feedback": "Comentarios",
     "feedbackOpenNewWindow": "Abrir formulario de comentarios en nueva ventana",
     "deleteAccount": "Eliminar Cuenta",
@@ -958,7 +965,9 @@
       "gelt": "Dinero de Janúcá/Purim",
       "whatsapp": "Botón de WhatsApp",
       "features": "Funciones Adicionales",
-      "settings": "Configuración y Privacidad"
+      "settings": "Configuración y Privacidad",
+      "menu": "Menú de la Guía",
+      "openMenu": "Abrir menú de la guía"
     },
     "title": "📘 Guía Completa",
     "subtitle": "Nunca olvides una fecha - Hebrea o Gregoriana 🎂",

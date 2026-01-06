@@ -26,18 +26,19 @@ interface GoogleCalendarButtonProps {
 
 export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ initialStrictMode = false, isCompact = false, onManageClick }) => {
   const { t } = useTranslation();
-  const { 
-    isConnected, 
-    lastSyncTime, 
-    isSyncing, 
-    userEmail, 
-    calendarId, 
+  const {
+    isConnected,
+    lastSyncTime,
+    isSyncing,
+    userEmail,
+    calendarId,
     calendarName,
     syncStatus,
     recentActivity,
-    connectToGoogle, 
-    deleteAllSyncedEvents, 
-    disconnect, 
+    statusAnnouncement,
+    connectToGoogle,
+    deleteAllSyncedEvents,
+    disconnect,
     createCalendar,
     updateCalendarSelection,
     listCalendars,
@@ -170,9 +171,10 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
       await deleteAllSyncedEvents(currentTenant.id);
       setShowConfirm(false);
       setPreviewData(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting all events:', error);
-      alert(`שגיאה במחיקה: ${error.message || 'שגיאה לא ידועה'}`);
+      const message = error instanceof Error ? error.message : 'שגיאה לא ידועה';
+      alert(`שגיאה במחיקה: ${message}`);
     }
   };
 
@@ -390,6 +392,11 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
 
     return (
       <>
+        {/* Status Announcements for Screen Readers */}
+        <div aria-live="polite" aria-atomic="true" className="sr-only">
+          {statusAnnouncement}
+        </div>
+
         {/* Main Card Container */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden w-full transition-all hover:shadow-md">
           
@@ -482,6 +489,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
               <button
                 onClick={handleCleanupOrphans}
                 disabled={isSyncing}
+                aria-busy={isSyncing}
                 className="flex flex-col items-center justify-center gap-1 p-2 rounded-lg hover:bg-amber-50 text-gray-600 hover:text-amber-600 transition-colors border border-transparent hover:border-amber-100"
               >
                 <RefreshCw className="w-4 h-4" />
@@ -491,6 +499,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
               <button
                 onClick={handlePreviewDeletion}
                 disabled={isSyncing}
+                aria-busy={isSyncing}
                 className="flex flex-col items-center justify-center gap-1 p-2 rounded-lg hover:bg-red-50 text-gray-600 hover:text-red-600 transition-colors border border-transparent hover:border-red-100"
               >
                 <Trash2 className="w-4 h-4" />
@@ -500,6 +509,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
               <button
                 onClick={handleDisconnect}
                 disabled={isSyncing}
+                aria-busy={isSyncing}
                 className="flex flex-col items-center justify-center gap-1 p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors border border-transparent hover:border-gray-200"
               >
                 <LogOut className="w-4 h-4" />
@@ -849,6 +859,8 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
     <button
       onClick={handleConnect}
       disabled={isSyncing}
+      aria-busy={isSyncing}
+      aria-label={t('googleCalendar.connect')}
       className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 rounded-lg font-medium transition-all shadow-sm text-sm disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {isSyncing ? (

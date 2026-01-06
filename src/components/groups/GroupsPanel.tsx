@@ -455,7 +455,7 @@ const CategorySection = ({
             <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 rounded-full bg-gray-100 flex items-center justify-center">
               <Plus className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
             </div>
-            <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 px-2">
+            <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 px-2" role="status">
               {t('groups.noGroups', { category: translatedRootName })}
             </p>
             <button
@@ -500,14 +500,14 @@ const CategorySection = ({
                     <button
                       onClick={() => onShareGroup(group)}
                       className="p-3 sm:p-3 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-                      aria-label={`${t('groups.shareGroup', 'שתף קבוצה')} ${group.name}`}
+                      aria-label={t('groups.shareGroup', { name: group.name })}
                     >
                       <Share2 className="w-4 h-4 sm:w-4 sm:h-4" />
                     </button>
                     <button
                       onClick={() => onEditGroup(group)}
                       className="p-3 sm:p-3 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                      aria-label={`${t('common.edit')} ${group.name}`}
+                      aria-label={t('groups.editGroup', { name: group.name })}
                     >
                       <Edit className="w-4 h-4 sm:w-4 sm:h-4" />
                     </button>

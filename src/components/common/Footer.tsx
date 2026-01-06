@@ -24,6 +24,12 @@ export const Footer: React.FC = () => {
             >
               {t('footer.privacyPolicy', 'מדיניות פרטיות')}
             </Link>
+            <Link
+              to="/accessibility"
+              className="text-gray-600 hover:text-indigo-600 transition-colors whitespace-nowrap"
+            >
+              {t('footer.accessibility', 'הצהרת נגישות')}
+            </Link>
             <a
               href="https://docs.google.com/forms/d/e/1FAIpQLSf4M-3ytbYRAOIh9B7Bavgaw2WyGgDFP3PT7zgTmTMnUFXMrg/viewform"
               target="_blank"

@@ -109,6 +109,7 @@
     "copyToWhatsapp": "Copy",
     "copyToWhatsappList": "Copy birthday list to WhatsApp",
     "copied": "Copied!",
+    "selectColor": "Select {{color}} color",
     "yes": "Yes",
     "no": "No",
     "male": "Male",
@@ -457,7 +458,10 @@
     "exportSuccess": "Data exported successfully",
     "hebrewZodiacCopied": "Hebrew dates and zodiac signs copied to clipboard",
     "viewDetails": "View details for {{name}}",
-    "resultsFound": "Found {{count}} birthdays"
+    "resultsFound": "Found {{count}} birthdays",
+    "editName": "Edit {{name}}'s birthday",
+    "deleteName": "Delete {{name}}'s birthday",
+    "selectRow": "Select row"
   },
   "groups": {
     "title": "Groups",
@@ -502,7 +506,9 @@
     "selectionSummary": "{{count}} groups selected: {{text}}",
     "noSelection": "No groups selected",
     "underGroup": "Under",
-    "assignToGroup": "Add to Group"
+    "assignToGroup": "Add to Group",
+    "shareGroup": "Share {{name}} group",
+    "editGroup": "Edit {{name}} group"
   },
   "wishlist": {
     "title": "Wishlist",
@@ -710,6 +716,7 @@
   "footer": {
     "termsOfUse": "Terms of Use",
     "privacyPolicy": "Privacy Policy",
+    "accessibility": "Accessibility Statement",
     "feedback": "Feedback",
     "feedbackOpenNewWindow": "Open feedback form in new window",
     "deleteAccount": "Delete Account",
@@ -956,7 +963,9 @@
       "gelt": "Hanukkah/Purim Money",
       "whatsapp": "WhatsApp Button",
       "features": "Additional Features",
-      "settings": "Settings & Privacy"
+      "settings": "Settings & Privacy",
+      "menu": "Guide Menu",
+      "openMenu": "Open guide menu"
     },
     "title": "📘 Complete Guide",
     "subtitle": "Never miss a date - Hebrew or Gregorian 🎂",
