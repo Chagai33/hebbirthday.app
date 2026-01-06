@@ -655,6 +655,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
               : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
             aria-expanded={showGroupFilter}
+            aria-label={t('common.filters', 'Filters')}
           >
             <Filter className="w-4 h-4" />
             <span className="hidden sm:inline">{t('common.filters', 'Filters')}</span>
@@ -745,6 +746,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   <button
                     onClick={() => setShowAssignGroupModal(true)}
                     className="px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    aria-label={t('groups.assignToGroup', 'הוספה לקבוצה')}
                   >
                     <FolderPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('groups.assignToGroup', 'הוספה לקבוצה')}</span>
@@ -752,6 +754,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   <button
                     onClick={() => handleBulkDelete()}
                     className="px-2 sm:px-3 py-1 sm:py-1.5 bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    aria-label={t('common.delete', 'מחק את הנבחרים')}
                   >
                     <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('common.delete')}</span>
@@ -796,6 +799,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   <button
                     onClick={() => handleBulkDelete()}
                     className="px-2 sm:px-3 py-1 sm:py-1.5 bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    aria-label={t('common.delete', 'מחק את הנבחרים')}
                   >
                     <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('common.delete')}</span>
@@ -803,6 +807,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   <button
                     onClick={() => setShowAssignGroupModal(true)}
                     className="px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    aria-label={t('groups.assignToGroup', 'הוספה לקבוצה')}
                   >
                     <FolderPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('groups.assignToGroup', 'הוספה לקבוצה')}</span>
@@ -1360,6 +1365,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                             }}
                             className="p-3 text-pink-600 hover:bg-pink-100 rounded-lg transition-all hover:scale-110"
                             title={t('wishlist.title')}
+                            aria-label={t('wishlist.title')}
                           >
                             <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           </button>
@@ -1380,6 +1386,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                               onClick={() => onEdit(birthday)}
                               className="p-3 text-orange-600 hover:bg-orange-100 rounded-lg transition-all hover:scale-110 animate-pulse"
                               title={t('birthday.reassign')}
+                              aria-label={t('birthday.reassign')}
                             >
                               <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </button>
