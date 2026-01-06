@@ -70,9 +70,9 @@ export const GuestWishlistManager: React.FC<GuestWishlistManagerProps> = ({ init
       
       setItems([newItem, ...items]);
       resetForm();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      if (err.message?.includes('permission-denied') || err.code === 'permission-denied') {
+      if ((err instanceof Error && err.message?.includes('permission-denied')) || (typeof err === 'object' && err !== null && 'code' in err && err.code === 'permission-denied')) {
            setError(t('guest.accessDenied') || 'Access to the guest portal has been disabled.');
       } else {
            setError(t('guest.sessionExpired'));
@@ -102,9 +102,9 @@ export const GuestWishlistManager: React.FC<GuestWishlistManagerProps> = ({ init
       } : item));
       
       resetForm();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      if (err.message?.includes('permission-denied') || err.code === 'permission-denied') {
+      if ((err instanceof Error && err.message?.includes('permission-denied')) || (typeof err === 'object' && err !== null && 'code' in err && err.code === 'permission-denied')) {
            setError(t('guest.accessDenied') || 'Access to the guest portal has been disabled.');
       } else {
            setError(t('guest.updateError'));
@@ -120,9 +120,9 @@ export const GuestWishlistManager: React.FC<GuestWishlistManagerProps> = ({ init
     try {
       await guestService.deleteItem(id);
       setItems(items.filter(item => item.id !== id));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      if (err.message?.includes('permission-denied') || err.code === 'permission-denied') {
+      if ((err instanceof Error && err.message?.includes('permission-denied')) || (typeof err === 'object' && err !== null && 'code' in err && err.code === 'permission-denied')) {
            setError(t('guest.accessDenied') || 'Access to the guest portal has been disabled.');
       } else {
            setError(t('guest.deleteError'));
@@ -178,8 +178,8 @@ export const GuestWishlistManager: React.FC<GuestWishlistManagerProps> = ({ init
       </div>
 
       {error && (
-        <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg flex items-center gap-2">
-          <AlertCircle className="w-4 h-4" />
+        <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg flex items-center gap-2" role="alert">
+          <AlertCircle className="w-4 h-4" aria-hidden="true" />
           {error}
         </div>
       )}
@@ -264,15 +264,14 @@ export const GuestWishlistManager: React.FC<GuestWishlistManagerProps> = ({ init
         </div>
       )}
 
-      <div className="space-y-3">
-        {items.length === 0 && !isAdding && (
-            <div className="text-center py-10 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
-                {t('guest.emptyWishlist')}
-            </div>
-        )}
-        
-        {items.map((item) => (
-            <div key={item.id} className={`bg-white p-4 rounded-xl border border-gray-200 hover:border-blue-200 shadow-sm transition-all group ${editingId === item.id ? 'opacity-50 pointer-events-none' : ''}`}>
+      {items.length === 0 && !isAdding ? (
+        <div className="text-center py-10 text-gray-400 bg-white rounded-xl border border-dashed border-gray-200">
+            {t('guest.emptyWishlist')}
+        </div>
+      ) : (
+        <ul className="space-y-3" role="list">
+          {items.map((item) => (
+              <li key={item.id} className={`bg-white p-4 rounded-xl border border-gray-200 hover:border-blue-200 shadow-sm transition-all group ${editingId === item.id ? 'opacity-50 pointer-events-none' : ''}`}>
                 <div className="flex justify-between items-start gap-3">
                     <div className="flex-grow">
                         <div className="flex items-center gap-2 mb-1">
@@ -286,23 +285,26 @@ export const GuestWishlistManager: React.FC<GuestWishlistManagerProps> = ({ init
                         )}
                     </div>
                     <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
+                        <button
                             onClick={() => startEdit(item)}
-                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="min-h-[44px] min-w-[44px] p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            aria-label={t('guest.editItemName', { name: item.item_name })}
                         >
-                            <Edit2 className="w-4 h-4" />
+                            <Edit2 className="w-4 h-4" aria-hidden="true" />
                         </button>
-                        <button 
+                        <button
                             onClick={() => handleDelete(item.id)}
-                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="min-h-[44px] min-w-[44px] p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            aria-label={t('guest.deleteItemName', { name: item.item_name })}
                         >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4" aria-hidden="true" />
                         </button>
                     </div>
                 </div>
-            </div>
-        ))}
-      </div>
+              </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };

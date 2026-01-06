@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { AgeGroup, BudgetConfig, GeltTemplate } from '../../types/gelt';
 import { Button } from '../common/Button';
 import { X, Save, Loader2 } from 'lucide-react';
+import { useFocusTrap } from '../../hooks/useAccessibility';
 
 const MAX_PROFILE_NAME_LENGTH = 50;
 const MAX_PROFILE_DESCRIPTION_LENGTH = 100;
@@ -41,6 +42,9 @@ export const GeltTemplateModal: React.FC<GeltTemplateModalProps> = ({
   const [description, setDescription] = useState('');
   const [isDefault, setIsDefault] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Focus trap for modal
+  const focusTrapRef = useFocusTrap(isOpen, onClose);
 
   useEffect(() => {
     if (isOpen) {
@@ -110,38 +114,44 @@ export const GeltTemplateModal: React.FC<GeltTemplateModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div 
+      <div
+        ref={focusTrapRef}
         className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-slide-in"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="save-template-title"
       >
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-bold text-gray-900">{t('gelt.saveProfile')}</h2>
+          <h2 id="save-template-title" className="text-xl font-bold text-gray-900">{t('gelt.saveProfile')}</h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors min-h-[44px]"
             disabled={isLoading}
+            aria-label={t('common.close')}
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
         <div className="p-6 space-y-4">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700" role="alert">
               {error}
             </div>
           )}
 
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label htmlFor="profile-name" className="block text-sm font-medium text-gray-700">
                 {t('gelt.profileName')} *
               </label>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-400" aria-live="polite">
                 {name.length}/{MAX_PROFILE_NAME_LENGTH}
               </span>
             </div>
             <input
+              id="profile-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -149,19 +159,22 @@ export const GeltTemplateModal: React.FC<GeltTemplateModalProps> = ({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder={t('gelt.profileNamePlaceholder')}
               disabled={isLoading}
+              required
+              aria-required="true"
             />
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label htmlFor="profile-description" className="block text-sm font-medium text-gray-700">
                 {t('gelt.profileDescription')}
               </label>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-400" aria-live="polite">
                 {description.length}/{MAX_PROFILE_DESCRIPTION_LENGTH}
               </span>
             </div>
             <textarea
+              id="profile-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               maxLength={MAX_PROFILE_DESCRIPTION_LENGTH}
@@ -188,7 +201,7 @@ export const GeltTemplateModal: React.FC<GeltTemplateModalProps> = ({
 
           <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
             <p className="font-medium mb-1">{t('gelt.profileWillSave')}:</p>
-            <ul className="list-disc list-inside space-y-1">
+            <ul className="list-disc list-inside space-y-1" role="list">
               <li>{t('gelt.profileWillSaveAgeGroups', { count: currentAgeGroups.length })}</li>
               <li>{t('gelt.profileWillSaveBudgetConfig')}</li>
               {currentCustomGroupSettings && (
@@ -206,7 +219,7 @@ export const GeltTemplateModal: React.FC<GeltTemplateModalProps> = ({
             variant="primary"
             onClick={handleSave}
             disabled={isLoading || !name.trim()}
-            icon={isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            icon={isLoading ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : <Save className="w-4 h-4" aria-hidden="true" />}
           >
             {isLoading ? t('common.saving') : t('gelt.saveProfile')}
           </Button>

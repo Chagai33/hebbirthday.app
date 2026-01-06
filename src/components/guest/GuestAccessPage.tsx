@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -6,8 +6,6 @@ import {
   Search,
   AlertCircle,
   CheckCircle,
-  Mail,
-  Loader,
   Calendar,
   UserPlus,
   AlertTriangle,
@@ -15,7 +13,6 @@ import {
 } from 'lucide-react';
 import { birthdayService } from '../../services/birthday.service';
 import { analyticsService } from '../../services/analytics.service';
-import { groupService } from '../../services/group.service';
 import { Birthday, BirthdayFormData } from '../../types';
 import { Footer } from '../common/Footer';
 import { LanguageSwitcher } from '../common/LanguageSwitcher';
@@ -147,6 +144,61 @@ export const GuestAccessPage: React.FC = () => {
   const [dateWasChanged, setDateWasChanged] = useState<boolean>(false);
   const [hebrewDateWasChanged, setHebrewDateWasChanged] = useState<boolean>(false);
 
+  // Calculate and format Hebrew date
+  const calculateHebrewDate = useCallback((date: Date, afterSunset: boolean) => {
+    try {
+      // If after sunset, add one day to the date for Hebrew calculation
+      const adjustedDate = new Date(date);
+      if (afterSunset) {
+        adjustedDate.setDate(adjustedDate.getDate() + 1);
+      }
+
+      const hd = new HDate(adjustedDate);
+
+      if (i18n.language === 'he') {
+        // Hebrew format: ו׳ טֵבֵת תשפ״ה
+        const day = gematriya(hd.getDate());
+        const month = Locale.gettext(hd.getMonthName(), 'he');
+        const year = gematriya(hd.getFullYear());
+        return `${day} ${month} ${year}`;
+      } else {
+        // English format: 6 Tevet 5785
+        const day = hd.getDate();
+        const monthHebrew = Locale.gettext(hd.getMonthName(), 'he');
+        const monthEnglish = hebrewMonthsToEnglish[monthHebrew] || monthHebrew.replace(/[׳״]/g, ''); // Remove Hebrew punctuation as fallback
+        const year = hd.getFullYear();
+        return `${day} ${monthEnglish} ${year}`;
+      }
+    } catch (error) {
+      console.error('Error calculating Hebrew date:', error);
+      return '';
+    }
+  }, [i18n.language]);
+
+  // Handle form field changes
+  const handleFormChange = useCallback((field: keyof BirthdayFormData, value: unknown) => {
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+
+      // Recalculate Hebrew date when afterSunset changes
+      if (field === 'afterSunset' && newData.birthDateGregorian) {
+        const date = newData.birthDateGregorian instanceof Date
+          ? newData.birthDateGregorian
+          : new Date(newData.birthDateGregorian);
+        const hebrewDate = calculateHebrewDate(date, value as boolean);
+        setHebrewDateDisplay(hebrewDate);
+
+        // Mark that date display was changed
+        if (dateWasChanged) {
+          setDateWasChanged(true);
+        }
+      }
+
+      return newData;
+    });
+    setDuplicateWarning(null); // Clear warning on edit
+  }, [calculateHebrewDate, dateWasChanged]);
+
   // Fetch group and birthdays on mount
   useEffect(() => {
     if (!groupId || !token) {
@@ -170,23 +222,23 @@ export const GuestAccessPage: React.FC = () => {
           group: result.group,
           birthdays: result.birthdays,
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error fetching guest data:', error);
 
         let errorType: GuestAccessPageState['errorType'] = 'unknown';
         let errorMessage = t('guestAccess.errorFetching', 'שגיאה בטעינת הנתונים');
 
         // Parse error type from message
-        if (error.message?.includes('permission-denied') || error.message?.includes('Invalid token')) {
+        if (error instanceof Error && (error.message?.includes('permission-denied') || error.message?.includes('Invalid token'))) {
           errorType = 'invalid_token';
           errorMessage = t('guestAccess.invalidLink', 'קישור לא חוקי או פג תוקף');
-        } else if (error.message?.includes('disabled')) {
+        } else if (error instanceof Error && error.message?.includes('disabled')) {
           errorType = 'access_disabled';
           errorMessage = t('guestAccess.groupNotEnabled', 'גישת אורחים אינה מופעלת עבור קבוצה זו');
-        } else if (error.message?.includes('Too many attempts') || error.message?.includes('resource-exhausted')) {
+        } else if (error instanceof Error && (error.message?.includes('Too many attempts') || error.message?.includes('resource-exhausted'))) {
           errorType = 'rate_limit';
           errorMessage = t('guestAccess.rateLimitError', 'יותר מדי ניסיונות. אנא נסה שוב מאוחר יותר.');
-        } else if (error.message?.includes('network') || error.message?.includes('offline')) {
+        } else if (error instanceof Error && (error.message?.includes('network') || error.message?.includes('offline'))) {
           errorType = 'network';
           errorMessage = t('guestAccess.networkError', 'שגיאת רשת. אנא בדוק את החיבור שלך.');
         }
@@ -213,7 +265,7 @@ export const GuestAccessPage: React.FC = () => {
       const hebrewDate = calculateHebrewDate(date, formData.afterSunset || false);
       setHebrewDateDisplay(hebrewDate);
     }
-  }, [showAddForm]);
+  }, [showAddForm, formData.birthDateGregorian, formData.afterSunset, calculateHebrewDate]);
 
   // Sync Hebrew -> Gregorian when using Hebrew input
   useEffect(() => {
@@ -243,14 +295,14 @@ export const GuestAccessPage: React.FC = () => {
         console.error('Invalid Hebrew Date', e);
       }
     }
-  }, [hebrewDay, hebrewMonth, hebrewYear, dateInputType]);
+  }, [hebrewDay, hebrewMonth, hebrewYear, dateInputType, formData.afterSunset, handleFormChange, calculateHebrewDate]);
 
   // Track when Hebrew date fields are manually changed
   useEffect(() => {
     if (dateInputType === 'hebrew') {
       setHebrewDateWasChanged(true);
     }
-  }, [hebrewDay, hebrewMonth, hebrewYear]);
+  }, [hebrewDay, hebrewMonth, hebrewYear, dateInputType]);
 
   // Filter birthdays by search term
   const filteredBirthdays = useMemo(() => {
@@ -278,61 +330,6 @@ export const GuestAccessPage: React.FC = () => {
     );
 
     return duplicate;
-  };
-
-  // Calculate and format Hebrew date
-  const calculateHebrewDate = (date: Date, afterSunset: boolean) => {
-    try {
-      // If after sunset, add one day to the date for Hebrew calculation
-      const adjustedDate = new Date(date);
-      if (afterSunset) {
-        adjustedDate.setDate(adjustedDate.getDate() + 1);
-      }
-
-      const hd = new HDate(adjustedDate);
-
-      if (i18n.language === 'he') {
-        // Hebrew format: ו׳ טֵבֵת תשפ״ה
-        const day = gematriya(hd.getDate());
-        const month = Locale.gettext(hd.getMonthName(), 'he');
-        const year = gematriya(hd.getFullYear());
-        return `${day} ${month} ${year}`;
-      } else {
-        // English format: 6 Tevet 5785
-        const day = hd.getDate();
-        const monthHebrew = Locale.gettext(hd.getMonthName(), 'he');
-        const monthEnglish = hebrewMonthsToEnglish[monthHebrew] || monthHebrew.replace(/[׳״]/g, ''); // Remove Hebrew punctuation as fallback
-        const year = hd.getFullYear();
-        return `${day} ${monthEnglish} ${year}`;
-      }
-    } catch (error) {
-      console.error('Error calculating Hebrew date:', error);
-      return '';
-    }
-  };
-
-  // Handle form field changes
-  const handleFormChange = (field: keyof BirthdayFormData, value: any) => {
-    setFormData(prev => {
-      const newData = { ...prev, [field]: value };
-
-      // Recalculate Hebrew date when afterSunset changes
-      if (field === 'afterSunset' && newData.birthDateGregorian) {
-        const date = newData.birthDateGregorian instanceof Date
-          ? newData.birthDateGregorian
-          : new Date(newData.birthDateGregorian);
-        const hebrewDate = calculateHebrewDate(date, value);
-        setHebrewDateDisplay(hebrewDate);
-
-        // Mark that date display was changed
-        if (dateWasChanged) {
-          setDateWasChanged(true);
-        }
-      }
-
-      return newData;
-    });
-    setDuplicateWarning(null); // Clear warning on edit
   };
 
   // Update date from day/month/year selectors
@@ -453,21 +450,21 @@ export const GuestAccessPage: React.FC = () => {
 
       // Clear success message after 3 seconds
       setTimeout(() => setSubmitSuccess(false), 3000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating birthday:', error);
 
       let errorMessage = t('guestAccess.addError', 'שגיאה בהוספת יום ההולדת');
 
       // Parse specific error messages
-      if (error.message?.includes('Bot detected')) {
+      if (error instanceof Error && error.message?.includes('Bot detected')) {
         errorMessage = t('guestAccess.botDetected', 'נתגלתה פעילות חשודה. אנא נסה שוב.');
-      } else if (error.message?.includes('limit') || error.message?.includes('resource-exhausted')) {
+      } else if (error instanceof Error && (error.message?.includes('limit') || error.message?.includes('resource-exhausted'))) {
         errorMessage = t('guestAccess.limitReached', 'הגעת למגבלת ההוספות לקישור זה. אנא צור קשר עם מנהל הקבוצה.');
-      } else if (error.message?.includes('expired') || error.message?.includes('72-hour')) {
+      } else if (error instanceof Error && (error.message?.includes('expired') || error.message?.includes('72-hour'))) {
         errorMessage = t('guestAccess.tokenExpired', 'קישור זה פג תוקף (72 שעות). אנא צור קשר עם מנהל הקבוצה לקבלת קישור חדש.');
       }
 
-      alert(errorMessage + (error.message ? ': ' + error.message : ''));
+      alert(errorMessage + (error instanceof Error && error.message ? ': ' + error.message : ''));
     } finally {
       setIsSubmitting(false);
     }
@@ -650,8 +647,8 @@ export const GuestAccessPage: React.FC = () => {
 
             {/* Success Message */}
             {submitSuccess && (
-              <div className="flex items-center justify-center gap-2 bg-green-50 border border-green-200 text-green-800 px-3 py-2 rounded-lg text-xs sm:text-sm mt-3">
-                <CheckCircle className="w-4 h-4" />
+              <div className="flex items-center justify-center gap-2 bg-green-50 border border-green-200 text-green-800 px-3 py-2 rounded-lg text-xs sm:text-sm mt-3" role="status" aria-live="polite">
+                <CheckCircle className="w-4 h-4" aria-hidden="true" />
                 <span>{t('guestAccess.addSuccess', 'יום ההולדת נוסף בהצלחה!')}</span>
               </div>
             )}
@@ -679,29 +676,33 @@ export const GuestAccessPage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3">
                   {/* First Name */}
                   <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="guest-first-name" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                       {t('birthday.firstName', 'שם פרטי')} *
                     </label>
                     <input
+                      id="guest-first-name"
                       type="text"
                       value={formData.firstName || ''}
                       onChange={e => handleFormChange('firstName', e.target.value)}
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       required
+                      aria-required="true"
                     />
                   </div>
 
                   {/* Last Name */}
                   <div>
-                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="guest-last-name" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                       {t('birthday.lastName', 'שם משפחה')} *
                     </label>
                     <input
+                      id="guest-last-name"
                       type="text"
                       value={formData.lastName || ''}
                       onChange={e => handleFormChange('lastName', e.target.value)}
                       className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       required
+                      aria-required="true"
                     />
                   </div>
                 </div>
@@ -733,39 +734,43 @@ export const GuestAccessPage: React.FC = () => {
                   </div>
 
                   {dateInputType === 'gregorian' ? (
-                    <div className="grid grid-cols-3 gap-2">
-                      {/* Day */}
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1">{t('common.day', 'יום')}</label>
-                        <select
-                          value={birthDay}
-                          onChange={e => {
-                            const day = parseInt(e.target.value);
-                            setBirthDay(day);
-                            updateDateFromSelectors(day, birthMonth, birthYear);
-                          }}
-                          className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                          required
-                        >
+                    <fieldset>
+                      <legend className="sr-only">{t('guest.dateGroupLabel')}</legend>
+                      <div className="grid grid-cols-3 gap-2">
+                        {/* Day */}
+                        <div>
+                          <label htmlFor="guest-access-day" className="block text-xs text-gray-500 mb-1">{t('common.day', 'יום')}</label>
+                          <select
+                            id="guest-access-day"
+                            value={birthDay}
+                            onChange={e => {
+                              const day = parseInt(e.target.value);
+                              setBirthDay(day);
+                              updateDateFromSelectors(day, birthMonth, birthYear);
+                            }}
+                            className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            required
+                          >
                           {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
                             <option key={day} value={day}>{day}</option>
                           ))}
                         </select>
                       </div>
 
-                      {/* Month */}
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1">{t('common.month', 'חודש')}</label>
-                        <select
-                          value={birthMonth}
-                          onChange={e => {
-                            const month = parseInt(e.target.value);
-                            setBirthMonth(month);
-                            updateDateFromSelectors(birthDay, month, birthYear);
-                          }}
-                          className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                          required
-                        >
+                        {/* Month */}
+                        <div>
+                          <label htmlFor="guest-access-month" className="block text-xs text-gray-500 mb-1">{t('common.month', 'חודש')}</label>
+                          <select
+                            id="guest-access-month"
+                            value={birthMonth}
+                            onChange={e => {
+                              const month = parseInt(e.target.value);
+                              setBirthMonth(month);
+                              updateDateFromSelectors(birthDay, month, birthYear);
+                            }}
+                            className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            required
+                          >
                           {[
                             'ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני',
                             'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'
@@ -775,36 +780,41 @@ export const GuestAccessPage: React.FC = () => {
                         </select>
                       </div>
 
-                      {/* Year */}
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1">{t('common.year', 'שנה')}</label>
-                        <select
-                          value={birthYear}
-                          onChange={e => {
-                            const year = parseInt(e.target.value);
-                            setBirthYear(year);
-                            updateDateFromSelectors(birthDay, birthMonth, year);
-                          }}
-                          className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                          required
-                        >
+                        {/* Year */}
+                        <div>
+                          <label htmlFor="guest-access-year" className="block text-xs text-gray-500 mb-1">{t('common.year', 'שנה')}</label>
+                          <select
+                            id="guest-access-year"
+                            value={birthYear}
+                            onChange={e => {
+                              const year = parseInt(e.target.value);
+                              setBirthYear(year);
+                              updateDateFromSelectors(birthDay, birthMonth, year);
+                            }}
+                            className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            required
+                          >
                           {Array.from({ length: 120 }, (_, i) => new Date().getFullYear() - i).map(year => (
                             <option key={year} value={year}>{year}</option>
                           ))}
                         </select>
+                        </div>
                       </div>
-                    </div>
+                    </fieldset>
                   ) : (
-                    <div className="grid grid-cols-3 gap-2">
-                      {/* Hebrew Day */}
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1">{t('common.day', 'יום')}</label>
-                        <select
-                          value={hebrewDay}
-                          onChange={e => setHebrewDay(Number(e.target.value))}
-                          className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center"
-                          dir={i18n.language === 'he' ? "rtl" : "ltr"}
-                        >
+                    <fieldset>
+                      <legend className="sr-only">{t('guest.dateGroupLabel')}</legend>
+                      <div className="grid grid-cols-3 gap-2">
+                        {/* Hebrew Day */}
+                        <div>
+                          <label htmlFor="guest-access-hebrew-day" className="block text-xs text-gray-500 mb-1">{t('common.day', 'יום')}</label>
+                          <select
+                            id="guest-access-hebrew-day"
+                            value={hebrewDay}
+                            onChange={e => setHebrewDay(Number(e.target.value))}
+                            className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center"
+                            dir={i18n.language === 'he' ? "rtl" : "ltr"}
+                          >
                           {Array.from({ length: 30 }, (_, i) => i + 1).map(d => (
                             <option key={d} value={d}>
                               {i18n.language === 'he' ? numberToHebrewLetter(d) : d}
@@ -813,15 +823,16 @@ export const GuestAccessPage: React.FC = () => {
                         </select>
                       </div>
 
-                      {/* Hebrew Month */}
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1">{t('common.month', 'חודש')}</label>
-                        <select
-                          value={hebrewMonth}
-                          onChange={e => setHebrewMonth(e.target.value)}
-                          className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center"
-                          dir={i18n.language === 'he' ? "rtl" : "ltr"}
-                        >
+                        {/* Hebrew Month */}
+                        <div>
+                          <label htmlFor="guest-access-hebrew-month" className="block text-xs text-gray-500 mb-1">{t('common.month', 'חודש')}</label>
+                          <select
+                            id="guest-access-hebrew-month"
+                            value={hebrewMonth}
+                            onChange={e => setHebrewMonth(e.target.value)}
+                            className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center"
+                            dir={i18n.language === 'he' ? "rtl" : "ltr"}
+                          >
                           {getHebrewMonths().map((m, idx) => (
                             <option key={m} value={HEBREW_MONTHS_EN[idx]}>
                               {m}
@@ -830,23 +841,25 @@ export const GuestAccessPage: React.FC = () => {
                         </select>
                       </div>
 
-                      {/* Hebrew Year */}
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1">{t('common.year', 'שנה')}</label>
-                        <select
-                          value={hebrewYear}
-                          onChange={e => setHebrewYear(Number(e.target.value))}
-                          className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center"
-                          dir="ltr"
-                        >
+                        {/* Hebrew Year */}
+                        <div>
+                          <label htmlFor="guest-access-hebrew-year" className="block text-xs text-gray-500 mb-1">{t('common.year', 'שנה')}</label>
+                          <select
+                            id="guest-access-hebrew-year"
+                            value={hebrewYear}
+                            onChange={e => setHebrewYear(Number(e.target.value))}
+                            className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center"
+                            dir="ltr"
+                          >
                           {HEBREW_YEAR_RANGE.map(y => (
                             <option key={y} value={y}>
                               {y} {i18n.language === 'he' ? `(${numberToHebrewYear(y)})` : ''}
                             </option>
                           ))}
                         </select>
+                        </div>
                       </div>
-                    </div>
+                    </fieldset>
                   )}
                 </div>
 
@@ -1000,10 +1013,10 @@ export const GuestAccessPage: React.FC = () => {
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm('')}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  aria-label="Clear search"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  aria-label={t('guest.searchClear')}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4" aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -1016,9 +1029,9 @@ export const GuestAccessPage: React.FC = () => {
                   : t('guestAccess.noBirthdaysFound', 'לא נמצאו ימי הולדת בקבוצה זו')}
               </p>
             ) : (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
+              <ul className="space-y-2 max-h-96 overflow-y-auto" role="list">
                 {filteredBirthdays.map(birthday => (
-                  <div
+                  <li
                     key={birthday.id}
                     className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                   >
@@ -1052,9 +1065,9 @@ export const GuestAccessPage: React.FC = () => {
                         {t('guestAccess.guestAdded', 'נוסף על ידי אורח')}
                       </span>
                     )}
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             )}
           </div>
         </div>

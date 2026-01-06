@@ -82,7 +82,13 @@
     "rateLimitError": "יותר מדי נסיונות. אנא המתן לפני נסיון נוסף.",
     "maxItemsError": "לא ניתן להוסיף יותר מ-{{count}} פריטים לרשימה",
     "maxItemsLimitReached": "הגעת למכסת הפריטים המקסימלית ({{count}})",
-    "groups": "קבוצות"
+    "groups": "קבוצות",
+    "editItemName": "ערוך מתנה: {{name}}",
+    "deleteItemName": "מחק מתנה: {{name}}",
+    "firstNameRequired": "שם פרטי (שדה חובה)",
+    "lastNameRequired": "שם משפחה (שדה חובה)",
+    "dateGroupLabel": "בחירת תאריך לידה",
+    "searchClear": "נקה חיפוש"
   },
   "googleCalendar": {
     "title": "יומן Google",
@@ -205,7 +211,16 @@
     "account": "חשבון",
     "calendar": "יומן",
     "unsyncSelected": "בטל סנכרון",
-    "confirmBulkUnsync": "האם לבטל סנכרון ולמחוק מהיומן עבור הרשומות שנבחרו?"
+    "confirmBulkUnsync": "האם לבטל סנכרון ולמחוק מהיומן עבור הרשומות שנבחרו?",
+    "deleteCalendarName": "מחק יומן: {{name}}",
+    "compactConnectedLabel": "מחובר ליומן Google עבור {{email}}, יומן נוכחי: {{calendar}}",
+    "historyModalLabel": "חלון היסטוריית סנכרון",
+    "closeHistory": "סגור היסטוריה",
+    "calendarSelectorLabel": "תפריט בחירת יומן",
+    "createCalendarLabel": "חלון יצירת יומן חדש",
+    "cleanupConfirmLabel": "חלון אישור ניקוי אירועים יתומים",
+    "deleteConfirmLabel": "חלון אישור מחיקת יומן",
+    "syncStatusLabel": "סטטוס סנכרון ליומן Google"
   },
   "guestAccess": {
     "welcomeToGroup": "ברוכים הבאים לקבוצת {{name}}",
@@ -303,7 +318,11 @@
     "quickGuide": "מדריך מקוצר",
     "fullGuide": "המדריך המלא",
     "advancedOptions": "אפשרויות מתקדמות (לוח שנה, הערות)",
-    "lessOptions": "פחות אפשרויות"
+    "lessOptions": "פחות אפשרויות",
+    "currentDateLabel": "התאריך היום: {{hebrew}}, {{gregorian}}",
+    "home": "HebBirthday.app - דף הבית",
+    "switchToLanguage": "שנה שפה ל-{{lang}}",
+    "sendEmailTo": "שלח אימייל ל-{{email}}"
   },
   "guestPortal": {
     "title": "פורטל מתנות לאורחים",
@@ -819,6 +838,7 @@
     "termsOfUse": "תנאי שימוש",
     "privacyPolicy": "מדיניות פרטיות",
     "feedback": "משוב",
+    "feedbackOpenNewWindow": "פתח טופס משוב בחלון חדש",
     "deleteAccount": "מחק חשבון",
     "confirmDelete": "לאשר מחיקה?",
     "deleteAccountNotImplemented": "פונקציונליות מחיקת חשבון עדיין לא זמינה. אנא צור קשר עם התמיכה.",
@@ -945,7 +965,31 @@
     "confirmRemoveChild": "האם אתה בטוח שברצונך להסיר את הילד מהרשימה?",
     "removeChild": "הסר ילד",
     "modifiedAgesWarning": "יש ילדים עם גיל משונה",
-    "modifiedAgesWarningDescription": "גילאים ששונו ידנית לא יישמרו לאחר ריפרש. הגיל יאופס אוטומטית לגיל המקורי מימי ההולדת."
+    "modifiedAgesWarningDescription": "גילאים ששונו ידנית לא יישמרו לאחר ריפרש. הגיל יאופס אוטומטית לגיל המקורי מימי ההולדת.",
+    "includeChild": "כלול את {{name}} בחישוב",
+    "excludeChild": "הסר את {{name}} מהחישוב",
+    "editAgeFor": "ערוך גיל עבור {{name}}",
+    "resetAgeFor": "אפס גיל למקורי עבור {{name}}",
+    "saveAge": "שמור גיל",
+    "cancelEdit": "בטל עריכה",
+    "expandSection": "הרחב סעיף",
+    "collapseSection": "צמצם סעיף",
+    "howItWorksLabel": "הסבר על אופן פעולת המחשבון",
+    "selectBirthdayFor": "בחר את {{name}} לייבוא",
+    "deleteProfileLabel": "מחק פרופיל: {{name}}",
+    "showChildrenInGroup": "הצג ילדים בקבוצת גיל: {{name}}",
+    "showChildrenInGroupCount": "הצג {{count}} ילדים בקבוצת גיל: {{name}}",
+    "closeBudgetConfig": "סגור הגדרות תקציב",
+    "clearCustomBudget": "נקה תקציב מותאם",
+    "saveGroupChanges": "שמור שינויים לקבוצה",
+    "cancelGroupChanges": "בטל שינויים לקבוצה",
+    "includeGroup": "כלול קבוצה {{name}}",
+    "excludeGroup": "הסר קבוצה {{name}}",
+    "editMinAgeFor": "ערוך גיל מינימלי לקבוצה {{name}}",
+    "editMaxAgeFor": "ערוך גיל מקסימלי לקבוצה {{name}}",
+    "editAmountFor": "ערוך סכום לכל ילד בקבוצה {{name}}",
+    "childrenTableCaption": "רשימת ילדים וגילאים לחישוב דמי חנוכה",
+    "noChildrenStatus": "רשימת הילדים ריקה כרגע"
   },
   "terms": {
     "title": "תנאי שימוש לאפליקציית \"HebBirthday.App\"",

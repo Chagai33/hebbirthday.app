@@ -25,21 +25,22 @@ export const GeltChildrenList: React.FC<GeltChildrenListProps> = ({
 
   if (sortedChildren.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        {t('gelt.noChildren')}
+      <div className="text-center py-8 text-gray-500" role="status" aria-live="polite">
+        {t('gelt.noChildrenStatus')}
       </div>
     );
   }
 
   return (
     <div className="overflow-x-auto -mx-4 sm:mx-0">
-      <table className="w-full min-w-[300px] sm:min-w-0">
+      <table className="w-full min-w-[300px] sm:min-w-0" aria-label={t('gelt.children')}>
+        <caption className="sr-only">{t('gelt.childrenTableCaption')}</caption>
         <thead className="bg-gray-50 border-b border-gray-200">
           <tr>
-            <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-semibold text-gray-900">
+            <th scope="col" className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-semibold text-gray-900">
               {t('gelt.childName')}
             </th>
-            <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-semibold text-gray-900">
+            <th scope="col" className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-semibold text-gray-900">
               {t('gelt.age')}
             </th>
           </tr>

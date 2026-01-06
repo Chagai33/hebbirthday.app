@@ -24,22 +24,22 @@ export const GeltAgeGroupsList: React.FC<GeltAgeGroupsListProps> = ({
 
   return (
     <div className="overflow-x-auto -mx-4 sm:mx-0">
-      <table className="w-full min-w-[600px] sm:min-w-0">
+      <table className="w-full min-w-[600px] sm:min-w-0" aria-label={t('gelt.ageGroups')}>
         <thead className="bg-gray-50 border-b border-gray-200">
           <tr>
-            <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-semibold text-gray-900">
+            <th scope="col" className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-semibold text-gray-900">
               {t('gelt.ageGroup')}
             </th>
-            <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-semibold text-gray-900">
+            <th scope="col" className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-semibold text-gray-900">
               {t('gelt.amountPerChild')}
             </th>
-            <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm font-semibold text-gray-900">
+            <th scope="col" className="px-2 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm font-semibold text-gray-900">
               {t('gelt.childrenCount')}
             </th>
-            <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-semibold text-gray-900">
+            <th scope="col" className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-semibold text-gray-900">
               {t('gelt.total')}
             </th>
-            <th className="px-2 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm font-semibold text-gray-900">
+            <th scope="col" className="px-2 sm:px-4 py-2 sm:py-3 text-center text-xs sm:text-sm font-semibold text-gray-900">
               {t('gelt.percentageOfBudget')}
             </th>
           </tr>

@@ -31,18 +31,18 @@ export const PrivacyPolicy: React.FC = () => {
             </p>
             <div className="space-y-3">
               <div>
-                <strong className="text-gray-900">{t('privacy.section1.subtitle1', 'מידע שאתה מספק (מידע אישי):')}</strong>
+                <h3 className="text-gray-900 font-semibold">{t('privacy.section1.subtitle1', 'מידע שאתה מספק (מידע אישי):')}</h3>
                 <ul className="list-disc list-inside mt-2 space-y-1 text-gray-700">
                   <li>
-                    <strong>{t('privacy.section1.item1.title', 'פרטי חשבון:')}</strong> {t('privacy.section1.item1.content', 'שם תצוגה, כתובת דוא"ל, מספר טלפון (אופציונלי), ותמונה (אופציונלי). אם נרשמת דרך שירות צד ג\' (כמו גוגל), אנו אוספים את המידע שמועבר אלינו מאותו שירות.')}
+                    <h3 className="inline font-semibold">{t('privacy.section1.item1.title', 'פרטי חשבון:')}</h3> {t('privacy.section1.item1.content', 'שם תצוגה, כתובת דוא"ל, מספר טלפון (אופציונלי), ותמונה (אופציונלי). אם נרשמת דרך שירות צד ג\' (כמו גוגל), אנו אוספים את המידע שמועבר אלינו מאותו שירות.')}
                   </li>
                   <li>
-                    <strong>{t('privacy.section1.item2.title', 'סיסמה:')}</strong> {t('privacy.section1.item2.content', 'אם נרשמת באמצעות דוא"ל, סיסמתך נשמרת באופן מוצפן.')}
+                    <h3 className="inline font-semibold">{t('privacy.section1.item2.title', 'סיסמה:')}</h3> {t('privacy.section1.item2.content', 'אם נרשמת באמצעות דוא"ל, סיסמתך נשמרת באופן מוצפן.')}
                   </li>
                 </ul>
               </div>
               <div>
-                <strong className="text-gray-900">{t('privacy.section1.subtitle2', 'מידע שאתה מזין (תוכן משתמש):')}</strong>
+                <h3 className="text-gray-900 font-semibold">{t('privacy.section1.subtitle2', 'מידע שאתה מזין (תוכן משתמש):')}</h3>
                 <ul className="list-disc list-inside mt-2 space-y-1 text-gray-700">
                   <li>{t('privacy.section1.item3', 'מידע אודות צדדים שלישיים (בעלי יום ההולדת): שם פרטי, שם משפחה, תאריך לידה לועזי, מין, וציון האם הלידה אירעה אחרי השקיעה.')}</li>
                   <li>{t('privacy.section1.item4', 'פרטי "קבוצות" (Groups) שאתה יוצר לניהול רשימות ימי הולדת.')}</li>
@@ -259,7 +259,7 @@ export const PrivacyPolicy: React.FC = () => {
                 </p>
               </div>
               <p className="mt-2">
-                {t('privacy.section8.contact', 'בכל שאלה נוספת בנושאי פרטיות, אנא פנה אלינו באמצעות כתובת המייל:')} <a href="mailto:hebbirthday@gmail.com" className="text-blue-600 hover:text-blue-800 underline">hebbirthday@gmail.com</a>.
+                {t('privacy.section8.contact', 'בכל שאלה נוספת בנושאי פרטיות, אנא פנה אלינו באמצעות כתובת המייל:')} <a href="mailto:hebbirthday@gmail.com" className="text-blue-600 hover:text-blue-800 underline" aria-label={t('common.sendEmailTo', { email: 'hebbirthday@gmail.com' })}>hebbirthday@gmail.com</a>.
               </p>
             </div>
           </section>

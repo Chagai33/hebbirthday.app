@@ -43,15 +43,16 @@ export const Login: React.FC = () => {
     try {
       await signIn(email, password);
       // Don't navigate here - let AuthContext's onAuthStateChanged handle it
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       // Check if user has Google account
-      if (err.message === 'invalidCredential') {
+      if (errorMessage === 'invalidCredential') {
         try {
           const methods = await authService.checkSignInMethods(email);
           if (methods.includes('google.com')) {
             setError(t('auth.errors.useGoogleOrReset'));
           } else {
-            setError(getErrorMessage(err.message));
+            setError(getErrorMessage(errorMessage));
           }
         } catch {
           setError(getErrorMessage(err.message));
@@ -68,8 +69,9 @@ export const Login: React.FC = () => {
     setIsSubmitting(true);
     try {
       await signInWithGoogle();
-    } catch (err: any) {
-      setError(getErrorMessage(err.message));
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(getErrorMessage(errorMessage));
       setIsSubmitting(false);
     }
   };

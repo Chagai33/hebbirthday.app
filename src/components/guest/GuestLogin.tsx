@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { guestService, GuestVerificationData } from '../../services/guest.service';
 import { Button } from '../common/Button';
 import { WishlistItem } from '../../types';
-import { Users, Info, ChevronDown, ChevronUp, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Users, Info, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface GuestLoginProps {
   onLoginSuccess: (birthdayId: string, verification: GuestVerificationData, wishlist: WishlistItem[], firstName: string, lastName: string) => void;
@@ -206,10 +206,10 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
       } else {
         setError(t('guest.loginError'));
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error(err);
         // Handle rate limiting error specially if possible, or generic
-        if (err.message?.includes('Too many attempts')) {
+        if (err instanceof Error && err.message?.includes('Too many attempts')) {
              setError(t('guest.rateLimitError') || 'Too many attempts. Please wait.');
         } else {
              setError(t('guest.loginError'));
@@ -316,13 +316,15 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
         
         <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 flex items-start gap-3 text-start mt-2 transition-all duration-300">
             <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-            <div className="flex-1 text-sm text-blue-800 leading-relaxed">
+            <div id="portal-info-content" className="flex-1 text-sm text-blue-800 leading-relaxed">
                 <span>
                     {isInfoExpanded ? t('guest.portalInfo') : t('guest.portalInfoShort')}
                 </span>
-                <button 
+                <button
                     onClick={() => setIsInfoExpanded(!isInfoExpanded)}
                     className="text-xs font-semibold text-blue-600 hover:text-blue-800 inline-flex items-center gap-0.5 transition-colors whitespace-nowrap ms-1.5"
+                    aria-expanded={isInfoExpanded}
+                    aria-controls="portal-info-content"
                 >
                     {isInfoExpanded ? (
                         <>
@@ -343,23 +345,27 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-                <label className="block text-sm font-medium text-gray-700">{t('guest.firstName')}</label>
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">{t('guest.firstName')}</label>
                 <input
+                    id="firstName"
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
                     placeholder={t('guest.firstName')}
+                    aria-required="true"
                 />
             </div>
             <div className="space-y-1">
-                <label className="block text-sm font-medium text-gray-700">{t('guest.lastName')}</label>
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">{t('guest.lastName')}</label>
                 <input
+                    id="lastName"
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
                     placeholder={t('guest.lastName')}
+                    aria-required="true"
                 />
             </div>
         </div>
@@ -389,11 +395,14 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
         {verificationType === 'gregorian' ? (
             <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">{t('guest.gregorianDate')}</label>
-                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <fieldset>
+                    <legend className="sr-only">{t('guest.dateGroupLabel')}</legend>
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
                     {/* Day */}
                     <div className="space-y-1">
-                        <label className="block text-xs sm:text-xs text-gray-500 text-center">{t('guest.day')}</label>
+                        <label htmlFor="gregorian-day" className="block text-xs sm:text-xs text-gray-500 text-center">{t('guest.day')}</label>
                         <select
+                            id="gregorian-day"
                             value={selectedDay}
                             onChange={(e) => setSelectedDay(e.target.value)}
                             className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
@@ -408,8 +417,9 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
 
                     {/* Month */}
                     <div className="space-y-1">
-                        <label className="block text-xs sm:text-xs text-gray-500 text-center">{t('guest.month')}</label>
+                        <label htmlFor="gregorian-month" className="block text-xs sm:text-xs text-gray-500 text-center">{t('guest.month')}</label>
                         <select
+                            id="gregorian-month"
                             value={selectedMonth}
                             onChange={(e) => setSelectedMonth(e.target.value)}
                             className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
@@ -428,8 +438,9 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
 
                     {/* Year */}
                     <div className="space-y-1">
-                        <label className="block text-xs sm:text-xs text-gray-500 text-center">{t('guest.year')}</label>
+                        <label htmlFor="gregorian-year" className="block text-xs sm:text-xs text-gray-500 text-center">{t('guest.year')}</label>
                         <select
+                            id="gregorian-year"
                             value={selectedYear}
                             onChange={(e) => setSelectedYear(e.target.value)}
                             className="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
@@ -442,16 +453,20 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
                         </select>
                     </div>
                 </div>
+                </fieldset>
             </div>
         ) : (
             <div className="space-y-2">
                  <label className="block text-sm font-medium text-gray-700">{t('guest.hebrewDate')}</label>
-                 <div className="grid grid-cols-3 gap-2">
+                 <fieldset>
+                    <legend className="sr-only">{t('guest.dateGroupLabel')}</legend>
+                    <div className="grid grid-cols-3 gap-2">
                     {/* Day */}
                     <div className="space-y-1">
-                        <label className="text-xs font-medium text-gray-500 text-center block">{t('guest.day')}</label>
-                        <select 
-                            value={hebrewDay} 
+                        <label htmlFor="hebrew-day" className="text-xs font-medium text-gray-500 text-center block">{t('guest.day')}</label>
+                        <select
+                            id="hebrew-day"
+                            value={hebrewDay}
                             onChange={(e) => setHebrewDay(e.target.value)}
                             className="w-full p-2 border border-gray-300 rounded-lg text-sm text-center appearance-none"
                             dir={isHebrew ? "rtl" : "ltr"}
@@ -466,9 +481,10 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
 
                     {/* Month */}
                     <div className="space-y-1">
-                        <label className="text-xs font-medium text-gray-500 text-center block">{t('guest.month')}</label>
-                        <select 
-                            value={hebrewMonth} 
+                        <label htmlFor="hebrew-month" className="text-xs font-medium text-gray-500 text-center block">{t('guest.month')}</label>
+                        <select
+                            id="hebrew-month"
+                            value={hebrewMonth}
                             onChange={(e) => setHebrewMonth(e.target.value)}
                             className="w-full p-2 border border-gray-300 rounded-lg text-sm text-center appearance-none"
                             dir={isHebrew ? "rtl" : "ltr"}
@@ -483,12 +499,13 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
 
                     {/* Year */}
                     <div className="space-y-1">
-                        <label className="text-xs font-medium text-gray-500 text-center block">{t('guest.year')}</label>
+                        <label htmlFor="hebrew-year" className="text-xs font-medium text-gray-500 text-center block">{t('guest.year')}</label>
                         <select
+                            id="hebrew-year"
                             value={hebrewYear}
                             onChange={(e) => setHebrewYear(Number(e.target.value))}
                             className="w-full p-2 border border-gray-300 rounded-lg text-sm text-center appearance-none"
-                            dir="ltr" 
+                            dir="ltr"
                         >
                             {YEAR_RANGE.map(y => (
                                 <option key={y} value={y}>
@@ -498,11 +515,12 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
                         </select>
                     </div>
                 </div>
+                </fieldset>
             </div>
         )}
 
         {error && (
-            <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg text-center">
+            <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg text-center" role="alert">
                 {error}
             </div>
         )}

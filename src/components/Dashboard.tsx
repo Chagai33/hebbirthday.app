@@ -51,6 +51,7 @@ export const Dashboard = () => {
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showTextImport, setShowTextImport] = useState(false);
   const [originalPastedText, setOriginalPastedText] = useState<string>('');
+  const [importSource, setImportSource] = useState<'text' | 'file' | null>(null);
 
   const [isStatsExpanded, setIsStatsExpanded] = useState(() => {
     const saved = localStorage.getItem('stats-expanded');
@@ -149,6 +150,7 @@ export const Dashboard = () => {
       });
 
       setCsvData(validatedData);
+      setImportSource('file');
       setShowCSVPreview(true);
     } catch (error) {
       logger.error('Error parsing CSV:', error);
@@ -180,6 +182,7 @@ export const Dashboard = () => {
       });
 
       setCsvData(validatedData);
+      setImportSource('text');
       setShowCSVPreview(true);
       success(t('import.textImportSuccess', 'נמצאו {{count}} רשומות תקינות', { count: parsedData.length }));
     } catch (error) {
@@ -310,6 +313,10 @@ export const Dashboard = () => {
     }
 
     setShowCSVPreview(false);
+
+    // Reset import session state
+    setImportSource(null);
+    setOriginalPastedText('');
   };
 
   if (!currentTenant) {
@@ -449,17 +456,15 @@ export const Dashboard = () => {
                 <FileText className="w-4 h-4" />
                 <span>{t('birthday.pasteImport', 'הדבק וייבא')}</span>
               </button>
-              <label className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg font-medium transition-all cursor-pointer text-sm">
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleCSVImport}
-                  className="hidden"
-                  ref={fileInputRef}
-                />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg font-medium transition-all text-sm"
+                aria-label={t('birthday.importCSV')}
+              >
                 <Upload className="w-4 h-4" />
                 <span>{t('birthday.importCSV', 'Import CSV')}</span>
-              </label>
+              </button>
 
               {/* Separator */}
               <div className="h-8 w-px bg-gray-300 mx-1" />
@@ -480,17 +485,15 @@ export const Dashboard = () => {
               <div className="h-8 w-px bg-gray-300 mx-1" />
 
               {/* קבוצה 2: פעולות ראשיות */}
-              <label className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg font-medium transition-all cursor-pointer text-sm">
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleCSVImport}
-                  className="hidden"
-                  ref={fileInputRef}
-                />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg font-medium transition-all text-sm"
+                aria-label={t('birthday.importCSV')}
+              >
                 <Upload className="w-4 h-4" />
                 <span>{t('birthday.importCSV', 'Import CSV')}</span>
-              </label>
+              </button>
               <button
                 onClick={() => setShowTextImport(true)}
                 className="flex items-center justify-center gap-1.5 px-3 py-2 bg-purple-50 text-purple-600 border border-purple-200 hover:bg-purple-100 shadow-sm rounded-lg font-medium transition-all text-sm"
@@ -543,11 +546,11 @@ export const Dashboard = () => {
 
       <CSVImportPreviewModal
         isOpen={showCSVPreview}
-        onClose={() => setShowCSVPreview(false)}
+        onClose={importSource === 'text' ? handleBackToTextImport : () => setShowCSVPreview(false)}
         data={csvData}
         onConfirm={handleConfirmImport}
-        onBack={originalPastedText ? handleBackToTextImport : undefined}
-        showBackButton={!!originalPastedText}
+        onBack={importSource === 'text' ? handleBackToTextImport : undefined}
+        showBackButton={importSource === 'text'}
       />
 
       <ZodiacStatsModal
@@ -568,6 +571,15 @@ export const Dashboard = () => {
       <GoogleCalendarModal
         isOpen={showCalendarModal}
         onClose={() => setShowCalendarModal(false)}
+      />
+
+      {/* Hidden file input for CSV import */}
+      <input
+        type="file"
+        accept=".csv"
+        onChange={handleCSVImport}
+        className="hidden"
+        ref={fileInputRef}
       />
     </Layout>
   );

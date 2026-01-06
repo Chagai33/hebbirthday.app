@@ -20,7 +20,7 @@ export const GoogleCalendarStatus: React.FC<GoogleCalendarStatusProps> = ({
   if (isLoading) {
     return (
       <div className="flex items-center gap-1 text-gray-500">
-        <Loader className="w-4 h-4 animate-spin" />
+        <Loader className="w-4 h-4 animate-spin" aria-hidden="true" />
         <span className="text-xs">{t('googleCalendar.syncing')}</span>
       </div>
     );
@@ -29,12 +29,13 @@ export const GoogleCalendarStatus: React.FC<GoogleCalendarStatusProps> = ({
   if (isSynced) {
     return (
       <div className="flex items-center gap-1">
-        <CheckCircle className="w-4 h-4 text-green-600" />
+        <CheckCircle className="w-4 h-4 text-green-600" aria-hidden="true" />
         <span className="text-xs text-green-700">{t('googleCalendar.synced')}</span>
         {onRemove && (
           <button
             onClick={onRemove}
-            className="text-xs text-red-600 hover:text-red-800 underline ml-2"
+            className="text-xs text-red-600 hover:text-red-800 underline ml-2 p-1"
+            aria-label={t('googleCalendar.remove')}
           >
             {t('googleCalendar.remove')}
           </button>
@@ -45,12 +46,13 @@ export const GoogleCalendarStatus: React.FC<GoogleCalendarStatusProps> = ({
 
   return (
     <div className="flex items-center gap-1">
-      <Circle className="w-4 h-4 text-gray-400" />
+      <Circle className="w-4 h-4 text-gray-600" aria-hidden="true" />
       <span className="text-xs text-gray-600">{t('googleCalendar.notSynced')}</span>
       {onSync && (
         <button
           onClick={onSync}
-          className="text-xs text-blue-600 hover:text-blue-800 underline ml-2"
+          className="text-xs text-blue-600 hover:text-blue-800 underline ml-2 p-1"
+          aria-label={t('googleCalendar.sync')}
         >
           {t('googleCalendar.sync')}
         </button>

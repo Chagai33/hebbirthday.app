@@ -83,7 +83,7 @@ export const Accessibility: React.FC = () => {
               </p>
               <p className="text-gray-700">
                 <strong>{t('accessibility.coordinator.email', 'אימייל:')}</strong>{' '}
-                <a href="mailto:hebbirthday@gmail.com" className="text-blue-600 hover:text-blue-800 underline">
+                <a href="mailto:hebbirthday@gmail.com" className="text-blue-600 hover:text-blue-800 underline" aria-label={t('common.sendEmailTo', { email: 'hebbirthday@gmail.com' })}>
                   hebbirthday@gmail.com
                 </a>
               </p>
@@ -100,7 +100,7 @@ export const Accessibility: React.FC = () => {
             <div className="mt-4 space-y-2">
               <p className="text-gray-700">
                 <strong>{t('accessibility.contact.email', 'דוא"ל')}:</strong>{' '}
-                <a href="mailto:hebbirthday@gmail.com" className="text-blue-600 hover:text-blue-800 underline">
+                <a href="mailto:hebbirthday@gmail.com" className="text-blue-600 hover:text-blue-800 underline" aria-label={t('common.sendEmailTo', { email: 'hebbirthday@gmail.com' })}>
                   hebbirthday@gmail.com
                 </a>
               </p>

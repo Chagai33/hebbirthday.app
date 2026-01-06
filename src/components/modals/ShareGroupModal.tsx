@@ -62,8 +62,9 @@ ${guestLink}
       await groupService.updateGroup(group.id, {
         is_guest_access_enabled: true,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error generating token:', err);
+      const errorMessage = err instanceof Error ? err.message : String(err);
       setError(t('groups.guestAccessLinkError', 'שגיאה ביצירת קישור גישת אורחים'));
     } finally {
       setIsGenerating(false);
@@ -87,8 +88,9 @@ ${guestLink}
         await groupService.resetGuestAccessToken(group.id);
         setGuestToken(null);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error toggling access:', err);
+      const errorMessage = err instanceof Error ? err.message : String(err);
       setError(t('groups.guestAccessLinkError', 'שגיאה בעדכון גישת אורחים'));
     } finally {
       setIsGenerating(false);

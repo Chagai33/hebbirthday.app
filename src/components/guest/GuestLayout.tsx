@@ -20,6 +20,7 @@ export const GuestLayout: React.FC<{ children: React.ReactNode }> = ({ children 
           <button
             onClick={() => navigate('/')}
             className="flex flex-col items-start transition-opacity hover:opacity-80 -ms-1 pe-6"
+            aria-label={t('common.home')}
           >
             <div className="text-xl sm:text-2xl font-black tracking-tight leading-none relative inline-flex items-baseline" dir="ltr">
               <span className="text-[#8e24aa]">Heb</span>
@@ -67,6 +68,7 @@ export const GuestLayout: React.FC<{ children: React.ReactNode }> = ({ children 
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-gray-600 transition-colors"
+              aria-label={`${t('common.developedBy')} Chagai Yechiel - LinkedIn`}
             >
               {t('common.developedBy')} {i18n.language === 'he' ? 'חגי יחיאל' : 'Chagai Yechiel'}
             </a>

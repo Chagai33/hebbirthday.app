@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { X, Mail, Send } from 'lucide-react';
 import { authService } from '../../services/auth.service';
 import { useToast } from '../../contexts/ToastContext';
+import { useFocusTrap } from '../../hooks/useAccessibility';
 
 interface ForgotPasswordModalProps {
   isOpen: boolean;
@@ -17,6 +18,9 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+
+  // Accessibility: Focus management
+  const modalFocusRef = useFocusTrap(isOpen, onClose);
 
   // Update email when modal opens or initialEmail changes
   useEffect(() => {
@@ -49,34 +53,36 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
         onClose();
         setIsSuccess(false);
       }, 3000);
-    } catch (err: any) {
-      setError(err.message || t('common.error'));
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(errorMessage || t('common.error'));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={onClose}>
+      <div ref={modalFocusRef} className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden" role="dialog" aria-modal="true" aria-labelledby="forgot-password-title" onClick={(e) => e.stopPropagation()}>
         <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 id="forgot-password-title" className="text-xl font-bold text-gray-900">
             {t('auth.resetPassword')}
           </h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
+            aria-label={t('common.close')}
           >
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6" aria-hidden="true" />
           </button>
         </div>
 
         <div className="p-6">
           {isSuccess ? (
             <div className="text-center py-8">
-              <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Send className="w-8 h-8" />
-              </div>
+            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Send className="w-8 h-8" aria-hidden="true" />
+            </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 {t('auth.emailSent')}
               </h3>
@@ -97,12 +103,13 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="reset-email" className="block text-sm font-medium text-gray-700 mb-1">
                   {t('auth.email')}
                 </label>
                 <div className="relative">
-                  <Mail className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Mail className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" aria-hidden="true" />
                   <input
+                    id="reset-email"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}

@@ -55,13 +55,13 @@ export const TermsOfUse: React.FC = () => {
             </h2>
             <div className="text-gray-700 leading-relaxed space-y-3">
               <p>
-                <strong>{t('terms.section4.subtitle1', 'האפליקציה:')}</strong> {t('terms.section4.content1', 'כל זכויות הקניין הרוחני באפליקציה, לרבות קוד המקור, העיצוב, הלוגו, הממשק הגרפי, וכל חומר אחר הכלול בה (למעט תוכן משתמשים), שייכות באופן בלעדי למפתח האפליקציה, חגי יחיאל. אין להעתיק, לשכפל, להפיץ, לשנות או לעשות כל שימוש מסחרי באפליקציה או בחלק ממנה ללא אישור מפורש בכתב. האייקונים המשמשים באפליקציה הם מתוך ספריית lucide-react ומופצים תחת רישיון ISC.')}
+                <h3 className="inline font-semibold">{t('terms.section4.subtitle1', 'האפליקציה:')}</h3> {t('terms.section4.content1', 'כל זכויות הקניין הרוחני באפליקציה, לרבות קוד המקור, העיצוב, הלוגו, הממשק הגרפי, וכל חומר אחר הכלול בה (למעט תוכן משתמשים), שייכות באופן בלעדי למפתח האפליקציה, חגי יחיאל. אין להעתיק, לשכפל, להפיץ, לשנות או לעשות כל שימוש מסחרי באפליקציה או בחלק ממנה ללא אישור מפורש בכתב. האייקונים המשמשים באפליקציה הם מתוך ספריית lucide-react ומופצים תחת רישיון ISC.')}
               </p>
               <p>
-                <strong>{t('terms.section4.subtitle2', 'תוכן משתמשים (User-Generated Content):')}</strong> {t('terms.section4.content2', 'הינך האחראי הבלעדי לתוכן שאתה יוצר ומעלה לאפליקציה, כולל שמות, תאריכים, הערות וכל מידע אישי אחר.')}
+                <h3 className="inline font-semibold">{t('terms.section4.subtitle2', 'תוכן משתמשים (User-Generated Content):')}</h3> {t('terms.section4.content2', 'הינך האחראי הבלעדי לתוכן שאתה יוצר ומעלה לאפליקציה, כולל שמות, תאריכים, הערות וכל מידע אישי אחר.')}
               </p>
               <p>
-                <strong>{t('terms.section4.subtitle3', 'אחריות על מידע צד ג\'')}</strong> {t('terms.section4.content3', 'האפליקציה מאפשרת לך להזין מידע אישי אודות אנשים אחרים (בעלי יום ההולדת). בהעלאת תוכן זה, הינך מצהיר ומתחייב כי השגת את כל ההסכמות החוקיות הנדרשות מאותם צדדים שלישיים (או מהאפוטרופוסים החוקיים שלהם) לצורך איסוף, שמירה ועיבוד המידע שלהם במסגרת השירות.')}
+                <h3 className="inline font-semibold">{t('terms.section4.subtitle3', 'אחריות על מידע צד ג\'')}</h3> {t('terms.section4.content3', 'האפליקציה מאפשרת לך להזין מידע אישי אודות אנשים אחרים (בעלי יום ההולדת). בהעלאת תוכן זה, הינך מצהיר ומתחייב כי השגת את כל ההסכמות החוקיות הנדרשות מאותם צדדים שלישיים (או מהאפוטרופוסים החוקיים שלהם) לצורך איסוף, שמירה ועיבוד המידע שלהם במסגרת השירות.')}
               </p>
             </div>
           </section>
@@ -116,13 +116,13 @@ export const TermsOfUse: React.FC = () => {
             </h2>
             <div className="text-gray-700 leading-relaxed space-y-3">
               <p>
-                <strong>{t('terms.section8.subtitle1', 'השירות ניתן "כפי שהוא" (As-Is):')}</strong> {t('terms.section8.content1', 'האפליקציה מסופקת לשימוש כפי שהיא, ללא כל התחייבות או אחריות לתקינותה, זמינותה או אמינותה.')}
+                <h3 className="inline font-semibold">{t('terms.section8.subtitle1', 'השירות ניתן "כפי שהוא" (As-Is):')}</h3> {t('terms.section8.content1', 'האפליקציה מסופקת לשימוש כפי שהיא, ללא כל התחייבות או אחריות לתקינותה, זמינותה או אמינותה.')}
               </p>
               <p>
-                <strong>{t('terms.section8.subtitle2', 'תוכן גולשים:')}</strong> {t('terms.section8.content2', 'מפתח האפליקציה אינו נושא באחריות לתוכן שמועלה על ידי המשתמשים, ובכלל זה לדיוק המידע שהוזן או לקבלת ההסכמות הנדרשות להזנתו.')}
+                <h3 className="inline font-semibold">{t('terms.section8.subtitle2', 'תוכן גולשים:')}</h3> {t('terms.section8.content2', 'מפתח האפליקציה אינו נושא באחריות לתוכן שמועלה על ידי המשתמשים, ובכלל זה לדיוק המידע שהוזן או לקבלת ההסכמות הנדרשות להזנתו.')}
               </p>
               <p>
-                <strong>{t('terms.section8.subtitle3', 'חישוב תאריכים ושירותי צד ג\'')}</strong> {t('terms.section8.content3', 'האפליקציה מספקת כלי עזר לחישוב תאריכים עבריים. חישוב זה מתבצע מקומית בדפדפן באמצעות ספריית @hebcal/core. מפתח האפליקציה אינו אחראי לדיוק החישובים או לטעויות הנובעות מהספרייה. סנכרון עם יומנים חיצוניים (כגון Google Calendar) מוצע "כפי שהוא" ואינו מובטח כנטול שגיאות. האחריות על וידוא נכונות התאריכים והאירועים חלה על המשתמש בלבד.')}
+                <h3 className="inline font-semibold">{t('terms.section8.subtitle3', 'חישוב תאריכים ושירותי צד ג\'')}</h3> {t('terms.section8.content3', 'האפליקציה מספקת כלי עזר לחישוב תאריכים עבריים. חישוב זה מתבצע מקומית בדפדפן באמצעות ספריית @hebcal/core. מפתח האפליקציה אינו אחראי לדיוק החישובים או לטעויות הנובעות מהספרייה. סנכרון עם יומנים חיצוניים (כגון Google Calendar) מוצע "כפי שהוא" ואינו מובטח כנטול שגיאות. האחריות על וידוא נכונות התאריכים והאירועים חלה על המשתמש בלבד.')}
               </p>
             </div>
           </section>
@@ -141,7 +141,7 @@ export const TermsOfUse: React.FC = () => {
               {t('terms.section10.title', '10. יצירת קשר')}
             </h2>
             <p className="text-gray-700 leading-relaxed">
-              {t('terms.section10.content', 'בכל שאלה בנוגע לתנאי שימוש אלו, ניתן ליצור עמנו קשר באמצעות כתובת המייל:')} <a href="mailto:hebbirthday@gmail.com" className="text-blue-600 hover:text-blue-800 underline">hebbirthday@gmail.com</a>.
+              {t('terms.section10.content', 'בכל שאלה בנוגע לתנאי שימוש אלו, ניתן ליצור עמנו קשר באמצעות כתובת המייל:')} <a href="mailto:hebbirthday@gmail.com" className="text-blue-600 hover:text-blue-800 underline" aria-label={t('common.sendEmailTo', { email: 'hebbirthday@gmail.com' })}>hebbirthday@gmail.com</a>.
             </p>
           </section>
         </div>

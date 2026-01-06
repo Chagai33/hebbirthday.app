@@ -83,8 +83,9 @@ export const Register: React.FC = () => {
       // Track successful sign-up (critical event)
       analyticsService.trackEvent('User', 'Sign_Up', 'Email', { critical: true });
       // Don't navigate here - let AuthContext's onAuthStateChanged handle it
-    } catch (err: any) {
-      setError(getErrorMessage(err.message));
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(getErrorMessage(errorMessage));
       setIsSubmitting(false);
     }
   };
@@ -107,8 +108,9 @@ export const Register: React.FC = () => {
         showToast(t('auth.accountExistsLoggingIn', 'Account exists, logging in...'), 'info');
       }
       // Redirect handled by useEffect
-    } catch (err: any) {
-      setError(getErrorMessage(err.message));
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(getErrorMessage(errorMessage));
       setIsSubmitting(false);
     }
   };

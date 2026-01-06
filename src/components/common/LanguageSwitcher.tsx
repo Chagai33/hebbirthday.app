@@ -10,7 +10,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
     className = '',
     variant = 'default'
 }) => {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     const toggleLanguage = () => {
         let newLang: string;
@@ -42,17 +42,17 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         }
     };
 
-    const baseClasses = "text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-0";
+    const baseClasses = "text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 min-h-[44px]";
     const paddingClasses = variant === 'minimal' ? "px-1 py-1.5" : "px-3 py-1.5";
 
     return (
         <button
             onClick={toggleLanguage}
             className={`${baseClasses} ${paddingClasses} ${className}`}
-            title={getTitle()}
+            aria-label={t('common.switchToLanguage', { lang: getTitle() })}
             type="button"
         >
-            {getLabel()}
+            <span aria-hidden="true">{getLabel()}</span>
         </button>
     );
 };

@@ -6,6 +6,7 @@ import { Child, AgeGroup } from '../../types/gelt';
 import { Button } from '../common/Button';
 import { useGroups } from '../../hooks/useGroups';
 import { X, Download, AlertCircle, ChevronDown, ChevronUp, Filter } from 'lucide-react';
+import { useFocusTrap } from '../../hooks/useAccessibility';
 
 interface GeltImportModalProps {
   isOpen: boolean;
@@ -29,6 +30,9 @@ export const GeltImportModal: React.FC<GeltImportModalProps> = ({
   const [selectedGroupIds, setSelectedGroupIds] = useState<Set<string>>(new Set());
   const [genderFilter, setGenderFilter] = useState<Gender | 'all'>('all');
   const [showFilters, setShowFilters] = useState(false);
+
+  // Focus trap for modal
+  const focusTrapRef = useFocusTrap(isOpen, onClose);
 
   // Calculate age for each birthday
   const birthdaysWithAge = useMemo(() => {
@@ -133,17 +137,22 @@ export const GeltImportModal: React.FC<GeltImportModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div 
+      <div
+        ref={focusTrapRef}
         className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col animate-slide-in"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="import-modal-title"
       >
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-bold text-gray-900">{t('gelt.importFromBirthdays')}</h2>
+          <h2 id="import-modal-title" className="text-xl font-bold text-gray-900">{t('gelt.importFromBirthdays')}</h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors min-h-[44px]"
+            aria-label={t('common.close')}
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
@@ -153,36 +162,36 @@ export const GeltImportModal: React.FC<GeltImportModalProps> = ({
             <div className="flex items-center justify-between mb-3">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 p-1 min-h-[44px] focus:ring-2 focus:ring-blue-500 focus:outline-none rounded"
+                aria-expanded={showFilters}
+                aria-controls="filters-section"
               >
-                <Filter className="w-4 h-4" />
+                <Filter className="w-4 h-4" aria-hidden="true" />
                 {t('gelt.filters')}
                 {showFilters ? (
-                  <ChevronUp className="w-4 h-4" />
+                  <ChevronUp className="w-4 h-4" aria-hidden="true" />
                 ) : (
-                  <ChevronDown className="w-4 h-4" />
+                  <ChevronDown className="w-4 h-4" aria-hidden="true" />
                 )}
               </button>
               {(selectedGroupIds.size > 0 || genderFilter !== 'all') && (
-                <button
-                  onClick={() => {
-                    setSelectedGroupIds(new Set());
-                    setGenderFilter('all');
-                  }}
-                  className="text-xs text-blue-600 hover:text-blue-700 transition-colors"
-                >
+              <button
+                onClick={() => {
+                  setSelectedGroupIds(new Set());
+                  setGenderFilter('all');
+                }}
+                className="text-xs text-blue-600 hover:text-blue-700 transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none rounded"
+              >
                   {t('gelt.clearFilters')}
                 </button>
               )}
             </div>
 
             {showFilters && (
-              <div className="space-y-3">
+              <div id="filters-section" className="space-y-3">
                 {/* Group Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('gelt.filterByGroups')}
-                  </label>
+                <fieldset>
+                  <legend className="sr-only">{t('gelt.filterByGroups')}</legend>
                   <div className="max-h-32 overflow-y-auto space-y-1">
                     {groupOptions.map((group) => (
                       <label
@@ -212,13 +221,11 @@ export const GeltImportModal: React.FC<GeltImportModalProps> = ({
                       <p className="text-xs text-gray-500 p-2">{t('gelt.noGroupsAvailable')}</p>
                     )}
                   </div>
-                </div>
+                </fieldset>
 
                 {/* Gender Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('gelt.filterByGender')}
-                  </label>
+                <fieldset>
+                  <legend className="sr-only">{t('gelt.filterByGender')}</legend>
                   <div className="flex gap-3">
                     {(['all', 'male', 'female'] as const).map((gender) => (
                       <label
@@ -234,16 +241,16 @@ export const GeltImportModal: React.FC<GeltImportModalProps> = ({
                           className="w-4 h-4 text-blue-600 focus:ring-blue-500"
                         />
                         <span className="text-sm text-gray-700">
-                          {gender === 'all' 
-                            ? t('gelt.allGenders') 
-                            : gender === 'male' 
-                            ? t('gelt.male') 
+                          {gender === 'all'
+                            ? t('gelt.allGenders')
+                            : gender === 'male'
+                            ? t('gelt.male')
                             : t('gelt.female')}
                         </span>
                       </label>
                     ))}
                   </div>
-                </div>
+                </fieldset>
               </div>
             )}
           </div>
@@ -252,7 +259,7 @@ export const GeltImportModal: React.FC<GeltImportModalProps> = ({
           {excludedBirthdays.length > 0 && (
             <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
               <div className="flex items-start gap-2">
-                <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-yellow-800">
                     {t('gelt.excludedAgesWarning')}
@@ -271,18 +278,18 @@ export const GeltImportModal: React.FC<GeltImportModalProps> = ({
                 {t('gelt.selectBirthdays')} ({selectedBirthdayIds.size} / {relevantBirthdays.length})
               </span>
               {excludedBirthdays.length > 0 && (
-                <button
-                  onClick={() => setShowExcluded(!showExcluded)}
-                  className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 self-start"
-                >
+                  <button
+                    onClick={() => setShowExcluded(!showExcluded)}
+                    className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 self-start focus:ring-2 focus:ring-blue-500 focus:outline-none rounded"
+                  >
                   {showExcluded ? (
                     <>
-                      <ChevronUp className="w-3 h-3" />
+                      <ChevronUp className="w-3 h-3" aria-hidden="true" />
                       {t('gelt.hideExcluded')}
                     </>
                   ) : (
                     <>
-                      <ChevronDown className="w-3 h-3" />
+                      <ChevronDown className="w-3 h-3" aria-hidden="true" />
                       {t('gelt.showExcluded', { count: excludedBirthdays.length })}
                     </>
                   )}
@@ -301,59 +308,62 @@ export const GeltImportModal: React.FC<GeltImportModalProps> = ({
           </div>
 
           {/* Relevant birthdays */}
-          <div className="space-y-2 mb-4">
+          <ul className="space-y-2 mb-4" role="list">
             {relevantBirthdays.map((birthday) => (
-              <label
-                key={birthday.id}
-                className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedBirthdayIds.has(birthday.id)}
-                  onChange={() => handleToggle(birthday.id)}
-                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                />
-                <div className="flex-1">
-                  <span className="font-medium">
-                    {birthday.first_name} {birthday.last_name}
-                  </span>
-                  <span className="text-sm text-gray-500 ml-2">
-                    ({birthday.birth_date_gregorian}, {t('gelt.age')}: {birthday.calculatedAge})
-                  </span>
-                </div>
-              </label>
+              <li key={birthday.id}>
+                <label
+                  className="flex items-center gap-3 p-3 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedBirthdayIds.has(birthday.id)}
+                    onChange={() => handleToggle(birthday.id)}
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    aria-label={t('gelt.selectBirthdayFor', { name: `${birthday.first_name} ${birthday.last_name}` })}
+                  />
+                  <div className="flex-1">
+                    <span className="font-medium">
+                      {birthday.first_name} {birthday.last_name}
+                    </span>
+                    <span className="text-sm text-gray-500 ml-2">
+                      ({birthday.birth_date_gregorian}, {t('gelt.age')}: {birthday.calculatedAge})
+                    </span>
+                  </div>
+                </label>
+              </li>
             ))}
-          </div>
+          </ul>
 
           {/* Excluded birthdays (shown when expanded) */}
           {showExcluded && excludedBirthdays.length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-200">
               <div className="flex items-center gap-2 mb-3 text-sm text-gray-600">
-                <AlertCircle className="w-4 h-4 text-orange-500" />
+                <AlertCircle className="w-4 h-4 text-orange-500" aria-hidden="true" />
                 <span className="font-medium">
                   {t('gelt.excludedBirthdays', { count: excludedBirthdays.length })}
                 </span>
               </div>
-              <div className="space-y-2">
+              <ul className="space-y-2" role="list">
                 {excludedBirthdays.map((birthday) => (
-                  <div
-                    key={birthday.id}
-                    className="flex items-center gap-3 p-3 border border-orange-200 bg-orange-50 rounded-xl"
-                  >
-                    <div className="flex-1">
-                      <span className="font-medium text-gray-700">
-                        {birthday.first_name} {birthday.last_name}
-                      </span>
-                      <span className="text-sm text-gray-600 ml-2">
-                        ({birthday.birth_date_gregorian}, {t('gelt.age')}: {birthday.calculatedAge})
+                  <li key={birthday.id}>
+                    <div
+                      className="flex items-center gap-3 p-3 border border-orange-200 bg-orange-50 rounded-xl"
+                    >
+                      <div className="flex-1">
+                        <span className="font-medium text-gray-700">
+                          {birthday.first_name} {birthday.last_name}
+                        </span>
+                        <span className="text-sm text-gray-600 ml-2">
+                          ({birthday.birth_date_gregorian}, {t('gelt.age')}: {birthday.calculatedAge})
+                        </span>
+                      </div>
+                      <span className="text-xs text-orange-600 font-medium">
+                        {t('gelt.noMatchingAgeGroup')}
                       </span>
                     </div>
-                    <span className="text-xs text-orange-600 font-medium">
-                      {t('gelt.noMatchingAgeGroup')}
-                    </span>
-                  </div>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           )}
         </div>
@@ -366,7 +376,7 @@ export const GeltImportModal: React.FC<GeltImportModalProps> = ({
             variant="primary"
             onClick={handleImport}
             disabled={selectedBirthdayIds.size === 0}
-            icon={<Download className="w-4 h-4" />}
+            icon={<Download className="w-4 h-4" aria-hidden="true" />}
           >
             {t('gelt.import')}
           </Button>
