@@ -219,7 +219,7 @@ export const GuestPortalManagement: React.FC<GuestPortalManagementProps> = ({ is
                 {/* WhatsApp Share */}
                 <button
                   onClick={handleWhatsAppShare}
-                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-green-50 hover:bg-green-100 text-green-600 transition-all focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
+                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 transition-all focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
                   aria-label={t('guestPortal.shareWhatsAppAction')}
                 >
                   <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">

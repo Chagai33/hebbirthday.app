@@ -80,7 +80,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
         <div className="p-6">
           {isSuccess ? (
             <div className="text-center py-8">
-            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-green-100 text-green-700 rounded-full flex items-center justify-center mx-auto mb-4">
               <Send className="w-8 h-8" aria-hidden="true" />
             </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">

@@ -128,7 +128,7 @@ export const GeltGroupChildrenModal: React.FC<GeltGroupChildrenModalProps> = ({
                           />
                           <button
                             onClick={() => handleSaveEdit(child)}
-                            className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors min-h-[44px]"
+                            className="p-2 text-green-700 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors min-h-[44px]"
                             aria-label={t('gelt.saveAge')}
                           >
                             <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" aria-hidden="true" />

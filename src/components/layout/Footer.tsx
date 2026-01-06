@@ -19,7 +19,7 @@ export const Footer: React.FC = () => {
             <li>
               <Link
                 to="/terms"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-gray-800 hover:text-gray-900 transition-colors"
               >
                 {t('footer.termsOfUse', 'תנאי שימוש')}
               </Link>
@@ -27,7 +27,7 @@ export const Footer: React.FC = () => {
             <li>
               <Link
                 to="/privacy"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-gray-800 hover:text-gray-900 transition-colors"
               >
                 {t('footer.privacyPolicy', 'מדיניות פרטיות')}
               </Link>
@@ -35,7 +35,7 @@ export const Footer: React.FC = () => {
             <li>
               <Link
                 to="/accessibility"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-gray-800 hover:text-gray-900 transition-colors"
               >
                 {t('footer.accessibility', 'הצהרת נגישות')}
               </Link>
@@ -43,7 +43,7 @@ export const Footer: React.FC = () => {
             <li>
               <button
                 onClick={handleFeedback}
-                className="text-gray-600 hover:text-gray-900 transition-colors flex items-center gap-1"
+                className="text-gray-800 hover:text-gray-900 transition-colors flex items-center gap-1"
                 aria-label={t('footer.feedbackOpenNewWindow')}
               >
                 <MessageSquare className="w-4 h-4" />
@@ -51,7 +51,7 @@ export const Footer: React.FC = () => {
               </button>
             </li>
           </ul>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-800">
             © {new Date().getFullYear()} HebBirthday.App. {t('footer.allRightsReserved', 'כל הזכויות שמורות')}
           </div>
         </div>

@@ -14,19 +14,19 @@ export const Footer: React.FC = () => {
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 lg:gap-6 text-xs sm:text-sm">
             <Link
               to="/terms"
-              className="text-gray-600 hover:text-indigo-600 transition-colors whitespace-nowrap"
+              className="text-gray-800 hover:text-indigo-600 transition-colors whitespace-nowrap"
             >
               {t('footer.termsOfUse', 'תנאי שימוש')}
             </Link>
             <Link
               to="/privacy"
-              className="text-gray-600 hover:text-indigo-600 transition-colors whitespace-nowrap"
+              className="text-gray-800 hover:text-indigo-600 transition-colors whitespace-nowrap"
             >
               {t('footer.privacyPolicy', 'מדיניות פרטיות')}
             </Link>
             <Link
               to="/accessibility"
-              className="text-gray-600 hover:text-indigo-600 transition-colors whitespace-nowrap"
+              className="text-gray-800 hover:text-indigo-600 transition-colors whitespace-nowrap"
             >
               {t('footer.accessibility', 'הצהרת נגישות')}
             </Link>
@@ -34,7 +34,7 @@ export const Footer: React.FC = () => {
               href="https://docs.google.com/forms/d/e/1FAIpQLSf4M-3ytbYRAOIh9B7Bavgaw2WyGgDFP3PT7zgTmTMnUFXMrg/viewform"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-600 hover:text-indigo-600 transition-colors whitespace-nowrap"
+              className="text-gray-800 hover:text-indigo-600 transition-colors whitespace-nowrap"
             >
               {t('footer.feedback', 'משוב')}
             </a>
@@ -44,7 +44,7 @@ export const Footer: React.FC = () => {
           <DeveloperCredit />
 
           {/* Copyright */}
-          <div className="text-xs text-gray-500 text-center">
+          <div className="text-xs text-gray-800 text-center">
             © {new Date().getFullYear()} HebBirthday
           </div>
         </div>

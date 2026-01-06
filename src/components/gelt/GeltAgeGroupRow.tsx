@@ -130,7 +130,7 @@ export const GeltAgeGroupRow: React.FC<GeltAgeGroupRowProps> = ({
             aria-label={group.isIncluded ? t('gelt.excludeGroup', { name: group.name }) : t('gelt.includeGroup', { name: group.name })}
           >
             {group.isIncluded ? (
-              <ToggleRight className="w-5 h-5 text-green-600" aria-hidden="true" />
+              <ToggleRight className="w-5 h-5 text-green-700" aria-hidden="true" />
             ) : (
               <ToggleLeft className="w-5 h-5 text-gray-400" aria-hidden="true" />
             )}
@@ -156,7 +156,7 @@ export const GeltAgeGroupRow: React.FC<GeltAgeGroupRowProps> = ({
               />
               <button
                 onClick={handleSave}
-                className="p-2 text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors min-h-[44px]"
+                className="p-2 text-green-700 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors min-h-[44px]"
                 aria-label={t('gelt.saveGroupChanges')}
               >
                 <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" aria-hidden="true" />

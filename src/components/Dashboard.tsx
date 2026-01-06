@@ -338,6 +338,7 @@ export const Dashboard = () => {
   return (
     <Layout>
       <div className="space-y-3 sm:space-y-4">
+        <h2 className="sr-only">{t('dashboard.title', 'Dashboard')}</h2>
         {/* Divider עדין מעל הסטטיסטיקה */}
         <div className="border-t border-gray-200"></div>
 
@@ -371,10 +372,10 @@ export const Dashboard = () => {
                   <Users className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 </div>
                 <div className={`min-w-0 flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                  <p className="text-[8px] leading-tight sm:text-xs text-blue-700 font-medium mb-0.5 truncate">
+                  <h3 className="text-[8px] leading-tight sm:text-xs text-blue-700 font-medium mb-0.5 truncate">
                     {t('dashboard.totalBirthdays')}
-                  </p>
-                  <p className="text-base sm:text-2xl font-bold text-blue-900" aria-live="polite">{stats.totalBirthdays}</p>
+                  </h3>
+                  <h3 className="text-base sm:text-2xl font-bold text-blue-900" aria-live="polite" aria-atomic="true">{stats.totalBirthdays}</h3>
                 </div>
               </div>
             </div>
@@ -385,12 +386,12 @@ export const Dashboard = () => {
                   <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 </div>
                 <div className={`min-w-0 flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                  <p className="text-[8px] leading-tight sm:text-xs text-green-700 font-medium mb-0.5 truncate">
+                  <h3 className="text-[8px] leading-tight sm:text-xs text-green-700 font-medium mb-0.5 truncate">
                     {t('dashboard.upcomingThisWeek')}
-                  </p>
-                  <p className="text-base sm:text-2xl font-bold text-green-900">
+                  </h3>
+                  <h3 className="text-base sm:text-2xl font-bold text-green-900" aria-live="polite" aria-atomic="true">
                     {stats.upcomingThisWeek}
-                  </p>
+                  </h3>
                 </div>
               </div>
             </div>
@@ -401,12 +402,12 @@ export const Dashboard = () => {
                   <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 </div>
                 <div className={`min-w-0 flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                  <p className="text-[8px] leading-tight sm:text-xs text-orange-700 font-medium mb-0.5 truncate">
+                  <h3 className="text-[8px] leading-tight sm:text-xs text-orange-700 font-medium mb-0.5 truncate">
                     {t('dashboard.upcomingThisMonth')}
-                  </p>
-                  <p className="text-base sm:text-2xl font-bold text-orange-900">
+                  </h3>
+                  <h3 className="text-base sm:text-2xl font-bold text-orange-900" aria-live="polite" aria-atomic="true">
                     {stats.upcomingThisMonth}
-                  </p>
+                  </h3>
                 </div>
               </div>
             </div>
@@ -417,10 +418,10 @@ export const Dashboard = () => {
                   <Cake className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 </div>
                 <div className={`min-w-0 flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                  <p className="text-[8px] leading-tight sm:text-xs text-pink-700 font-medium mb-0.5 truncate">{t('dashboard.statistics')}</p>
-                  <p className="text-sm sm:text-xl font-bold text-pink-900">
+                  <h3 className="text-[8px] leading-tight sm:text-xs text-pink-700 font-medium mb-0.5 truncate">{t('dashboard.statistics')}</h3>
+                  <h3 className="text-sm sm:text-xl font-bold text-pink-900" aria-live="polite" aria-atomic="true">
                     {stats.maleCount}M / {stats.femaleCount}F
-                  </p>
+                  </h3>
                 </div>
                 <button
                   onClick={() => setShowZodiacStats(true)}
@@ -446,7 +447,6 @@ export const Dashboard = () => {
               <button
                 onClick={() => setShowForm(true)}
                 className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md text-sm"
-                title={t('birthday.addBirthday')}
               >
                 <Plus className="w-4 h-4" />
                 <span>{t('birthday.addBirthday')}</span>
@@ -454,7 +454,6 @@ export const Dashboard = () => {
               <button
                 onClick={() => setShowTextImport(true)}
                 className="flex items-center justify-center gap-1.5 px-3 py-2 bg-purple-50 text-purple-600 border border-purple-200 hover:bg-purple-100 shadow-sm rounded-lg font-medium transition-all text-sm"
-                title={t('birthday.pasteImport', 'הדבק וייבא')}
               >
                 <FileText className="w-4 h-4" />
                 <span>{t('birthday.pasteImport', 'הדבק וייבא')}</span>
@@ -462,7 +461,7 @@ export const Dashboard = () => {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg font-medium transition-all text-sm"
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg font-medium transition-all text-sm"
                 aria-label={t('birthday.importCSV')}
               >
                 <Upload className="w-4 h-4" />
@@ -491,7 +490,7 @@ export const Dashboard = () => {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg font-medium transition-all text-sm"
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg font-medium transition-all text-sm"
                 aria-label={t('birthday.importCSV')}
               >
                 <Upload className="w-4 h-4" />
@@ -500,7 +499,6 @@ export const Dashboard = () => {
               <button
                 onClick={() => setShowTextImport(true)}
                 className="flex items-center justify-center gap-1.5 px-3 py-2 bg-purple-50 text-purple-600 border border-purple-200 hover:bg-purple-100 shadow-sm rounded-lg font-medium transition-all text-sm"
-                title={t('birthday.pasteImport', 'Paste & Import')}
               >
                 <FileText className="w-4 h-4" />
                 <span>{t('birthday.pasteImport', 'Paste & Import')}</span>
@@ -508,7 +506,6 @@ export const Dashboard = () => {
               <button
                 onClick={() => setShowForm(true)}
                 className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md text-sm"
-                title={t('birthday.addBirthday')}
               >
                 <Plus className="w-4 h-4" />
                 <span>{t('birthday.addBirthday')}</span>
@@ -538,7 +535,7 @@ export const Dashboard = () => {
           <li>
             <Link
               to="/terms"
-              className="hover:text-gray-600 transition-colors"
+              className="text-gray-600 hover:text-gray-600 transition-colors"
             >
               {t('footer.termsOfUse')}
             </Link>
@@ -546,7 +543,7 @@ export const Dashboard = () => {
           <li>
             <Link
               to="/privacy"
-              className="hover:text-gray-600 transition-colors"
+              className="text-gray-600 hover:text-gray-600 transition-colors"
             >
               {t('footer.privacyPolicy')}
             </Link>
@@ -554,7 +551,7 @@ export const Dashboard = () => {
           <li>
             <Link
               to="/accessibility"
-              className="hover:text-gray-600 transition-colors"
+              className="text-gray-600 hover:text-gray-600 transition-colors"
             >
               {t('footer.accessibility')}
             </Link>
@@ -611,6 +608,7 @@ export const Dashboard = () => {
         onChange={handleCSVImport}
         className="hidden"
         ref={fileInputRef}
+        aria-label={t('birthday.importCSV')}
       />
     </Layout>
   );

@@ -137,7 +137,7 @@ export const UserGuide: React.FC = () => {
                       </div>
 
                       <div className="flex items-start gap-3">
-                        <MessageCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <MessageCircle className="w-5 h-5 text-green-700 flex-shrink-0 mt-0.5" />
                         <div>
                           <p className="text-sm text-gray-900 font-medium">{t('guide.intro.feature2Title', 'סיכום שבועי:')}</p>
                           <p className="text-sm text-gray-600">{t('guide.intro.feature2Desc', 'יצוא רשימת חוגגים מהירה להדבקה בוואטסאפ.')}</p>
@@ -246,7 +246,7 @@ export const UserGuide: React.FC = () => {
                 <div className="mb-6">
                   <div className="p-5 rounded-xl bg-green-50 border border-green-200">
                     <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-green-600" />
+                      <FileText className="w-5 h-5 text-green-700" />
                       {t('guide.section1.csv.title', '3. ייבוא מקובץ Excel/CSV')}
                     </h3>
                     <p className="text-sm text-gray-700 leading-relaxed mb-3">
@@ -365,7 +365,7 @@ export const UserGuide: React.FC = () => {
               {/* SYNC */}
               <section id="sync" className="mb-12 scroll-mt-24">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6 flex items-center gap-3 pb-3 border-b-2 border-green-200">
-                  <Calendar className="w-6 h-6 text-green-600" />
+                  <Calendar className="w-6 h-6 text-green-700" />
                   {t('guide.section3.title', 'סנכרון ליומן Google')}
                 </h2>
 
@@ -375,7 +375,7 @@ export const UserGuide: React.FC = () => {
 
                 <div className="bg-green-50 border border-green-200 rounded-xl p-5 mb-4">
                   <div className="flex items-start gap-3">
-                    <Shield className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <Shield className="w-5 h-5 text-green-700 flex-shrink-0 mt-0.5" />
                     <div>
                       <h3 className="font-bold text-gray-900 mb-2">
                         {t('guide.section3.dedicated.title', 'יומן ייעודי ונפרד')}

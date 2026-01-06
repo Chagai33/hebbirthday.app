@@ -56,7 +56,7 @@ export const GeltCalculationResults: React.FC<GeltCalculationResultsProps> = ({
 
       {!overBudget && (
         <div className="mt-3 sm:mt-4 p-2 sm:p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2" role="status">
-          <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 flex-shrink-0" aria-hidden="true" />
+          <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-700 flex-shrink-0" aria-hidden="true" />
           <span className="text-green-800 font-medium text-xs sm:text-sm">{t('gelt.withinBudget')}</span>
         </div>
       )}

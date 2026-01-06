@@ -50,7 +50,7 @@ export const WhatsAppCopyButton: React.FC<WhatsAppCopyButtonProps> = ({
     <div className="relative" ref={containerRef}>
       <div className={`flex items-center border shadow-sm rounded-lg transition-all ${isCopied
           ? 'bg-green-100 border-green-300 text-green-700'
-          : 'bg-green-50 border-green-200 text-green-600 hover:bg-green-100'
+          : 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100'
         }`}
       >
         <button
@@ -139,7 +139,7 @@ export const WhatsAppCopyButton: React.FC<WhatsAppCopyButtonProps> = ({
                 type="checkbox"
                 checked={includeWeekday}
                 onChange={(e) => onIncludeWeekdayChange(e.target.checked)}
-                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                className="rounded border-gray-300 text-green-700 focus:ring-green-500"
               />
               <span>{t('birthday.includeWeekday', 'כלול יום בשבוע')}</span>
             </label>

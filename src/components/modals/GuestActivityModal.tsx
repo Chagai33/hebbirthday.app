@@ -33,18 +33,19 @@ const GuestActivityItem: React.FC<GuestActivityItemProps> = ({
   birthday, onDelete, deletingId, getBirthdayGroups, getGroupName, formatDate, t, isNew, isSelected, onToggleSelect, rowRef
 }) => {
   return (
-    <div 
+    <div
       ref={rowRef}
       data-row-id={birthday.id}
       className={`flex items-center gap-4 p-4 rounded-xl transition-all border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-        isSelected 
+        isSelected
           ? 'bg-blue-50 border-blue-300'
-          : isNew 
-            ? 'bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200' 
+          : isNew
+            ? 'bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200'
             : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50'
       }`}
       role="row"
       tabIndex={0}
+      aria-label={`${t('guestPortal.selectBirthday')} ${birthday.first_name} ${birthday.last_name}${isSelected ? ` - ${t('common.selected')}` : ''}`}
       onClick={() => onToggleSelect(birthday.id)}
       onKeyDown={(e) => {
         if (e.key === ' ' || e.key === 'Enter') {
@@ -63,6 +64,7 @@ const GuestActivityItem: React.FC<GuestActivityItemProps> = ({
         onChange={() => onToggleSelect(birthday.id)}
         tabIndex={-1}
         className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer flex-shrink-0 pointer-events-none"
+        aria-hidden="true"
       />
       {/* Avatar */}
       <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -412,10 +414,7 @@ export const GuestActivityModal: React.FC<GuestActivityModalProps> = ({ isOpen, 
             <>
               {/* Selection Controls */}
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
-                <button
-                  onClick={toggleSelectAll}
-                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 font-medium"
-                >
+                <label className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 font-medium cursor-pointer">
                   <input
                     type="checkbox"
                     checked={selectedIds.size === guestBirthdays.all.length && guestBirthdays.all.length > 0}
@@ -427,7 +426,7 @@ export const GuestActivityModal: React.FC<GuestActivityModalProps> = ({ isOpen, 
                       ? t('common.deselectAll')
                       : t('common.selectAll')}
                   </span>
-                </button>
+                </label>
                 {selectedIds.size > 0 && (
                   <span className="text-sm text-gray-600">
                     {selectedIds.size} {t('common.selected')}

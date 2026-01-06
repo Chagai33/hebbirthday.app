@@ -204,7 +204,7 @@ export const AssignGroupModal = ({
           </div>
           <button
             onClick={() => setShowCreateGroup(!showCreateGroup)}
-            className={`mt-6 p-2 rounded-lg transition-colors border ${showCreateGroup ? 'bg-gray-100 border-gray-300 text-gray-700' : 'bg-green-50 border-green-200 text-green-600 hover:bg-green-100'}`}
+            className={`mt-6 p-2 rounded-lg transition-colors border ${showCreateGroup ? 'bg-gray-100 border-gray-300 text-gray-700' : 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100'}`}
             title={t('groups.createSubgroup', 'Create New Group')}
           >
             <Plus className={`w-5 h-5 transition-transform ${showCreateGroup ? 'rotate-45' : ''}`} />

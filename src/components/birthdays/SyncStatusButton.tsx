@@ -41,43 +41,43 @@ export const SyncStatusButton: React.FC<SyncStatusButtonProps> = ({
 
   const status = birthday.syncMetadata?.status;
 
-  // Visual Configuration
-  let icon = <Cloud className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400" />;
+  // Visual Configuration - Optimized for mobile space efficiency
+  let icon = <Cloud className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-400" />;
   let colorClass = "text-gray-400 hover:text-gray-600 hover:bg-gray-50";
   let tooltipContent = t('googleCalendar.startSyncing', 'לחץ לסנכרון');
   let onClickAction = () => onSync(birthday.id);
 
   // LOGIC PRIORITY:
-  
+
   // 0. Loading / Syncing (Top Priority)
   if (isLoading) {
-    icon = <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />; // Spinner
+    icon = <Loader2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin" />; // Spinner
     colorClass = "text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50 cursor-wait"; // Yellow
     tooltipContent = t('googleCalendar.syncing', 'מסנכרן...');
     onClickAction = () => {}; // No action while syncing
   }
   // 1. Error / Partial (Red)
   else if (isSynced && (status === 'ERROR' || status === 'PARTIAL_SYNC')) {
-    icon = <AlertCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />; // Error Icon
+    icon = <AlertCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />; // Error Icon
     colorClass = "text-red-500 hover:text-red-600 hover:bg-red-50"; // Red
-    tooltipContent = status === 'ERROR' 
+    tooltipContent = status === 'ERROR'
         ? t('googleCalendar.syncError', 'שגיאה בסנכרון (כל הניסיונות נכשלו)')
         : t('googleCalendar.partialSync', 'סנכרון חלקי (חלק מהאירועים לא עברו)');
     onClickAction = () => onSync(birthday.id); // Retry
   }
   // 2. Pending Changes (Yellow)
   else if (isSynced && (status === 'PENDING' || isPendingChange)) {
-    icon = <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin" />; // Spinner
+    icon = <Loader2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin" />; // Spinner
     colorClass = "text-yellow-500 hover:text-yellow-600 hover:bg-yellow-50"; // Yellow
     tooltipContent = t('googleCalendar.unsyncedChanges', 'יש שינויים הממתינים לסנכרון');
     onClickAction = () => onSync(birthday.id); // Update/Refresh
   }
   // 3. Synced (Green)
   else if (isSynced) {
-    icon = <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={3} />; // Bold Check
+    icon = <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={3} />; // Bold Check
     colorClass = "text-green-500 hover:text-green-600 hover:bg-green-50"; // Green
     tooltipContent = t('googleCalendar.stopSyncing', 'מסונכרן ותקין. לחץ להסרה');
-    
+
     // Safety Confirmation
     onClickAction = () => {
       // Custom confirmation logic
@@ -96,7 +96,7 @@ export const SyncStatusButton: React.FC<SyncStatusButtonProps> = ({
       <button
         onClick={onClickAction}
         disabled={isLoading || isDisabled}
-        className={`p-1 sm:p-2 rounded-lg transition-all duration-200 transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed ${colorClass}`}
+        className={`p-1.5 sm:p-2 rounded-md transition-all duration-200 transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed min-h-[32px] min-w-[32px] sm:min-h-[36px] sm:min-w-[36px] ${colorClass}`}
         aria-label={tooltipContent}
       >
         {icon}

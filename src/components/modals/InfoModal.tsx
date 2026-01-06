@@ -117,7 +117,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
 
             <div className="flex gap-4 bg-green-50 p-4 rounded-xl border border-green-100">
               <div className="flex-shrink-0 mt-1">
-                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
+                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-700">
                   <Cloud className="w-5 h-5" />
                 </div>
               </div>

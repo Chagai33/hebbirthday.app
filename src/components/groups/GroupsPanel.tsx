@@ -222,11 +222,11 @@ export const GroupsPanel: React.FC<GroupsPanelProps> = ({ isModal = false, onClo
   }
 
   const content = (
-    <div className={`space-y-2 sm:space-y-2.5 ${isModal ? 'pb-4' : 'pb-24 sm:pb-0'}`}>
+    <div className={`space-y-1.5 sm:space-y-2.5 ${isModal ? 'pb-4' : 'pb-24 sm:pb-0'}`}>
       {!isModal && (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">{t('groups.manageGroups')}</h2>
+            <h2 className="text-base sm:text-xl md:text-2xl font-bold text-gray-900">{t('groups.manageGroups')}</h2>
             <p className="text-xs sm:text-sm text-gray-600 mt-0.5 sm:mt-1">{t('groups.manageDescription')}</p>
           </div>
           {/* Desktop Back Button */}
@@ -361,7 +361,7 @@ export const GroupsPanel: React.FC<GroupsPanelProps> = ({ isModal = false, onClo
                 <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
-            <div className="p-4 sm:p-6">
+            <div className="p-3 sm:p-6">
               {content}
             </div>
           </div>
@@ -473,47 +473,47 @@ const CategorySection = ({
               return (
               <li key={group.id}>
                 <div
-                  className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 border border-gray-200 hover:shadow-lg transition-all hover:-translate-y-0.5 group"
+                  className="bg-white rounded-lg sm:rounded-xl py-2.5 px-3 sm:py-4 sm:px-4 border border-gray-200 hover:shadow-lg transition-all hover:-translate-y-0.5 group"
                   style={{
                     borderRightColor: group.color,
                     borderRightWidth: '3px'
                   }}
                 >
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center justify-between gap-1.5 sm:gap-2">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                     <div
-                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0"
+                      className="w-4 h-4 sm:w-8 sm:h-8 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0"
                       style={{ backgroundColor: `${group.color}20` }}
                     >
                       <div
-                        className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full"
+                        className="w-2 h-2 sm:w-3 sm:h-3 rounded-full"
                         style={{ backgroundColor: group.color }}
                       />
                     </div>
-                    <span className="font-semibold text-gray-900 text-xs sm:text-sm md:text-base truncate">{group.name}</span>
+                    <span className="font-semibold text-gray-900 text-xs sm:text-sm truncate">{group.name}</span>
                   </div>
-                <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
                   <span className="text-[10px] sm:text-xs font-medium text-gray-600 bg-gray-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md sm:rounded-lg whitespace-nowrap">
                     {isCountsLoading ? t('common.loading') : `(${groupCount})`}
                   </span>
                   <div className="flex items-center gap-1 sm:gap-2">
                     <button
                       onClick={() => onShareGroup(group)}
-                      className="p-3 sm:p-3 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
+                      className="p-3.5 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
                       aria-label={t('groups.shareGroup', { name: group.name })}
                     >
                       <Share2 className="w-4 h-4 sm:w-4 sm:h-4" />
                     </button>
                     <button
                       onClick={() => onEditGroup(group)}
-                      className="p-3 sm:p-3 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      className="p-3.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                       aria-label={t('groups.editGroup', { name: group.name })}
                     >
                       <Edit className="w-4 h-4 sm:w-4 sm:h-4" />
                     </button>
                     <button
                       onClick={() => onDeleteGroup(group)}
-                      className="p-3 sm:p-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                      className="p-3.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
                       aria-label={`${t('common.delete')} ${group.name}`}
                     >
                       <Trash2 className="w-4 h-4 sm:w-4 sm:h-4" />
