@@ -165,7 +165,7 @@ export const Header: React.FC = () => {
               <h1 className="text-xl sm:text-2xl font-black tracking-tight leading-none relative inline-flex items-baseline" dir="ltr">
                 <span className="text-[#8e24aa]">Heb</span>
                 <span className="text-[#304FFE]">Birthday</span>
-                <span className="text-gray-400 text-sm sm:text-base ml-[1px]">.app</span>
+                <span className="text-gray-500 text-sm sm:text-base ml-[1px]">.app</span>
               </h1>
               <span className="text-[10px] sm:text-xs text-gray-500 font-medium -mt-0.5">
                 {t('app.taglinePart1')} <span className="text-[#8e24aa]">{t('app.taglineHebrew')}</span> {t('app.taglineOr')} <span className="text-[#304FFE]">{t('app.taglineGregorian')}</span>

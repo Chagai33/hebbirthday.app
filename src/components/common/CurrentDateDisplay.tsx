@@ -24,6 +24,7 @@ export const CurrentDateDisplay: React.FC = () => {
   return (
     <div
       className="flex flex-col items-center justify-center px-2 leading-none select-none min-w-[80px]"
+      role="img"
       aria-label={t('common.currentDateLabel', {
         hebrew: hebrewDate.hebrew,
         gregorian: gregorianDate,
