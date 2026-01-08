@@ -26,7 +26,7 @@ export class ProcessAccountDeletionUseCase {
     }
 
     // 2. Auth Check - Fail Fast if Revoked
-    let calendarId: string;
+    let calendarId: string | null;
     try {
       const accessToken = await this.authClient.getValidAccessToken(userId);
       if (!accessToken) throw new Error('No access token');
@@ -37,51 +37,119 @@ export class ProcessAccountDeletionUseCase {
       return { deletedCount: 0, remaining: false };
     }
 
-    // 3. Batch Fetch - Get up to 50 synced birthdays
-    const snapshot = await this.db.collection('birthdays')
-      .where('tenant_id', '==', tenantId)
-      .orderBy('googleCalendarEventId')
-      .limit(50)
-      .get();
+    // 3. Handle Missing Calendar
+    if (!calendarId) {
+      functions.logger.log('[DeleteJob] No dedicated calendar found in settings. Skipping Google cleanup.');
+      await this.nukeDatabase(tenantId, userId);
+      return { deletedCount: 0, remaining: false };
+    }
 
-    const eventsToDelete = snapshot.docs
-      .map(doc => ({
-        docId: doc.id,
-        eventId: doc.data().googleCalendarEventId
-      }))
-      .filter(item => !!item.eventId);
+    // 4. List Events from Google Calendar - Get events created by THIS app
+    functions.logger.log(`[DeleteJob] Searching in calendar: ${calendarId} for events with createdByApp=hebbirthday...`);
 
-    if (eventsToDelete.length === 0) {
-      // 4. No more events to delete from Google -> Final Cleanup
+    let response: { items: { id: string }[]; nextPageToken?: string };
+    try {
+      // Fetch events created by THIS app from the CORRECT calendar
+      response = await this.calendarClient.listEvents(userId, calendarId, {
+        privateExtendedProperty: ['createdByApp=hebbirthday'],
+        maxResults: 250, // Process in chunks
+        singleEvents: true
+      });
+    } catch (error: unknown) {
+      const err = error as { code?: number; message?: string };
+      if (err.code === 404) {
+        functions.logger.log('[DeleteJob] Calendar already deleted or not accessible. Skipping Google cleanup.');
+        await this.nukeDatabase(tenantId, userId);
+        return { deletedCount: 0, remaining: false };
+      }
+      throw error; // Re-throw other errors
+    }
+
+    functions.logger.log(`Found ${response.items.length} events to delete.`);
+
+    if (response.items.length === 0) {
+      // 5. No more events to delete from Google -> Final Cleanup
       functions.logger.log('Google Calendar cleanup complete. Nuking Database...');
       await this.nukeDatabase(tenantId, userId);
       return { deletedCount: 0, remaining: false };
     }
 
-    // 5. Execute Batch Deletion from Google
-    functions.logger.log(`Deleting batch of ${eventsToDelete.length} events from Google...`);
+    // 6. Execute Batch Deletion from Google with Strict Rate Control
+    functions.logger.log(`Deleting batch of ${response.items.length} events from Google (rate-controlled)...`);
+
+    // 6.1 Chunking for Rate Safety (3 events per chunk, 1 second delay)
+    const chunkSize = 3;
+    const chunks = [];
+    for (let i = 0; i < response.items.length; i += chunkSize) {
+      chunks.push(response.items.slice(i, i + chunkSize));
+    }
+
     let deletedCount = 0;
+    let failedCount = 0;
 
-    const deletionPromises = eventsToDelete.map(async ({ eventId, docId }) => {
-      try {
-        await this.calendarClient.deleteEvent(userId, calendarId, eventId);
-        deletedCount++;
-      } catch (e: unknown) {
-        const error = e as { code?: number; message?: string };
-        if (error.code === 404 || error.code === 410) {
-            // Already deleted
-        } else {
-            functions.logger.warn(`Failed to delete event ${eventId}: ${error.message || 'Unknown error'}`);
+    // 6.2 Process chunks sequentially with rate limiting
+    for (const chunk of chunks) {
+      const promises = chunk.map(async (event) => {
+        try {
+          await this.calendarClient.deleteEvent(userId, calendarId, event.id);
+          deletedCount++;
+
+          // Also delete from local DB if we have a matching birthday
+          const birthdayQuery = await this.db.collection('birthdays')
+            .where('tenant_id', '==', tenantId)
+            .where('googleCalendarEventId', '==', event.id)
+            .limit(1)
+            .get();
+
+          if (!birthdayQuery.empty) {
+            await this.db.collection('birthdays').doc(birthdayQuery.docs[0].id).delete();
+          }
+        } catch (error: unknown) {
+          const err = error as { code?: number; message?: string };
+          // Ignore 404 and 410 (already deleted)
+          if (err.code === 404 || err.code === 410) {
+            // Count as successful deletion (event was already gone)
+            deletedCount++;
+            return;
+          }
+
+          // Rate limit errors - critical, will trigger Cloud Tasks retry
+          if (err.code === 403 || err.code === 429) {
+            functions.logger.warn(`Rate limit hit for event ${event.id}: ${err.message}`);
+            failedCount++;
+            return;
+          }
+
+          // Other errors - log but continue
+          functions.logger.warn(`Failed to delete event ${event.id}: ${err.message || 'Unknown error'}`);
+          failedCount++;
         }
+      });
+
+      await Promise.all(promises);
+
+      // 6.3 Rate Limit Delay (1 second between chunks)
+      if (chunks.length > 1) { // Only delay if there are multiple chunks
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
-      // Delete local doc to prevent re-fetching
-      await this.db.collection('birthdays').doc(docId).delete();
-    });
+    }
 
-    await Promise.all(deletionPromises);
+    // 6.4 Cloud Tasks Backoff Trigger
+    if (failedCount > 0) {
+      functions.logger.log(`[DeleteJob] ${failedCount} deletions failed (likely rate limit). Triggering Cloud Task retry with backoff.`);
+      return { deletedCount, remaining: true }; // Keep user data, retry later with exponential backoff
+    }
 
-    // 6. Recursion - Re-queue immediately
-    return { deletedCount, remaining: true };
+    // 7. Only proceed to final DB cleanup if we had 0 critical errors
+    if (response.nextPageToken) {
+      functions.logger.log(`[DeleteJob] Batch complete (${deletedCount} deleted). More events available, re-queuing...`);
+      return { deletedCount, remaining: true };
+    }
+
+    // All events deleted successfully - proceed to final cleanup
+    functions.logger.log(`[DeleteJob] All events deleted (${deletedCount} total). Proceeding to database cleanup...`);
+    await this.nukeDatabase(tenantId, userId);
+    return { deletedCount, remaining: false };
   }
 
   private async nukeDatabase(tenantId: string, userId: string) {
