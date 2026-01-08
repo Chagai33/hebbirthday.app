@@ -85,7 +85,7 @@ export const UpcomingGregorianBirthdaysModal: React.FC<UpcomingGregorianBirthday
           </h2>
           <button
             onClick={onClose}
-            className="p-3 text-gray-500 hover:text-gray-600 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            className="p-3 text-gray-400 hover:text-gray-600 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             aria-label={t('common.close')}
           >
             <X className="w-6 h-6" />

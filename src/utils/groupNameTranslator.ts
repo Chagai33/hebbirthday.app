@@ -32,4 +32,3 @@ export const useTranslatedRootGroupName = (group: Group): string => {
   const { t } = useTranslation();
   return getTranslatedGroupName(group, t);
 };
-
