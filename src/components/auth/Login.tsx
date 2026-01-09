@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { Mail, Lock, LogIn, Gift, BookOpen } from 'lucide-react';
@@ -7,7 +7,6 @@ import { ForgotPasswordModal } from './ForgotPasswordModal';
 import { authService } from '../../services/auth.service';
 import { DeveloperCredit } from '../common/DeveloperCredit';
 import { LanguageSwitcher } from '../common/LanguageSwitcher';
-import { Footer } from '../layout/Footer';
 
 export const Login: React.FC = () => {
   const { t } = useTranslation();
@@ -82,8 +81,9 @@ export const Login: React.FC = () => {
   // toggleLanguage removed - using LanguageSwitcher
 
   return (
-    <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-8 overflow-y-auto">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 relative">
+    <div className="min-h-[100dvh] flex flex-col items-center bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-8 overflow-y-auto">
+      <div className="flex-1 flex items-center justify-center w-full p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 relative">
         <div className="flex justify-end items-center gap-1 mb-4">
           <button
             onClick={() => navigate('/guide')}
@@ -226,9 +226,37 @@ export const Login: React.FC = () => {
         </p>
 
         <DeveloperCredit className="mt-4" />
-
-        <Footer variant="transparent" />
+        </div>
       </div>
+
+      <footer className="w-full py-6 text-center mt-auto" role="contentinfo">
+        <nav className="flex justify-center items-center gap-2" aria-label="Legal links">
+          <Link
+            to="/privacy"
+            className="text-xs text-gray-600 hover:text-gray-900 transition-colors p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 rounded"
+          >
+            {t('footer.privacyPolicy', 'מדיניות פרטיות')}
+          </Link>
+
+          <span aria-hidden="true" className="text-gray-400 select-none">•</span>
+
+          <Link
+            to="/terms"
+            className="text-xs text-gray-600 hover:text-gray-900 transition-colors p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 rounded"
+          >
+            {t('footer.termsOfUse', 'תנאי שימוש')}
+          </Link>
+
+          <span aria-hidden="true" className="text-gray-400 select-none">•</span>
+
+          <Link
+            to="/accessibility"
+            className="text-xs text-gray-600 hover:text-gray-900 transition-colors p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 rounded"
+          >
+            {t('footer.accessibility', 'הצהרת נגישות')}
+          </Link>
+        </nav>
+      </footer>
 
       <ForgotPasswordModal
         isOpen={showForgotPassword}
