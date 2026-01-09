@@ -3,7 +3,11 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MessageSquare } from 'lucide-react';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  variant?: 'default' | 'transparent';
+}
+
+export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
   const { t } = useTranslation();
 
 
@@ -12,7 +16,7 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-white border-t border-gray-200 mt-auto">
+    <footer className={variant === 'default' ? "bg-white border-t border-gray-200 mt-auto" : ""}>
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4">
         <div className="flex flex-col items-center gap-4 text-center">
           <ul className="flex flex-wrap justify-center gap-4 sm:gap-6 text-sm" role="list">

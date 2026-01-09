@@ -7,6 +7,7 @@ import { ForgotPasswordModal } from './ForgotPasswordModal';
 import { authService } from '../../services/auth.service';
 import { DeveloperCredit } from '../common/DeveloperCredit';
 import { LanguageSwitcher } from '../common/LanguageSwitcher';
+import { Footer } from '../layout/Footer';
 
 export const Login: React.FC = () => {
   const { t } = useTranslation();
@@ -81,7 +82,7 @@ export const Login: React.FC = () => {
   // toggleLanguage removed - using LanguageSwitcher
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-8 overflow-y-auto">
+    <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-8 overflow-y-auto">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 relative">
         <div className="flex justify-end items-center gap-1 mb-4">
           <button
@@ -225,6 +226,8 @@ export const Login: React.FC = () => {
         </p>
 
         <DeveloperCredit className="mt-4" />
+
+        <Footer variant="transparent" />
       </div>
 
       <ForgotPasswordModal
