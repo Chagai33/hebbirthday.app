@@ -1,0 +1,20 @@
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Block site from being displayed in an iframe (Clickjacking protection)
+    X-Frame-Options = "DENY"
+
+    # Prevent browser from guessing content types
+    X-Content-Type-Options = "nosniff"
+
+    # Enable XSS protection filter in older browsers
+    X-XSS-Protection = "1; mode=block"
+
+    # Referrer Policy for privacy
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+    # Basic Permissions Policy (deny access to sensitive features by default)
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+
+    # Strict Transport Security (HSTS) - Force HTTPS for one year
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
