@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { authService } from '../../services/auth.service';
 import { Lock } from 'lucide-react';
 import { LanguageSwitcher } from '../common/LanguageSwitcher';
+import { Logo } from '../common/Logo';
+import { Footer } from '../layout/Footer';
 
 export const ResetPassword: React.FC = () => {
   const { t } = useTranslation();
@@ -72,14 +74,18 @@ export const ResetPassword: React.FC = () => {
   if (!oobCode) return null;
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-8 overflow-y-auto">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 relative" role="main">
+    <div className="min-h-[100dvh] flex flex-col items-center bg-gradient-to-br from-blue-50 to-blue-100 overflow-y-auto">
+      <div className="flex-1 flex items-center justify-center w-full p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 relative" role="main">
         <div className="flex justify-end items-center mb-4">
           <LanguageSwitcher className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" variant="minimal" />
         </div>
 
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <div className="flex justify-center mb-6">
+            <Logo variant="auth" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">
             {t('auth.resetPassword')}
           </h1>
         </div>
@@ -151,7 +157,10 @@ export const ResetPassword: React.FC = () => {
             </button>
           </form>
         )}
+        </div>
       </div>
+
+      <Footer variant="minimal" />
     </div>
   );
 };

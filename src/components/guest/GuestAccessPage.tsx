@@ -14,8 +14,9 @@ import {
 import { birthdayService } from '../../services/birthday.service';
 import { analyticsService } from '../../services/analytics.service';
 import { Birthday, BirthdayFormData } from '../../types';
-import { Footer } from '../common/Footer';
+import { Footer } from '../layout/Footer';
 import { LanguageSwitcher } from '../common/LanguageSwitcher';
+import { Logo } from '../common/Logo';
 import { HDate, gematriya, Locale } from '@hebcal/core';
 
 // Hebrew date constants
@@ -474,16 +475,7 @@ export const GuestAccessPage: React.FC = () => {
   if (state.loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-8 bg-gradient-to-br from-purple-50 to-blue-50 overflow-x-hidden max-w-full">
-        <div className="flex flex-col items-center animate-pulse">
-          <div className="text-5xl font-black tracking-tight leading-none relative inline-flex items-baseline" dir="ltr">
-            <span className="text-[#8e24aa]">Heb</span>
-            <span className="text-[#304FFE]">Birthday</span>
-            <span className="text-gray-400 text-xl ml-[2px]">.app</span>
-          </div>
-          <span className="text-base text-gray-500 font-medium mt-3">
-            {t('app.taglinePart1')} <span className="text-[#8e24aa]">{t('app.taglineHebrew')}</span> {t('app.taglineOr')} <span className="text-[#304FFE]">{t('app.taglineGregorian')}</span>
-          </span>
-        </div>
+        <Logo variant="guest-hero" className="animate-pulse" />
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600/50"></div>
       </div>
     );
@@ -494,21 +486,9 @@ export const GuestAccessPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex flex-col overflow-x-hidden max-w-full">
         {/* Logo Header */}
-        <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200 py-4 overflow-x-hidden">
+        <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200 py-2 overflow-x-hidden">
           <div className="max-w-4xl mx-auto px-3 sm:px-4 flex items-center justify-between overflow-x-hidden">
-            <a
-              href={`${window.location.origin}/`}
-              className="flex flex-col items-center gap-1 sm:gap-2 hover:opacity-80 transition-opacity flex-shrink min-w-0"
-            >
-              <div className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-none inline-flex items-baseline" dir="ltr">
-                <span className="text-[#8e24aa]">Heb</span>
-                <span className="text-[#304FFE]">Birthday</span>
-                <span className="text-gray-400 text-base sm:text-lg md:text-xl ml-[1px]">.app</span>
-              </div>
-              <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 text-center">
-                {t('app.taglinePart1')} <span className="text-[#8e24aa]">{t('app.taglineHebrew')}</span> {t('app.taglineOr')} <span className="text-[#304FFE]">{t('app.taglineGregorian')}</span>
-              </p>
-            </a>
+            <Logo variant="guest-sticky" linkToHome={true} />
             <LanguageSwitcher className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:border-purple-400 hover:text-purple-600 rounded-lg transition-all duration-200 shadow-sm hover:shadow flex-shrink-0" variant="minimal" />
           </div>
         </div>
@@ -593,7 +573,7 @@ export const GuestAccessPage: React.FC = () => {
         </div>
 
         {/* Footer */}
-        <Footer />
+        <Footer variant="minimal" />
       </div>
     );
   }
@@ -602,21 +582,9 @@ export const GuestAccessPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex flex-col overflow-x-hidden max-w-full">
       {/* Logo Header */}
-      <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200 py-4 overflow-x-hidden">
+      <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200 py-2 overflow-x-hidden">
         <div className="max-w-4xl mx-auto px-3 sm:px-4 flex items-center justify-between overflow-x-hidden">
-          <a
-            href={`${window.location.origin}/`}
-            className="flex flex-col items-center gap-1 sm:gap-2 hover:opacity-80 transition-opacity flex-shrink min-w-0"
-          >
-            <div className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight leading-none inline-flex items-baseline" dir="ltr">
-              <span className="text-[#8e24aa]">Heb</span>
-              <span className="text-[#304FFE]">Birthday</span>
-              <span className="text-gray-400 text-base sm:text-lg md:text-xl ml-[1px]">.app</span>
-            </div>
-            <p className="text-[10px] sm:text-xs md:text-sm text-gray-600 text-center">
-              {t('app.taglinePart1')} <span className="text-[#8e24aa]">{t('app.taglineHebrew')}</span> {t('app.taglineOr')} <span className="text-[#304FFE]">{t('app.taglineGregorian')}</span>
-            </p>
-          </a>
+          <Logo variant="guest-sticky" linkToHome={true} />
           <LanguageSwitcher className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:border-purple-400 hover:text-purple-600 rounded-lg transition-all duration-200 shadow-sm hover:shadow flex-shrink-0" variant="minimal" />
         </div>
       </div>
@@ -1074,7 +1042,7 @@ export const GuestAccessPage: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <Footer />
+      <Footer variant="minimal" />
     </div>
   );
 };

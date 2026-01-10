@@ -8,6 +8,7 @@ import { useGoogleCalendar } from '../../contexts/GoogleCalendarContext';
 import { useBirthdays } from '../../hooks/useBirthdays';
 import { FloatingBackButton } from '../common/FloatingBackButton';
 import { TenantSettings } from '../settings/TenantSettings';
+import { Logo } from '../common/Logo';
 import { InfoModal } from './InfoModal';
 import { GuestActivityModal } from './GuestActivityModal';
 import { GoogleCalendarModal } from './GoogleCalendarModal';
@@ -76,10 +77,8 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
         <div className="flex-shrink-0 p-6 pb-0">
           <div className="space-y-6 pt-2">
             <div className="text-center space-y-2">
-              <div id="about-modal-title" className="text-lg sm:text-xl font-black tracking-tight leading-none relative inline-flex items-baseline" dir="ltr">
-                <span className="text-[#8e24aa]">Heb</span>
-                <span className="text-[#304FFE]">Birthday</span>
-                <span className="text-gray-500 text-sm ml-[1px]">.app</span>
+              <div id="about-modal-title">
+                <Logo variant="app-header" />
               </div>
               <p className="text-sm text-gray-500">
                 {t('common.developedBy')} <a
