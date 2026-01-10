@@ -728,7 +728,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                         showToast(t('messages.exportError', 'שגיאה בייצוא הקובץ'), 'error');
                       }
                     }}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
                     aria-label={t('birthday.exportSelected')}
                   >
                     <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -745,7 +745,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   )}
                   <button
                     onClick={() => setShowAssignGroupModal(true)}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
                     aria-label={t('groups.assignToGroup', 'הוספה לקבוצה')}
                   >
                     <FolderPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -753,7 +753,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   </button>
                   <button
                     onClick={() => handleBulkDelete()}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
                     aria-label={t('common.delete', 'מחק את הנבחרים')}
                   >
                     <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -763,7 +763,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     <button
                       onClick={handleBulkSyncToCalendar}
                       disabled={isSyncing}
-                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-sky-50 text-sky-600 border border-sky-200 hover:bg-sky-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-sky-50 text-sky-600 border border-sky-200 hover:bg-sky-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <UploadCloud className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="hidden sm:inline">{t('googleCalendar.syncToCalendar')}</span>
@@ -781,7 +781,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                         setSelectedIds(new Set());
                         showToast(`${successCount} רשומות הוסרו מהסנכרון`, 'success');
                       }}
-                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
                     >
                       <CloudOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="hidden sm:inline">{t('googleCalendar.unsyncSelected', 'בטל סנכרון')}</span>
@@ -798,7 +798,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 <>
                   <button
                     onClick={() => handleBulkDelete()}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
                     aria-label={t('common.delete', 'מחק את הנבחרים')}
                   >
                     <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -806,7 +806,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   </button>
                   <button
                     onClick={() => setShowAssignGroupModal(true)}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
                     aria-label={t('groups.assignToGroup', 'הוספה לקבוצה')}
                   >
                     <FolderPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -837,7 +837,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                         showToast(t('messages.exportError', 'שגיאה בייצוא הקובץ'), 'error');
                       }
                     }}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
                     aria-label={t('birthday.exportSelected')}
                   >
                     <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -856,7 +856,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     <button
                       onClick={handleBulkSyncToCalendar}
                       disabled={isSyncing}
-                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-sky-50 text-sky-600 border border-sky-200 hover:bg-sky-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-sky-50 text-sky-600 border border-sky-200 hover:bg-sky-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <UploadCloud className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="hidden sm:inline">{t('googleCalendar.syncToCalendar')}</span>
@@ -874,7 +874,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                         setSelectedIds(new Set());
                         showToast(`${successCount} רשומות הוסרו מהסנכרון`, 'success');
                       }}
-                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
                     >
                       <CloudOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="hidden sm:inline">{t('googleCalendar.unsyncSelected', 'בטל סנכרון')}</span>
@@ -931,7 +931,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
               <button
                 onClick={() => setGenderFilter('all')}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${genderFilter === 'all'
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 border-2 ${genderFilter === 'all'
                   ? 'bg-gray-600 border-gray-600 text-white'
                   : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                   }`}
@@ -941,7 +941,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
               </button>
               <button
                 onClick={() => setGenderFilter(genderFilter === 'male' ? 'all' : 'male')}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${genderFilter === 'male'
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 border-2 ${genderFilter === 'male'
                   ? 'bg-blue-600 border-blue-600 text-white'
                   : 'bg-white border-blue-300 text-blue-600 hover:border-blue-400'
                   }`}
@@ -951,7 +951,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
               </button>
               <button
                 onClick={() => setGenderFilter(genderFilter === 'female' ? 'all' : 'female')}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${genderFilter === 'female'
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 border-2 ${genderFilter === 'female'
                   ? 'bg-pink-600 border-pink-600 text-white'
                   : 'bg-white border-pink-300 text-pink-600 hover:border-pink-400'
                   }`}
@@ -983,7 +983,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
               <div className="grid grid-cols-2 gap-1">
                 <button
                   onClick={() => setSyncStatusFilter('all')}
-                  className={`px-2 py-1.5 rounded-md text-xs font-medium transition-all border ${syncStatusFilter === 'all'
+                  className={`px-2 py-1.5 rounded-md text-xs font-medium transition-colors duration-200 border ${syncStatusFilter === 'all'
                     ? 'bg-gray-600 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                     }`}
@@ -993,7 +993,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 </button>
                 <button
                   onClick={() => setSyncStatusFilter(syncStatusFilter === 'synced' ? 'all' : 'synced')}
-                  className={`px-2 py-1.5 rounded-md text-xs font-medium transition-all border ${syncStatusFilter === 'synced'
+                  className={`px-2 py-1.5 rounded-md text-xs font-medium transition-colors duration-200 border ${syncStatusFilter === 'synced'
                     ? 'bg-green-600 border-green-600 text-white'
                     : 'bg-white border-green-300 text-green-600 hover:border-green-400'
                     }`}
@@ -1003,7 +1003,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 </button>
                 <button
                   onClick={() => setSyncStatusFilter(syncStatusFilter === 'error' ? 'all' : 'error')}
-                  className={`px-2 py-1.5 rounded-md text-xs font-medium transition-all border ${syncStatusFilter === 'error'
+                  className={`px-2 py-1.5 rounded-md text-xs font-medium transition-colors duration-200 border ${syncStatusFilter === 'error'
                     ? 'bg-red-600 border-red-600 text-white'
                     : 'bg-white border-red-300 text-red-600 hover:border-red-400'
                     }`}
@@ -1013,7 +1013,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 </button>
                 <button
                   onClick={() => setSyncStatusFilter(syncStatusFilter === 'not-synced' ? 'all' : 'not-synced')}
-                  className={`px-2 py-1.5 rounded-md text-xs font-medium transition-all border ${syncStatusFilter === 'not-synced'
+                  className={`px-2 py-1.5 rounded-md text-xs font-medium transition-colors duration-200 border ${syncStatusFilter === 'not-synced'
                     ? 'bg-gray-600 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                     }`}
@@ -1046,7 +1046,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 <button
                   onClick={() => setSyncStatusFilter('all')}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'all'
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 border-2 ${syncStatusFilter === 'all'
                     ? 'bg-gray-600 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                     }`}
@@ -1056,7 +1056,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 </button>
                 <button
                   onClick={() => setSyncStatusFilter(syncStatusFilter === 'synced' ? 'all' : 'synced')}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'synced'
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 border-2 ${syncStatusFilter === 'synced'
                     ? 'bg-green-600 border-green-600 text-white'
                     : 'bg-white border-green-300 text-green-600 hover:border-green-400'
                     }`}
@@ -1066,7 +1066,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 </button>
                 <button
                   onClick={() => setSyncStatusFilter(syncStatusFilter === 'error' ? 'all' : 'error')}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'error'
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 border-2 ${syncStatusFilter === 'error'
                     ? 'bg-red-600 border-red-600 text-white'
                     : 'bg-white border-red-300 text-red-600 hover:border-red-400'
                     }`}
@@ -1076,7 +1076,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 </button>
                 <button
                   onClick={() => setSyncStatusFilter(syncStatusFilter === 'not-synced' ? 'all' : 'not-synced')}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'not-synced'
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 border-2 ${syncStatusFilter === 'not-synced'
                     ? 'bg-gray-600 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                     }`}
@@ -1185,7 +1185,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   return (
                     <tr
                       key={birthday.id}
-                      className="hover:bg-blue-50 transition-all group"
+                      className="hover:bg-blue-50 transition-colors duration-200 group"
                       style={{
                         borderRight: birthday.group ? `4px solid ${birthday.group.color}` : undefined,
                       }}
@@ -1363,7 +1363,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                               setSelectedBirthday(birthday);
                               setShowWishlistModal(true);
                             }}
-                            className="p-3 text-pink-600 hover:bg-pink-100 rounded-lg transition-all hover:scale-110"
+                            className="p-3 text-pink-600 hover:bg-pink-100 rounded-lg transition-colors duration-200 hover:scale-110"
                             title={t('wishlist.title')}
                             aria-label={t('wishlist.title')}
                           >
@@ -1384,7 +1384,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                           {(!birthday.group_ids || birthday.group_ids.length === 0) && (
                             <button
                               onClick={() => onEdit(birthday)}
-                              className="p-3 text-orange-600 hover:bg-orange-100 rounded-lg transition-all hover:scale-110 animate-pulse"
+                              className="p-3 text-orange-600 hover:bg-orange-100 rounded-lg transition-colors duration-200 hover:scale-110 animate-pulse"
                               title={t('birthday.reassign')}
                               aria-label={t('birthday.reassign')}
                             >
@@ -1394,7 +1394,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                           {birthday.group_ids && birthday.group_ids.length > 0 && (
                           <button
                             onClick={() => onEdit(birthday)}
-                            className="p-3 text-blue-600 hover:bg-blue-100 rounded-lg transition-all hover:scale-110"
+                            className="p-3 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors duration-200 hover:scale-110"
                             title={t('common.edit')}
                             aria-label={t('birthday.editName', { name: birthday.first_name })}
                           >
@@ -1403,7 +1403,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                           )}
                         <button
                           onClick={() => handleDelete(birthday.id)}
-                          className="p-3 text-red-600 hover:bg-red-100 rounded-lg transition-all hover:scale-110"
+                          className="p-3 text-red-600 hover:bg-red-100 rounded-lg transition-colors duration-200 hover:scale-110"
                           title={t('common.delete')}
                           aria-label={t('birthday.deleteName', { name: birthday.first_name })}
                         >

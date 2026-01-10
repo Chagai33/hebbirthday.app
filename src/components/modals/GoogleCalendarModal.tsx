@@ -67,7 +67,7 @@ export const GoogleCalendarModal: React.FC<GoogleCalendarModalProps> = ({ isOpen
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 sm:hidden">
         <button
           onClick={onClose}
-          className="px-6 py-3 bg-white/90 backdrop-blur-md border border-white/30 text-gray-700 rounded-full shadow-xl hover:bg-white transition-all active:scale-95 ring-1 ring-black/5 flex items-center gap-2"
+          className="px-6 py-3 bg-white/90 backdrop-blur-md border border-white/30 text-gray-700 rounded-full shadow-xl hover:bg-white transition-[transform,colors] duration-200 active:scale-95 ring-1 ring-black/5 flex items-center gap-2"
         >
           {i18n.language === 'he' ? (
             <>

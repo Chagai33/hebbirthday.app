@@ -657,7 +657,7 @@ export const BirthdayForm = ({
                   id="gregorian-tab"
                   aria-selected={inputType === 'gregorian'}
                   aria-controls="gregorian-panel"
-                  className={`flex-1 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${inputType === 'gregorian' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'
+                  className={`flex-1 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors duration-200 ${inputType === 'gregorian' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'
                     }`}
                   onClick={() => setInputType('gregorian')}
                 >
@@ -669,7 +669,7 @@ export const BirthdayForm = ({
                   id="hebrew-tab"
                   aria-selected={inputType === 'hebrew'}
                   aria-controls="hebrew-panel"
-                  className={`flex-1 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-all ${inputType === 'hebrew' ? 'bg-white shadow text-purple-600' : 'text-gray-500 hover:text-gray-700'
+                  className={`flex-1 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors duration-200 ${inputType === 'hebrew' ? 'bg-white shadow text-purple-600' : 'text-gray-500 hover:text-gray-700'
                     }`}
                   onClick={() => setInputType('hebrew')}
                 >

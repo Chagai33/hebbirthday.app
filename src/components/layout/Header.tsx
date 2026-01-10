@@ -21,7 +21,7 @@ import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 export const Header: React.FC = () => {
   const { openAboutModal } = useLayoutContext();
   const { isNew } = useGuestNotifications();
-  const { needsCalendarSetup } = useGoogleCalendar();
+  const { needsCalendarSetup, isInitializing } = useGoogleCalendar();
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -179,8 +179,10 @@ export const Header: React.FC = () => {
                   aria-label={t('common.menu')}
                 >
                   <Menu className="w-5 h-5" />
-                  {needsCalendarSetup && (
-                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-amber-400 rounded-full border-2 border-white animate-pulse"></span>
+                  {(needsCalendarSetup || isInitializing) && (
+                    <span className={`absolute top-1 right-1 w-2.5 h-2.5 rounded-full border-2 border-white animate-pulse ${
+                      isInitializing ? 'bg-gray-300' : 'bg-amber-400'
+                    }`}></span>
                   )}
                 </button>
               </div>
@@ -249,8 +251,10 @@ export const Header: React.FC = () => {
                         >
                           <Settings className="w-4 h-4 text-gray-500" />
                           <span>{t('tenant.settings')}</span>
-                          {needsCalendarSetup && (
-                            <span className="mr-auto w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                          {(needsCalendarSetup || isInitializing) && (
+                            <span className={`mr-auto w-2 h-2 rounded-full animate-pulse ${
+                              isInitializing ? 'bg-gray-300' : 'bg-amber-400'
+                            }`}></span>
                           )}
                         </button>
                       </li>
@@ -417,8 +421,10 @@ export const Header: React.FC = () => {
                         >
                           <Settings className="w-4 h-4" />
                           <span>{t('tenant.settings')}</span>
-                          {needsCalendarSetup && (
-                            <span className="mr-auto w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                          {(needsCalendarSetup || isInitializing) && (
+                            <span className={`mr-auto w-2 h-2 rounded-full animate-pulse ${
+                              isInitializing ? 'bg-gray-300' : 'bg-amber-400'
+                            }`}></span>
                           )}
                         </button>
                       </li>
@@ -531,8 +537,10 @@ export const Header: React.FC = () => {
                         >
                           <Settings className="w-4 h-4 text-gray-500" />
                           <span>{t('tenant.settings')}</span>
-                          {needsCalendarSetup && (
-                            <span className="mr-auto w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                          {(needsCalendarSetup || isInitializing) && (
+                            <span className={`mr-auto w-2 h-2 rounded-full animate-pulse ${
+                              isInitializing ? 'bg-gray-300' : 'bg-amber-400'
+                            }`}></span>
                           )}
                         </button>
                       </li>

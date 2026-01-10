@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MessageSquare } from 'lucide-react';
+import { DeveloperCredit } from '../common/DeveloperCredit';
 
 interface FooterProps {
   variant?: 'default' | 'minimal';
@@ -87,6 +88,7 @@ export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
               </button>
             </li>
           </ul>
+          <DeveloperCredit />
           <div className="text-xs text-gray-800">
             © {new Date().getFullYear()} HebBirthday.App. {t('footer.allRightsReserved', 'כל הזכויות שמורות')}
           </div>

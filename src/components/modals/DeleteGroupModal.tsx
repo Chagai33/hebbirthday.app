@@ -74,7 +74,7 @@ export const DeleteGroupModal = ({
         <div className="space-y-3 mb-6">
           <button
             onClick={() => setSelectedOption('keep')}
-            className={`w-full p-4 border-2 rounded-lg text-right transition-all ${
+            className={`w-full p-4 border-2 rounded-lg text-right transition-colors duration-200 ${
               selectedOption === 'keep'
                 ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-200 hover:border-gray-300'
@@ -100,7 +100,7 @@ export const DeleteGroupModal = ({
 
           <button
             onClick={() => setSelectedOption('delete')}
-            className={`w-full p-4 border-2 rounded-lg text-right transition-all ${
+            className={`w-full p-4 border-2 rounded-lg text-right transition-colors duration-200 ${
               selectedOption === 'delete'
                 ? 'border-red-500 bg-red-50'
                 : 'border-gray-200 hover:border-gray-300'

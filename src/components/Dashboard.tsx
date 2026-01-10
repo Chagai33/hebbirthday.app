@@ -366,7 +366,7 @@ export const Dashboard = () => {
             className={`flex-1 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 transition-all duration-300 ease-in-out overflow-hidden ${isStatsExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
               }`}
           >
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-sm border border-blue-200 p-1.5 sm:p-2.5 hover:shadow-md transition-all">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-sm border border-blue-200 p-1.5 sm:p-2.5 hover:shadow-md transition-[box-shadow] duration-200">
               <div className="flex flex-row items-center justify-between gap-1">
                 <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-md flex items-center justify-center shadow-sm flex-shrink-0">
                   <Users className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
@@ -380,7 +380,7 @@ export const Dashboard = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-sm border border-green-200 p-1.5 sm:p-2.5 hover:shadow-md transition-all">
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-sm border border-green-200 p-1.5 sm:p-2.5 hover:shadow-md transition-[box-shadow] duration-200">
               <div className="flex flex-row items-center justify-between gap-1">
                 <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-600 rounded-md flex items-center justify-center shadow-sm flex-shrink-0">
                   <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
@@ -396,7 +396,7 @@ export const Dashboard = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg shadow-sm border border-orange-200 p-1.5 sm:p-2.5 hover:shadow-md transition-all">
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg shadow-sm border border-orange-200 p-1.5 sm:p-2.5 hover:shadow-md transition-[box-shadow] duration-200">
               <div className="flex flex-row items-center justify-between gap-1">
                 <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-600 rounded-md flex items-center justify-center shadow-sm flex-shrink-0">
                   <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
@@ -412,7 +412,7 @@ export const Dashboard = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg shadow-sm border border-pink-200 p-1.5 sm:p-2.5 hover:shadow-md transition-all relative group">
+            <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg shadow-sm border border-pink-200 p-1.5 sm:p-2.5 hover:shadow-md transition-[box-shadow] duration-200 relative group">
               <div className="flex flex-row items-center justify-between gap-1">
                 <div className="w-6 h-6 sm:w-8 sm:h-8 bg-pink-600 rounded-md flex items-center justify-center shadow-sm flex-shrink-0">
                   <Cake className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
@@ -446,7 +446,7 @@ export const Dashboard = () => {
               {/* קבוצה 1: פעולות ראשיות */}
               <button
                 onClick={() => setShowForm(true)}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md text-sm"
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-colors duration-200 shadow-sm hover:shadow-md text-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span>{t('birthday.addBirthday')}</span>
@@ -505,7 +505,7 @@ export const Dashboard = () => {
               </button>
               <button
                 onClick={() => setShowForm(true)}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md text-sm"
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-colors duration-200 shadow-sm hover:shadow-md text-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span>{t('birthday.addBirthday')}</span>

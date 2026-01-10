@@ -41,7 +41,7 @@ export const CalendarPreferenceSelector: React.FC<CalendarPreferenceSelectorProp
               type="button"
               onClick={() => onChange(option)}
               className={`
-                relative p-2 border-2 rounded-lg text-start transition-all
+                relative p-2 border-2 rounded-lg text-start transition-colors duration-200
                 ${isSelected
                   ? 'border-blue-600 bg-blue-50 shadow-sm'
                   : 'border-gray-300 bg-white hover:border-blue-400 hover:bg-blue-50/50'

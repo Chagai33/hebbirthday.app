@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { InfoPageLayout } from '../layout/InfoPageLayout';
-import { Footer } from '../common/Footer';
+import { Footer } from '../layout/Footer';
 import {
   ChevronRight,
   Download,
@@ -654,7 +654,7 @@ export const UserGuide: React.FC = () => {
             </div>
           </div>
           <div className="mt-16">
-            <Footer />
+            <Footer variant="default" />
           </div>
         </main>
 

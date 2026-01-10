@@ -45,7 +45,7 @@ export const FloatingActionButton: React.FC = () => {
       {/* Main FAB */}
       <button
         onClick={handleMainClick}
-        className={`p-4 rounded-full shadow-xl text-white transition-all duration-300 z-50 
+        className={`p-4 rounded-full shadow-xl text-white transition-[transform,colors] duration-300 z-50
           ${isOpen ? 'bg-gray-700 rotate-45' : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'}
           ${shouldPulse ? 'animate-pulse-ring' : ''}
         `}

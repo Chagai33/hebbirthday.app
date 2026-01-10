@@ -500,7 +500,7 @@ export const GuestAccessPage: React.FC = () => {
         <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200 py-2 overflow-x-hidden">
           <div className="max-w-4xl mx-auto px-3 sm:px-4 flex items-center justify-between overflow-x-hidden">
             <Logo variant="guest-sticky" linkToHome={true} />
-            <LanguageSwitcher className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:border-purple-400 hover:text-purple-600 rounded-lg transition-all duration-200 shadow-sm hover:shadow flex-shrink-0" variant="minimal" />
+            <LanguageSwitcher className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:border-purple-400 hover:text-purple-600 rounded-lg transition-[colors,box-shadow] duration-200 shadow-sm hover:shadow flex-shrink-0" variant="minimal" />
           </div>
         </div>
 
@@ -616,7 +616,7 @@ export const GuestAccessPage: React.FC = () => {
       <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200 py-2 overflow-x-hidden">
         <div className="max-w-4xl mx-auto px-3 sm:px-4 flex items-center justify-between overflow-x-hidden">
           <Logo variant="guest-sticky" linkToHome={true} />
-          <LanguageSwitcher className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:border-purple-400 hover:text-purple-600 rounded-lg transition-all duration-200 shadow-sm hover:shadow flex-shrink-0" variant="minimal" />
+          <LanguageSwitcher className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:border-purple-400 hover:text-purple-600 rounded-lg transition-[colors,box-shadow] duration-200 shadow-sm hover:shadow flex-shrink-0" variant="minimal" />
         </div>
       </div>
 

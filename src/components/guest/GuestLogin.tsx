@@ -265,7 +265,7 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
                         key={p.birthdayId}
                         onClick={() => handleProfileSelect(p.birthdayId)}
                         disabled={isLoading}
-                        className={`w-full p-4 flex items-center gap-4 bg-white border border-gray-200 rounded-xl transition-all duration-200 shadow-sm text-start group ${
+                        className={`w-full p-4 flex items-center gap-4 bg-white border border-gray-200 rounded-xl transition-colors duration-200 duration-200 shadow-sm text-start group ${
                             isLoading 
                                 ? 'opacity-70 cursor-not-allowed' 
                                 : 'hover:bg-blue-50 hover:border-blue-300 hover:shadow-md'
@@ -314,7 +314,7 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
         <h2 className="text-2xl font-bold text-gray-800">{t('guest.welcome')}</h2>
         <p className="text-gray-500">{t('guest.welcomeSubtitle')}</p>
         
-        <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 flex items-start gap-3 text-start mt-2 transition-all duration-300">
+        <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 flex items-start gap-3 text-start mt-2 transition-colors duration-200 duration-300">
             <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
             <div id="portal-info-content" className="flex-1 text-sm text-blue-800 leading-relaxed">
                 <span>
@@ -374,7 +374,7 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
             <label className="block text-sm font-medium text-gray-700">{t('guest.verificationMethod')}</label>
             <div className="flex p-1 bg-gray-100 rounded-lg">
                 <button
-                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
+                className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
                     verificationType === 'gregorian' ? 'bg-white shadow text-[#304FFE]' : 'text-gray-500 hover:text-gray-700'
                 }`}
                 onClick={() => setVerificationType('gregorian')}
@@ -382,7 +382,7 @@ export const GuestLogin: React.FC<GuestLoginProps> = ({ onLoginSuccess, initialV
                 {t('guest.gregorianDate')}
                 </button>
                 <button
-                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
+                className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors duration-200 ${
                     verificationType === 'hebrew' ? 'bg-white shadow text-[#8e24aa]' : 'text-gray-500 hover:text-gray-700'
                 }`}
                 onClick={() => setVerificationType('hebrew')}

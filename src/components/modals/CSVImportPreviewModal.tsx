@@ -543,7 +543,7 @@ export const CSVImportPreviewModal = ({
               return (
                 <div
                   key={index}
-                  className={`border rounded-xl p-4 transition-all ${
+                  className={`border rounded-xl p-4 transition-colors duration-200 ${
                     hasErrors
                       ? 'border-red-300 bg-red-50'
                       : hasWarnings
@@ -791,7 +791,7 @@ export const CSVImportPreviewModal = ({
             <button
               onClick={handleConfirm}
               disabled={selectedRows.size === 0 || isImporting}
-              className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all text-sm sm:text-base font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 sm:gap-2"
+              className="px-4 sm:px-6 py-2 sm:py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-colors duration-200 text-sm sm:text-base font-medium shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 sm:gap-2"
             >
               {isImporting ? (
                 <>

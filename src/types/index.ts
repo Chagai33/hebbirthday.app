@@ -323,6 +323,7 @@ export interface GoogleCalendarContextType {
   recentActivity: SyncHistoryItem[];
   needsCalendarSetup: boolean; // Added - מציין שהמשתמש צריך לבחור יומן ייעודי
   statusAnnouncement: string;
+  isInitializing: boolean; // Added - מציין האם אנחנו בבדיקה ראשונית
   connectToGoogle: () => Promise<void>;
   syncSingleBirthday: (birthdayId: string) => Promise<SyncResult>;
   syncMultipleBirthdays: (birthdayIds: string[]) => Promise<BulkSyncResult>;

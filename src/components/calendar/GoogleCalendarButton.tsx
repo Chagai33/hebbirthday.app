@@ -359,7 +359,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
       return (
         <button
           onClick={onManageClick}
-          className="flex items-center gap-3 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-all text-sm group h-[38px]"
+          className="flex items-center gap-3 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-colors duration-200 text-sm group h-[38px]"
           title={t('googleCalendar.title')}
           aria-label={t('googleCalendar.compactStatus', {
             status: isConnected ? t('googleCalendar.connected') : t('googleCalendar.notConnected'),
@@ -398,7 +398,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
         </div>
 
         {/* Main Card Container */}
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden w-full transition-all hover:shadow-md">
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden w-full transition-colors duration-200 hover:shadow-md">
           
           {/* Header Section */}
           <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
@@ -425,7 +425,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
                ) : (
                   <button 
                     onClick={() => setShowHistory(true)}
-                    className="flex items-center gap-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 px-2 py-1 rounded-md transition-all text-xs font-medium"
+                    className="flex items-center gap-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 px-2 py-1 rounded-md transition-colors duration-200 text-xs font-medium"
                     title={t('googleCalendar.showHistory')}
                   >
                     <History className="w-3.5 h-3.5" />
@@ -460,7 +460,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
                 <button
                   onClick={() => setShowCalendarSelector(!showCalendarSelector)}
                   disabled={isSyncing}
-                  className="flex-1 flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg hover:border-blue-500 hover:ring-1 hover:ring-blue-500 transition-all text-sm group text-right"
+                  className="flex-1 flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg hover:border-blue-500 hover:ring-1 hover:ring-blue-500 transition-colors duration-200 text-sm group text-right"
                   aria-expanded={showCalendarSelector}
                   aria-haspopup="listbox"
                 >
@@ -707,7 +707,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
                         <button
                           onClick={() => handleSelectCalendar(calendar)}
                           disabled={isSyncing || isCurrent}
-                          className={`flex-1 flex items-center justify-between px-3 py-3 rounded-lg text-sm transition-all border ${
+                          className={`flex-1 flex items-center justify-between px-3 py-3 rounded-lg text-sm transition-colors duration-200 border ${
                             isCurrent
                               ? 'bg-blue-50 text-blue-900 border-blue-200 ring-1 ring-blue-200'
                               : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200 hover:border-gray-300'
@@ -861,7 +861,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
       disabled={isSyncing}
       aria-busy={isSyncing}
       aria-label={t('googleCalendar.connect')}
-      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 rounded-lg font-medium transition-all shadow-sm text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 rounded-lg font-medium transition-colors duration-200 shadow-sm text-sm disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {isSyncing ? (
         <Loader className="w-4 h-4 animate-spin" />

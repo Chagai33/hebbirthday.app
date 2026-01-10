@@ -10,9 +10,22 @@ import { analyticsService } from '../../services/analytics.service';
 export const AnalyticsTracker: React.FC = () => {
   const location = useLocation();
 
-  // Initialize analytics on mount (only once)
+  // Initialize analytics on mount (only once) - delayed for better LCP
   useEffect(() => {
-    analyticsService.init();
+    const initAnalytics = () => {
+      analyticsService.init();
+    };
+
+    // Use requestIdleCallback if available, otherwise setTimeout
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(initAnalytics, { timeout: 2000 });
+    } else {
+      setTimeout(initAnalytics, 2000);
+    }
+
+    return () => {
+      // Cleanup if needed
+    };
   }, []);
 
   // Track page view on location change

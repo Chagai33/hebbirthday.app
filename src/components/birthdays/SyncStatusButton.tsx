@@ -96,7 +96,7 @@ export const SyncStatusButton: React.FC<SyncStatusButtonProps> = ({
       <button
         onClick={onClickAction}
         disabled={isLoading || isDisabled}
-        className={`p-1.5 sm:p-2 rounded-md transition-all duration-200 transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed min-h-[32px] min-w-[32px] sm:min-h-[36px] sm:min-w-[36px] ${colorClass}`}
+        className={`p-1.5 sm:p-2 rounded-md transition-[transform,opacity] duration-200 transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed min-h-[32px] min-w-[32px] sm:min-h-[36px] sm:min-w-[36px] ${colorClass}`}
         aria-label={tooltipContent}
       >
         {icon}

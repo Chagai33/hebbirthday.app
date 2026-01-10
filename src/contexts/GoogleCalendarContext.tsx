@@ -39,10 +39,16 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
   const [recentActivity, setRecentActivity] = useState<SyncHistoryItem[]>([]);
   const [needsCalendarSetup, setNeedsCalendarSetup] = useState<boolean>(false);
   const [statusAnnouncement, setStatusAnnouncement] = useState<string>('');
+  const [isInitializing, setIsInitializing] = useState<boolean>(true);
 
   useEffect(() => {
     if (user) {
-      refreshStatus();
+      // טען את סטטוס היומן ברקע מבלי לחסום את הרינדור
+      setTimeout(() => {
+        refreshStatus().finally(() => {
+          setIsInitializing(false);
+        });
+      }, 100); // השהייה קטנה למניעת עומס ראשוני
     } else {
       setIsConnected(false);
       setLastSyncTime(null);
@@ -52,6 +58,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       setSyncStatus('IDLE');
       setRecentActivity([]);
       setStatusAnnouncement('');
+      setIsInitializing(false);
     }
   }, [user]);
 
@@ -460,6 +467,7 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
     recentActivity,
     needsCalendarSetup,
     statusAnnouncement,
+    isInitializing,
     connectToGoogle,
     syncSingleBirthday,
     syncMultipleBirthdays,

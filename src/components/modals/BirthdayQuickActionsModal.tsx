@@ -79,7 +79,7 @@ export const BirthdayQuickActionsModal: React.FC<BirthdayQuickActionsModalProps>
             onClick={() => {
               onWishlist(birthday);
             }}
-            className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 bg-white hover:bg-pink-50 hover:border-pink-200 transition-all group shadow-sm hover:shadow-md text-start"
+            className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 bg-white hover:bg-pink-50 hover:border-pink-200 transition-[box-shadow,background-color,border-color] duration-200 group shadow-sm hover:shadow-md text-start"
           >
             <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 group-hover:scale-110 transition-transform">
               <Gift className="w-5 h-5" />
@@ -96,7 +96,7 @@ export const BirthdayQuickActionsModal: React.FC<BirthdayQuickActionsModalProps>
 
           {/* Sync Action - Only if connected */}
           {isConnected && (
-            <div className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 bg-white hover:bg-blue-50 hover:border-blue-200 transition-all group shadow-sm hover:shadow-md text-start relative overflow-hidden">
+            <div className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 bg-white hover:bg-blue-50 hover:border-blue-200 transition-[box-shadow,background-color,border-color] duration-200 group shadow-sm hover:shadow-md text-start relative overflow-hidden">
                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none border-2 border-blue-500/10 rounded-xl transition-opacity" />
                
                {/* Reuse the existing button logic but styled as a wrapper */}
@@ -130,7 +130,7 @@ export const BirthdayQuickActionsModal: React.FC<BirthdayQuickActionsModalProps>
             onClick={() => {
               onEdit(birthday);
             }}
-            className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 bg-white hover:bg-orange-50 hover:border-orange-200 transition-all group shadow-sm hover:shadow-md text-start"
+            className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 bg-white hover:bg-orange-50 hover:border-orange-200 transition-[box-shadow,background-color,border-color] duration-200 group shadow-sm hover:shadow-md text-start"
           >
             <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform">
               <Edit className="w-5 h-5" />

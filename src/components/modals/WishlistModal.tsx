@@ -158,7 +158,7 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
           {!isAdding && (
             <button
               onClick={() => setIsAdding(true)}
-              className="w-full mb-6 px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
+              className="w-full mb-6 px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-xl font-semibold hover:shadow-lg transition-[transform,box-shadow] duration-200 hover:scale-[1.02] flex items-center justify-center gap-2"
             >
               <Plus className="w-5 h-5" />
               {t('wishlist.addItem')}
@@ -204,7 +204,7 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, priority: 'high' })}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      className={`px-4 py-2 rounded-lg font-medium transition-[transform,box-shadow] duration-200 ${
                         formData.priority === 'high'
                           ? 'bg-red-500 text-white shadow-md scale-105'
                           : 'bg-red-100 text-red-700 hover:bg-red-200'
@@ -216,7 +216,7 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, priority: 'medium' })}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      className={`px-4 py-2 rounded-lg font-medium transition-[transform,box-shadow] duration-200 ${
                         formData.priority === 'medium'
                           ? 'bg-orange-500 text-white shadow-md scale-105'
                           : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
@@ -228,7 +228,7 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, priority: 'low' })}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      className={`px-4 py-2 rounded-lg font-medium transition-[transform,box-shadow] duration-200 ${
                         formData.priority === 'low'
                           ? 'bg-blue-500 text-white shadow-md scale-105'
                           : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
@@ -244,7 +244,7 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
                   <button
                     type="submit"
                     disabled={createItem.isPending || updateItem.isPending}
-                    className="flex-1 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50"
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg font-semibold hover:shadow-lg transition-[transform,box-shadow] duration-200 disabled:opacity-50"
                   >
                     {editingId ? t('common.save') : t('common.add')}
                   </button>
@@ -278,7 +278,7 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className={`rounded-xl p-4 border-2 transition-all hover:shadow-md group ${getPriorityColor(
+                  className={`rounded-xl p-4 border-2 transition-[transform,box-shadow] duration-200 hover:shadow-md group ${getPriorityColor(
                     item.priority
                   )}`}
                 >
@@ -295,14 +295,14 @@ export const WishlistModal = ({ isOpen, onClose, birthday }: WishlistModalProps)
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => handleEdit(item)}
-                        className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all hover:scale-110"
+                        className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-[transform,box-shadow] duration-200 hover:scale-110"
                         title={t('common.edit')}
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(item.id)}
-                        className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-all hover:scale-110"
+                        className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-[transform,box-shadow] duration-200 hover:scale-110"
                         title={t('common.delete')}
                       >
                         <Trash2 className="w-4 h-4" />
