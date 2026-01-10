@@ -24,27 +24,27 @@ export const Logo: React.FC<LogoProps> = ({
     auth: {
       // מקור: src/components/auth/Login.tsx
       wrapper: "text-3xl sm:text-4xl font-black tracking-tight leading-none relative inline-flex items-baseline",
-      dotApp: "text-gray-400 text-xl ml-[1px] absolute left-full bottom-1",
-      tagline: "text-sm text-gray-500 font-medium mt-1"
+      dotApp: "text-gray-500 text-xl ml-[1px] absolute left-full bottom-1",
+      tagline: "text-sm text-gray-600 font-medium mt-1"
     },
     'guest-sticky': {
       // מקור: src/components/guest/GuestAccessPage.tsx (Sticky Header)
       wrapper: "text-xl sm:text-2xl font-black tracking-tight leading-none inline-flex items-baseline",
-      dotApp: "text-gray-400 text-sm sm:text-base ml-[1px]",
+      dotApp: "text-gray-500 text-sm sm:text-base ml-[1px]",
       tagline: "text-[10px] sm:text-xs text-gray-600 text-center -mt-1"
     },
     'guest-hero': {
       // מקור: src/components/guest/GuestAccessPage.tsx (Loading State)
       wrapper: "text-5xl font-black tracking-tight leading-none relative inline-flex items-baseline",
-      dotApp: "text-gray-400 text-xl ml-[2px]",
-      tagline: "text-base text-gray-500 font-medium mt-3"
+      dotApp: "text-gray-500 text-xl ml-[2px]",
+      tagline: "text-base text-gray-600 font-medium mt-3"
     },
     'app-header': {
       // מקור: src/components/layout/Header.tsx
       // שים לב: ב-Header זה h1 ולפעמים div, כאן נשתמש ב-div גנרי והעוטף יקבע
       wrapper: "text-xl sm:text-2xl font-black tracking-tight leading-none relative inline-flex items-baseline",
-      dotApp: "text-gray-500 text-sm sm:text-base ml-[1px]", // צבע שונה מעט ב-Header
-      tagline: "text-[10px] sm:text-xs text-gray-500 font-medium -mt-0.5"
+      dotApp: "text-gray-600 text-sm sm:text-base ml-[1px]", // צבע שונה מעט ב-Header
+      tagline: "text-[10px] sm:text-xs text-gray-600 font-medium -mt-0.5"
     }
   };
 
