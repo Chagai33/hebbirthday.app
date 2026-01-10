@@ -68,18 +68,19 @@ async function recordFailedAttempt(ip) {
             attempts = (doc.data()?.attempts || 0) + 1;
         }
         let blockedUntil = null;
-        // Policy: 3 free attempts, then progressive blocking
-        // 4th attempt -> block 30s
-        // 5th attempt -> block 60s
-        // 6th+ attempt -> block 5 mins
-        if (attempts >= 3) {
+        // Policy: 5 free attempts, then progressive blocking
+        // 5th attempt -> block 30s (Warning)
+        // 6th attempt -> block 120s (2 mins)
+        // 7th+ attempt -> block 600s (10 mins)
+        // IMPORTANT: Do not change the error message format without updating frontend parser
+        if (attempts >= 5) {
             let delaySeconds = 0;
-            if (attempts === 3)
+            if (attempts === 5)
                 delaySeconds = 30;
-            else if (attempts === 4)
-                delaySeconds = 60;
+            else if (attempts === 6)
+                delaySeconds = 120;
             else
-                delaySeconds = 300;
+                delaySeconds = 600;
             blockedUntil = admin.firestore.Timestamp.fromMillis(Date.now() + (delaySeconds * 1000));
             console.log(`Blocking IP ${ip} until ${blockedUntil.toDate().toISOString()} (${delaySeconds}s)`);
         }

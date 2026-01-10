@@ -89,6 +89,7 @@
     "botDetected": "Suspicious activity detected. Please try again.",
     "limitReached": "You've reached the addition limit for this link. Please contact the group admin.",
     "tokenExpired": "This link has expired (72 hours). Please contact the group admin for a new link.",
+    "rateLimitWait": "Too many attempts. Please wait {{seconds}} seconds and try again.",
     "verifyHebrewDate": "Please verify that the Hebrew date is correct. If not, change 'Born after sunset' below.",
     "verifyGregorianDate": "Verify that the corresponding Gregorian date is correct"
   },
@@ -159,7 +160,9 @@
     "currentDateLabel": "Today's date: {{hebrew}}, {{gregorian}}",
     "home": "HebBirthday.app - Home",
     "switchToLanguage": "Switch language to {{lang}}",
-    "sendEmailTo": "Send email to {{email}}"
+    "sendEmailTo": "Send email to {{email}}",
+    "backToHome": "Back to Home",
+    "retry": "Try again"
   },
   "guestPortal": {
     "title": "Guest Wishlist Portal",

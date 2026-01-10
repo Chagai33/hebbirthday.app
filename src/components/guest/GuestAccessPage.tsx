@@ -92,7 +92,7 @@ const hebrewMonthsToEnglish: Record<string, string> = {
 interface GuestAccessPageState {
   loading: boolean;
   error: string | null;
-  errorType: 'invalid_token' | 'access_disabled' | 'rate_limit' | 'network' | 'unknown' | null;
+  errorType: 'invalid_token' | 'access_disabled' | 'token_expired' | 'rate_limit' | 'network' | 'unknown' | null;
   group: { id: string; name: string; color: string; tenant_id: string } | null;
   birthdays: Birthday[];
 }
@@ -230,7 +230,10 @@ export const GuestAccessPage: React.FC = () => {
         let errorMessage = t('guestAccess.errorFetching', 'שגיאה בטעינת הנתונים');
 
         // Parse error type from message
-        if (error instanceof Error && (error.message?.includes('permission-denied') || error.message?.includes('Invalid token'))) {
+        if (error instanceof Error && (error.message?.includes('expired') || error.message?.includes('72-hour'))) {
+          errorType = 'token_expired';
+          errorMessage = error.message; // Use specific server message for expired tokens
+        } else if (error instanceof Error && (error.message?.includes('permission-denied') || error.message?.includes('Invalid token'))) {
           errorType = 'invalid_token';
           errorMessage = t('guestAccess.invalidLink', 'קישור לא חוקי או פג תוקף');
         } else if (error instanceof Error && error.message?.includes('disabled')) {
@@ -238,7 +241,15 @@ export const GuestAccessPage: React.FC = () => {
           errorMessage = t('guestAccess.groupNotEnabled', 'גישת אורחים אינה מופעלת עבור קבוצה זו');
         } else if (error instanceof Error && (error.message?.includes('Too many attempts') || error.message?.includes('resource-exhausted'))) {
           errorType = 'rate_limit';
-          errorMessage = t('guestAccess.rateLimitError', 'יותר מדי ניסיונות. אנא נסה שוב מאוחר יותר.');
+
+          // Check if error message contains wait time information
+          const waitMatch = error.message.match(/wait (\d+) seconds/i);
+          if (waitMatch) {
+            const waitSeconds = parseInt(waitMatch[1], 10);
+            errorMessage = t('guestAccess.rateLimitWait', 'יותר מדי ניסיונות. אנא המתן {{seconds}} שניות ונסה שוב.', { seconds: waitSeconds });
+          } else {
+            errorMessage = t('guestAccess.rateLimitError', 'יותר מדי ניסיונות. אנא נסה שוב מאוחר יותר.');
+          }
         } else if (error instanceof Error && (error.message?.includes('network') || error.message?.includes('offline'))) {
           errorType = 'network';
           errorMessage = t('guestAccess.networkError', 'שגיאת רשת. אנא בדוק את החיבור שלך.');
@@ -503,6 +514,26 @@ export const GuestAccessPage: React.FC = () => {
                   {t('guestAccess.linkExpired', 'קישור לא תקף')}
                 </h2>
                 <p className="text-gray-600 mb-6">{state.error}</p>
+                <div className="space-y-3">
+                  <p className="text-sm text-gray-500">
+                    {t('guestAccess.contactAdmin', 'אנא צור קשר עם מנהל הקבוצה לקבלת קישור חדש')}
+                  </p>
+                  <button
+                    onClick={() => navigate('/')}
+                    className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  >
+                    {t('common.backToHome', 'חזור לדף הבית')}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {state.errorType === 'token_expired' && (
+              <>
+                <AlertTriangle className="w-16 h-16 text-orange-500 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  {t('guestAccess.linkExpired', 'קישור פג תוקף')}
+                </h2>
                 <div className="space-y-3">
                   <p className="text-sm text-gray-500">
                     {t('guestAccess.contactAdmin', 'אנא צור קשר עם מנהל הקבוצה לקבלת קישור חדש')}

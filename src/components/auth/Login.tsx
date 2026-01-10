@@ -8,7 +8,7 @@ import { authService } from '../../services/auth.service';
 import { DeveloperCredit } from '../common/DeveloperCredit';
 import { LanguageSwitcher } from '../common/LanguageSwitcher';
 import { Logo } from '../common/Logo';
-import { Footer } from '../layout/Footer';
+import { AuthLayout } from './AuthLayout';
 
 export const Login: React.FC = () => {
   const { t } = useTranslation();
@@ -83,10 +83,8 @@ export const Login: React.FC = () => {
   // toggleLanguage removed - using LanguageSwitcher
 
   return (
-    <div className="min-h-[100dvh] flex flex-col items-center bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-8 overflow-y-auto">
-      <div className="flex-1 flex items-center justify-center w-full p-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 relative">
-        <div className="flex justify-end items-center gap-1 mb-4">
+    <AuthLayout>
+      <div className="flex justify-end items-center gap-1 mb-4">
           <button
             onClick={() => navigate('/guide')}
             className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -103,6 +101,7 @@ export const Login: React.FC = () => {
           </button>
           <LanguageSwitcher className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" variant="minimal" />
         </div>
+
         <div className="text-center mb-8">
           <Logo variant="auth" className="mb-6" />
           <h1 className="text-2xl font-bold text-gray-900">
@@ -218,17 +217,13 @@ export const Login: React.FC = () => {
           </button>
         </p>
 
-        <DeveloperCredit className="mt-4" />
-        </div>
-      </div>
-
-      <Footer variant="minimal" />
+      <DeveloperCredit className="mt-4" />
 
       <ForgotPasswordModal
         isOpen={showForgotPassword}
         onClose={() => setShowForgotPassword(false)}
         email={email}
       />
-    </div>
+    </AuthLayout>
   );
 };

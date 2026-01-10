@@ -248,6 +248,7 @@
     "botDetected": "נתגלתה פעילות חשודה. אנא נסה שוב.",
     "limitReached": "הגעת למגבלת ההוספות לקישור זה. אנא צור קשר עם מנהל הקבוצה.",
     "tokenExpired": "קישור זה פג תוקף (72 שעות). אנא צור קשר עם מנהל הקבוצה לקבלת קישור חדש.",
+    "rateLimitWait": "יותר מדי ניסיונות. אנא המתן {{seconds}} שניות ונסה שוב.",
     "verifyHebrewDate": "אנא ודא שהתאריך העברי נכון. אם לא, שנה את 'נולד אחרי השקיעה' למטה.",
     "verifyGregorianDate": "ודא שהתאריך הלועזי המתאים נכון"
   },
@@ -323,7 +324,9 @@
     "currentDateLabel": "התאריך היום: {{hebrew}}, {{gregorian}}",
     "home": "HebBirthday.app - דף הבית",
     "switchToLanguage": "שנה שפה ל-{{lang}}",
-    "sendEmailTo": "שלח אימייל ל-{{email}}"
+    "sendEmailTo": "שלח אימייל ל-{{email}}",
+    "backToHome": "חזור לעמוד הבית",
+    "retry": "נסה שוב"
   },
   "guestPortal": {
     "title": "פורטל מתנות לאורחים",

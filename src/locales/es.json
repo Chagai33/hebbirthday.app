@@ -89,6 +89,7 @@
     "botDetected": "Actividad sospechosa detectada. Por favor intenta de nuevo.",
     "limitReached": "Has alcanzado el límite de adiciones para este enlace. Por favor contacta al administrador del grupo.",
     "tokenExpired": "Este enlace ha expirado (72 horas). Por favor contacta al administrador del grupo para obtener un nuevo enlace.",
+    "rateLimitWait": "Demasiados intentos. Por favor espera {{seconds}} segundos e intenta de nuevo.",
     "verifyHebrewDate": "Por favor verifica que la fecha hebrea sea correcta. Si no, cambia 'Nacido después del atardecer' a continuación.",
     "verifyGregorianDate": "Verifica que la fecha gregoriana correspondiente sea correcta"
   },
@@ -163,7 +164,9 @@
     "currentDateLabel": "Fecha de hoy: {{hebrew}}, {{gregorian}}",
     "home": "HebBirthday.app - Inicio",
     "switchToLanguage": "Cambiar idioma a {{lang}}",
-    "sendEmailTo": "Enviar correo a {{email}}"
+    "sendEmailTo": "Enviar correo a {{email}}",
+    "backToHome": "Volver al inicio",
+    "retry": "Intentar de nuevo"
   },
   "guestPortal": {
     "title": "Portal de Lista de Deseos para Invitados",
