@@ -8,6 +8,7 @@ import { X, Loader2, Trash2, Star, StarOff, RotateCcw } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { DEFAULT_AGE_GROUPS, DEFAULT_BUDGET_CONFIG } from '../../utils/geltConstants';
 import { useFocusTrap } from '../../hooks/useAccessibility';
+import { formatCurrency } from '../../utils/currencyUtils';
 
 interface GeltLoadTemplateModalProps {
   isOpen: boolean;
@@ -210,7 +211,7 @@ export const GeltLoadTemplateModal: React.FC<GeltLoadTemplateModalProps> = ({
                       </span>
                       {template.budgetConfig.customBudget && (
                         <span className="ml-3">
-                          {t('gelt.customBudget')}: {template.budgetConfig.customBudget}₪
+                          {t('gelt.customBudget')}: {formatCurrency(template.budgetConfig.customBudget || 0, currentTenant?.currency)}
                         </span>
                       )}
                     </div>

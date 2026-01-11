@@ -26,7 +26,6 @@ export const Header: React.FC = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showGroupFilter, setShowGroupFilter] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showGuestActivity, setShowGuestActivity] = useState(false);
@@ -36,13 +35,9 @@ export const Header: React.FC = () => {
   const { data: allGroups = [] } = useGroups();
   const { data: birthdays = [] } = useBirthdays();
   const filterRef = useRef<HTMLDivElement>(null);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const mobileUserMenuRef = useRef<HTMLDivElement>(null);
 
-  // Accessibility: Focus management for mobile menu
-  const mobileMenuFocusRef = useFocusTrap(mobileMenuOpen, () => setMobileMenuOpen(false));
-  useFocusReturn(mobileMenuOpen);
 
   // toggleLanguage removed - now using LanguageSwitcher component
 
@@ -50,9 +45,6 @@ export const Header: React.FC = () => {
     function handleClickOutside(event: MouseEvent) {
       if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
         setShowGroupFilter(false);
-      }
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
-        setMobileMenuOpen(false);
       }
       const clickedInDesktopMenu = userMenuRef.current?.contains(event.target as Node);
       const clickedInMobileMenu = mobileUserMenuRef.current?.contains(event.target as Node);
@@ -71,7 +63,7 @@ export const Header: React.FC = () => {
       }
     }
 
-    if (showGroupFilter || mobileMenuOpen || showUserMenu) {
+    if (showGroupFilter || showUserMenu) {
       document.addEventListener("mousedown", handleClickOutside);
     }
     
@@ -84,7 +76,7 @@ export const Header: React.FC = () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [showGroupFilter, mobileMenuOpen, showUserMenu]);
+  }, [showGroupFilter, showUserMenu]);
 
   // Check if we're on a public page (terms, privacy) without user
   const isPublicPage = !user && (location.pathname === '/terms' || location.pathname === '/privacy');
@@ -282,167 +274,6 @@ export const Header: React.FC = () => {
               )}
             </div>
 
-            {/* תפריט ביניים (Tablet/Small Laptop) */}
-            <div className="hidden sm:flex md:hidden relative" ref={mobileMenuRef}>
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-1"
-                aria-expanded={mobileMenuOpen}
-                aria-label={t('common.menu')}
-              >
-                <span className="text-sm font-medium text-gray-700">
-                  {t('common.menu')}
-                </span>
-                {mobileMenuOpen ? (
-                  <ChevronUp className="w-4 h-4" />
-                ) : (
-                  <ChevronDown className="w-4 h-4" />
-                )}
-              </button>
-
-              {/* Dropdown Menu */}
-              {mobileMenuOpen && (
-                <ul ref={mobileMenuFocusRef as any} className="absolute top-full mt-2 end-0 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50 w-64" role="menu">
-                  {user && (
-                    <li className="px-4 py-2 border-b border-gray-200 mb-2">
-                      <span className="text-sm font-semibold text-gray-700 block truncate">
-                        {user.display_name || user.email}
-                      </span>
-                    </li>
-                  )}
-
-                  {user && location.pathname === '/' && (
-                    <li className="relative px-2">
-                      <button
-                        onClick={() => setShowGroupFilter(!showGroupFilter)}
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm ${selectedGroupIds.length > 0
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'text-gray-700 hover:bg-gray-50'
-                          }`}
-                        role="menuitem"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Filter className="w-4 h-4" />
-                          <span>{t('groups.filterByGroup')}</span>
-                        </div>
-                        {selectedGroupIds.length > 0 ? (
-                          <span className="bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
-                            {selectedGroupIds.length}
-                          </span>
-                        ) : (
-                          <ChevronDown className={`w-3 h-3 transition-transform ${showGroupFilter ? 'rotate-180' : ''}`} />
-                        )}
-                      </button>
-
-                      {showGroupFilter && (
-                        <div className="mt-1 pl-4 border-l-2 border-gray-100 ml-2">
-                          <GroupFilterDropdown
-                            allGroups={allGroups}
-                            selectedGroupIds={selectedGroupIds}
-                            toggleGroupFilter={toggleGroupFilter}
-                            clearGroupFilters={clearGroupFilters}
-                            countsByGroup={countsByGroup}
-                            onClose={() => setShowGroupFilter(false)}
-                            isMobile={true}
-                          />
-                        </div>
-                      )}
-                    </li>
-                  )}
-
-                  {user && (
-                    <li role="none">
-                      <button
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          setShowGroupsPanel(true);
-                        }}
-                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm text-gray-700 hover:bg-gray-50"
-                        role="menuitem"
-                      >
-                        <FolderTree className="w-4 h-4" />
-                        <span>{t('groups.manageGroups')}</span>
-                      </button>
-                    </li>
-                  )}
-
-                  {user && (
-                    <li role="none">
-                      <button
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          if (location.pathname === '/gelt') {
-                            navigate('/');
-                          } else {
-                            navigate('/gelt');
-                          }
-                        }}
-                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm ${location.pathname === '/gelt'
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'text-gray-700 hover:bg-gray-50'
-                          }`}
-                        role="menuitem"
-                      >
-                        <Calculator className="w-4 h-4" />
-                        <span>{t('gelt.title')}</span>
-                      </button>
-                    </li>
-                  )}
-
-                  {user && (
-                    <>
-                      <li role="separator" aria-hidden="true" className="h-px bg-gray-100 my-1 mx-2"></li>
-                      <li role="none">
-                        <button
-                          onClick={() => {
-                            setShowGuestActivity(true);
-                            setMobileMenuOpen(false);
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm text-gray-700 hover:bg-gray-50 relative"
-                          role="menuitem"
-                        >
-                          <Bell className="w-4 h-4" />
-                          <span>{t('dashboard.guestNotifications', 'התראות אורחים')}</span>
-                          {guestBirthdaysCount > 0 && (
-                            <span className="mr-auto bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full font-bold">
-                              {guestBirthdaysCount}
-                            </span>
-                          )}
-                        </button>
-                      </li>
-                      <li role="none">
-                        <button
-                          onClick={() => {
-                            setShowSettings(true);
-                            setMobileMenuOpen(false);
-                          }}
-                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm text-gray-700 hover:bg-gray-50 relative"
-                          role="menuitem"
-                        >
-                          <Settings className="w-4 h-4" />
-                          <span>{t('tenant.settings')}</span>
-                          {(needsCalendarSetup || isInitializing) && (
-                            <span className={`mr-auto w-2 h-2 rounded-full animate-pulse ${
-                              isInitializing ? 'bg-gray-300' : 'bg-amber-400'
-                            }`}></span>
-                          )}
-                        </button>
-                      </li>
-                      <li role="none">
-                        <button
-                          onClick={handleSignOut}
-                          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm text-red-600 hover:bg-red-50"
-                          role="menuitem"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          <span>{t('auth.signOut')}</span>
-                        </button>
-                      </li>
-                    </>
-                  )}
-                </ul>
-              )}
-            </div>
 
             <div className="hidden md:flex items-center gap-2">
               {/* כפתור החלפת שפה - דסקטופ */}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AgeGroup, BudgetCalculation, Child } from '../../types/gelt';
+import { Tenant } from '../../types';
 import { GeltAgeGroupRow } from './GeltAgeGroupRow';
 
 interface GeltAgeGroupsListProps {
@@ -10,6 +11,7 @@ interface GeltAgeGroupsListProps {
   onToggleInclude: (groupId: string, include: boolean) => void;
   onShowGroupChildren: (group: AgeGroup) => void;
   children: Child[];
+  tenant?: Tenant | null;
 }
 
 export const GeltAgeGroupsList: React.FC<GeltAgeGroupsListProps> = ({
@@ -19,6 +21,7 @@ export const GeltAgeGroupsList: React.FC<GeltAgeGroupsListProps> = ({
   onToggleInclude,
   onShowGroupChildren,
   children,
+  tenant,
 }) => {
   const { t } = useTranslation();
 
@@ -55,6 +58,7 @@ export const GeltAgeGroupsList: React.FC<GeltAgeGroupsListProps> = ({
               onToggleInclude={onToggleInclude}
               onShowGroupChildren={onShowGroupChildren}
               children={children}
+              tenant={tenant}
             />
           ))}
         </tbody>

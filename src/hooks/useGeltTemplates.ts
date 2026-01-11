@@ -56,6 +56,7 @@ export const useSaveGeltTemplate = () => {
       ageGroups: AgeGroup[];
       budgetConfig: BudgetConfig;
       customGroupSettings: AgeGroup[] | null;
+      currency?: 'ILS' | 'USD' | 'EUR';
       is_default?: boolean;
     }) => {
       if (!currentTenant || !user) throw new Error('No tenant or user');

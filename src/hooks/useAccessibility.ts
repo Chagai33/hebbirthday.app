@@ -30,7 +30,8 @@ export const useFocusTrap = (isOpen: boolean, onClose?: () => void) => {
         return;
       }
       const focusableElements = containerRef.current.querySelectorAll(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'      );
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
 
       if (focusableElements.length === 0) return;
 
@@ -51,16 +52,30 @@ export const useFocusTrap = (isOpen: boolean, onClose?: () => void) => {
     }
   }, [onClose]);
 
+  // Effect 1: Manage Event Listeners (Runs on updates to handleKeyDown)
   useEffect(() => {
     if (isOpen) {
-      // Use capture phase to handle events before they bubble
       document.addEventListener('keydown', handleKeyDown, true);
-      // Optional: Focus first element on open
-      const focusableElements = containerRef.current?.querySelectorAll('button, input, select');
-      if (focusableElements?.[0]) (focusableElements[0] as HTMLElement).focus();
     }
     return () => document.removeEventListener('keydown', handleKeyDown, true);
   }, [isOpen, handleKeyDown]);
+
+  // Effect 2: Manage Initial Focus (Runs ONLY when isOpen changes)
+  useEffect(() => {
+    if (isOpen && containerRef.current) {
+      // Safety Check: Only reset focus if focus is currently OUTSIDE the container
+      // This prevents the "jump to X" bug when re-rendering internal state
+      if (!containerRef.current.contains(document.activeElement)) {
+        const focusableElements = containerRef.current.querySelectorAll('button, input, select');
+        if (focusableElements?.[0]) {
+          // Small timeout to ensure DOM is ready and prevent conflict with browser native focus
+          requestAnimationFrame(() => {
+             (focusableElements[0] as HTMLElement).focus();
+          });
+        }
+      }
+    }
+  }, [isOpen]);
 
   return containerRef;
 };
@@ -73,10 +88,8 @@ export const useFocusReturn = (isOpen: boolean) => {
     } else {
       if (lastFocusedElement.current) {
         const el = lastFocusedElement.current;
-        // Delay to ensure child is gone and parent is visible
         setTimeout(() => {
           el.focus();
-          // If focus didn't land (e.g. element gone), focus the first modal button
           if (document.activeElement !== el) {
             const topmost = document.querySelectorAll('[role="dialog"]');
             const last = topmost[topmost.length - 1] as HTMLElement;
@@ -87,4 +100,3 @@ export const useFocusReturn = (isOpen: boolean) => {
     }
   }, [isOpen]);
 };
-

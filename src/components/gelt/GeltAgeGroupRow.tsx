@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AgeGroup, BudgetCalculation, Child } from '../../types/gelt';
+import { Tenant } from '../../types';
 import { Edit2, X, Check, ToggleLeft, ToggleRight } from 'lucide-react';
 import { roundToFive, updateGroupName, validateAgeRange, findUncoveredAges, findDuplicateAges, calculateGroupPercentage } from '../../utils/geltCalculations';
+import { formatCurrency } from '../../utils/currencyUtils';
 
 interface GeltAgeGroupRowProps {
   group: AgeGroup;
@@ -12,6 +14,7 @@ interface GeltAgeGroupRowProps {
   onToggleInclude: (groupId: string, include: boolean) => void;
   onShowGroupChildren: (group: AgeGroup) => void;
   children: Child[];
+  tenant?: Tenant | null;
 }
 
 export const GeltAgeGroupRow: React.FC<GeltAgeGroupRowProps> = ({
@@ -21,6 +24,7 @@ export const GeltAgeGroupRow: React.FC<GeltAgeGroupRowProps> = ({
   onUpdate,
   onToggleInclude,
   onShowGroupChildren,
+  tenant,
 }) => {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
@@ -205,9 +209,12 @@ export const GeltAgeGroupRow: React.FC<GeltAgeGroupRowProps> = ({
         ) : (
           <div className="flex flex-col">
             <span className="font-medium text-xs sm:text-sm">
-              {calculation.isCustomBudget && groupData.calculatedAmountPerChild !== undefined
-                ? groupData.calculatedAmountPerChild
-                : group.amountPerChild} ₪
+              {formatCurrency(
+                calculation.isCustomBudget && groupData.calculatedAmountPerChild !== undefined
+                  ? groupData.calculatedAmountPerChild
+                  : group.amountPerChild,
+                tenant?.currency
+              )}
             </span>
             {calculation.isCustomBudget && groupData.calculatedAmountPerChild !== undefined && (
               <span className="text-[10px] sm:text-xs text-gray-500">
@@ -231,7 +238,7 @@ export const GeltAgeGroupRow: React.FC<GeltAgeGroupRowProps> = ({
         )}
       </td>
       <td className="px-2 sm:px-4 py-2 sm:py-3 text-right font-medium text-xs sm:text-sm">
-        {groupData.total.toFixed(0)} ₪
+        {formatCurrency(groupData.total, tenant?.currency)}
       </td>
       <td className="px-2 sm:px-4 py-2 sm:py-3">
         {calculation.totalRequired > 0 ? (

@@ -70,6 +70,7 @@ export interface GeltTemplate {
   ageGroups: AgeGroup[];           // קבוצות הגיל
   budgetConfig: BudgetConfig;      // הגדרות תקציב
   customGroupSettings: AgeGroup[] | null; // הגדרות מותאמות אישית (אם יש תקציב מותאם)
+  currency?: 'ILS' | 'USD' | 'EUR'; // מטבע התבנית (לתיעוד בלבד)
   created_at: string;
   updated_at: string;
   created_by: string;

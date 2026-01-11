@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '../layout/Layout';
+import { useTenant } from '../../contexts/TenantContext';
 import { useGelt, useUpdateGelt, useResetGelt } from '../../hooks/useGelt';
 import { useSaveGeltTemplate, useDefaultGeltTemplate, useGeltTemplates } from '../../hooks/useGeltTemplates';
 import { GeltTemplate } from '../../types/gelt';
@@ -29,6 +30,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { DEFAULT_AGE_GROUPS, DEFAULT_BUDGET_CONFIG } from '../../utils/geltConstants';
 import { FloatingBackButton } from '../common/FloatingBackButton';
 import { useFocusTrap } from '../../hooks/useAccessibility';
+import { formatCurrency } from '../../utils/currencyUtils';
 
 export const GeltPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -36,9 +38,10 @@ export const GeltPage: React.FC = () => {
   const updateGelt = useUpdateGelt();
   const resetGelt = useResetGelt();
   const { data: birthdays = [] } = useBirthdays();
-  const { success, error: showError } = useToast();
+  const { success, error: showError, warning } = useToast();
   const { data: defaultTemplate, isLoading: isLoadingDefaultTemplate } = useDefaultGeltTemplate();
   const { data: existingTemplates = [] } = useGeltTemplates();
+  const { currentTenant } = useTenant();
 
   const [localState, setLocalState] = useState<GeltState | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -458,7 +461,10 @@ export const GeltPage: React.FC = () => {
     is_default?: boolean;
   }) => {
     try {
-      await saveTemplate.mutateAsync(template);
+      await saveTemplate.mutateAsync({
+        ...template,
+        currency: currentTenant?.currency,
+      });
       success(t('gelt.profileSaved'));
     } catch {
       showError(t('gelt.profileSaveError'));
@@ -466,6 +472,14 @@ export const GeltPage: React.FC = () => {
   };
 
   const handleLoadTemplate = (template: GeltTemplate) => {
+    // Check if template currency differs from current tenant currency
+    if (template.currency && currentTenant?.currency && template.currency !== currentTenant.currency) {
+      warning(t('gelt.templateCurrencyWarning', {
+        templateCurrency: template.currency,
+        default: 'התבנית נשמרה במטבע אחר ({templateCurrency}). המספרים נטענו ללא המרה.'
+      }));
+    }
+
     // Prepare budgetConfig - only include customBudget if it exists in the template
     const budgetConfigToLoad: BudgetConfig = {
       participants: template.budgetConfig.participants,
@@ -586,7 +600,7 @@ export const GeltPage: React.FC = () => {
                 {localState.budgetConfig.participants} / {localState.budgetConfig.allowedOverflowPercentage}%
                 {localState.budgetConfig.customBudget && (
                   <span className="ml-1 font-semibold">
-                    • {localState.budgetConfig.customBudget}₪
+                    • {formatCurrency(localState.budgetConfig.customBudget || 0, currentTenant?.currency)}
                   </span>
                 )}
               </span>
@@ -685,6 +699,7 @@ export const GeltPage: React.FC = () => {
                 onToggleInclude={handleToggleGroupInclude}
                 onShowGroupChildren={handleShowGroupChildren}
                 children={localState.children}
+                tenant={currentTenant}
               />
             </div>
           </div>
@@ -711,7 +726,7 @@ export const GeltPage: React.FC = () => {
               </button>
               {showCalculationResults && (
                 <div id="calculation-results-section">
-                  <GeltCalculationResults calculation={calculation} />
+                  <GeltCalculationResults calculation={calculation} tenant={currentTenant} />
                 </div>
               )}
             </div>

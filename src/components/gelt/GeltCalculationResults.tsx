@@ -1,15 +1,19 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { BudgetCalculation } from '../../types/gelt';
+import { Tenant } from '../../types';
 import { isOverBudget, getOverflowAmount } from '../../utils/geltCalculations';
+import { formatCurrency } from '../../utils/currencyUtils';
 import { AlertCircle, CheckCircle } from 'lucide-react';
 
 interface GeltCalculationResultsProps {
   calculation: BudgetCalculation;
+  tenant?: Tenant | null;
 }
 
 export const GeltCalculationResults: React.FC<GeltCalculationResultsProps> = ({
   calculation,
+  tenant,
 }) => {
   const { t } = useTranslation();
   const overBudget = isOverBudget(calculation);
@@ -29,17 +33,17 @@ export const GeltCalculationResults: React.FC<GeltCalculationResultsProps> = ({
         <dt className="text-gray-700 text-sm sm:text-base">
           {calculation.isCustomBudget ? t('gelt.customBudget') : t('gelt.totalRequired')}:
         </dt>
-        <dd className="font-semibold text-base sm:text-lg mt-1">{calculation.totalRequired.toFixed(0)} ₪</dd>
+        <dd className="font-semibold text-base sm:text-lg mt-1">{formatCurrency(calculation.totalRequired, tenant?.currency)}</dd>
       </div>
 
       <div>
         <dt className="text-gray-700 text-sm sm:text-base">{t('gelt.amountPerParticipant')}:</dt>
-        <dd className="font-semibold text-base sm:text-lg mt-1">{calculation.amountPerParticipant.toFixed(0)} ₪</dd>
+        <dd className="font-semibold text-base sm:text-lg mt-1">{formatCurrency(calculation.amountPerParticipant, tenant?.currency)}</dd>
       </div>
 
       <div>
         <dt className="text-gray-700 text-sm sm:text-base">{t('gelt.maxAllowed')}:</dt>
-        <dd className="font-semibold text-sm sm:text-base mt-1">{calculation.maxAllowed.toFixed(0)} ₪</dd>
+        <dd className="font-semibold text-sm sm:text-base mt-1">{formatCurrency(calculation.maxAllowed, tenant?.currency)}</dd>
       </div>
 
       {overBudget && (
@@ -48,7 +52,7 @@ export const GeltCalculationResults: React.FC<GeltCalculationResultsProps> = ({
           <div className="min-w-0">
             <span className="text-red-800 font-medium text-xs sm:text-sm">{t('gelt.overBudget')}</span>
             <span className="text-red-600 ml-1 sm:ml-2 text-xs sm:text-sm block sm:inline">
-              {t('gelt.overflowAmount')}: {overflowAmount.toFixed(0)} ₪
+              {t('gelt.overflowAmount')}: {formatCurrency(overflowAmount, tenant?.currency)}
             </span>
           </div>
         </div>

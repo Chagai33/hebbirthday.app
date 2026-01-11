@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTenant } from '../../contexts/TenantContext';
 import { CalendarPreferenceSelector } from './CalendarPreferenceSelector';
-import { CalendarPreference } from '../../types';
-import { Settings, Save, X, Trash2, AlertTriangle, Globe, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { CalendarPreference, Currency } from '../../types';
+import { Settings, Save, X, Trash2, AlertTriangle, Globe, Info, ChevronDown, ChevronUp, DollarSign } from 'lucide-react';
 import { getSupportedTimezones, detectBrowserTimezone } from '../../utils/dateUtils';
 import { useToast } from '../../hooks/useToast';
 import { Toast } from '../common/Toast';
@@ -30,6 +30,9 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
     );
     const [timezone, setTimezone] = useState<string>(
         currentTenant?.timezone || detectBrowserTimezone()
+    );
+    const [currency, setCurrency] = useState<Currency>(
+        currentTenant?.currency || 'ILS'
     );
     const [isSaving, setIsSaving] = useState(false);
     const [isDangerZoneOpen, setIsDangerZoneOpen] = useState(false);
@@ -57,6 +60,7 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
             await updateTenant(currentTenant.id, {
                 default_calendar_preference: preference,
                 timezone: timezone,
+                currency: currency,
             });
             success(t('messages.tenantUpdated'));
             setTimeout(() => onClose(), 1000);
@@ -178,6 +182,33 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
                                 <li>{t('settings.note2', 'קבוצות יכולות לעקוף הגדרה זו')}</li>
                                 <li>{t('settings.note3', 'רשומות בודדות יכולות לעקוף הגדרת קבוצה')}</li>
                             </ul>
+                        </div>
+
+                        {/* Currency Selector - Compact */}
+                        <div className="space-y-2 bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3">
+                            <div className="flex items-center gap-2">
+                                <DollarSign className="w-4 h-4 text-green-600" />
+                                <label className="text-sm font-semibold text-gray-800">
+                                    {t('settings.currency', 'מטבע ראשי')}
+                                </label>
+                            </div>
+
+                            <select
+                                value={currency}
+                                onChange={(e) => setCurrency(e.target.value as Currency)}
+                                className="w-full px-3 py-2 text-sm border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white"
+                            >
+                                <option value="ILS">₪ שקל (ILS)</option>
+                                <option value="USD">$ דולר (USD)</option>
+                                <option value="EUR">€ אירו (EUR)</option>
+                            </select>
+
+                            <div className="flex items-start gap-1.5 text-xs text-green-700 bg-green-100 rounded-md p-2">
+                                <Info className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                <p>
+                                    {t('settings.currencyHint', 'המטבע שבו יוצגו הסכומים בכל האפליקציה.')}
+                                </p>
+                            </div>
                         </div>
 
                         {/* Timezone Selector - Compact */}

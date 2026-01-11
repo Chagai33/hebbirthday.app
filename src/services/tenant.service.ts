@@ -49,6 +49,7 @@ export const tenantService = {
       owner_id: data.owner_id,
       default_language: data.default_language,
       timezone: data.timezone,
+      currency: data.currency,
       current_hebrew_year: data.current_hebrew_year,
       hebrew_year_last_updated: this.timestampToString(data.hebrew_year_last_updated),
       created_at: this.timestampToString(data.created_at),
@@ -90,6 +91,7 @@ export const tenantService = {
     if (data.name !== undefined) updateData.name = data.name;
     if (data.default_language !== undefined) updateData.default_language = data.default_language;
     if (data.timezone !== undefined) updateData.timezone = data.timezone;
+    if (data.currency !== undefined) updateData.currency = data.currency;
     if (data.current_hebrew_year !== undefined) {
       updateData.current_hebrew_year = data.current_hebrew_year;
       updateData.hebrew_year_last_updated = serverTimestamp();

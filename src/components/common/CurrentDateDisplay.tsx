@@ -18,7 +18,8 @@ export const CurrentDateDisplay: React.FC = () => {
   const gregorianDate = formatInTenantTimezone(
     new Date(),
     timezone,
-    i18n.language === 'he' ? 'dd/MM/yyyy' : 'MM/dd/yyyy'
+    i18n.language === 'he' ? 'dd/MM/yyyy' : 'MM/dd/yyyy',
+    i18n.language
   );
 
   return (
