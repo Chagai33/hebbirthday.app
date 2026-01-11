@@ -6,6 +6,14 @@
     "taglineOr": "or",
     "taglineGregorian": "Gregorian"
   },
+  "landing": {
+    "title": "Family Birthday Management",
+    "features": {
+      "sync": "Sync Hebrew/Gregorian Birthdays",
+      "portal": "Gift Portal & Wish Lists",
+      "gelt": "Hanukkah/Purim Gelt Calculator"
+    }
+  },
   "guest": {
     "portalTitle": "Wishlist Portal",
     "welcome": "Welcome Guest",

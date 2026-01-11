@@ -15,8 +15,54 @@ export class EventBuilderService {
     wishlistItems: WishlistItem[]
   ): Promise<SyncEvent[]> {
     const events: SyncEvent[] = [];
-    const language = (tenant?.default_language || 'he') as 'he' | 'en';
-    
+    const language = (tenant?.default_language || 'he') as 'he' | 'en' | 'es';
+
+    // Translation maps
+    const translations = {
+      he: {
+        wishlist: '🎁 רשימת משאלות:\n',
+        gregorianBirthDate: 'תאריך לידה לועזי',
+        hebrewBirthDate: 'תאריך לידה עברי',
+        afterSunset: '⚠️ לאחר השקיעה\n',
+        groups: 'קבוצות',
+        notes: 'הערות',
+        zodiacSign: 'מזל',
+        gregorianTitle: 'יום הולדת לועזי 🎂',
+        hebrewTitle: 'יום הולדת עברי 🎂'
+      },
+      en: {
+        wishlist: '🎁 Wishlist:\n',
+        gregorianBirthDate: 'Gregorian Birth Date',
+        hebrewBirthDate: 'Hebrew Birth Date',
+        afterSunset: '⚠️ After Sunset\n',
+        groups: 'Groups',
+        notes: 'Notes',
+        zodiacSign: 'Zodiac Sign',
+        gregorianTitle: 'Gregorian Birthday 🎂',
+        hebrewTitle: 'Hebrew Birthday 🎂'
+      },
+      es: {
+        wishlist: '🎁 Lista de deseos:\n',
+        gregorianBirthDate: 'Fecha de nacimiento Gregoriano',
+        hebrewBirthDate: 'Fecha de nacimiento Hebreo',
+        afterSunset: '⚠️ Después del atardecer\n',
+        groups: 'Grupos',
+        notes: 'Notas',
+        zodiacSign: 'Signo Zodiacal',
+        gregorianTitle: 'Cumpleaños Gregoriano 🎂',
+        hebrewTitle: 'Cumpleaños Hebreo 🎂'
+      }
+    };
+
+    const t = translations[language];
+
+    // Spanish zodiac names mapping
+    const zodiacNamesEs: { [key: string]: string } = {
+      'Aries': 'Aries', 'Taurus': 'Tauro', 'Gemini': 'Géminis', 'Cancer': 'Cáncer',
+      'Leo': 'Leo', 'Virgo': 'Virgo', 'Libra': 'Libra', 'Scorpio': 'Escorpio',
+      'Sagittarius': 'Sagitario', 'Capricorn': 'Capricornio', 'Aquarius': 'Acuario', 'Pisces': 'Piscis'
+    };
+
     // Description Construction - העתקה מדויקת
     let description = '';
     let wishlistText = '';
@@ -27,26 +73,24 @@ export class EventBuilderService {
         .sort((a, b) => (priorityOrder[b.priority as keyof typeof priorityOrder] || 0) - (priorityOrder[a.priority as keyof typeof priorityOrder] || 0))
         .map((item, index) => `${index + 1}. ${item.item_name}`);
       if (items.length > 0) {
-        wishlistText = (language === 'en' ? '🎁 Wishlist:\n' : '🎁 רשימת משאלות:\n') + items.join('\n') + '\n\n';
+        wishlistText = t.wishlist + items.join('\n') + '\n\n';
       }
     }
 
     description += wishlistText;
-    description += language === 'en' 
-      ? `Gregorian Birth Date: ${birthday.birth_date_gregorian}\nHebrew Birth Date: ${birthday.birth_date_hebrew_string || ''}\n`
-      : `תאריך לידה לועזי: ${birthday.birth_date_gregorian}\nתאריך לידה עברי: ${birthday.birth_date_hebrew_string || ''}\n`;
+    description += `${t.gregorianBirthDate}: ${birthday.birth_date_gregorian}\n${t.hebrewBirthDate}: ${birthday.birth_date_hebrew_string || ''}\n`;
     
     if (birthday.after_sunset) {
-      description += language === 'en' ? '⚠️ After Sunset\n' : '⚠️ לאחר השקיעה\n';
+      description += t.afterSunset;
     }
     
     if (groups.length > 0) {
       const gNames = groups.map(g => g.parentName ? `${g.parentName}: ${g.name}` : g.name);
-      description += `\n${language === 'en' ? 'Groups' : 'קבוצות'}: ${gNames.join(', ')}`;
+      description += `\n${t.groups}: ${gNames.join(', ')}`;
     }
     
     if (birthday.notes) {
-      description += `\n\n${language === 'en' ? 'Notes' : 'הערות'}: ${birthday.notes}`;
+      description += `\n\n${t.notes}: ${birthday.notes}`;
     }
 
     const extendedProperties = { 
@@ -94,9 +138,9 @@ export class EventBuilderService {
       const bDate = new Date(birthday.birth_date_gregorian);
       let gregDesc = description;
       if (gregSign) {
-        gregDesc += `\n\n${language === 'en' ? 'Zodiac Sign' : 'מזל'}: ${
-          language === 'en' ? 
-            this.zodiacService.getZodiacSignNameEn(gregSign) : 
+        gregDesc += `\n\n${t.zodiacSign}: ${
+          language === 'en' ? this.zodiacService.getZodiacSignNameEn(gregSign) :
+          language === 'es' ? (zodiacNamesEs[gregSign] || gregSign) :
             this.zodiacService.getZodiacSignNameHe(gregSign)
         }`;
       }
@@ -106,9 +150,7 @@ export class EventBuilderService {
         const y = curYear + i;
         const d = new Date(y, bDate.getMonth(), bDate.getDate());
         const age = y - bDate.getFullYear();
-        const title = language === 'en' ? 
-          `${birthday.first_name} ${birthday.last_name} | ${age} | Birthday 🎂` : 
-          `${birthday.first_name} ${birthday.last_name} | ${age} | יום הולדת לועזי 🎂`;
+        const title = `${birthday.first_name} ${birthday.last_name} | ${age} | ${t.gregorianTitle}`;
         events.push(createEvent(title, d, 'gregorian', y, gregDesc));
       }
     }
@@ -117,9 +159,9 @@ export class EventBuilderService {
     if (doHeb && birthday.future_hebrew_birthdays) {
       let hebDesc = description;
       if (hebSign) {
-        hebDesc += `\n\n${language === 'en' ? 'Zodiac Sign' : 'מזל'}: ${
-          language === 'en' ? 
-            this.zodiacService.getZodiacSignNameEn(hebSign) : 
+        hebDesc += `\n\n${t.zodiacSign}: ${
+          language === 'en' ? this.zodiacService.getZodiacSignNameEn(hebSign) :
+          language === 'es' ? (zodiacNamesEs[hebSign] || hebSign) :
             this.zodiacService.getZodiacSignNameHe(hebSign)
         }`;
       }
@@ -128,9 +170,7 @@ export class EventBuilderService {
         const dStr = typeof item === 'string' ? item : item.gregorian;
         const hYear = typeof item === 'string' ? 0 : item.hebrewYear;
         const age = (hYear && birthday.hebrew_year) ? hYear - birthday.hebrew_year : 0;
-        const title = language === 'en' ? 
-          `${birthday.first_name} ${birthday.last_name} | ${age} | Hebrew Birthday 🎂` : 
-          `${birthday.first_name} ${birthday.last_name} | ${age} | יום הולדת עברי 🎂`;
+        const title = `${birthday.first_name} ${birthday.last_name} | ${age} | ${t.hebrewTitle}`;
         events.push(createEvent(title, new Date(dStr), 'hebrew', hYear, hebDesc));
       });
     }

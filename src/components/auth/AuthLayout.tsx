@@ -11,7 +11,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:start-4 focus:z-50 focus:p-2 focus:bg-white focus:text-blue-600 focus:shadow-lg focus:rounded-lg">דלג לתוכן העיקרי</a>
 
       <main id="main-content" className="flex-1 flex items-center justify-center w-full">
-        <div className="max-w-lg w-full bg-white rounded-2xl shadow-xl p-6 relative">
+        <div className="md:max-w-4xl max-w-lg w-full bg-white rounded-2xl shadow-xl p-6 relative">
           {children}
         </div>
       </main>
