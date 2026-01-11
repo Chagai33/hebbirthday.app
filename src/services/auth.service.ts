@@ -30,7 +30,7 @@ export const authService = {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.code === 'auth/email-already-in-use') {
         throw new Error('emailAlreadyInUse');
       } else if (error.code === 'auth/weak-password') {
@@ -46,7 +46,7 @@ export const authService = {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       await userCredential.user.getIdToken(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
         throw new Error('invalidCredential');
       } else if (error.code === 'auth/invalid-email') {
@@ -101,7 +101,7 @@ export const authService = {
       
       await user.getIdToken(true);
       return { isNewUser };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.code === 'auth/popup-closed-by-user') {
         throw new Error('popupClosedByUser');
       } else if (error.code === 'auth/account-exists-with-different-credential') {
@@ -160,7 +160,7 @@ export const authService = {
   async resetPassword(email: string): Promise<void> {
     try {
       await sendPasswordResetEmail(auth, email);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.code === 'auth/user-not-found') {
         throw new Error('userNotFound');
       } else if (error.code === 'auth/invalid-email') {
@@ -173,7 +173,7 @@ export const authService = {
   async confirmPasswordReset(oobCode: string, newPassword: string): Promise<void> {
     try {
       await confirmPasswordReset(auth, oobCode, newPassword);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.code === 'auth/expired-action-code') {
         throw new Error('expired-action-code');
       } else if (error.code === 'auth/invalid-action-code') {

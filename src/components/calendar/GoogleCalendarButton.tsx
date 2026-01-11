@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Calendar, Check, Loader, Trash2, User, LogOut, Plus, Settings, ChevronDown, ShieldAlert, RefreshCw, History, X } from 'lucide-react';
+import { useFocusTrap } from '../../hooks/useAccessibility';
 import { useGoogleCalendar } from '../../contexts/GoogleCalendarContext';
 import { useTenant } from '../../contexts/TenantContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -25,18 +26,19 @@ interface GoogleCalendarButtonProps {
 
 export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ initialStrictMode = false, isCompact = false, onManageClick }) => {
   const { t } = useTranslation();
-  const { 
-    isConnected, 
-    lastSyncTime, 
-    isSyncing, 
-    userEmail, 
-    calendarId, 
+  const {
+    isConnected,
+    lastSyncTime,
+    isSyncing,
+    userEmail,
+    calendarId,
     calendarName,
     syncStatus,
     recentActivity,
-    connectToGoogle, 
-    deleteAllSyncedEvents, 
-    disconnect, 
+    statusAnnouncement,
+    connectToGoogle,
+    deleteAllSyncedEvents,
+    disconnect,
     createCalendar,
     updateCalendarSelection,
     listCalendars,
@@ -64,6 +66,12 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
   
   const [previewData, setPreviewData] = useState<PreviewDeletionResult | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
+
+  // Focus trap refs for modals
+  const createCalendarFocusRef = useFocusTrap(showCreateCalendar, () => setShowCreateCalendar(false));
+  const calendarSelectorFocusRef = useFocusTrap(showCalendarSelector, () => setShowCalendarSelector(false));
+  const cleanupConfirmFocusRef = useFocusTrap(showCleanupConfirm, () => setShowCleanupConfirm(false));
+  const deleteConfirmFocusRef = useFocusTrap(showDeleteConfirm, () => setShowDeleteConfirm(false));
 
   // Update showStrictModeModal if initialStrictMode prop changes (e.g. when opening modal from Dashboard)
   useEffect(() => {
@@ -163,9 +171,10 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
       await deleteAllSyncedEvents(currentTenant.id);
       setShowConfirm(false);
       setPreviewData(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting all events:', error);
-      alert(`שגיאה במחיקה: ${error.message || 'שגיאה לא ידועה'}`);
+      const message = error instanceof Error ? error.message : 'שגיאה לא ידועה';
+      alert(`שגיאה במחיקה: ${message}`);
     }
   };
 
@@ -350,8 +359,13 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
       return (
         <button
           onClick={onManageClick}
-          className="flex items-center gap-3 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-all text-sm group h-[38px]"
+          className="flex items-center gap-3 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-colors duration-200 text-sm group h-[38px]"
           title={t('googleCalendar.title')}
+          aria-label={t('googleCalendar.compactStatus', {
+            status: isConnected ? t('googleCalendar.connected') : t('googleCalendar.notConnected'),
+            calendar: calendarName || t('googleCalendar.primaryCalendar'),
+            email: userEmail || ''
+          })}
         >
           {/* Icon & Status */}
           <div className="relative">
@@ -369,7 +383,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
           <div className="flex items-center gap-2 text-xs">
             <span className="font-medium text-gray-900 hidden xl:inline">{t('googleCalendar.connected')}</span>
             <span className="text-gray-500 hidden lg:inline">{userEmail}</span>
-            <span className="text-gray-400 hidden lg:inline">•</span>
+            <span className="text-gray-500 hidden lg:inline">•</span>
             <span className="text-blue-700 font-medium">{calendarName || t('googleCalendar.primaryCalendar')}</span>
           </div>
         </button>
@@ -378,8 +392,13 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
 
     return (
       <>
+        {/* Status Announcements for Screen Readers */}
+        <div aria-live="polite" aria-atomic="true" className="sr-only">
+          {statusAnnouncement}
+        </div>
+
         {/* Main Card Container */}
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden w-full transition-all hover:shadow-md">
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden w-full transition-colors duration-200 hover:shadow-md">
           
           {/* Header Section */}
           <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
@@ -406,7 +425,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
                ) : (
                   <button 
                     onClick={() => setShowHistory(true)}
-                    className="flex items-center gap-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 px-2 py-1 rounded-md transition-all text-xs font-medium"
+                    className="flex items-center gap-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 px-2 py-1 rounded-md transition-colors duration-200 text-xs font-medium"
                     title={t('googleCalendar.showHistory')}
                   >
                     <History className="w-3.5 h-3.5" />
@@ -421,8 +440,8 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
             
             {/* User Info Row */}
             <div className="flex items-center gap-3 text-sm text-gray-700">
-              <div className="w-8 flex justify-center text-gray-400">
-                <User className="w-4 h-4" />
+              <div className="w-8 flex justify-center text-gray-500">
+                <User className="w-4 h-4" aria-hidden="true" />
               </div>
               <div className="flex-1 font-medium truncate">
                 {userEmail || (isSyncing ? t('common.loading') : t('googleCalendar.notAvailable'))}
@@ -435,18 +454,20 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
                 {t('googleCalendar.currentCalendar')}
               </label>
               <div className="flex items-center gap-3">
-                <div className="w-8 flex justify-center text-gray-400">
-                  <Calendar className="w-4 h-4" />
+                <div className="w-8 flex justify-center text-gray-500">
+                  <Calendar className="w-4 h-4" aria-hidden="true" />
                 </div>
                 <button
                   onClick={() => setShowCalendarSelector(!showCalendarSelector)}
                   disabled={isSyncing}
-                  className="flex-1 flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg hover:border-blue-500 hover:ring-1 hover:ring-blue-500 transition-all text-sm group text-right"
+                  className="flex-1 flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg hover:border-blue-500 hover:ring-1 hover:ring-blue-500 transition-colors duration-200 text-sm group text-right"
+                  aria-expanded={showCalendarSelector}
+                  aria-haspopup="listbox"
                 >
                   <span className="font-medium text-gray-900 truncate">
                     {calendarName || t('googleCalendar.primaryCalendar')}
                   </span>
-                  <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                  <ChevronDown className="w-4 h-4 text-gray-500 group-hover:text-blue-500 transition-colors" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -468,6 +489,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
               <button
                 onClick={handleCleanupOrphans}
                 disabled={isSyncing}
+                aria-busy={isSyncing}
                 className="flex flex-col items-center justify-center gap-1 p-2 rounded-lg hover:bg-amber-50 text-gray-600 hover:text-amber-600 transition-colors border border-transparent hover:border-amber-100"
               >
                 <RefreshCw className="w-4 h-4" />
@@ -477,6 +499,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
               <button
                 onClick={handlePreviewDeletion}
                 disabled={isSyncing}
+                aria-busy={isSyncing}
                 className="flex flex-col items-center justify-center gap-1 p-2 rounded-lg hover:bg-red-50 text-gray-600 hover:text-red-600 transition-colors border border-transparent hover:border-red-100"
               >
                 <Trash2 className="w-4 h-4" />
@@ -486,6 +509,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
               <button
                 onClick={handleDisconnect}
                 disabled={isSyncing}
+                aria-busy={isSyncing}
                 className="flex flex-col items-center justify-center gap-1 p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors border border-transparent hover:border-gray-200"
               >
                 <LogOut className="w-4 h-4" />
@@ -512,13 +536,19 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
         {/* מודל מחיקת יומן - מוצג לפני רשימת היומנים */}
         {showDeleteConfirm && calendarToDelete && (
           // ... existing delete confirm ...
-          <div className="mb-2 w-full sm:w-96 sm:ml-auto bg-gradient-to-br from-red-50 to-orange-50 border border-red-200 rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-5 z-50 relative">
+          <div
+            ref={deleteConfirmFocusRef}
+            className="mb-2 w-full sm:w-96 sm:ml-auto bg-gradient-to-br from-red-50 to-orange-50 border border-red-200 rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-5 z-50 relative"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-calendar-title"
+          >
             {/* ... contents unchanged ... */}
              <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
-                <Trash2 className="w-4 h-4 text-white" />
+                <Trash2 className="w-4 h-4 text-white" aria-hidden="true" />
               </div>
-              <h3 className="text-sm sm:text-base font-semibold text-red-900">
+              <h3 id="delete-calendar-title" className="text-sm sm:text-base font-semibold text-red-900">
                 {t('googleCalendar.deleteCalendar')}
               </h3>
             </div>
@@ -553,12 +583,19 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
 
         {showCreateCalendar && (
              <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/20 backdrop-blur-[1px]" onClick={(e) => { e.stopPropagation(); setShowCreateCalendar(false); }}>
-             <div className="bg-white border border-gray-200 rounded-xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
+             <div
+               ref={createCalendarFocusRef}
+               className="bg-white border border-gray-200 rounded-xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden animate-in fade-in zoom-in duration-200"
+               onClick={(e) => e.stopPropagation()}
+               role="dialog"
+               aria-modal="true"
+               aria-labelledby="create-calendar-title"
+             >
              <div className="p-4 border-b border-gray-100 bg-blue-50/50 flex items-center gap-2">
               <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
-                <Plus className="w-4 h-4 text-white" />
+                <Plus className="w-4 h-4 text-white" aria-hidden="true" />
               </div>
-              <h3 className="text-sm font-semibold text-blue-900">
+              <h3 id="create-calendar-title" className="text-sm font-semibold text-blue-900">
                 {t('googleCalendar.createCalendar')}
               </h3>
             </div>
@@ -609,13 +646,20 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
         {/* Calendar Selection Modal - Replaced inline with modal overlay */}
         {showCalendarSelector && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/20 backdrop-blur-[1px]" onClick={(e) => { e.stopPropagation(); setShowCalendarSelector(false); }}>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
+            <div
+              ref={calendarSelectorFocusRef}
+              className="bg-white border border-gray-200 rounded-xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden animate-in fade-in zoom-in duration-200"
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="calendar-selector-title"
+            >
             <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-purple-50 border border-purple-100 rounded-lg flex items-center justify-center text-purple-600">
-                        <Settings className="w-4 h-4" />
+                        <Settings className="w-4 h-4" aria-hidden="true" />
                     </div>
-                    <h3 className="text-sm font-semibold text-gray-900">
+                    <h3 id="calendar-selector-title" className="text-sm font-semibold text-gray-900">
                         {t('googleCalendar.selectCalendar')}
                     </h3>
                 </div>
@@ -635,21 +679,21 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
                   <span className="text-sm">{t('googleCalendar.loadingCalendars')}</span>
                 </div>
               ) : (
-                <div className="space-y-2 max-h-[60vh] overflow-y-auto mb-4 pr-1 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+                <ul className="space-y-2 max-h-[60vh] overflow-y-auto mb-4 pr-1 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent" role="listbox">
                   {/* Primary Calendar - Disabled */}
-                  <div className="relative group">
-                      <button
-                          disabled={true}
-                          className="w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm bg-gray-50 text-gray-400 border border-gray-100 cursor-not-allowed"
-                      >
-                          <div className="flex flex-col items-start gap-0.5">
-                              <span className="font-medium">{t('googleCalendar.primaryCalendarName')}</span>
-                              <span className="text-[10px] text-gray-400">לא ניתן לסנכרן ליומן הראשי</span>
-                          </div>
-                          <span className="text-[10px] bg-gray-200 px-1.5 py-0.5 rounded text-gray-500 font-medium">חסום</span>
-                      </button>
-                  </div>
-  
+                  <li className="relative group">
+                    <button
+                      disabled={true}
+                      className="w-full flex items-center justify-between px-3 py-3 rounded-lg text-sm bg-gray-50 text-gray-500 border border-gray-100 cursor-not-allowed"
+                    >
+                      <div className="flex flex-col items-start gap-0.5">
+                        <span className="font-medium">{t('googleCalendar.primaryCalendarName')}</span>
+                        <span className="text-[10px] text-gray-500">לא ניתן לסנכרן ליומן הראשי</span>
+                      </div>
+                      <span className="text-[10px] bg-gray-200 px-1.5 py-0.5 rounded text-gray-500 font-medium">חסום</span>
+                    </button>
+                  </li>
+
                   {/* Custom Calendars */}
                   {availableCalendars
                     .filter(cal => cal.id !== 'primary' && !cal.primary)
@@ -659,11 +703,11 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
                       const canDelete = isCreated && !isCurrent;
                       
                       return (
-                      <div key={calendar.id} className="flex items-center gap-2 group">
+                      <li key={calendar.id} className="flex items-center gap-2 group">
                         <button
                           onClick={() => handleSelectCalendar(calendar)}
                           disabled={isSyncing || isCurrent}
-                          className={`flex-1 flex items-center justify-between px-3 py-3 rounded-lg text-sm transition-all border ${
+                          className={`flex-1 flex items-center justify-between px-3 py-3 rounded-lg text-sm transition-colors duration-200 border ${
                             isCurrent
                               ? 'bg-blue-50 text-blue-900 border-blue-200 ring-1 ring-blue-200'
                               : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-200 hover:border-gray-300'
@@ -692,14 +736,15 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
                               disabled={isSyncing}
                               className="flex-shrink-0 p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
                               title={t('googleCalendar.deleteCalendar')}
+                              aria-label={t('googleCalendar.deleteCalendarName', { name: calendar.summary })}
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4" aria-hidden="true" />
                             </button>
                           )}
-                        </div>
+                        </li>
                       );
                     })}
-                </div>
+                </ul>
               )}
               <button
                 onClick={(e) => {
@@ -718,12 +763,18 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
         )}
 
         {showConfirm && (
-          <div className="mt-2 w-full sm:w-96 sm:ml-auto bg-gradient-to-br from-red-50 to-orange-50 border border-red-200 rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-5">
+          <div
+            ref={cleanupConfirmFocusRef}
+            className="mt-2 w-full sm:w-96 sm:ml-auto bg-gradient-to-br from-red-50 to-orange-50 border border-red-200 rounded-lg sm:rounded-xl shadow-lg p-4 sm:p-5"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cleanup-confirm-title"
+          >
             <div className="flex items-center gap-2 mb-3">
               <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
-                <ShieldAlert className="w-4 h-4 text-white" />
+                <ShieldAlert className="w-4 h-4 text-white" aria-hidden="true" />
               </div>
-              <h3 className="text-sm sm:text-base font-semibold text-red-900">
+              <h3 id="cleanup-confirm-title" className="text-sm sm:text-base font-semibold text-red-900">
                 {t('googleCalendar.deleteAllEvents')}
               </h3>
             </div>
@@ -756,13 +807,13 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
 
                     {previewData && previewData.summary.length > 0 ? (
                         <div className="mb-4 bg-white/50 rounded-lg p-3 max-h-40 overflow-y-auto text-xs border border-red-100">
-                             <p className="font-bold text-red-900 mb-1">{t('googleCalendar.deleteAllSummary', { 
+                             <p className="font-bold text-red-900 mb-1">{t('googleCalendar.deleteAllSummary', {
                                 recordsCount: previewData.recordsCount || previewData.summary.length,
-                                eventsCount: previewData.totalCount 
+                                eventsCount: previewData.totalCount
                              })}</p>
-                             <ul className="list-disc list-inside space-y-0.5 text-red-800">
+                             <ul className="list-disc list-inside space-y-0.5 text-red-800" role="list">
                                 {previewData.summary.map((item, idx) => (
-                                    <li key={idx}>
+                                    <li key={idx} role="listitem">
                                         {item.name}: {item.hebrewEvents + item.gregorianEvents} {t('common.events')}
                                     </li>
                                 ))}
@@ -808,7 +859,9 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
     <button
       onClick={handleConnect}
       disabled={isSyncing}
-      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 rounded-lg font-medium transition-all shadow-sm text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+      aria-busy={isSyncing}
+      aria-label={t('googleCalendar.connect')}
+      className="flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 rounded-lg font-medium transition-colors duration-200 shadow-sm text-sm disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {isSyncing ? (
         <Loader className="w-4 h-4 animate-spin" />

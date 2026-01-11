@@ -49,7 +49,7 @@ export const FloatingBackButton: React.FC<FloatingBackButtonProps> = ({
       <button
         onClick={handleClick}
         onTouchEnd={handleClick}
-        className={`p-4 bg-white/95 border border-gray-200 text-gray-700 rounded-full shadow-xl hover:bg-white transition-all active:scale-95 cursor-pointer touch-manipulation ${className}`}
+        className={`p-4 bg-white/95 border border-gray-200 text-gray-700 rounded-full shadow-xl hover:bg-white transition-[transform,colors] duration-200 active:scale-95 cursor-pointer touch-manipulation ${className}`}
         aria-label={t('common.back')}
         style={{ WebkitTapHighlightColor: 'transparent' }}
       >

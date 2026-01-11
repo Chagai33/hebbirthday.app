@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, AlertTriangle } from 'lucide-react';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 interface DeleteGroupModalProps {
   isOpen: boolean;
@@ -20,6 +21,10 @@ export const DeleteGroupModal = ({
   const { t } = useTranslation();
   const [selectedOption, setSelectedOption] = useState<'keep' | 'delete' | null>(null);
 
+  // Accessibility: Focus management
+  const modalFocusRef = useFocusTrap(isOpen, onClose);
+  useFocusReturn(isOpen);
+
   if (!isOpen) return null;
 
   const handleConfirm = () => {
@@ -31,14 +36,14 @@ export const DeleteGroupModal = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6">
+      <div ref={modalFocusRef} className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[calc(100vh-2rem)] overflow-y-auto p-6" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
               <AlertTriangle className="w-6 h-6 text-red-600" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 id="delete-modal-title" className="text-xl font-bold text-gray-900">
                 {t('modals.deleteGroup.title')}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
@@ -48,9 +53,10 @@ export const DeleteGroupModal = ({
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-3 text-gray-500 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            aria-label={t('common.close')}
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -68,7 +74,7 @@ export const DeleteGroupModal = ({
         <div className="space-y-3 mb-6">
           <button
             onClick={() => setSelectedOption('keep')}
-            className={`w-full p-4 border-2 rounded-lg text-right transition-all ${
+            className={`w-full p-4 border-2 rounded-lg text-right transition-colors duration-200 ${
               selectedOption === 'keep'
                 ? 'border-blue-500 bg-blue-50'
                 : 'border-gray-200 hover:border-gray-300'
@@ -94,7 +100,7 @@ export const DeleteGroupModal = ({
 
           <button
             onClick={() => setSelectedOption('delete')}
-            className={`w-full p-4 border-2 rounded-lg text-right transition-all ${
+            className={`w-full p-4 border-2 rounded-lg text-right transition-colors duration-200 ${
               selectedOption === 'delete'
                 ? 'border-red-500 bg-red-50'
                 : 'border-gray-200 hover:border-gray-300'

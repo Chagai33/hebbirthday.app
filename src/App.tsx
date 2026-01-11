@@ -18,6 +18,7 @@ import { GroupsPanel } from './components/groups/GroupsPanel';
 import { GeltPage } from './components/gelt/GeltPage';
 import { TermsOfUse } from './components/pages/TermsOfUse';
 import { PrivacyPolicy } from './components/pages/PrivacyPolicy';
+import { Accessibility } from './components/pages/Accessibility';
 import { UserGuide } from './components/pages/UserGuide';
 import { GuestPortal } from './components/guest/GuestPortal';
 import { GuestAccessPage } from './components/guest/GuestAccessPage';
@@ -58,6 +59,12 @@ function App() {
     document.title = t('app.title', 'HebBirthday | Hebrew & Gregorian Calendar');
   }, [i18n.language, t]);
 
+  useEffect(() => {
+    // Sync HTML lang attribute with i18next language
+    document.documentElement.lang = i18n.language;
+    document.documentElement.dir = i18n.language === 'he' ? 'rtl' : 'ltr';
+  }, [i18n.language]);
+
   // טיפול ב-Google OAuth callback אם יש טוקן ב-URL hash
   useEffect(() => {
     if (window.google && window.google.accounts && window.google.accounts.oauth2) {
@@ -96,6 +103,7 @@ function App() {
                       <Route path="/reset-password" element={<ResetPassword />} />
                       <Route path="/terms" element={<TermsOfUse />} />
                       <Route path="/privacy" element={<PrivacyPolicy />} />
+                      <Route path="/accessibility" element={<Accessibility />} />
                       <Route path="/guide" element={<UserGuide />} />
                       <Route path="/portal" element={<GuestPortal />} />
                       <Route path="/guest/:groupId/:token" element={<GuestAccessPage />} />

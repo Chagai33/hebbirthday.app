@@ -38,11 +38,11 @@ exports.deleteAllSyncedEventsFn = exports.triggerDeleteAllEventsFn = exports.pro
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const dependencies_1 = require("../dependencies");
-const deps = (0, dependencies_1.createDependencies)();
 // Process calendar sync job
 exports.processCalendarSyncJobFn = functions
     .runWith({ timeoutSeconds: 540, memory: '256MB' })
     .https.onRequest(async (req, res) => {
+    const deps = (0, dependencies_1.createDependencies)();
     if (req.method !== 'POST') {
         res.status(405).send('Method Not Allowed');
         return;
@@ -57,8 +57,9 @@ exports.processCalendarSyncJobFn = functions
 });
 // Process deletion job
 exports.processDeletionJobFn = functions
-    .runWith({ timeoutSeconds: 540, memory: '256MB' })
+    .runWith({ timeoutSeconds: 540, memory: '512MB' })
     .https.onRequest(async (req, res) => {
+    const deps = (0, dependencies_1.createDependencies)();
     if (req.method !== 'POST') {
         res.status(405).send('Method Not Allowed');
         return;
@@ -69,33 +70,29 @@ exports.processDeletionJobFn = functions
         return;
     }
     try {
-        const result = await deps.cleanupOrphanEventsUseCase.executeWithDBCleanup(userId, tenantId);
-        functions.logger.log(`[DeleteJob] Completed. Deleted: ${result.deletedCount}, Found: ${result.foundCount}`);
-        await deps.tokenRepo.save(userId, {
-            userId,
-            syncStatus: 'IDLE',
-            accessToken: '',
-            expiresAt: 0
-        });
+        const result = await deps.processAccountDeletionUseCase.execute(userId, tenantId);
+        if (result.remaining) {
+            functions.logger.log(`[DeleteJob] Batch complete (${result.deletedCount} deleted). Re-queueing...`);
+            await deps.tasksClient.createDeletionTask({ userId, tenantId });
+        }
+        else {
+            functions.logger.log(`[DeleteJob] Completed successfully.`);
+        }
         res.status(200).send({
             success: true,
             deletedCount: result.deletedCount,
-            foundCount: result.foundCount
+            remaining: result.remaining
         });
     }
     catch (e) {
         functions.logger.error('[DeleteJob] Fatal error:', e);
-        await deps.tokenRepo.save(userId, {
-            userId,
-            syncStatus: 'ERROR',
-            accessToken: '',
-            expiresAt: 0
-        });
-        res.status(500).send({ error: e.message });
+        const error = e;
+        res.status(500).send({ error: error.message || 'Unknown error' });
     }
 });
 // Trigger delete all events
 exports.triggerDeleteAllEventsFn = functions.https.onCall(async (data, context) => {
+    const deps = (0, dependencies_1.createDependencies)();
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'Auth required');
     }
@@ -119,11 +116,13 @@ exports.triggerDeleteAllEventsFn = functions.https.onCall(async (data, context) 
             accessToken: '',
             expiresAt: 0
         });
-        throw new functions.https.HttpsError('internal', 'Failed to queue job: ' + e.message);
+        const error = e;
+        throw new functions.https.HttpsError('internal', 'Failed to queue job: ' + (error.message || 'Unknown error'));
     }
 });
 // Delete all synced events (legacy)
 exports.deleteAllSyncedEventsFn = functions.https.onCall(async (data, context) => {
+    const deps = (0, dependencies_1.createDependencies)();
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'Auth required');
     }

@@ -26,29 +26,29 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
 
   // Order: Add (Bottom), Import, Text Import (Top)
   const menuItems = [
-    { 
+    {
         id: 'add',
-        icon: Plus, 
-        label: t('birthday.addBirthday'), 
-        onClick: onAdd, 
-        color: 'text-blue-600', 
+        icon: Plus,
+        label: t('birthday.addBirthday'),
+        onClick: onAdd,
+        color: 'text-blue-600',
         bgColor: 'bg-blue-50',
         borderColor: 'border-blue-200'
     },
-    { 
+    {
         id: 'import',
-        icon: Upload, 
-        label: t('birthday.importCSV'), 
-        onClick: onImport, 
+        icon: Upload,
+        label: t('birthday.importCSV'),
+        onClick: onImport,
         color: 'text-green-600',
         bgColor: 'bg-green-50',
         borderColor: 'border-green-200'
     },
-    { 
+    {
         id: 'textImport',
-        icon: FileText, 
-        label: t('birthday.pasteImport'), 
-        onClick: onTextImport, 
+        icon: FileText,
+        label: t('birthday.pasteImport'),
+        onClick: onTextImport,
         color: 'text-purple-600',
         bgColor: 'bg-purple-50',
         borderColor: 'border-purple-200'
@@ -95,7 +95,7 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
 
         {/* Menu Items */}
         <div 
-            className={`flex flex-col-reverse gap-3 absolute bottom-full mb-6 transition-all duration-200 ${isHebrew ? 'left-2' : 'right-2'}
+            className={`flex flex-col-reverse gap-3 absolute bottom-full mb-6 transition-transform duration-200 ${isHebrew ? 'left-2' : 'right-2'}
             ${isOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 translate-y-4 pointer-events-none'}`}
             style={{ paddingBottom: '1rem' }}
         >
@@ -104,7 +104,7 @@ export const FloatingDock: React.FC<FloatingDockProps> = ({
                  {/* Icon Button */}
                 <button
                     onClick={() => handleAction(item.onClick)}
-                    className={`p-3 rounded-full shadow-lg border transition-all duration-200 hover:scale-110 active:scale-95 backdrop-blur-md bg-white/90 border-white/50`}
+                    className={`p-3 rounded-full shadow-lg border transition-transform duration-200 hover:scale-110 active:scale-95 backdrop-blur-md bg-white/90 border-white/50`}
                     aria-label={item.label}
                 >
                     {item.isCustomIcon ? (

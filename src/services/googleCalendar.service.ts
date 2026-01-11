@@ -34,7 +34,7 @@ class GoogleCalendarService {
                         reject(new Error('Failed to get authorization code'));
                     }
                 },
-                error_callback: (error: any) => {
+                error_callback: (error: unknown) => {
                     reject(error);
                 }
             });

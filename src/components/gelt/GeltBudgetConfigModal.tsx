@@ -4,6 +4,7 @@ import { BudgetConfig } from '../../types/gelt';
 import { handleInputBlur, handleArrowKey, roundToFive } from '../../utils/geltCalculations';
 import { X, XCircle } from 'lucide-react';
 import { Button } from '../common/Button';
+import { useFocusTrap } from '../../hooks/useAccessibility';
 
 interface GeltBudgetConfigModalProps {
   isOpen: boolean;
@@ -24,6 +25,9 @@ export const GeltBudgetConfigModal: React.FC<GeltBudgetConfigModalProps> = ({
   const [customBudget, setCustomBudget] = useState(
     config.customBudget ? config.customBudget.toString() : ''
   );
+
+  // Focus trap for modal
+  const focusTrapRef = useFocusTrap(isOpen, onClose);
 
   // Update local state when config changes
   useEffect(() => {
@@ -119,26 +123,32 @@ export const GeltBudgetConfigModal: React.FC<GeltBudgetConfigModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div 
+      <div
+        ref={focusTrapRef}
         className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-slide-in"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="budget-config-title"
       >
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-bold text-gray-900">{t('gelt.budgetConfig')}</h2>
+          <h2 id="budget-config-title" className="text-xl font-bold text-gray-900">{t('gelt.budgetConfig')}</h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors min-h-[44px]"
+            aria-label={t('gelt.closeBudgetConfig')}
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
         <div className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="participants-input" className="block text-sm font-medium text-gray-700 mb-2">
               {t('gelt.participants')}
             </label>
             <input
+              id="participants-input"
               type="number"
               value={participants}
               onChange={(e) => setParticipants(e.target.value)}
@@ -150,10 +160,11 @@ export const GeltBudgetConfigModal: React.FC<GeltBudgetConfigModalProps> = ({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="overflow-input" className="block text-sm font-medium text-gray-700 mb-2">
               {t('gelt.allowedOverflow')} (%)
             </label>
             <input
+              id="overflow-input"
               type="number"
               value={overflow}
               onChange={(e) => setOverflow(e.target.value)}
@@ -168,21 +179,22 @@ export const GeltBudgetConfigModal: React.FC<GeltBudgetConfigModalProps> = ({
 
           <div className="pt-4 border-t border-gray-200">
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-gray-700">
+              <label htmlFor="custom-budget-input" className="block text-sm font-medium text-gray-700">
                 {t('gelt.customBudget')}
               </label>
               {config.customBudget && (
                 <button
                   onClick={handleClearCustomBudget}
-                  className="text-xs text-gray-500 hover:text-red-600 flex items-center gap-1"
-                  title={t('gelt.clearCustomBudget')}
+                  className="text-xs text-gray-500 hover:text-red-600 flex items-center gap-1 p-1 min-h-[44px]"
+                  aria-label={t('gelt.clearCustomBudget')}
                 >
-                  <XCircle className="w-3 h-3" />
+                  <XCircle className="w-3 h-3" aria-hidden="true" />
                   {t('gelt.clear')}
                 </button>
               )}
             </div>
             <input
+              id="custom-budget-input"
               type="number"
               value={customBudget}
               onChange={(e) => setCustomBudget(e.target.value)}
@@ -192,8 +204,9 @@ export const GeltBudgetConfigModal: React.FC<GeltBudgetConfigModalProps> = ({
               step="5"
               placeholder={t('gelt.customBudgetPlaceholder')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              aria-describedby="custom-budget-hint"
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p id="custom-budget-hint" className="text-xs text-gray-500 mt-1">
               {t('gelt.customBudgetHint')}
             </p>
           </div>

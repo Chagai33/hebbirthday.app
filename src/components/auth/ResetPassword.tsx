@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { authService } from '../../services/auth.service';
 import { Lock } from 'lucide-react';
 import { LanguageSwitcher } from '../common/LanguageSwitcher';
+import { Logo } from '../common/Logo';
+import { AuthLayout } from './AuthLayout';
 
 export const ResetPassword: React.FC = () => {
   const { t } = useTranslation();
@@ -47,16 +49,17 @@ export const ResetPassword: React.FC = () => {
           navigate('/login');
         }, 3000);
       }
-    } catch (err: any) {
-      if (err.message === 'expired-action-code') {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      if (errorMessage === 'expired-action-code') {
         setError(t('auth.expiredActionCode'));
-      } else if (err.message === 'invalid-action-code') {
+      } else if (errorMessage === 'invalid-action-code') {
         setError(t('auth.invalidActionCode'));
-      } else if (err.message === 'user-disabled') {
+      } else if (errorMessage === 'user-disabled') {
         setError(t('auth.userDisabled'));
-      } else if (err.message === 'user-not-found') {
+      } else if (errorMessage === 'user-not-found') {
         setError(t('auth.userNotFound'));
-      } else if (err.message === 'weak-password') {
+      } else if (errorMessage === 'weak-password') {
         setError(t('validation.passwordTooShort'));
       } else {
         setError(t('common.error'));
@@ -71,22 +74,24 @@ export const ResetPassword: React.FC = () => {
   if (!oobCode) return null;
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-8 overflow-y-auto">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 relative">
-        <div className="flex justify-end items-center mb-4">
+    <AuthLayout>
+      <div className="flex justify-end items-center mb-4">
           <LanguageSwitcher className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" variant="minimal" />
         </div>
 
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <div className="flex justify-center mb-6">
+            <Logo variant="auth" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">
             {t('auth.resetPassword')}
           </h1>
         </div>
 
         {success ? (
           <div className="text-center py-4">
-            <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-16 h-16 bg-green-100 text-green-700 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
@@ -106,12 +111,13 @@ export const ResetPassword: React.FC = () => {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-1">
                 {t('auth.newPassword')}
               </label>
               <div className="relative">
-                <Lock className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Lock className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" aria-hidden="true" />
                 <input
+                  id="new-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -123,12 +129,13 @@ export const ResetPassword: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-1">
                 {t('auth.confirmPassword')}
               </label>
               <div className="relative">
-                <Lock className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Lock className="absolute start-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" aria-hidden="true" />
                 <input
+                  id="confirm-password"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -148,8 +155,7 @@ export const ResetPassword: React.FC = () => {
             </button>
           </form>
         )}
-      </div>
-    </div>
+    </AuthLayout>
   );
 };
 

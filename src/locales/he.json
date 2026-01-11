@@ -82,7 +82,13 @@
     "rateLimitError": "יותר מדי נסיונות. אנא המתן לפני נסיון נוסף.",
     "maxItemsError": "לא ניתן להוסיף יותר מ-{{count}} פריטים לרשימה",
     "maxItemsLimitReached": "הגעת למכסת הפריטים המקסימלית ({{count}})",
-    "groups": "קבוצות"
+    "groups": "קבוצות",
+    "editItemName": "ערוך מתנה: {{name}}",
+    "deleteItemName": "מחק מתנה: {{name}}",
+    "firstNameRequired": "שם פרטי (שדה חובה)",
+    "lastNameRequired": "שם משפחה (שדה חובה)",
+    "dateGroupLabel": "בחירת תאריך לידה",
+    "searchClear": "נקה חיפוש"
   },
   "googleCalendar": {
     "title": "יומן Google",
@@ -205,7 +211,16 @@
     "account": "חשבון",
     "calendar": "יומן",
     "unsyncSelected": "בטל סנכרון",
-    "confirmBulkUnsync": "האם לבטל סנכרון ולמחוק מהיומן עבור הרשומות שנבחרו?"
+    "confirmBulkUnsync": "האם לבטל סנכרון ולמחוק מהיומן עבור הרשומות שנבחרו?",
+    "deleteCalendarName": "מחק יומן: {{name}}",
+    "compactConnectedLabel": "מחובר ליומן Google עבור {{email}}, יומן נוכחי: {{calendar}}",
+    "historyModalLabel": "חלון היסטוריית סנכרון",
+    "closeHistory": "סגור היסטוריה",
+    "calendarSelectorLabel": "תפריט בחירת יומן",
+    "createCalendarLabel": "חלון יצירת יומן חדש",
+    "cleanupConfirmLabel": "חלון אישור ניקוי אירועים יתומים",
+    "deleteConfirmLabel": "חלון אישור מחיקת יומן",
+    "syncStatusLabel": "סטטוס סנכרון ליומן Google"
   },
   "guestAccess": {
     "welcomeToGroup": "ברוכים הבאים לקבוצת {{name}}",
@@ -233,6 +248,7 @@
     "botDetected": "נתגלתה פעילות חשודה. אנא נסה שוב.",
     "limitReached": "הגעת למגבלת ההוספות לקישור זה. אנא צור קשר עם מנהל הקבוצה.",
     "tokenExpired": "קישור זה פג תוקף (72 שעות). אנא צור קשר עם מנהל הקבוצה לקבלת קישור חדש.",
+    "rateLimitWait": "יותר מדי ניסיונות. אנא המתן {{seconds}} שניות ונסה שוב.",
     "verifyHebrewDate": "אנא ודא שהתאריך העברי נכון. אם לא, שנה את 'נולד אחרי השקיעה' למטה.",
     "verifyGregorianDate": "ודא שהתאריך הלועזי המתאים נכון"
   },
@@ -250,6 +266,7 @@
     "copyToWhatsapp": "העתק",
     "copyToWhatsappList": "העתק רשימת ימי הולדת לוואטסאפ",
     "copied": "הועתק!",
+    "selectColor": "בחר צבע {{color}}",
     "filter": "סינון",
     "filters": "פילטרים",
     "close": "סגור",
@@ -264,6 +281,7 @@
     "other": "אחר",
     "actions": "פעולות",
     "selected": "נבחרו",
+    "notSelected": "לא נבחר",
     "clear": "נקה הכל",
     "confirmDelete": "האם אתה בטוח?",
     "noResults": "לא נמצאו תוצאות",
@@ -287,6 +305,7 @@
     "month": "חודש",
     "year": "שנה",
     "menu": "תפריט",
+    "notifications": "התראות",
     "note": "הערה",
     "moreInfo": "מידע נוסף",
     "birthDate": "תאריך לידה",
@@ -301,7 +320,13 @@
     "quickGuide": "מדריך מקוצר",
     "fullGuide": "המדריך המלא",
     "advancedOptions": "אפשרויות מתקדמות (לוח שנה, הערות)",
-    "lessOptions": "פחות אפשרויות"
+    "lessOptions": "פחות אפשרויות",
+    "currentDateLabel": "התאריך היום: {{hebrew}}, {{gregorian}}",
+    "home": "HebBirthday.app - דף הבית",
+    "switchToLanguage": "שנה שפה ל-{{lang}}",
+    "sendEmailTo": "שלח אימייל ל-{{email}}",
+    "backToHome": "חזור לעמוד הבית",
+    "retry": "נסה שוב"
   },
   "guestPortal": {
     "title": "פורטל מתנות לאורחים",
@@ -318,7 +343,12 @@
     "shareHint": "כפתור ההודעה מעתיק טקסט מלא עם הסבר",
     "accessSettings": "הגדרות גישה לפורטל",
     "accessDescription": "אפשר לאורחים לגשת ולנהל את המשאלות שלהם דרך הפורטל הציבורי.",
-    "groupPermissions": "ניהול הרשאות לפי קבוצות"
+    "groupPermissions": "ניהול הרשאות לפי קבוצות",
+    "enablePortal": "הפעל פורטל מתנות לאורחים",
+    "toggleGroupFor": "הפעל פורטל לקבוצה {{groupName}}",
+    "copyLinkAction": "העתק קישור לפורטל ללוח",
+    "copyMessageAction": "העתק הודעה עם קישור לפורטל ללוח",
+    "shareWhatsAppAction": "שתף קישור לפורטל בוואטסאפ"
   },
   "auth": {
     "signIn": "התחבר",
@@ -408,7 +438,14 @@
     "deleteAccountConfirmTitle": "האם אתה בטוח לחלוטין?",
     "deleteAccountConfirmDescription": "פעולה זו אינה הפיכה. היא תמחק לצמיתות את חשבונך ותסיר את הנתונים שלך מהשרתים שלנו.",
     "summaryOfData": "סיכום הנתונים שיימחקו:",
-    "confirmDelete": "כן, מחק חשבון"
+    "confirmDelete": "כן, מחק חשבון",
+    "currency": "מטבע ראשי",
+    "currencyHint": "המטבע שבו יוצגו הסכומים בכל האפליקציה.",
+    "currencies": {
+      "ILS": "₪ שקל (ILS)",
+      "USD": "$ דולר (USD)",
+      "EUR": "€ אירו (EUR)"
+    }
   },
   "sort": {
     "upcomingSoonest": "יום הולדת (לועזי - הקרוב ביותר)",
@@ -500,7 +537,10 @@
     "possibleDuplicate": "כפילות אפשרית",
     "deleteConfirmWithCalendar": "האם אתה בטוח? פעולה זו תמחק את יום ההולדת וגם תסיר את כל האירועים המקושרים מיומן Google.",
     "exportSuccess": "הייצוא הושלם בהצלחה",
-    "hebrewZodiacCopied": "התאריכים העבריים והמזלות הועתקו ללוח"
+    "hebrewZodiacCopied": "התאריכים העבריים והמזלות הועתקו ללוח",
+    "editName": "עריכת יום הולדת של {{name}}",
+    "deleteName": "מחיקת יום הולדת של {{name}}",
+    "selectRow": "בחר שורה"
   },
   "zodiac": {
     "aries": "טלה",
@@ -543,6 +583,9 @@
     "noGroupsYet": "טרם נוצרו קבוצות",
     "createFirstGroup": "צור את הקבוצה הראשונה שלך",
     "rootGroup": "קבוצה ראשית",
+    "selectGroupItem": "{{name}} - {{status}}",
+    "selectionSummary": "{{count}} קבוצות נבחרו: {{text}}",
+    "noSelection": "לא נבחרו קבוצות",
     "underGroup": "תחת",
     "filterByGroup": "סינון לפי קבוצה",
     "allGroups": "כל הקבוצות",
@@ -608,7 +651,9 @@
     "addedBy": "נוסף על ידי אורח",
     "undo": "בטל",
     "undoSuccess": "יום ההולדת הוסר בהצלחה",
-    "guestAddedIndicator": "נוסף על ידי אורח"
+    "guestAddedIndicator": "נוסף על ידי אורח",
+    "shareGroup": "שתף קבוצת {{name}}",
+    "editGroup": "ערוך קבוצת {{name}}"
   },
   "wishlist": {
     "title": "רשימת המשאלות",
@@ -680,6 +725,11 @@
   },
   "validation": {
     "required": "שדה זה הוא חובה",
+    "firstNameRequired": "שם פרטי הוא שדה חובה",
+    "lastNameRequired": "שם משפחה הוא שדה חובה",
+    "birthDateRequired": "תאריך לידה הוא שדה חובה",
+    "genderRequired": "מגדר הוא שדה חובה",
+    "groupRequired": "בחירת קבוצה היא שדה חובה",
     "invalidEmail": "כתובת דואר אלקטרוני לא תקינה",
     "importSuccess": "ייבוא הושלם בהצלחה",
     "importError": "שגיאה בייבוא קובץ CSV",
@@ -803,7 +853,9 @@
   "footer": {
     "termsOfUse": "תנאי שימוש",
     "privacyPolicy": "מדיניות פרטיות",
+    "accessibility": "הצהרת נגישות",
     "feedback": "משוב",
+    "feedbackOpenNewWindow": "פתח טופס משוב בחלון חדש",
     "deleteAccount": "מחק חשבון",
     "confirmDelete": "לאשר מחיקה?",
     "deleteAccountNotImplemented": "פונקציונליות מחיקת חשבון עדיין לא זמינה. אנא צור קשר עם התמיכה.",
@@ -930,7 +982,31 @@
     "confirmRemoveChild": "האם אתה בטוח שברצונך להסיר את הילד מהרשימה?",
     "removeChild": "הסר ילד",
     "modifiedAgesWarning": "יש ילדים עם גיל משונה",
-    "modifiedAgesWarningDescription": "גילאים ששונו ידנית לא יישמרו לאחר ריפרש. הגיל יאופס אוטומטית לגיל המקורי מימי ההולדת."
+    "modifiedAgesWarningDescription": "גילאים ששונו ידנית לא יישמרו לאחר ריפרש. הגיל יאופס אוטומטית לגיל המקורי מימי ההולדת.",
+    "includeChild": "כלול את {{name}} בחישוב",
+    "excludeChild": "הסר את {{name}} מהחישוב",
+    "editAgeFor": "ערוך גיל עבור {{name}}",
+    "resetAgeFor": "אפס גיל למקורי עבור {{name}}",
+    "saveAge": "שמור גיל",
+    "cancelEdit": "בטל עריכה",
+    "expandSection": "הרחב סעיף",
+    "collapseSection": "צמצם סעיף",
+    "howItWorksLabel": "הסבר על אופן פעולת המחשבון",
+    "selectBirthdayFor": "בחר את {{name}} לייבוא",
+    "deleteProfileLabel": "מחק פרופיל: {{name}}",
+    "showChildrenInGroup": "הצג ילדים בקבוצת גיל: {{name}}",
+    "showChildrenInGroupCount": "הצג {{count}} ילדים בקבוצת גיל: {{name}}",
+    "closeBudgetConfig": "סגור הגדרות תקציב",
+    "clearCustomBudget": "נקה תקציב מותאם",
+    "saveGroupChanges": "שמור שינויים לקבוצה",
+    "cancelGroupChanges": "בטל שינויים לקבוצה",
+    "includeGroup": "כלול קבוצה {{name}}",
+    "excludeGroup": "הסר קבוצה {{name}}",
+    "editMinAgeFor": "ערוך גיל מינימלי לקבוצה {{name}}",
+    "editMaxAgeFor": "ערוך גיל מקסימלי לקבוצה {{name}}",
+    "editAmountFor": "ערוך סכום לכל ילד בקבוצה {{name}}",
+    "childrenTableCaption": "רשימת ילדים וגילאים לחישוב דמי חנוכה",
+    "noChildrenStatus": "רשימת הילדים ריקה כרגע"
   },
   "terms": {
     "title": "תנאי שימוש לאפליקציית \"HebBirthday.App\"",
@@ -1007,7 +1083,9 @@
       "gelt": "דמי חנוכה/פורים",
       "whatsapp": "כפתור וואטסאפ",
       "features": "פיצ'רים נוספים",
-      "settings": "הגדרות ופרטיות"
+      "settings": "הגדרות ופרטיות",
+      "menu": "תפריט המדריך",
+      "openMenu": "פתח תפריט המדריך"
     },
     "title": "📘 המדריך המלא",
     "subtitle": "לא שוכחים אף תאריך - עברי או לועזי 🎂",
@@ -1198,6 +1276,62 @@
       "text": "נבנה עם ❤️ בישראל 🇮🇱",
       "rights": "כל הזכויות שמורות"
     }
+  },
+  "accessibility": {
+    "title": "הצהרת נגישות - HebBirthday.App",
+    "lastUpdated": "תאריך עדכון אחרון",
+    "intro": "אנו ב-HebBirthday רואים חשיבות עליונה בהנגשת שירותינו לכלל האוכלוסייה, לרבות אנשים עם מוגבלויות. אנו פועלים מתוך אמונה כי לכל אדם מגיעה הזכות ליהנות מחוויית גלישה שוויונית, נוחה ועצמאית.",
+    "level": {
+      "title": "רמת הנגישות",
+      "text": "האתר מונגש בהתאם להנחיות הנגישות בתקן הישראלי 5568 (\"קווים מנחים לנגישות תכנים באינטרנט\") ברמה AA, וזאת בהתאם להנחיות הבינלאומיות של מסמך WCAG 2.2."
+    },
+    "adjustments": {
+      "title": "התאמות שבוצעו",
+      "keyboard": "ניווט מקלדת:",
+      "keyboardDesc": "האתר תומך באופן מלא בניווט באמצעות המקלדת בלבד (שימוש במקשי Tab, Enter ו-Esc).",
+      "skiplink": "קישור דילוג:",
+      "skiplinkDesc": "הוטמע קישור \"דלג לתוכן\" המאפשר דילוג על תפריטי הניווט ישירות לתוכן המרכזי.",
+      "focus": "ניהול פוקוס:",
+      "focusDesc": "מיושמת \"מלכודת פוקוס\" במודלים ובתפריטים כדי למנוע אובדן התמצאות.",
+      "screenreader": "תמיכה בקוראי מסך:",
+      "screenreaderDesc": "שימוש ב-Semantic HTML ובתגיות ARIA להקראה נכונה של תכנים, טפסים ושגיאות.",
+      "contrast": "ניגודיות:",
+      "contrastDesc": "הקפדה על יחס ניגודיות העומד בתקן לקריאות מקסימלית.",
+      "languages": "שפות:",
+      "languagesDesc": "האתר תומך ב-RTL (עברית) ובשפות נוספות עם עדכון דינמי של שפת המסמך."
+    },
+    "limitations": {
+      "title": "סייגי נגישות",
+      "text": "למרות מאמצינו להנגיש את כלל דפי האתר, ייתכן שיתגלו חלקים שטרם הונגשו במלואם (למשל רכיבים המוטמעים מצד שלישי). אם נתקלתם בבעיה, נשמח אם תדווחו לנו."
+    },
+    "standards": {
+      "title": "תקנים ושיטות נגישות",
+      "wcag": "תאימות ל-WCAG 2.2 רמה AA",
+      "keyboard": "ניווט מקלדת מלא",
+      "screenreader": "תמיכה בקוראי מסך",
+      "contrast": "ניגודיות צבעים מיטבית",
+      "focus": "אינדיקציות פוקוס ברורות"
+    },
+    "coordinator": {
+      "title": "פרטי רכז נגישות",
+      "intro": "לכל שאלה, בקשה או דיווח על תקלה, ניתן לפנות לרכז הנגישות:",
+      "name": "שם:",
+      "nameValue": "חגי יחיאל",
+      "email": "אימייל:"
+    },
+    "contact": {
+      "title": "דרכי יצירת קשר נוספות",
+      "text": "אם נתקלת בבעיית נגישות או יש לך הצעות לשיפור, נשמח לשמוע ממך:",
+      "email": "דוא\"ל",
+      "form": "טופס משוב",
+      "formLink": "שלח משוב"
+    },
+    "ongoing": {
+      "title": "שיפור מתמיד",
+      "text": "אנו משקיעים מאמצים מתמידים לשיפור הנגישות של האפליקציה ולוודא שהיא עומדת בתקנים העדכניים ביותר. אנו מבצעים בדיקות נגישות שוטפות ומיישמים משוב ממשתמשים כדי להבטיח חוויית שימוש מיטבית לכולם."
+    },
+    "updateDate": "תאריך עדכון ההצהרה:",
+    "updateDateValue": "דצמבר 2025"
   },
   "cookies": {
     "message": "אנחנו משתמשים בעוגיות לשיפור החוויה. השימוש באתר מהווה הסכמה לכך.",

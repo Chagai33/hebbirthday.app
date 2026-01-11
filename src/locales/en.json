@@ -55,7 +55,13 @@
     "rateLimitError": "Too many attempts. Please wait.",
     "maxItemsError": "Cannot add more than {{count}} items",
     "maxItemsLimitReached": "Maximum items limit reached ({{count}})",
-    "groups": "Groups"
+    "groups": "Groups",
+    "editItemName": "Edit gift: {{name}}",
+    "deleteItemName": "Delete gift: {{name}}",
+    "firstNameRequired": "First Name (required field)",
+    "lastNameRequired": "Last Name (required field)",
+    "dateGroupLabel": "Birth date selection",
+    "searchClear": "Clear search"
   },
   "guestAccess": {
     "welcomeToGroup": "Welcome to {{name}} Group",
@@ -83,6 +89,7 @@
     "botDetected": "Suspicious activity detected. Please try again.",
     "limitReached": "You've reached the addition limit for this link. Please contact the group admin.",
     "tokenExpired": "This link has expired (72 hours). Please contact the group admin for a new link.",
+    "rateLimitWait": "Too many attempts. Please wait {{seconds}} seconds and try again.",
     "verifyHebrewDate": "Please verify that the Hebrew date is correct. If not, change 'Born after sunset' below.",
     "verifyGregorianDate": "Verify that the corresponding Gregorian date is correct"
   },
@@ -103,6 +110,7 @@
     "copyToWhatsapp": "Copy",
     "copyToWhatsappList": "Copy birthday list to WhatsApp",
     "copied": "Copied!",
+    "selectColor": "Select {{color}} color",
     "yes": "Yes",
     "no": "No",
     "male": "Male",
@@ -110,6 +118,7 @@
     "other": "Other",
     "actions": "Actions",
     "selected": "selected",
+    "notSelected": "not selected",
     "clear": "Clear",
     "confirmDelete": "Are you sure?",
     "noResults": "No results found",
@@ -131,6 +140,7 @@
     "month": "Month",
     "year": "Year",
     "menu": "Menu",
+    "notifications": "Notifications",
     "note": "Note",
     "moreInfo": "More Info",
     "birthDate": "Birth Date",
@@ -146,7 +156,13 @@
     "advancedOptions": "Advanced Options (calendar, notes)",
     "lessOptions": "Less Options",
     "quickGuide": "Quick Guide",
-    "fullGuide": "Full User Guide"
+    "fullGuide": "Full User Guide",
+    "currentDateLabel": "Today's date: {{hebrew}}, {{gregorian}}",
+    "home": "HebBirthday.app - Home",
+    "switchToLanguage": "Switch language to {{lang}}",
+    "sendEmailTo": "Send email to {{email}}",
+    "backToHome": "Back to Home",
+    "retry": "Try again"
   },
   "guestPortal": {
     "title": "Guest Wishlist Portal",
@@ -163,7 +179,12 @@
     "shareHint": "The message button copies full text with explanation",
     "accessSettings": "Portal Access Settings",
     "accessDescription": "Allow guests to access and manage their wishlists through the public portal.",
-    "groupPermissions": "Manage Permissions by Groups"
+    "groupPermissions": "Manage Permissions by Groups",
+    "enablePortal": "Enable guest portal",
+    "toggleGroupFor": "Enable portal for {{groupName}}",
+    "copyLinkAction": "Copy portal URL to clipboard",
+    "copyMessageAction": "Copy message with portal link to clipboard",
+    "shareWhatsAppAction": "Share portal link on WhatsApp"
   },
   "googleCalendar": {
     "title": "Google Calendar",
@@ -260,6 +281,15 @@
     "syncInProgress": "Sync in progress...",
     "unsyncSelected": "Unsync",
     "confirmBulkUnsync": "Are you sure you want to unsync and delete from calendar for the selected records?",
+    "deleteCalendarName": "Delete calendar: {{name}}",
+    "compactConnectedLabel": "Connected to Google Calendar for {{email}}, active calendar: {{calendar}}",
+    "historyModalLabel": "Sync history dialog",
+    "closeHistory": "Close history",
+    "calendarSelectorLabel": "Calendar selection menu",
+    "createCalendarLabel": "Create new calendar dialog",
+    "cleanupConfirmLabel": "Confirm cleanup of orphan events dialog",
+    "deleteConfirmLabel": "Confirm calendar deletion dialog",
+    "syncStatusLabel": "Google Calendar sync status",
     "status": {
       "SUCCESS": "Completed Successfully",
       "PARTIAL": "Completed Partially",
@@ -429,7 +459,12 @@
     "notesSyncHint": "Notes will be displayed in the Google Calendar event description if you choose to sync",
     "deleteConfirmWithCalendar": "Are you sure? This action will delete the birthday and also remove all linked events from Google Calendar.",
     "exportSuccess": "Data exported successfully",
-    "hebrewZodiacCopied": "Hebrew dates and zodiac signs copied to clipboard"
+    "hebrewZodiacCopied": "Hebrew dates and zodiac signs copied to clipboard",
+    "viewDetails": "View details for {{name}}",
+    "resultsFound": "Found {{count}} birthdays",
+    "editName": "Edit {{name}}'s birthday",
+    "deleteName": "Delete {{name}}'s birthday",
+    "selectRow": "Select row"
   },
   "groups": {
     "title": "Groups",
@@ -470,8 +505,13 @@
     "unknownGroup": "Unknown Group",
     "noGroupsAvailable": "No groups available",
     "rootGroup": "Main Group",
+    "selectGroupItem": "{{name}} - {{status}}",
+    "selectionSummary": "{{count}} groups selected: {{text}}",
+    "noSelection": "No groups selected",
     "underGroup": "Under",
-    "assignToGroup": "Add to Group"
+    "assignToGroup": "Add to Group",
+    "shareGroup": "Share {{name}} group",
+    "editGroup": "Edit {{name}} group"
   },
   "wishlist": {
     "title": "Wishlist",
@@ -542,6 +582,11 @@
   },
   "validation": {
     "required": "This field is required",
+    "firstNameRequired": "First name is required",
+    "lastNameRequired": "Last name is required",
+    "birthDateRequired": "Birth date is required",
+    "genderRequired": "Gender is required",
+    "groupRequired": "Group selection is required",
     "importSuccess": "Import completed successfully",
     "importError": "Error importing CSV file",
     "invalidEmail": "Invalid email address",
@@ -656,7 +701,14 @@
     "deleteAccountConfirmTitle": "Are you absolutely sure?",
     "deleteAccountConfirmDescription": "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
     "summaryOfData": "Summary of data to be deleted:",
-    "confirmDelete": "Yes, delete account"
+    "confirmDelete": "Yes, delete account",
+    "currency": "Primary Currency",
+    "currencyHint": "The currency in which amounts will be displayed throughout the application.",
+    "currencies": {
+      "ILS": "₪ Shekel (ILS)",
+      "USD": "$ Dollar (USD)",
+      "EUR": "€ Euro (EUR)"
+    }
   },
   "help": {
     "title": "The Quick Guide",
@@ -674,7 +726,9 @@
   "footer": {
     "termsOfUse": "Terms of Use",
     "privacyPolicy": "Privacy Policy",
+    "accessibility": "Accessibility Statement",
     "feedback": "Feedback",
+    "feedbackOpenNewWindow": "Open feedback form in new window",
     "deleteAccount": "Delete Account",
     "confirmDelete": "Confirm deletion?",
     "deleteAccountNotImplemented": "Account deletion functionality is not yet available. Please contact support.",
@@ -799,7 +853,31 @@
     "confirmRemoveChild": "Are you sure you want to remove this child from the list?",
     "removeChild": "Remove Child",
     "modifiedAgesWarning": "Some children have modified ages",
-    "modifiedAgesWarningDescription": "Manually modified ages will not be saved after refresh. Ages will automatically reset to the original age from birthdays."
+    "modifiedAgesWarningDescription": "Manually modified ages will not be saved after refresh. Ages will automatically reset to the original age from birthdays.",
+    "includeChild": "Include {{name}} in calculation",
+    "excludeChild": "Exclude {{name}} from calculation",
+    "editAgeFor": "Edit age for {{name}}",
+    "resetAgeFor": "Reset age to original for {{name}}",
+    "saveAge": "Save age",
+    "cancelEdit": "Cancel edit",
+    "expandSection": "Expand section",
+    "collapseSection": "Collapse section",
+    "howItWorksLabel": "Explanation of calculator operation",
+    "selectBirthdayFor": "Select {{name}} for import",
+    "deleteProfileLabel": "Delete profile: {{name}}",
+    "showChildrenInGroup": "Show children in age group: {{name}}",
+    "showChildrenInGroupCount": "Show {{count}} children in age group: {{name}}",
+    "closeBudgetConfig": "Close budget configuration",
+    "clearCustomBudget": "Clear custom budget",
+    "saveGroupChanges": "Save group changes",
+    "cancelGroupChanges": "Cancel group changes",
+    "includeGroup": "Include group {{name}}",
+    "excludeGroup": "Exclude group {{name}}",
+    "editMinAgeFor": "Edit minimum age for group {{name}}",
+    "editMaxAgeFor": "Edit maximum age for group {{name}}",
+    "editAmountFor": "Edit amount per child for group {{name}}",
+    "childrenTableCaption": "List of children and ages for Hanukkah money calculation",
+    "noChildrenStatus": "Children list is currently empty"
   },
   "terms": {
     "title": "Terms of Use for \"HebBirthday.App\"",
@@ -895,7 +973,9 @@
       "gelt": "Hanukkah/Purim Money",
       "whatsapp": "WhatsApp Button",
       "features": "Additional Features",
-      "settings": "Settings & Privacy"
+      "settings": "Settings & Privacy",
+      "menu": "Guide Menu",
+      "openMenu": "Open guide menu"
     },
     "title": "📘 Complete Guide",
     "subtitle": "Never miss a date - Hebrew or Gregorian 🎂",
@@ -1093,6 +1173,62 @@
     "privacyLink": "Privacy Policy",
     "accept": "Accept & Continue",
     "decline": "Close"
+  },
+  "accessibility": {
+    "title": "Accessibility Statement - HebBirthday.App",
+    "lastUpdated": "Last Updated",
+    "intro": "At HebBirthday, we place paramount importance on making our services accessible to all, including people with disabilities. We operate from the belief that everyone deserves the right to enjoy an equal, comfortable, and independent browsing experience.",
+    "level": {
+      "title": "Accessibility Level",
+      "text": "The website is accessible in accordance with the accessibility guidelines in Israeli Standard 5568 (\"Guidelines for Web Content Accessibility\") at level AA, and in accordance with the international guidelines of the WCAG 2.2 document."
+    },
+    "adjustments": {
+      "title": "Adjustments Made",
+      "keyboard": "Keyboard Navigation:",
+      "keyboardDesc": "The site fully supports navigation using keyboard only (using Tab, Enter, and Esc keys).",
+      "skiplink": "Skip Link:",
+      "skiplinkDesc": "A \"skip to content\" link has been embedded, allowing users to skip navigation menus directly to the main content.",
+      "focus": "Focus Management:",
+      "focusDesc": "\"Focus trap\" is implemented in modals and menus to prevent loss of orientation.",
+      "screenreader": "Screen Reader Support:",
+      "screenreaderDesc": "Use of Semantic HTML and ARIA tags for proper reading of content, forms, and errors.",
+      "contrast": "Contrast:",
+      "contrastDesc": "Adherence to contrast ratios that meet standards for maximum readability.",
+      "languages": "Languages:",
+      "languagesDesc": "The site supports RTL (Hebrew) and additional languages with dynamic document language updating."
+    },
+    "limitations": {
+      "title": "Accessibility Limitations",
+      "text": "Despite our efforts to make all pages of the site accessible, there may be parts that have not yet been fully made accessible (for example, components embedded from third parties). If you encounter a problem, we would appreciate if you report it to us."
+    },
+    "standards": {
+      "title": "Accessibility Standards and Methods",
+      "wcag": "WCAG 2.2 Level AA Compliance",
+      "keyboard": "Full Keyboard Navigation",
+      "screenreader": "Screen Reader Support",
+      "contrast": "Optimal Color Contrast",
+      "focus": "Clear Focus Indicators"
+    },
+    "coordinator": {
+      "title": "Accessibility Coordinator Details",
+      "intro": "For any question, request, or report of a malfunction, you can contact the accessibility coordinator:",
+      "name": "Name:",
+      "nameValue": "Chagai Yechiel",
+      "email": "Email:"
+    },
+    "contact": {
+      "title": "Additional Contact Methods",
+      "text": "If you encountered an accessibility issue or have suggestions for improvement, we'd love to hear from you:",
+      "email": "Email",
+      "form": "Feedback Form",
+      "formLink": "Send Feedback"
+    },
+    "ongoing": {
+      "title": "Continuous Improvement",
+      "text": "We invest ongoing efforts to improve the application's accessibility and ensure it meets the latest standards. We conduct regular accessibility checks and implement user feedback to ensure the best possible user experience for everyone."
+    },
+    "updateDate": "Statement Update Date:",
+    "updateDateValue": "December 2025"
   },
   "privacy": {
     "title": "Privacy Policy for \"HebBirthday.App\"",

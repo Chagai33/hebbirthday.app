@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Layout } from './layout/Layout';
 import { BirthdayList } from './birthdays/BirthdayList';
 import { BirthdayForm } from './birthdays/BirthdayForm';
@@ -51,6 +51,7 @@ export const Dashboard = () => {
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showTextImport, setShowTextImport] = useState(false);
   const [originalPastedText, setOriginalPastedText] = useState<string>('');
+  const [importSource, setImportSource] = useState<'text' | 'file' | null>(null);
 
   const [isStatsExpanded, setIsStatsExpanded] = useState(() => {
     const saved = localStorage.getItem('stats-expanded');
@@ -85,6 +86,9 @@ export const Dashboard = () => {
     });
     return duplicates;
   }, [allBirthdays]);
+
+  // Context-aware visibility: Hide FAB when any modal is open
+  const isAnyModalOpen = showForm || showCSVPreview || showCalendarModal || showZodiacStats || showTextImport;
 
   useEffect(() => {
     if (currentTenant && user && !isLoadingGroups && rootGroups.length === 0 && !initializeRootGroups.isPending) {
@@ -149,6 +153,7 @@ export const Dashboard = () => {
       });
 
       setCsvData(validatedData);
+      setImportSource('file');
       setShowCSVPreview(true);
     } catch (error) {
       logger.error('Error parsing CSV:', error);
@@ -180,6 +185,7 @@ export const Dashboard = () => {
       });
 
       setCsvData(validatedData);
+      setImportSource('text');
       setShowCSVPreview(true);
       success(t('import.textImportSuccess', 'נמצאו {{count}} רשומות תקינות', { count: parsedData.length }));
     } catch (error) {
@@ -310,6 +316,10 @@ export const Dashboard = () => {
     }
 
     setShowCSVPreview(false);
+
+    // Reset import session state
+    setImportSource(null);
+    setOriginalPastedText('');
   };
 
   if (!currentTenant) {
@@ -328,6 +338,7 @@ export const Dashboard = () => {
   return (
     <Layout>
       <div className="space-y-3 sm:space-y-4">
+        <h2 className="sr-only">{t('dashboard.title', 'Dashboard')}</h2>
         {/* Divider עדין מעל הסטטיסטיקה */}
         <div className="border-t border-gray-200"></div>
 
@@ -337,6 +348,8 @@ export const Dashboard = () => {
             onClick={() => setIsStatsExpanded(!isStatsExpanded)}
             className="flex items-center gap-1.5 flex-shrink-0 px-2 py-1 text-gray-500 hover:text-gray-700 transition-colors text-xs"
             title={isStatsExpanded ? t('common.collapse', 'סגור') : t('common.expand', 'פתח')}
+            aria-expanded={isStatsExpanded}
+            aria-controls="dashboard-stats-grid"
           >
             {isStatsExpanded ? (
               <ChevronUp className="w-3.5 h-3.5" />
@@ -349,70 +362,72 @@ export const Dashboard = () => {
           </button>
 
           <div
+            id="dashboard-stats-grid"
             className={`flex-1 grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 transition-all duration-300 ease-in-out overflow-hidden ${isStatsExpanded ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
               }`}
           >
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-sm border border-blue-200 p-1.5 sm:p-2.5 hover:shadow-md transition-all">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-sm border border-blue-200 p-1.5 sm:p-2.5 hover:shadow-md transition-[box-shadow] duration-200">
               <div className="flex flex-row items-center justify-between gap-1">
                 <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-600 rounded-md flex items-center justify-center shadow-sm flex-shrink-0">
                   <Users className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 </div>
                 <div className={`min-w-0 flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                  <p className="text-[8px] leading-tight sm:text-xs text-blue-700 font-medium mb-0.5 truncate">
+                  <h3 className="text-[8px] leading-tight sm:text-xs text-blue-700 font-medium mb-0.5 truncate">
                     {t('dashboard.totalBirthdays')}
-                  </p>
-                  <p className="text-base sm:text-2xl font-bold text-blue-900">{stats.totalBirthdays}</p>
+                  </h3>
+                  <h3 className="text-base sm:text-2xl font-bold text-blue-900" aria-live="polite" aria-atomic="true">{stats.totalBirthdays}</h3>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-sm border border-green-200 p-1.5 sm:p-2.5 hover:shadow-md transition-all">
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-sm border border-green-200 p-1.5 sm:p-2.5 hover:shadow-md transition-[box-shadow] duration-200">
               <div className="flex flex-row items-center justify-between gap-1">
                 <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-600 rounded-md flex items-center justify-center shadow-sm flex-shrink-0">
                   <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 </div>
                 <div className={`min-w-0 flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                  <p className="text-[8px] leading-tight sm:text-xs text-green-700 font-medium mb-0.5 truncate">
+                  <h3 className="text-[8px] leading-tight sm:text-xs text-green-700 font-medium mb-0.5 truncate">
                     {t('dashboard.upcomingThisWeek')}
-                  </p>
-                  <p className="text-base sm:text-2xl font-bold text-green-900">
+                  </h3>
+                  <h3 className="text-base sm:text-2xl font-bold text-green-900" aria-live="polite" aria-atomic="true">
                     {stats.upcomingThisWeek}
-                  </p>
+                  </h3>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg shadow-sm border border-orange-200 p-1.5 sm:p-2.5 hover:shadow-md transition-all">
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg shadow-sm border border-orange-200 p-1.5 sm:p-2.5 hover:shadow-md transition-[box-shadow] duration-200">
               <div className="flex flex-row items-center justify-between gap-1">
                 <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-600 rounded-md flex items-center justify-center shadow-sm flex-shrink-0">
                   <Calendar className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 </div>
                 <div className={`min-w-0 flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                  <p className="text-[8px] leading-tight sm:text-xs text-orange-700 font-medium mb-0.5 truncate">
+                  <h3 className="text-[8px] leading-tight sm:text-xs text-orange-700 font-medium mb-0.5 truncate">
                     {t('dashboard.upcomingThisMonth')}
-                  </p>
-                  <p className="text-base sm:text-2xl font-bold text-orange-900">
+                  </h3>
+                  <h3 className="text-base sm:text-2xl font-bold text-orange-900" aria-live="polite" aria-atomic="true">
                     {stats.upcomingThisMonth}
-                  </p>
+                  </h3>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg shadow-sm border border-pink-200 p-1.5 sm:p-2.5 hover:shadow-md transition-all relative group">
+            <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-lg shadow-sm border border-pink-200 p-1.5 sm:p-2.5 hover:shadow-md transition-[box-shadow] duration-200 relative group">
               <div className="flex flex-row items-center justify-between gap-1">
                 <div className="w-6 h-6 sm:w-8 sm:h-8 bg-pink-600 rounded-md flex items-center justify-center shadow-sm flex-shrink-0">
                   <Cake className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 </div>
                 <div className={`min-w-0 flex-1 ${i18n.language === 'he' ? 'text-right' : 'text-left'}`}>
-                  <p className="text-[8px] leading-tight sm:text-xs text-pink-700 font-medium mb-0.5 truncate">{t('dashboard.statistics')}</p>
-                  <p className="text-sm sm:text-xl font-bold text-pink-900">
+                  <h3 className="text-[8px] leading-tight sm:text-xs text-pink-700 font-medium mb-0.5 truncate">{t('dashboard.statistics')}</h3>
+                  <h3 className="text-sm sm:text-xl font-bold text-pink-900" aria-live="polite" aria-atomic="true">
                     {stats.maleCount}M / {stats.femaleCount}F
-                  </p>
+                  </h3>
                 </div>
                 <button
                   onClick={() => setShowZodiacStats(true)}
                   className="p-0.5 text-pink-400 hover:text-pink-600 hover:bg-pink-200 rounded-full transition-colors flex-shrink-0"
                   title={t('zodiac.statsTitle', 'סטטיסטיקת מזלות')}
+                  aria-label={t('zodiac.statsTitle')}
                 >
                   <Info className="w-4 h-4" />
                 </button>
@@ -431,8 +446,7 @@ export const Dashboard = () => {
               {/* קבוצה 1: פעולות ראשיות */}
               <button
                 onClick={() => setShowForm(true)}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md text-sm"
-                title={t('birthday.addBirthday')}
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-colors duration-200 shadow-sm hover:shadow-md text-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span>{t('birthday.addBirthday')}</span>
@@ -440,22 +454,19 @@ export const Dashboard = () => {
               <button
                 onClick={() => setShowTextImport(true)}
                 className="flex items-center justify-center gap-1.5 px-3 py-2 bg-purple-50 text-purple-600 border border-purple-200 hover:bg-purple-100 shadow-sm rounded-lg font-medium transition-all text-sm"
-                title={t('birthday.pasteImport', 'הדבק וייבא')}
               >
                 <FileText className="w-4 h-4" />
                 <span>{t('birthday.pasteImport', 'הדבק וייבא')}</span>
               </button>
-              <label className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg font-medium transition-all cursor-pointer text-sm">
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleCSVImport}
-                  className="hidden"
-                  ref={fileInputRef}
-                />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg font-medium transition-all text-sm"
+                aria-label={t('birthday.importCSV')}
+              >
                 <Upload className="w-4 h-4" />
                 <span>{t('birthday.importCSV', 'Import CSV')}</span>
-              </label>
+              </button>
 
               {/* Separator */}
               <div className="h-8 w-px bg-gray-300 mx-1" />
@@ -476,29 +487,25 @@ export const Dashboard = () => {
               <div className="h-8 w-px bg-gray-300 mx-1" />
 
               {/* קבוצה 2: פעולות ראשיות */}
-              <label className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg font-medium transition-all cursor-pointer text-sm">
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleCSVImport}
-                  className="hidden"
-                  ref={fileInputRef}
-                />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg font-medium transition-all text-sm"
+                aria-label={t('birthday.importCSV')}
+              >
                 <Upload className="w-4 h-4" />
                 <span>{t('birthday.importCSV', 'Import CSV')}</span>
-              </label>
+              </button>
               <button
                 onClick={() => setShowTextImport(true)}
                 className="flex items-center justify-center gap-1.5 px-3 py-2 bg-purple-50 text-purple-600 border border-purple-200 hover:bg-purple-100 shadow-sm rounded-lg font-medium transition-all text-sm"
-                title={t('birthday.pasteImport', 'Paste & Import')}
               >
                 <FileText className="w-4 h-4" />
                 <span>{t('birthday.pasteImport', 'Paste & Import')}</span>
               </button>
               <button
                 onClick={() => setShowForm(true)}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md text-sm"
-                title={t('birthday.addBirthday')}
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-colors duration-200 shadow-sm hover:shadow-md text-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span>{t('birthday.addBirthday')}</span>
@@ -522,6 +529,36 @@ export const Dashboard = () => {
         </div>
       </div>
 
+      {/* Minimalist legal footer */}
+      <footer className="mt-auto py-6 text-center border-t border-gray-100">
+        <ul className="flex justify-center gap-4 text-xs text-gray-400" role="list">
+          <li>
+            <Link
+              to="/terms"
+              className="text-gray-600 hover:text-gray-600 transition-colors"
+            >
+              {t('footer.termsOfUse')}
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/privacy"
+              className="text-gray-600 hover:text-gray-600 transition-colors"
+            >
+              {t('footer.privacyPolicy')}
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/accessibility"
+              className="text-gray-600 hover:text-gray-600 transition-colors"
+            >
+              {t('footer.accessibility')}
+            </Link>
+          </li>
+        </ul>
+      </footer>
+
       {showForm && (
         <BirthdayForm
           onClose={handleCloseForm}
@@ -539,11 +576,11 @@ export const Dashboard = () => {
 
       <CSVImportPreviewModal
         isOpen={showCSVPreview}
-        onClose={() => setShowCSVPreview(false)}
+        onClose={importSource === 'text' ? handleBackToTextImport : () => setShowCSVPreview(false)}
         data={csvData}
         onConfirm={handleConfirmImport}
-        onBack={originalPastedText ? handleBackToTextImport : undefined}
-        showBackButton={!!originalPastedText}
+        onBack={importSource === 'text' ? handleBackToTextImport : undefined}
+        showBackButton={importSource === 'text'}
       />
 
       <ZodiacStatsModal
@@ -556,14 +593,22 @@ export const Dashboard = () => {
         onAdd={() => setShowForm(true)}
         onImport={() => fileInputRef.current?.click()}
         onTextImport={() => setShowTextImport(true)}
-        onCalendar={() => setShowCalendarModal(true)}
-        onGroups={() => navigate('/groups')}
-        hidden={showForm || showCSVPreview || showCalendarModal || showZodiacStats || showTextImport}
+        hidden={isAnyModalOpen}
       />
 
       <GoogleCalendarModal
         isOpen={showCalendarModal}
         onClose={() => setShowCalendarModal(false)}
+      />
+
+      {/* Hidden file input for CSV import */}
+      <input
+        type="file"
+        accept=".csv"
+        onChange={handleCSVImport}
+        className="hidden"
+        ref={fileInputRef}
+        aria-label={t('birthday.importCSV')}
       />
     </Layout>
   );

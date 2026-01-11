@@ -42,6 +42,7 @@ interface GeltTemplateDocument {
     amountPerChild: number;
     isIncluded: boolean;
   }> | null;
+  currency?: 'ILS' | 'USD' | 'EUR';
   created_at: Timestamp | FieldValue | null;
   updated_at: Timestamp | FieldValue | null;
   created_by: string;
@@ -143,6 +144,7 @@ export const geltTemplatesService = {
           : new Date().toISOString(),
         created_by: data.created_by,
         updated_by: data.updated_by,
+        currency: data.currency,
         is_default: data.is_default || false,
       };
     });
@@ -177,9 +179,10 @@ export const geltTemplatesService = {
           : {}),
         ageGroups: template.ageGroups,
         budgetConfig: budgetConfigToSave,
-        customGroupSettings: (template.customGroupSettings !== undefined && template.customGroupSettings !== null) 
-          ? template.customGroupSettings 
+        customGroupSettings: (template.customGroupSettings !== undefined && template.customGroupSettings !== null)
+          ? template.customGroupSettings
           : null,
+        ...(template.currency !== undefined ? { currency: template.currency } : {}),
         created_at: serverTimestamp(),
         updated_at: serverTimestamp(),
         created_by: userId,
@@ -337,6 +340,7 @@ export const geltTemplatesService = {
           : new Date().toISOString(),
         created_by: data.created_by,
         updated_by: data.updated_by,
+        currency: data.currency,
         is_default: data.is_default || false,
       };
     });

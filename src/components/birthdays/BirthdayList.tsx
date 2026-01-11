@@ -26,6 +26,7 @@ import { db } from '../../config/firebase';
 import { doc, writeBatch, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../../contexts/AuthContext';
 import { FolderPlus } from 'lucide-react';
+import { GroupFilterMultiSelect } from './GroupFilterMultiSelect';
 
 interface BirthdayListProps {
   birthdays: Birthday[];
@@ -323,7 +324,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
   const handleRefresh = async (id: string) => {
     try {
       await refreshHebrewData.mutateAsync(id);
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error.code === 'functions/resource-exhausted') {
         alert(t('birthday.refreshLimitReached', 'יותר מדי רענונים. המתן 30 שניות.'));
       } else {
@@ -406,7 +407,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
       } else {
         showToast(result.error || 'שגיאה בסנכרון ליומן Google', 'error');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error syncing birthday:', error);
       // אל תציג הודעה כאן אם זה היה בעיית primary calendar
       if (!error.message?.includes('ליומן הראשי')) {
@@ -419,7 +420,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
     try {
       await removeBirthdayFromCalendar(birthdayId);
       showToast('יום ההולדת הוסר מיומן Google', 'success');
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error removing birthday from calendar:', error);
       showToast(error.message || 'שגיאה בהסרת יום ההולדת מיומן Google', 'error');
     }
@@ -457,7 +458,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
         );
       }
       setSelectedIds(new Set());
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error('Error bulk syncing birthdays:', error);
       // אל תציג הודעה כאן אם זה היה בעיית primary calendar
       if (!error.message?.includes('ליומן הראשי')) {
@@ -569,6 +570,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
     }
   };
 
+
   const handleBulkAssignGroup = async (groupIdsToAdd: string[]) => {
     const birthdaysToUpdate = birthdays.filter((b) => selectedIds.has(b.id));
 
@@ -632,6 +634,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full ps-9 sm:ps-10 pe-8 sm:pe-10 py-1.5 sm:py-2 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            aria-label={t('common.search')}
           />
           {searchTerm && (
             <button
@@ -651,6 +654,8 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
               ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700'
               : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               }`}
+            aria-expanded={showGroupFilter}
+            aria-label={t('common.filters', 'Filters')}
           >
             <Filter className="w-4 h-4" />
             <span className="hidden sm:inline">{t('common.filters', 'Filters')}</span>
@@ -661,7 +666,11 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
             )}
           </button>
 
+          <label htmlFor="birthday-sort-select" className="sr-only">
+            {t('sort.sortBy', 'Sort by')}
+          </label>
           <select
+            id="birthday-sort-select"
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as any)}
             className={`px-2 sm:px-4 py-1.5 sm:py-2 text-base sm:text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${getSortSelectColor()} font-medium`}
@@ -719,7 +728,8 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                         showToast(t('messages.exportError', 'שגיאה בייצוא הקובץ'), 'error');
                       }
                     }}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
+                    aria-label={t('birthday.exportSelected')}
                   >
                     <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('birthday.exportSelected')}</span>
@@ -735,14 +745,16 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   )}
                   <button
                     onClick={() => setShowAssignGroupModal(true)}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
+                    aria-label={t('groups.assignToGroup', 'הוספה לקבוצה')}
                   >
                     <FolderPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('groups.assignToGroup', 'הוספה לקבוצה')}</span>
                   </button>
                   <button
                     onClick={() => handleBulkDelete()}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
+                    aria-label={t('common.delete', 'מחק את הנבחרים')}
                   >
                     <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('common.delete')}</span>
@@ -751,7 +763,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     <button
                       onClick={handleBulkSyncToCalendar}
                       disabled={isSyncing}
-                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-sky-50 text-sky-600 border border-sky-200 hover:bg-sky-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-sky-50 text-sky-600 border border-sky-200 hover:bg-sky-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <UploadCloud className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="hidden sm:inline">{t('googleCalendar.syncToCalendar')}</span>
@@ -769,7 +781,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                         setSelectedIds(new Set());
                         showToast(`${successCount} רשומות הוסרו מהסנכרון`, 'success');
                       }}
-                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
                     >
                       <CloudOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="hidden sm:inline">{t('googleCalendar.unsyncSelected', 'בטל סנכרון')}</span>
@@ -786,14 +798,16 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 <>
                   <button
                     onClick={() => handleBulkDelete()}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
+                    aria-label={t('common.delete', 'מחק את הנבחרים')}
                   >
                     <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('common.delete')}</span>
                   </button>
                   <button
                     onClick={() => setShowAssignGroupModal(true)}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
+                    aria-label={t('groups.assignToGroup', 'הוספה לקבוצה')}
                   >
                     <FolderPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('groups.assignToGroup', 'הוספה לקבוצה')}</span>
@@ -823,7 +837,8 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                         showToast(t('messages.exportError', 'שגיאה בייצוא הקובץ'), 'error');
                       }
                     }}
-                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
+                    aria-label={t('birthday.exportSelected')}
                   >
                     <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">{t('birthday.exportSelected')}</span>
@@ -841,7 +856,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                     <button
                       onClick={handleBulkSyncToCalendar}
                       disabled={isSyncing}
-                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-sky-50 text-sky-600 border border-sky-200 hover:bg-sky-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-sky-50 text-sky-600 border border-sky-200 hover:bg-sky-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <UploadCloud className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="hidden sm:inline">{t('googleCalendar.syncToCalendar')}</span>
@@ -859,7 +874,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                         setSelectedIds(new Set());
                         showToast(`${successCount} רשומות הוסרו מהסנכרון`, 'success');
                       }}
-                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 shadow-sm rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 flex items-center gap-1"
                     >
                       <CloudOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       <span className="hidden sm:inline">{t('googleCalendar.unsyncSelected', 'בטל סנכרון')}</span>
@@ -880,61 +895,20 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
 
       {showGroupFilter && (
         <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 space-y-3 sm:space-y-4 max-h-[60vh] sm:max-h-none overflow-y-auto">
-          {/* Sync Status Filter - מוצג רק כשיש חיבור ליומן */}
-          {isConnected && (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm sm:text-base font-semibold text-gray-900 flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  {t('filter.syncStatus', 'סטטוס סנכרון')}
-                </h3>
-                {syncStatusFilter !== 'all' && (
-                  <button
-                    onClick={() => setSyncStatusFilter('all')}
-                    className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium"
-                  >
-                    {t('common.clear', 'Clear')}
-                  </button>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                <button
-                  onClick={() => setSyncStatusFilter('all')}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'all'
-                    ? 'bg-gray-600 border-gray-600 text-white'
-                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
-                    }`}
-                >
-                  {t('filter.all', 'הכל')}
-                </button>
-                <button
-                  onClick={() => setSyncStatusFilter(syncStatusFilter === 'synced' ? 'all' : 'synced')}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'synced'
-                    ? 'bg-green-600 border-green-600 text-white'
-                    : 'bg-white border-green-300 text-green-600 hover:border-green-400'
-                    }`}
-                >
-                  ✓ {t('filter.synced', 'מסונכרן')}
-                </button>
-                <button
-                  onClick={() => setSyncStatusFilter(syncStatusFilter === 'error' ? 'all' : 'error')}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'error'
-                    ? 'bg-red-600 border-red-600 text-white'
-                    : 'bg-white border-red-300 text-red-600 hover:border-red-400'
-                    }`}
-                >
-                  ⚠️ {t('filter.syncError', 'שגיאה')}
-                </button>
-                <button
-                  onClick={() => setSyncStatusFilter(syncStatusFilter === 'not-synced' ? 'all' : 'not-synced')}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${syncStatusFilter === 'not-synced'
-                    ? 'bg-gray-600 border-gray-600 text-white'
-                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
-                    }`}
-                >
-                  ○ {t('filter.notSynced', 'לא מסונכרן')}
-                </button>
-              </div>
+          {/* Clear All Filters */}
+          {(selectedGroupIds.length > 0 || genderFilter !== 'all' || (isConnected && syncStatusFilter !== 'all')) && (
+            <div className="flex justify-end pb-2 border-b border-gray-200 mb-3">
+              <button
+                onClick={() => {
+                  setGenderFilter('all');
+                  setSyncStatusFilter('all');
+                  clearGroupFilters();
+                }}
+                className="px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                aria-label={t('filter.clearAllFilters', 'נקה את כל הפילטרים')}
+              >
+                {t('filter.clearAll', 'נקה הכל')}
+              </button>
             </div>
           )}
 
@@ -948,118 +922,226 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                 <button
                   onClick={() => setGenderFilter('all')}
                   className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium"
+                  aria-label={t('filter.clearGender', 'נקה סינון מגדר')}
                 >
-                  {t('common.clear', 'Clear')}
+                  {t('filter.clearGender', 'נקה מגדר')}
                 </button>
               )}
             </div>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
               <button
                 onClick={() => setGenderFilter('all')}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${genderFilter === 'all'
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 border-2 ${genderFilter === 'all'
                   ? 'bg-gray-600 border-gray-600 text-white'
                   : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                   }`}
+                aria-pressed={genderFilter === 'all'}
               >
                 {t('filter.all', 'All')}
               </button>
               <button
                 onClick={() => setGenderFilter(genderFilter === 'male' ? 'all' : 'male')}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${genderFilter === 'male'
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 border-2 ${genderFilter === 'male'
                   ? 'bg-blue-600 border-blue-600 text-white'
                   : 'bg-white border-blue-300 text-blue-600 hover:border-blue-400'
                   }`}
+                aria-pressed={genderFilter === 'male'}
               >
                 {t('filter.male', 'Male')}
               </button>
               <button
                 onClick={() => setGenderFilter(genderFilter === 'female' ? 'all' : 'female')}
-                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${genderFilter === 'female'
+                className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 border-2 ${genderFilter === 'female'
                   ? 'bg-pink-600 border-pink-600 text-white'
                   : 'bg-white border-pink-300 text-pink-600 hover:border-pink-400'
                   }`}
+                aria-pressed={genderFilter === 'female'}
               >
                 {t('filter.female', 'Female')}
               </button>
             </div>
           </div>
 
-          {groups.length > 0 && (
-            <div>
+          {/* Mobile-optimized sync status filter */}
+          {isConnected && (
+            <div className="sm:hidden">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm sm:text-base font-semibold text-gray-900">{t('groups.filterByGroup')}</h3>
-                {selectedGroupIds.length > 0 && (
+                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  {t('filter.syncStatus', 'סטטוס סנכרון')}
+                </h3>
+                {syncStatusFilter !== 'all' && (
                   <button
-                    onClick={clearGroupFilters}
-                    className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    onClick={() => setSyncStatusFilter('all')}
+                    className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                    aria-label={t('filter.clearSyncStatus', 'נקה סינון סטטוס סנכרון')}
                   >
-                    {t('common.clear', 'Clear')}
+                    {t('filter.clearSyncStatus', 'נקה סנכרון')}
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-1">
+                <button
+                  onClick={() => setSyncStatusFilter('all')}
+                  className={`px-2 py-1.5 rounded-md text-xs font-medium transition-colors duration-200 border ${syncStatusFilter === 'all'
+                    ? 'bg-gray-600 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
+                    }`}
+                  aria-pressed={syncStatusFilter === 'all'}
+                >
+                  {t('filter.all', 'הכל')}
+                </button>
+                <button
+                  onClick={() => setSyncStatusFilter(syncStatusFilter === 'synced' ? 'all' : 'synced')}
+                  className={`px-2 py-1.5 rounded-md text-xs font-medium transition-colors duration-200 border ${syncStatusFilter === 'synced'
+                    ? 'bg-green-600 border-green-600 text-white'
+                    : 'bg-white border-green-300 text-green-600 hover:border-green-400'
+                    }`}
+                  aria-pressed={syncStatusFilter === 'synced'}
+                >
+                  ✓ {t('filter.synced', 'מסונכרן')}
+                </button>
+                <button
+                  onClick={() => setSyncStatusFilter(syncStatusFilter === 'error' ? 'all' : 'error')}
+                  className={`px-2 py-1.5 rounded-md text-xs font-medium transition-colors duration-200 border ${syncStatusFilter === 'error'
+                    ? 'bg-red-600 border-red-600 text-white'
+                    : 'bg-white border-red-300 text-red-600 hover:border-red-400'
+                    }`}
+                  aria-pressed={syncStatusFilter === 'error'}
+                >
+                  ⚠️ {t('filter.syncError', 'שגיאה')}
+                </button>
+                <button
+                  onClick={() => setSyncStatusFilter(syncStatusFilter === 'not-synced' ? 'all' : 'not-synced')}
+                  className={`px-2 py-1.5 rounded-md text-xs font-medium transition-colors duration-200 border ${syncStatusFilter === 'not-synced'
+                    ? 'bg-gray-600 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
+                    }`}
+                  aria-pressed={syncStatusFilter === 'not-synced'}
+                >
+                  ○ {t('filter.notSynced', 'לא מסונכרן')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Desktop sync status filter - unchanged */}
+          {isConnected && (
+            <div className="hidden sm:block">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm sm:text-base font-semibold text-gray-900 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  {t('filter.syncStatus', 'סטטוס סנכרון')}
+                </h3>
+                {syncStatusFilter !== 'all' && (
+                  <button
+                    onClick={() => setSyncStatusFilter('all')}
+                    className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    aria-label={t('filter.clearSyncStatus', 'נקה סינון סטטוס סנכרון')}
+                  >
+                    {t('filter.clearSyncStatus', 'נקה סנכרון')}
                   </button>
                 )}
               </div>
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 <button
-                  onClick={clearGroupFilters}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all border-2 ${selectedGroupIds.length === 0
+                  onClick={() => setSyncStatusFilter('all')}
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 border-2 ${syncStatusFilter === 'all'
                     ? 'bg-gray-600 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                     }`}
+                  aria-pressed={syncStatusFilter === 'all'}
                 >
-                  {t('filter.all', 'All')}
+                  {t('filter.all', 'הכל')}
                 </button>
                 <button
-                  onClick={() => toggleGroupFilter('unassigned')}
-                  className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 border-2 ${selectedGroupIds.includes('unassigned')
-                    ? 'bg-gray-200 border-gray-400 text-gray-900'
+                  onClick={() => setSyncStatusFilter(syncStatusFilter === 'synced' ? 'all' : 'synced')}
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 border-2 ${syncStatusFilter === 'synced'
+                    ? 'bg-green-600 border-green-600 text-white'
+                    : 'bg-white border-green-300 text-green-600 hover:border-green-400'
+                    }`}
+                  aria-pressed={syncStatusFilter === 'synced'}
+                >
+                  ✓ {t('filter.synced', 'מסונכרן')}
+                </button>
+                <button
+                  onClick={() => setSyncStatusFilter(syncStatusFilter === 'error' ? 'all' : 'error')}
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 border-2 ${syncStatusFilter === 'error'
+                    ? 'bg-red-600 border-red-600 text-white'
+                    : 'bg-white border-red-300 text-red-600 hover:border-red-400'
+                    }`}
+                  aria-pressed={syncStatusFilter === 'error'}
+                >
+                  ⚠️ {t('filter.syncError', 'שגיאה')}
+                </button>
+                <button
+                  onClick={() => setSyncStatusFilter(syncStatusFilter === 'not-synced' ? 'all' : 'not-synced')}
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors duration-200 border-2 ${syncStatusFilter === 'not-synced'
+                    ? 'bg-gray-600 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
                     }`}
+                  aria-pressed={syncStatusFilter === 'not-synced'}
                 >
-                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border-2 border-dashed border-gray-400" />
-                  {t('birthday.unassigned')}
+                  ○ {t('filter.notSynced', 'לא מסונכרן')}
                 </button>
-                {groups.filter(g => !g.is_root).map((group) => (
-                  <button
-                    key={group.id}
-                    onClick={() => toggleGroupFilter(group.id)}
-                    className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all flex items-center gap-1.5 sm:gap-2 ${selectedGroupIds.includes(group.id)
-                      ? 'ring-2 ring-offset-1'
-                      : 'opacity-70 hover:opacity-100'
-                      }`}
-                    style={{
-                      backgroundColor: selectedGroupIds.includes(group.id) ? group.color : group.color + '40',
-                      color: selectedGroupIds.includes(group.id) ? 'white' : group.color,
-                      ringColor: group.color,
-                    }}
-                  >
-                    <div
-                      className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full"
-                      style={{ backgroundColor: selectedGroupIds.includes(group.id) ? 'white' : group.color }}
-                    />
-                    {group.name}
-                  </button>
-                ))}
               </div>
             </div>
+          )}
+
+          {groups.length > 0 && (
+            <GroupFilterMultiSelect
+              groups={[
+                { id: 'unassigned', name: t('birthday.unassigned'), isUnassigned: true },
+                ...groups.filter(g => !g.is_root).map(g => ({
+                  id: g.id,
+                  name: g.name,
+                  color: g.color
+                }))
+              ]}
+              selectedIds={selectedGroupIds}
+              onChange={(ids) => {
+                // Clear all first, then add selected groups
+                clearGroupFilters();
+                ids.forEach(id => {
+                  if (id !== 'unassigned') {
+                    toggleGroupFilter(id);
+                  } else {
+                    toggleGroupFilter('unassigned');
+                  }
+                });
+              }}
+              onClear={clearGroupFilters}
+              className="mb-4"
+            />
           )}
         </div>
       )}
 
+      {/* Live region for screen reader announcements */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {t('birthday.resultsFound', 'Found {{count}} birthdays', { count: filteredAndSortedBirthdays.length })}
+      </div>
 
+      <h2 className="sr-only">{t('birthday.listTitle', 'Birthdays List')}</h2>
       <div className="bg-white rounded-lg sm:rounded-xl shadow-sm sm:shadow-md border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full" role="table">
             <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
               <tr>
                 <th className="px-2 sm:px-6 py-2 sm:py-4 text-start">
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedIds.size === filteredAndSortedBirthdays.length &&
-                      filteredAndSortedBirthdays.length > 0
-                    }
-                    onChange={toggleSelectAll}
-                    className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
-                  />
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      id="select-all-birthdays"
+                      type="checkbox"
+                      checked={
+                        selectedIds.size === filteredAndSortedBirthdays.length &&
+                        filteredAndSortedBirthdays.length > 0
+                      }
+                      onChange={toggleSelectAll}
+                      className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span className="sr-only">{t('common.selectAll')}</span>
+                  </label>
                 </th>
                 <th className="px-2 sm:px-6 py-2 sm:py-4 text-start text-xs sm:text-sm font-bold text-gray-900">
                   {t('birthday.fullName')}
@@ -1103,7 +1185,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                   return (
                     <tr
                       key={birthday.id}
-                      className="hover:bg-blue-50 transition-all group"
+                      className="hover:bg-blue-50 transition-colors duration-200 group"
                       style={{
                         borderRight: birthday.group ? `4px solid ${birthday.group.color}` : undefined,
                       }}
@@ -1114,13 +1196,18 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                           checked={selectedIds.has(birthday.id)}
                           onChange={() => toggleSelect(birthday.id)}
                           className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                          aria-label={t('birthday.selectRow')}
                         />
                       </td>
-                      <td className="px-2 sm:px-6 py-2 sm:py-4 cursor-pointer" onClick={() => {
-                        setSelectedBirthday(birthday);
-                        setShowQuickActionsModal(true);
-                      }}>
-                        <div className="flex items-center gap-1.5 sm:gap-3">
+                      <td className="px-2 sm:px-6 py-2 sm:py-4">
+                        <button
+                          onClick={() => {
+                            setSelectedBirthday(birthday);
+                            setShowQuickActionsModal(true);
+                          }}
+                          className="flex items-center gap-1.5 sm:gap-3 text-start hover:bg-blue-50 p-2 rounded transition-colors w-full min-h-[44px]"
+                          aria-label={t('birthday.viewDetails', 'View details for {{name}}', { name: `${birthday.first_name} ${birthday.last_name}` })}
+                        >
                           <span className="text-xs sm:text-sm font-medium text-gray-900">
                             {birthday.first_name} {birthday.last_name}
                           </span>
@@ -1132,7 +1219,7 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                               </div>
                             </div>
                           )}
-                        </div>
+                        </button>
                       </td>
                       <td className="px-2 sm:px-6 py-2 sm:py-4 text-xs sm:text-sm text-gray-700">
                         <div className="flex flex-col gap-0.5 sm:gap-1">
@@ -1276,13 +1363,14 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                               setSelectedBirthday(birthday);
                               setShowWishlistModal(true);
                             }}
-                            className="p-1 sm:p-2 text-pink-600 hover:bg-pink-100 rounded-lg transition-all hover:scale-110"
+                            className="p-3 text-pink-600 hover:bg-pink-100 rounded-lg transition-colors duration-200 hover:scale-110"
                             title={t('wishlist.title')}
+                            aria-label={t('wishlist.title')}
                           >
                             <Gift className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           </button>
                           {isConnected && (
-                            <div className="mx-1">
+                            <div className="mx-0.5 sm:mx-1">
                               <SyncStatusButton
                                 birthday={birthday}
                                 isPendingChange={unsyncedMap.get(birthday.id)}
@@ -1296,28 +1384,31 @@ export const BirthdayList: React.FC<BirthdayListProps> = ({
                           {(!birthday.group_ids || birthday.group_ids.length === 0) && (
                             <button
                               onClick={() => onEdit(birthday)}
-                              className="p-1 sm:p-2 text-orange-600 hover:bg-orange-100 rounded-lg transition-all hover:scale-110 animate-pulse"
+                              className="p-3 text-orange-600 hover:bg-orange-100 rounded-lg transition-colors duration-200 hover:scale-110 animate-pulse"
                               title={t('birthday.reassign')}
+                              aria-label={t('birthday.reassign')}
                             >
                               <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </button>
                           )}
                           {birthday.group_ids && birthday.group_ids.length > 0 && (
-                            <button
-                              onClick={() => onEdit(birthday)}
-                              className="p-1 sm:p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-all hover:scale-110"
-                              title={t('common.edit')}
-                            >
-                              <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                            </button>
-                          )}
                           <button
-                            onClick={() => handleDelete(birthday.id)}
-                            className="p-1 sm:p-2 text-red-600 hover:bg-red-100 rounded-lg transition-all hover:scale-110"
-                            title={t('common.delete')}
+                            onClick={() => onEdit(birthday)}
+                            className="p-3 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors duration-200 hover:scale-110"
+                            title={t('common.edit')}
+                            aria-label={t('birthday.editName', { name: birthday.first_name })}
                           >
-                            <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                            <Edit className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           </button>
+                          )}
+                        <button
+                          onClick={() => handleDelete(birthday.id)}
+                          className="p-3 text-red-600 hover:bg-red-100 rounded-lg transition-colors duration-200 hover:scale-110"
+                          title={t('common.delete')}
+                          aria-label={t('birthday.deleteName', { name: birthday.first_name })}
+                        >
+                          <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        </button>
                         </div>
                       </td>
                     </tr>

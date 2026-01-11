@@ -55,7 +55,13 @@
     "rateLimitError": "Demasiados intentos. Por favor espera.",
     "maxItemsError": "No se pueden agregar más de {{count}} artículos",
     "maxItemsLimitReached": "Límite máximo de artículos alcanzado ({{count}})",
-    "groups": "Grupos"
+    "groups": "Grupos",
+    "editItemName": "Editar regalo: {{name}}",
+    "deleteItemName": "Eliminar regalo: {{name}}",
+    "firstNameRequired": "Nombre (campo obligatorio)",
+    "lastNameRequired": "Apellido (campo obligatorio)",
+    "dateGroupLabel": "Selección de fecha de nacimiento",
+    "searchClear": "Limpiar búsqueda"
   },
   "guestAccess": {
     "welcomeToGroup": "Bienvenido al Grupo {{name}}",
@@ -83,6 +89,7 @@
     "botDetected": "Actividad sospechosa detectada. Por favor intenta de nuevo.",
     "limitReached": "Has alcanzado el límite de adiciones para este enlace. Por favor contacta al administrador del grupo.",
     "tokenExpired": "Este enlace ha expirado (72 horas). Por favor contacta al administrador del grupo para obtener un nuevo enlace.",
+    "rateLimitWait": "Demasiados intentos. Por favor espera {{seconds}} segundos e intenta de nuevo.",
     "verifyHebrewDate": "Por favor verifica que la fecha hebrea sea correcta. Si no, cambia 'Nacido después del atardecer' a continuación.",
     "verifyGregorianDate": "Verifica que la fecha gregoriana correspondiente sea correcta"
   },
@@ -105,6 +112,7 @@
     "copyToWhatsapp": "Copiar",
     "copyToWhatsappList": "Copiar lista de cumpleaños a WhatsApp",
     "copied": "¡Copiado!",
+    "selectColor": "Seleccionar color {{color}}",
     "yes": "Sí",
     "no": "No",
     "male": "Masculino",
@@ -112,6 +120,7 @@
     "other": "Otro",
     "actions": "Acciones",
     "selected": "seleccionado",
+    "notSelected": "no seleccionado",
     "clear": "Limpiar",
     "confirmDelete": "¿Estás seguro?",
     "noResults": "No se encontraron resultados",
@@ -133,6 +142,7 @@
     "month": "Mes",
     "year": "Año",
     "menu": "Menú",
+    "notifications": "Notificaciones",
     "note": "Nota",
     "moreInfo": "Más Información",
     "birthDate": "Fecha de Nacimiento",
@@ -143,12 +153,20 @@
     "deleteSelected": "Eliminar Seleccionados",
     "markSelectedAsRead": "Marcar Seleccionados como Leídos",
     "selectAll": "Seleccionar Todo",
+    "selectRow": "Seleccionar a {{name}}",
+    "statsTitle": "Estadísticas",
     "deselectAll": "Deseleccionar Todo",
     "linkCopied": "¡Enlace copiado!",
     "advancedOptions": "Opciones Avanzadas (calendario, notas)",
     "lessOptions": "Menos Opciones",
     "quickGuide": "Guía Rápida",
-    "fullGuide": "Guía Completa del Usuario"
+    "fullGuide": "Guía Completa del Usuario",
+    "currentDateLabel": "Fecha de hoy: {{hebrew}}, {{gregorian}}",
+    "home": "HebBirthday.app - Inicio",
+    "switchToLanguage": "Cambiar idioma a {{lang}}",
+    "sendEmailTo": "Enviar correo a {{email}}",
+    "backToHome": "Volver al inicio",
+    "retry": "Intentar de nuevo"
   },
   "guestPortal": {
     "title": "Portal de Lista de Deseos para Invitados",
@@ -165,7 +183,12 @@
     "shareHint": "El botón de mensaje copia el texto completo con explicación",
     "accessSettings": "Configuración de Acceso al Portal",
     "accessDescription": "Permitir a los invitados acceder y gestionar sus listas de deseos a través del portal público.",
-    "groupPermissions": "Gestionar Permisos por Grupos"
+    "groupPermissions": "Gestionar Permisos por Grupos",
+    "enablePortal": "Habilitar portal de invitados",
+    "toggleGroupFor": "Habilitar portal para {{groupName}}",
+    "copyLinkAction": "Copiar URL del portal al portapapeles",
+    "copyMessageAction": "Copiar mensaje con enlace del portal al portapapeles",
+    "shareWhatsAppAction": "Compartir enlace del portal en WhatsApp"
   },
   "googleCalendar": {
     "title": "Google Calendar",
@@ -261,6 +284,15 @@
     "syncInProgress": "Sincronización en progreso...",
     "unsyncSelected": "Desincronizar",
     "confirmBulkUnsync": "¿Estás seguro de que quieres desincronizar y eliminar del calendario los registros seleccionados?",
+    "deleteCalendarName": "Eliminar calendario: {{name}}",
+    "compactConnectedLabel": "Conectado a Google Calendar para {{email}}, calendario activo: {{calendar}}",
+    "historyModalLabel": "Ventana de historial de sincronización",
+    "closeHistory": "Cerrar historial",
+    "calendarSelectorLabel": "Menú de selección de calendario",
+    "createCalendarLabel": "Ventana de creación de nuevo calendario",
+    "cleanupConfirmLabel": "Ventana de confirmación de limpieza de eventos huérfanos",
+    "deleteConfirmLabel": "Ventana de confirmación de eliminación de calendario",
+    "syncStatusLabel": "Estado de sincronización con Google Calendar",
     "status": {
       "SUCCESS": "Completado Exitosamente",
       "PARTIAL": "Completado Parcialmente",
@@ -430,7 +462,12 @@
     "notesSyncHint": "Las notas se mostrarán en la descripción del evento de Google Calendar si eliges sincronizar",
     "deleteConfirmWithCalendar": "¿Estás seguro? Esta acción eliminará el cumpleaños y también removerá todos los eventos vinculados de Google Calendar.",
     "exportSuccess": "Datos exportados exitosamente",
-    "hebrewZodiacCopied": "Fechas hebreas y signos zodiacales copiados al portapapeles"
+    "hebrewZodiacCopied": "Fechas hebreas y signos zodiacales copiados al portapapeles",
+    "viewDetails": "Ver detalles de {{name}}",
+    "resultsFound": "Encontrados {{count}} cumpleaños",
+    "editName": "Editar cumpleaños de {{name}}",
+    "deleteName": "Eliminar cumpleaños de {{name}}",
+    "selectRow": "Seleccionar fila"
   },
   "groups": {
     "title": "Grupos",
@@ -471,8 +508,13 @@
     "unknownGroup": "Grupo Desconocido",
     "noGroupsAvailable": "No hay grupos disponibles",
     "rootGroup": "Grupo Principal",
+    "selectGroupItem": "{{name}} - {{status}}",
+    "selectionSummary": "{{count}} grupos seleccionados: {{text}}",
+    "noSelection": "No hay grupos seleccionados",
     "underGroup": "Bajo",
-    "assignToGroup": "Agregar al Grupo"
+    "assignToGroup": "Agregar al Grupo",
+    "shareGroup": "Compartir grupo {{name}}",
+    "editGroup": "Editar grupo {{name}}"
   },
   "wishlist": {
     "title": "Lista de Deseos",
@@ -543,6 +585,11 @@
   },
   "validation": {
     "required": "Este campo es obligatorio",
+    "firstNameRequired": "El nombre es obligatorio",
+    "lastNameRequired": "El apellido es obligatorio",
+    "birthDateRequired": "La fecha de nacimiento es obligatoria",
+    "genderRequired": "El género es obligatorio",
+    "groupRequired": "La selección de grupo es obligatoria",
     "importSuccess": "Importación completada exitosamente",
     "importError": "Error al importar archivo CSV",
     "invalidEmail": "Dirección de correo electrónico inválida",
@@ -655,7 +702,14 @@
     "deleteAccountConfirmTitle": "¿Estás absolutamente seguro?",
     "deleteAccountConfirmDescription": "Esta acción no se puede deshacer. Esto eliminará permanentemente tu cuenta y removerá tus datos de nuestros servidores.",
     "summaryOfData": "Resumen de datos a eliminar:",
-    "confirmDelete": "Sí, eliminar cuenta"
+    "confirmDelete": "Sí, eliminar cuenta",
+    "currency": "Moneda Principal",
+    "currencyHint": "La moneda en la que se mostrarán los montos en toda la aplicación.",
+    "currencies": {
+      "ILS": "₪ Shekel (ILS)",
+      "USD": "$ Dólar (USD)",
+      "EUR": "€ Euro (EUR)"
+    }
   },
   "help": {
     "title": "La Guía Rápida",
@@ -673,7 +727,9 @@
   "footer": {
     "termsOfUse": "Términos de Uso",
     "privacyPolicy": "Política de Privacidad",
+    "accessibility": "Declaración de Accesibilidad",
     "feedback": "Comentarios",
+    "feedbackOpenNewWindow": "Abrir formulario de comentarios en nueva ventana",
     "deleteAccount": "Eliminar Cuenta",
     "confirmDelete": "¿Confirmar eliminación?",
     "deleteAccountNotImplemented": "La funcionalidad de eliminación de cuenta aún no está disponible. Por favor contacta a soporte.",
@@ -799,7 +855,31 @@
     "confirmRemoveChild": "¿Estás seguro de que quieres eliminar este niño de la lista?",
     "removeChild": "Eliminar Niño",
     "modifiedAgesWarning": "Algunos niños tienen edades modificadas",
-    "modifiedAgesWarningDescription": "Las edades modificadas manualmente no se guardarán después de actualizar. Las edades se restablecerán automáticamente a la edad original de los cumpleaños."
+    "modifiedAgesWarningDescription": "Las edades modificadas manualmente no se guardarán después de actualizar. Las edades se restablecerán automáticamente a la edad original de los cumpleaños.",
+    "includeChild": "Incluir a {{name}} en el cálculo",
+    "excludeChild": "Excluir a {{name}} del cálculo",
+    "editAgeFor": "Editar edad para {{name}}",
+    "resetAgeFor": "Restablecer edad original para {{name}}",
+    "saveAge": "Guardar edad",
+    "cancelEdit": "Cancelar edición",
+    "expandSection": "Expandir sección",
+    "collapseSection": "Contraer sección",
+    "howItWorksLabel": "Explicación del funcionamiento de la calculadora",
+    "selectBirthdayFor": "Seleccionar a {{name}} para importar",
+    "deleteProfileLabel": "Eliminar perfil: {{name}}",
+    "showChildrenInGroup": "Mostrar niños en grupo de edad: {{name}}",
+    "showChildrenInGroupCount": "Mostrar {{count}} niños en grupo de edad: {{name}}",
+    "closeBudgetConfig": "Cerrar configuración de presupuesto",
+    "clearCustomBudget": "Limpiar presupuesto personalizado",
+    "saveGroupChanges": "Guardar cambios del grupo",
+    "cancelGroupChanges": "Cancelar cambios del grupo",
+    "includeGroup": "Incluir grupo {{name}}",
+    "excludeGroup": "Excluir grupo {{name}}",
+    "editMinAgeFor": "Editar edad mínima para grupo {{name}}",
+    "editMaxAgeFor": "Editar edad máxima para grupo {{name}}",
+    "editAmountFor": "Editar monto por niño para grupo {{name}}",
+    "childrenTableCaption": "Lista de niños y edades para cálculo de dinero de Hanukkah",
+    "noChildrenStatus": "La lista de niños está actualmente vacía"
   },
   "terms": {
     "title": "Términos de Uso para \"HebBirthday.App\"",
@@ -895,7 +975,9 @@
       "gelt": "Dinero de Janúcá/Purim",
       "whatsapp": "Botón de WhatsApp",
       "features": "Funciones Adicionales",
-      "settings": "Configuración y Privacidad"
+      "settings": "Configuración y Privacidad",
+      "menu": "Menú de la Guía",
+      "openMenu": "Abrir menú de la guía"
     },
     "title": "📘 Guía Completa",
     "subtitle": "Nunca olvides una fecha - Hebrea o Gregoriana 🎂",
@@ -1096,6 +1178,62 @@
     "privacyLink": "Política de Privacidad",
     "accept": "Aceptar y Continuar",
     "decline": "Cerrar"
+  },
+  "accessibility": {
+    "title": "Declaración de Accesibilidad - HebBirthday.App",
+    "lastUpdated": "Última Actualización",
+    "intro": "En HebBirthday, damos suma importancia a hacer nuestros servicios accesibles para todos, incluyendo personas con discapacidades. Operamos con la creencia de que todos merecen el derecho a disfrutar de una experiencia de navegación igualitaria, cómoda e independiente.",
+    "level": {
+      "title": "Nivel de Accesibilidad",
+      "text": "El sitio web es accesible de acuerdo con las pautas de accesibilidad en el Estándar Israelí 5568 (\"Pautas para Accesibilidad de Contenido Web\") en el nivel AA, y de acuerdo con las pautas internacionales del documento WCAG 2.2."
+    },
+    "adjustments": {
+      "title": "Ajustes Realizados",
+      "keyboard": "Navegación por Teclado:",
+      "keyboardDesc": "El sitio soporta completamente la navegación usando solo el teclado (usando las teclas Tab, Enter y Esc).",
+      "skiplink": "Enlace de Salto:",
+      "skiplinkDesc": "Se ha incorporado un enlace \"saltar al contenido\", permitiendo a los usuarios saltar los menús de navegación directamente al contenido principal.",
+      "focus": "Gestión de Foco:",
+      "focusDesc": "Se implementa \"trampa de foco\" en modales y menús para prevenir pérdida de orientación.",
+      "screenreader": "Soporte de Lector de Pantalla:",
+      "screenreaderDesc": "Uso de HTML Semántico y etiquetas ARIA para una lectura adecuada de contenido, formularios y errores.",
+      "contrast": "Contraste:",
+      "contrastDesc": "Adherencia a proporciones de contraste que cumplen con estándares para máxima legibilidad.",
+      "languages": "Idiomas:",
+      "languagesDesc": "El sitio soporta RTL (hebreo) y idiomas adicionales con actualización dinámica del idioma del documento."
+    },
+    "limitations": {
+      "title": "Limitaciones de Accesibilidad",
+      "text": "A pesar de nuestros esfuerzos por hacer todas las páginas del sitio accesibles, puede haber partes que aún no se han hecho completamente accesibles (por ejemplo, componentes incorporados de terceros). Si encuentra un problema, agradeceríamos que nos lo reporte."
+    },
+    "standards": {
+      "title": "Estándares y Métodos de Accesibilidad",
+      "wcag": "Cumplimiento WCAG 2.2 Nivel AA",
+      "keyboard": "Navegación Completa por Teclado",
+      "screenreader": "Soporte de Lector de Pantalla",
+      "contrast": "Contraste de Color Óptimo",
+      "focus": "Indicadores de Foco Claros"
+    },
+    "coordinator": {
+      "title": "Detalles del Coordinador de Accesibilidad",
+      "intro": "Para cualquier pregunta, solicitud o reporte de un mal funcionamiento, puede contactar al coordinador de accesibilidad:",
+      "name": "Nombre:",
+      "nameValue": "Chagai Yechiel",
+      "email": "Correo Electrónico:"
+    },
+    "contact": {
+      "title": "Métodos de Contacto Adicionales",
+      "text": "Si encontró un problema de accesibilidad o tiene sugerencias para mejorar, nos encantaría saber de usted:",
+      "email": "Correo Electrónico",
+      "form": "Formulario de Comentarios",
+      "formLink": "Enviar Comentarios"
+    },
+    "ongoing": {
+      "title": "Mejora Continua",
+      "text": "Invertimos esfuerzos continuos para mejorar la accesibilidad de la aplicación y asegurar que cumple con los estándares más recientes. Realizamos verificaciones regulares de accesibilidad e implementamos comentarios de los usuarios para garantizar la mejor experiencia de usuario posible para todos."
+    },
+    "updateDate": "Fecha de Actualización de la Declaración:",
+    "updateDateValue": "Diciembre 2025"
   },
   "privacy": {
     "title": "Política de Privacidad para \"HebBirthday.App\"",

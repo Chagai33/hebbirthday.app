@@ -18,6 +18,18 @@ export const FloatingActionButton: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // Handle ESC key to close menu
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
+
   const handleMainClick = () => {
     setShouldPulse(false);
     setIsOpen(!isOpen);
@@ -33,11 +45,12 @@ export const FloatingActionButton: React.FC = () => {
       {/* Main FAB */}
       <button
         onClick={handleMainClick}
-        className={`p-4 rounded-full shadow-xl text-white transition-all duration-300 z-50 
+        className={`p-4 rounded-full shadow-xl text-white transition-[transform,colors] duration-300 z-50
           ${isOpen ? 'bg-gray-700 rotate-45' : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'}
           ${shouldPulse ? 'animate-pulse-ring' : ''}
         `}
         aria-label={isOpen ? t('common.close') : t('common.actions')}
+        aria-expanded={isOpen}
       >
         <Plus className="w-6 h-6 stroke-[3]" />
       </button>

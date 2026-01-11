@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, UserCircle, Trash2, AlertCircle, Loader, Users, CheckCheck, ChevronDown, ChevronUp } from 'lucide-react';
 import { Birthday, Group } from '../../types';
@@ -7,6 +7,7 @@ import { useGroups } from '../../hooks/useGroups';
 import { useGuestNotifications } from '../../contexts/GuestNotificationsContext';
 import { format } from 'date-fns';
 import { he, enUS } from 'date-fns/locale';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 interface GuestActivityModalProps {
   isOpen: boolean;
@@ -25,25 +26,45 @@ interface GuestActivityItemProps {
   isNew: boolean;
   isSelected: boolean;
   onToggleSelect: (id: string) => void;
+  rowRef: (element: HTMLDivElement | null) => void;
 }
 
 const GuestActivityItem: React.FC<GuestActivityItemProps> = ({ 
-  birthday, onDelete, deletingId, getBirthdayGroups, getGroupName, formatDate, t, isNew, isSelected, onToggleSelect
+  birthday, onDelete, deletingId, getBirthdayGroups, getGroupName, formatDate, t, isNew, isSelected, onToggleSelect, rowRef
 }) => {
   return (
-    <div className={`flex items-center gap-4 p-4 rounded-xl transition-all border ${
-      isSelected 
-        ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-200'
-        : isNew 
-          ? 'bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200' 
-          : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50'
-    }`}>
+    <div
+      ref={rowRef}
+      data-row-id={birthday.id}
+      className={`flex items-center gap-4 p-4 rounded-xl transition-all border cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+        isSelected
+          ? 'bg-blue-50 border-blue-300'
+          : isNew
+            ? 'bg-gradient-to-r from-purple-50 to-indigo-50 border-purple-200'
+            : 'bg-white border-gray-100 hover:border-gray-200 hover:bg-gray-50'
+      }`}
+      role="row"
+      tabIndex={0}
+      aria-label={`${t('guestPortal.selectBirthday')} ${birthday.first_name} ${birthday.last_name}${isSelected ? ` - ${t('common.selected')}` : ''}`}
+      onClick={() => onToggleSelect(birthday.id)}
+      onKeyDown={(e) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          onToggleSelect(birthday.id);
+        } else if (e.key === 'Delete' || e.key === 'Backspace') {
+          e.preventDefault();
+          onDelete(birthday);
+        }
+      }}
+    >
       {/* Checkbox */}
       <input
         type="checkbox"
         checked={isSelected}
         onChange={() => onToggleSelect(birthday.id)}
-        className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer flex-shrink-0"
+        tabIndex={-1}
+        className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer flex-shrink-0 pointer-events-none"
+        aria-hidden="true"
       />
       {/* Avatar */}
       <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -94,10 +115,15 @@ const GuestActivityItem: React.FC<GuestActivityItemProps> = ({
 
       {/* Delete Button */}
       <button
-        onClick={() => onDelete(birthday)}
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(birthday);
+        }}
         disabled={deletingId === birthday.id}
+        tabIndex={-1}
         className="p-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
         title={t('dashboard.undoAdd')}
+        aria-label={t('dashboard.undoAdd')}
       >
         {deletingId === birthday.id ? (
           <Loader className="w-5 h-5 animate-spin" />
@@ -117,6 +143,20 @@ export const GuestActivityModal: React.FC<GuestActivityModalProps> = ({ isOpen, 
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const rowRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  // Accessibility: Focus management
+  const modalFocusRef = useFocusTrap(isOpen, onClose);
+  useFocusReturn(isOpen); // Will work correctly with the improved hook
+
+  // Create ref callback for each row
+  const setRowRef = (id: string) => (element: HTMLDivElement | null) => {
+    if (element) {
+      rowRefs.current.set(id, element);
+    } else {
+      rowRefs.current.delete(id);
+    }
+  };
 
   // Filter for guest-created birthdays, sorted by creation date (most recent first)
   const guestBirthdays = useMemo(() => {
@@ -231,6 +271,58 @@ export const GuestActivityModal: React.FC<GuestActivityModalProps> = ({ isOpen, 
     return allGroups.filter(g => groupIds.includes(g.id));
   };
 
+  // Handle arrow key navigation between rows
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const allRows = guestBirthdays.all;
+      const activeElement = document.activeElement as HTMLElement;
+      const currentRowId = activeElement?.getAttribute('data-row-id');
+      
+      if (!currentRowId) return;
+      
+      const currentIndex = allRows.findIndex(b => b.id === currentRowId);
+      if (currentIndex === -1) return;
+
+      let targetId: string | null = null;
+
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          if (currentIndex < allRows.length - 1) {
+            targetId = allRows[currentIndex + 1].id;
+          }
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          if (currentIndex > 0) {
+            targetId = allRows[currentIndex - 1].id;
+          }
+          break;
+        case 'Home':
+          e.preventDefault();
+          targetId = allRows[0].id;
+          break;
+        case 'End':
+          e.preventDefault();
+          targetId = allRows[allRows.length - 1].id;
+          break;
+      }
+
+      if (targetId) {
+        const targetElement = rowRefs.current.get(targetId);
+        targetElement?.focus();
+      }
+    };
+
+    if (isOpen && guestBirthdays.all.length > 0) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, guestBirthdays.all]);
+
   if (!isOpen) return null;
 
   return (
@@ -239,8 +331,12 @@ export const GuestActivityModal: React.FC<GuestActivityModalProps> = ({ isOpen, 
       onClick={onClose}
     >
       <div 
-        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col"
+        ref={modalFocusRef}
+        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="guest-activity-modal-title"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-indigo-50">
@@ -249,7 +345,7 @@ export const GuestActivityModal: React.FC<GuestActivityModalProps> = ({ isOpen, 
               <UserCircle className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">
+              <h2 id="guest-activity-modal-title" className="text-xl font-bold text-gray-900">
                 {t('dashboard.recentGuestActivity')}
               </h2>
               <p className="text-sm text-gray-600">
@@ -291,7 +387,8 @@ export const GuestActivityModal: React.FC<GuestActivityModalProps> = ({ isOpen, 
             )}
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-3 hover:bg-gray-100 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+              aria-label={t('common.close')}
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>
@@ -317,10 +414,7 @@ export const GuestActivityModal: React.FC<GuestActivityModalProps> = ({ isOpen, 
             <>
               {/* Selection Controls */}
               <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-200">
-                <button
-                  onClick={toggleSelectAll}
-                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 font-medium"
-                >
+                <label className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 font-medium cursor-pointer">
                   <input
                     type="checkbox"
                     checked={selectedIds.size === guestBirthdays.all.length && guestBirthdays.all.length > 0}
@@ -332,7 +426,7 @@ export const GuestActivityModal: React.FC<GuestActivityModalProps> = ({ isOpen, 
                       ? t('common.deselectAll')
                       : t('common.selectAll')}
                   </span>
-                </button>
+                </label>
                 {selectedIds.size > 0 && (
                   <span className="text-sm text-gray-600">
                     {selectedIds.size} {t('common.selected')}
@@ -350,7 +444,7 @@ export const GuestActivityModal: React.FC<GuestActivityModalProps> = ({ isOpen, 
                   </div>
                   {guestBirthdays.new.map((birthday) => (
                     <GuestActivityItem 
-                      key={birthday.id} 
+                      key={birthday.id}
                       birthday={birthday} 
                       onDelete={handleDelete}
                       deletingId={deletingId}
@@ -361,6 +455,7 @@ export const GuestActivityModal: React.FC<GuestActivityModalProps> = ({ isOpen, 
                       isNew={true}
                       isSelected={selectedIds.has(birthday.id)}
                       onToggleSelect={toggleSelect}
+                      rowRef={setRowRef(birthday.id)}
                     />
                   ))}
                 </div>
@@ -394,7 +489,7 @@ export const GuestActivityModal: React.FC<GuestActivityModalProps> = ({ isOpen, 
                     <div className="space-y-3 animate-slide-in">
                       {guestBirthdays.history.map((birthday) => (
                         <GuestActivityItem 
-                          key={birthday.id} 
+                          key={birthday.id}
                           birthday={birthday} 
                           onDelete={handleDelete}
                           deletingId={deletingId}
@@ -405,6 +500,7 @@ export const GuestActivityModal: React.FC<GuestActivityModalProps> = ({ isOpen, 
                           isNew={false}
                           isSelected={selectedIds.has(birthday.id)}
                           onToggleSelect={toggleSelect}
+                          rowRef={{ current: null, ref: setRowRef(birthday.id) } as any}
                         />
                       ))}
                     </div>
@@ -417,12 +513,22 @@ export const GuestActivityModal: React.FC<GuestActivityModalProps> = ({ isOpen, 
 
           {/* Info Note */}
           {guestBirthdays.all.length > 0 && (
-            <div className="mt-6 flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-              <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-blue-700">
-                {t('dashboard.guestActivityInfo')}
-              </p>
-            </div>
+            <>
+              <div className="mt-6 flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-blue-700">
+                  {t('dashboard.guestActivityInfo')}
+                </p>
+              </div>
+              {/* Keyboard Navigation Hint */}
+              <div className="mt-3 flex items-start gap-3 p-3 bg-purple-50 border border-purple-200 rounded-xl">
+                <div className="w-5 h-5 flex-shrink-0 mt-0.5">⌨️</div>
+                <div className="text-xs text-purple-800 space-y-1">
+                  <p className="font-semibold">{t('common.keyboardShortcuts', 'קיצורי מקלדת')}:</p>
+                  <p>↑↓ {t('common.navigate', 'ניווט')} • Space {t('common.select', 'בחירה')} • Delete {t('common.delete', 'מחיקה')}</p>
+                </div>
+              </div>
+            </>
           )}
         </div>
 

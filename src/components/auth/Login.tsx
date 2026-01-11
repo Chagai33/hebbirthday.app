@@ -7,6 +7,8 @@ import { ForgotPasswordModal } from './ForgotPasswordModal';
 import { authService } from '../../services/auth.service';
 import { DeveloperCredit } from '../common/DeveloperCredit';
 import { LanguageSwitcher } from '../common/LanguageSwitcher';
+import { Logo } from '../common/Logo';
+import { AuthLayout } from './AuthLayout';
 
 export const Login: React.FC = () => {
   const { t } = useTranslation();
@@ -43,15 +45,16 @@ export const Login: React.FC = () => {
     try {
       await signIn(email, password);
       // Don't navigate here - let AuthContext's onAuthStateChanged handle it
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       // Check if user has Google account
-      if (err.message === 'invalidCredential') {
+      if (errorMessage === 'invalidCredential') {
         try {
           const methods = await authService.checkSignInMethods(email);
           if (methods.includes('google.com')) {
             setError(t('auth.errors.useGoogleOrReset'));
           } else {
-            setError(getErrorMessage(err.message));
+            setError(getErrorMessage(errorMessage));
           }
         } catch {
           setError(getErrorMessage(err.message));
@@ -68,8 +71,9 @@ export const Login: React.FC = () => {
     setIsSubmitting(true);
     try {
       await signInWithGoogle();
-    } catch (err: any) {
-      setError(getErrorMessage(err.message));
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(getErrorMessage(errorMessage));
       setIsSubmitting(false);
     }
   };
@@ -79,9 +83,8 @@ export const Login: React.FC = () => {
   // toggleLanguage removed - using LanguageSwitcher
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-100 px-4 py-8 overflow-y-auto">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-6 sm:p-8 relative">
-        <div className="flex justify-end items-center gap-1 mb-4">
+    <AuthLayout>
+      <div className="flex justify-end items-center gap-1 mb-4">
           <button
             onClick={() => navigate('/guide')}
             className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -98,17 +101,9 @@ export const Login: React.FC = () => {
           </button>
           <LanguageSwitcher className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" variant="minimal" />
         </div>
+
         <div className="text-center mb-8">
-          <div className="flex flex-col items-center justify-center mb-6">
-            <div className="text-3xl sm:text-4xl font-black tracking-tight leading-none relative inline-flex items-baseline" dir="ltr">
-              <span className="text-[#8e24aa]">Heb</span>
-              <span className="text-[#304FFE]">Birthday</span>
-              <span className="text-gray-400 text-xl ml-[1px] absolute left-full bottom-1">.app</span>
-            </div>
-            <span className="text-sm text-gray-500 font-medium mt-1">
-              {t('app.taglinePart1')} <span className="text-[#8e24aa]">{t('app.taglineHebrew')}</span> {t('app.taglineOr')} <span className="text-[#304FFE]">{t('app.taglineGregorian')}</span>
-            </span>
-          </div>
+          <Logo variant="auth" className="mb-6" />
           <h1 className="text-2xl font-bold text-gray-900">
             {t('auth.signIn')}
           </h1>
@@ -222,14 +217,13 @@ export const Login: React.FC = () => {
           </button>
         </p>
 
-        <DeveloperCredit className="mt-4" />
-      </div>
+      <DeveloperCredit className="mt-4" />
 
       <ForgotPasswordModal
         isOpen={showForgotPassword}
         onClose={() => setShowForgotPassword(false)}
         email={email}
       />
-    </div>
+    </AuthLayout>
   );
 };

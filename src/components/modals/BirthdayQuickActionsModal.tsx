@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Birthday } from '../../types';
 import { Gift, X, Calendar, Edit, Trash2 } from 'lucide-react';
 import { SyncStatusButton } from '../birthdays/SyncStatusButton';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 interface BirthdayQuickActionsModalProps {
   isOpen: boolean;
@@ -35,27 +36,36 @@ export const BirthdayQuickActionsModal: React.FC<BirthdayQuickActionsModalProps>
 }) => {
   const { t, i18n } = useTranslation();
 
+  // Accessibility: Focus management
+  const modalFocusRef = useFocusTrap(isOpen, onClose);
+  useFocusReturn(isOpen);
+
   if (!isOpen || !birthday) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={onClose}>
       <div 
-        className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200" 
+        ref={modalFocusRef}
+        className="bg-white rounded-2xl shadow-xl w-full max-w-sm max-h-[calc(100vh-2rem)] overflow-y-auto animate-in fade-in zoom-in duration-200" 
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="birthday-actions-modal-title"
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 border-b border-blue-100 flex justify-between items-start">
           <div>
-            <h3 className="text-lg font-bold text-gray-900">
+            <h3 id="birthday-actions-modal-title" className="text-lg font-bold text-gray-900">
               {birthday.first_name} {birthday.last_name}
             </h3>
             <p className="text-sm text-gray-500 mt-1">
               {t('common.actions')}
             </p>
           </div>
-          <button 
+          <button
             onClick={onClose}
-            className="p-1 text-gray-400 hover:text-gray-600 hover:bg-white/50 rounded-full transition-colors"
+            className="p-3 text-gray-500 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            aria-label={t('common.close')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -69,7 +79,7 @@ export const BirthdayQuickActionsModal: React.FC<BirthdayQuickActionsModalProps>
             onClick={() => {
               onWishlist(birthday);
             }}
-            className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 bg-white hover:bg-pink-50 hover:border-pink-200 transition-all group shadow-sm hover:shadow-md text-start"
+            className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 bg-white hover:bg-pink-50 hover:border-pink-200 transition-[box-shadow,background-color,border-color] duration-200 group shadow-sm hover:shadow-md text-start"
           >
             <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 group-hover:scale-110 transition-transform">
               <Gift className="w-5 h-5" />
@@ -86,7 +96,7 @@ export const BirthdayQuickActionsModal: React.FC<BirthdayQuickActionsModalProps>
 
           {/* Sync Action - Only if connected */}
           {isConnected && (
-            <div className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 bg-white hover:bg-blue-50 hover:border-blue-200 transition-all group shadow-sm hover:shadow-md text-start relative overflow-hidden">
+            <div className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 bg-white hover:bg-blue-50 hover:border-blue-200 transition-[box-shadow,background-color,border-color] duration-200 group shadow-sm hover:shadow-md text-start relative overflow-hidden">
                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none border-2 border-blue-500/10 rounded-xl transition-opacity" />
                
                {/* Reuse the existing button logic but styled as a wrapper */}
@@ -120,7 +130,7 @@ export const BirthdayQuickActionsModal: React.FC<BirthdayQuickActionsModalProps>
             onClick={() => {
               onEdit(birthday);
             }}
-            className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 bg-white hover:bg-orange-50 hover:border-orange-200 transition-all group shadow-sm hover:shadow-md text-start"
+            className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 bg-white hover:bg-orange-50 hover:border-orange-200 transition-[box-shadow,background-color,border-color] duration-200 group shadow-sm hover:shadow-md text-start"
           >
             <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform">
               <Edit className="w-5 h-5" />

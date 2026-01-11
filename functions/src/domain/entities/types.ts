@@ -75,6 +75,8 @@ export interface TenantData {
   created_at?: any;
   last_birthday_process_date?: string; // Used for scheduled updates
   is_guest_portal_enabled?: boolean;
+  deletionStatus?: string;
+  deletionStartedAt?: any;
 }
 
 export interface GroupData {

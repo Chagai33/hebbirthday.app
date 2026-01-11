@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { GeltTemplate, AgeGroup, BudgetConfig } from '../../types/gelt';
+import { GeltTemplate } from '../../types/gelt';
 import { Button } from '../common/Button';
 import { useGeltTemplates, useDeleteGeltTemplate, useUpdateGeltTemplate } from '../../hooks/useGeltTemplates';
 import { useTenant } from '../../contexts/TenantContext';
 import { X, Loader2, Trash2, Star, StarOff, RotateCcw } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
 import { DEFAULT_AGE_GROUPS, DEFAULT_BUDGET_CONFIG } from '../../utils/geltConstants';
+import { useFocusTrap } from '../../hooks/useAccessibility';
+import { formatCurrency } from '../../utils/currencyUtils';
 
 interface GeltLoadTemplateModalProps {
   isOpen: boolean;
@@ -28,6 +30,9 @@ export const GeltLoadTemplateModal: React.FC<GeltLoadTemplateModalProps> = ({
   const updateTemplate = useUpdateGeltTemplate();
   const { success, error: showError } = useToast();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Focus trap for modal
+  const focusTrapRef = useFocusTrap(isOpen, onClose);
 
   // Separate effect for refetch - only once when modal opens
   const hasRefetchedRef = useRef(false);
@@ -118,29 +123,35 @@ export const GeltLoadTemplateModal: React.FC<GeltLoadTemplateModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div 
+      <div
+        ref={focusTrapRef}
         className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col animate-slide-in"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="load-template-title"
       >
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-bold text-gray-900">{t('gelt.loadProfile')}</h2>
+          <h2 id="load-template-title" className="text-xl font-bold text-gray-900">{t('gelt.loadProfile')}</h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors min-h-[44px]"
+            aria-label={t('common.close')}
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5" aria-hidden="true" />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">
           <div className="space-y-3">
             {/* System Default Option - Always visible */}
-            <div
-              className="flex items-center justify-between p-4 border-2 border-blue-200 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"
+            <button
+              onClick={handleLoadSystemDefault}
+              className="flex items-center justify-between p-4 border-2 border-blue-200 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors w-full text-left focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <RotateCcw className="w-4 h-4 text-blue-600" />
+                  <RotateCcw className="w-4 h-4 text-blue-600" aria-hidden="true" />
                   <h3 className="font-medium text-gray-900">{t('gelt.systemDefaultProfile')}</h3>
                   <span className="text-xs bg-blue-200 text-blue-800 px-2 py-0.5 rounded">
                     {t('gelt.systemDefault')}
@@ -154,19 +165,13 @@ export const GeltLoadTemplateModal: React.FC<GeltLoadTemplateModalProps> = ({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={handleLoadSystemDefault}
-                >
-                  {t('gelt.load')}
-                </Button>
+                <span className="text-sm font-medium text-blue-600">{t('gelt.load')}</span>
               </div>
-            </div>
+            </button>
 
             {/* User Profiles */}
             {isError ? (
-              <div className="text-center py-8 text-red-500 border border-red-200 rounded-lg bg-red-50 p-4">
+              <div className="text-center py-8 text-red-500 border border-red-200 rounded-lg bg-red-50 p-4" role="alert" aria-live="assertive">
                 <p className="font-semibold mb-2">{t('gelt.profileLoadError')}</p>
                 <p className="text-sm">{error?.message || 'Unknown error'}</p>
                 <p className="text-xs mt-2 text-gray-500">
@@ -175,18 +180,19 @@ export const GeltLoadTemplateModal: React.FC<GeltLoadTemplateModalProps> = ({
               </div>
             ) : isLoading ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                <Loader2 className="w-6 h-6 animate-spin text-blue-600" aria-hidden="true" />
               </div>
             ) : templates.length === 0 ? (
               <div className="text-center py-8 text-gray-500 text-sm border border-gray-200 rounded-lg bg-gray-50 p-4">
                 <p>{t('gelt.noProfiles')}</p>
               </div>
             ) : (
-              templates.map((template) => (
-                <div
-                  key={template.id}
-                  className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
-                >
+              <ul className="space-y-3" role="list">
+                {templates.map((template) => (
+                  <li key={template.id}>
+                    <div
+                      className="flex items-center justify-between p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
+                    >
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-medium text-gray-900">{template.name}</h3>
@@ -205,7 +211,7 @@ export const GeltLoadTemplateModal: React.FC<GeltLoadTemplateModalProps> = ({
                       </span>
                       {template.budgetConfig.customBudget && (
                         <span className="ml-3">
-                          {t('gelt.customBudget')}: {template.budgetConfig.customBudget}₪
+                          {t('gelt.customBudget')}: {formatCurrency(template.budgetConfig.customBudget || 0, currentTenant?.currency)}
                         </span>
                       )}
                     </div>
@@ -213,17 +219,17 @@ export const GeltLoadTemplateModal: React.FC<GeltLoadTemplateModalProps> = ({
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleToggleDefault(template)}
-                      className="p-2 text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 rounded-lg transition-colors"
-                      title={
+                      className="p-2 text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 rounded-lg transition-colors min-h-[44px]"
+                      aria-label={
                         template.is_default
                           ? t('gelt.unsetAsDefault')
                           : t('gelt.setAsDefault')
                       }
                     >
                       {template.is_default ? (
-                        <Star className="w-5 h-5 fill-current" />
+                        <Star className="w-5 h-5 fill-current" aria-hidden="true" />
                       ) : (
-                        <StarOff className="w-5 h-5" />
+                        <StarOff className="w-5 h-5" aria-hidden="true" />
                       )}
                     </button>
                     <Button
@@ -235,19 +241,21 @@ export const GeltLoadTemplateModal: React.FC<GeltLoadTemplateModalProps> = ({
                     </Button>
                     <button
                       onClick={() => handleDelete(template.id, template.name)}
-                      className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                       disabled={deletingId === template.id}
-                      title={t('gelt.deleteProfile')}
+                      aria-label={t('gelt.deleteProfileLabel', { name: template.name })}
                     >
                       {deletingId === template.id ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
                       ) : (
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-5 h-5" aria-hidden="true" />
                       )}
                     </button>
                   </div>
                 </div>
-              ))
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         </div>

@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { TextPasteArea } from '../import/TextPasteArea';
 import { parseFreeText } from '../../utils/textParser';
 import { CSVBirthdayData } from '../../utils/csvExport';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 interface TextImportModalProps {
   isOpen: boolean;
@@ -20,6 +21,10 @@ export const TextImportModal: React.FC<TextImportModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // Accessibility: Focus management
+  const modalFocusRef = useFocusTrap(isOpen, onClose);
+  useFocusReturn(isOpen);
 
   // Reset analyzing state when modal closes
   useEffect(() => {
@@ -58,11 +63,11 @@ export const TextImportModal: React.FC<TextImportModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+      <div ref={modalFocusRef} className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col" role="dialog" aria-modal="true" aria-labelledby="text-import-modal-title">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-indigo-50">
           <div>
-            <h2 className="text-2xl font-bold text-gray-800">
+            <h2 id="text-import-modal-title" className="text-2xl font-bold text-gray-800">
               {t('import.pasteTitle', 'הדבק רשימת ימי הולדת')}
             </h2>
             <p className="text-sm text-gray-600 mt-1">

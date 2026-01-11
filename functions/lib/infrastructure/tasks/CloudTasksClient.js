@@ -4,10 +4,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TasksClient = void 0;
 const tasks_1 = require("@google-cloud/tasks");
 class TasksClient {
-    constructor(projectId, location, queue) {
+    constructor(projectId, location, queue, deletionQueue) {
         this.projectId = projectId;
         this.location = location;
         this.queue = queue;
+        this.deletionQueue = deletionQueue;
         this.client = new tasks_1.CloudTasksClient();
     }
     async createSyncTask(payload, delaySeconds) {
@@ -29,7 +30,7 @@ class TasksClient {
         await this.client.createTask({ parent, task });
     }
     async createDeletionTask(payload) {
-        const parent = this.client.queuePath(this.projectId, this.location, this.queue);
+        const parent = this.client.queuePath(this.projectId, this.location, this.deletionQueue);
         const task = {
             httpRequest: {
                 httpMethod: 'POST',

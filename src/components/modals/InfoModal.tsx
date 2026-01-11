@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Calendar, Plus, Cloud, Users, Calculator, Gift, MessageCircle, Copy, Check } from 'lucide-react';
+import { X, Calendar, Plus, Cloud, Calculator, Gift, MessageCircle, Copy, Check } from 'lucide-react';
 import { useToast } from '../../contexts/ToastContext';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 interface InfoModalProps {
   isOpen: boolean;
@@ -13,6 +14,10 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
   const { showToast } = useToast();
   const isRtl = i18n.language === 'he';
   const [copied, setCopied] = useState(false);
+
+  // Accessibility: Focus management
+  const modalFocusRef = useFocusTrap(isOpen, onClose);
+  useFocusReturn(isOpen); // Will work correctly with the improved hook
 
   const handleCopyLink = async () => {
     try {
@@ -31,19 +36,24 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4" onClick={onClose}>
       <div 
-        className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 animate-slide-in relative max-h-[90vh] overflow-y-auto"
+        ref={modalFocusRef}
+        className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 animate-slide-in relative max-h-[calc(100vh-2rem)] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="info-modal-title"
       >
         <button
           onClick={onClose}
-          className={`absolute top-4 ${isRtl ? 'left-4' : 'right-4'} p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors z-10`}
+          className={`absolute top-4 ${isRtl ? 'left-4' : 'right-4'} p-3 text-gray-500 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors z-10 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2`}
+          aria-label={t('common.close')}
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="space-y-6">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">{t('help.title')}</h2>
+            <h2 id="info-modal-title" className="text-2xl font-bold text-gray-900 mb-2">{t('help.title')}</h2>
             <p className="text-gray-600 leading-relaxed">
               {t('help.intro')}
             </p>
@@ -107,7 +117,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
 
             <div className="flex gap-4 bg-green-50 p-4 rounded-xl border border-green-100">
               <div className="flex-shrink-0 mt-1">
-                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
+                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center text-green-700">
                   <Cloud className="w-5 h-5" />
                 </div>
               </div>

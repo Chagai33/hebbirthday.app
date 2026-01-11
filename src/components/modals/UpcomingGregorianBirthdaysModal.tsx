@@ -4,6 +4,7 @@ import { X, Calendar } from 'lucide-react';
 import { format, addYears } from 'date-fns';
 import { he, enUS } from 'date-fns/locale';
 import { Birthday } from '../../types';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 interface UpcomingGregorianBirthdaysModalProps {
   isOpen: boolean;
@@ -18,6 +19,10 @@ export const UpcomingGregorianBirthdaysModal: React.FC<UpcomingGregorianBirthday
 }) => {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === 'he' ? he : enUS;
+
+  // Accessibility: Focus management
+  const modalFocusRef = useFocusTrap(isOpen, onClose);
+  useFocusReturn(isOpen);
 
   const birthDate = new Date(birthday.birth_date_gregorian);
   const today = useMemo(() => {
@@ -67,16 +72,21 @@ export const UpcomingGregorianBirthdaysModal: React.FC<UpcomingGregorianBirthday
       onClick={handleBackdropClick}
     >
       <div 
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[80vh] overflow-y-auto"
+        ref={modalFocusRef}
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 max-h-[calc(100vh-2rem)] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="upcoming-gregorian-modal-title"
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 id="upcoming-gregorian-modal-title" className="text-2xl font-bold text-gray-900">
             {t('birthday.upcomingGregorianBirthdays')}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-3 text-gray-400 hover:text-gray-600 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            aria-label={t('common.close')}
           >
             <X className="w-6 h-6" />
           </button>

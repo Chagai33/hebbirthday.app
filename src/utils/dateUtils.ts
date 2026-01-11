@@ -1,5 +1,12 @@
 import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 import { format, startOfDay } from 'date-fns';
+import { he, enUS, es } from 'date-fns/locale';
+
+const locales: Record<string, any> = {
+  he,
+  en: enUS,
+  es
+};
 
 /**
  * Get current date/time in tenant's timezone
@@ -33,8 +40,14 @@ export function getTenantHebrewNow(timezone: string = 'Asia/Jerusalem', sunsetHo
 /**
  * Format date in tenant's timezone
  */
-export function formatInTenantTimezone(date: Date, timezone: string, formatStr: string): string {
-  return formatInTimeZone(date, timezone, formatStr);
+export function formatInTenantTimezone(
+  date: Date,
+  timezone: string,
+  formatStr: string,
+  localeCode: string = 'en'
+): string {
+  const locale = locales[localeCode] || locales['en'];
+  return formatInTimeZone(date, timezone, formatStr, { locale });
 }
 
 /**

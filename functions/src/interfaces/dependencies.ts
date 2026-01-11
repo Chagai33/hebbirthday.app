@@ -27,9 +27,10 @@ import { CalculateHebrewDataUseCase } from '../application/use-cases/birthday/Ca
 import { CleanupOrphanEventsUseCase } from '../application/use-cases/calendar/CleanupOrphanEventsUseCase';
 import { ManageCalendarUseCase } from '../application/use-cases/calendar/ManageCalendarUseCase';
 import { GoogleOAuthUseCase } from '../application/use-cases/auth/GoogleOAuthUseCase';
+import { ProcessAccountDeletionUseCase } from '../application/use-cases/management/ProcessAccountDeletionUseCase';
 
 // Constants
-import { PROJECT_ID, LOCATION, QUEUE } from '../shared/constants';
+import { PROJECT_ID, LOCATION, QUEUE, DELETION_QUEUE } from '../shared/constants';
 
 export interface Dependencies {
   // Infrastructure
@@ -56,6 +57,7 @@ export interface Dependencies {
   cleanupOrphanEventsUseCase: CleanupOrphanEventsUseCase;
   manageCalendarUseCase: ManageCalendarUseCase;
   googleOAuthUseCase: GoogleOAuthUseCase;
+  processAccountDeletionUseCase: ProcessAccountDeletionUseCase;
 }
 
 let _dependencies: Dependencies | null = null;
@@ -84,7 +86,7 @@ export function createDependencies(): Dependencies {
     GOOGLE_REDIRECT_URI
   );
   const calendarClient = new GoogleCalendarClient(authClient);
-  const tasksClient = new TasksClient(PROJECT_ID, LOCATION, QUEUE);
+  const tasksClient = new TasksClient(PROJECT_ID, LOCATION, QUEUE, DELETION_QUEUE);
 
   // Domain Layer
   const zodiacService = new ZodiacService();
@@ -138,6 +140,13 @@ export function createDependencies(): Dependencies {
     tokenRepo
   );
 
+  const processAccountDeletionUseCase = new ProcessAccountDeletionUseCase(
+    tenantRepo,
+    authClient,
+    calendarClient,
+    db
+  );
+
   _dependencies = {
     db,
     birthdayRepo,
@@ -157,7 +166,8 @@ export function createDependencies(): Dependencies {
     calculateHebrewDataUseCase,
     cleanupOrphanEventsUseCase,
     manageCalendarUseCase,
-    googleOAuthUseCase
+    googleOAuthUseCase,
+    processAccountDeletionUseCase
   };
 
   return _dependencies;

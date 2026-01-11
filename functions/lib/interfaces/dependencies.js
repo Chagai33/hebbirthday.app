@@ -59,6 +59,7 @@ const CalculateHebrewDataUseCase_1 = require("../application/use-cases/birthday/
 const CleanupOrphanEventsUseCase_1 = require("../application/use-cases/calendar/CleanupOrphanEventsUseCase");
 const ManageCalendarUseCase_1 = require("../application/use-cases/calendar/ManageCalendarUseCase");
 const GoogleOAuthUseCase_1 = require("../application/use-cases/auth/GoogleOAuthUseCase");
+const ProcessAccountDeletionUseCase_1 = require("../application/use-cases/management/ProcessAccountDeletionUseCase");
 // Constants
 const constants_1 = require("../shared/constants");
 let _dependencies = null;
@@ -78,7 +79,7 @@ function createDependencies() {
     const groupRepo = new GroupRepository_1.GroupRepository(db);
     const authClient = new GoogleAuthClient_1.GoogleAuthClient(tokenRepo, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
     const calendarClient = new GoogleCalendarClient_1.GoogleCalendarClient(authClient);
-    const tasksClient = new CloudTasksClient_1.TasksClient(constants_1.PROJECT_ID, constants_1.LOCATION, constants_1.QUEUE);
+    const tasksClient = new CloudTasksClient_1.TasksClient(constants_1.PROJECT_ID, constants_1.LOCATION, constants_1.QUEUE, constants_1.DELETION_QUEUE);
     // Domain Layer
     const zodiacService = new ZodiacService_1.ZodiacService();
     const hebcalService = new HebcalService_1.HebcalService();
@@ -91,6 +92,7 @@ function createDependencies() {
     const cleanupOrphanEventsUseCase = new CleanupOrphanEventsUseCase_1.CleanupOrphanEventsUseCase(calendarClient, authClient, db);
     const manageCalendarUseCase = new ManageCalendarUseCase_1.ManageCalendarUseCase(calendarClient, tokenRepo);
     const googleOAuthUseCase = new GoogleOAuthUseCase_1.GoogleOAuthUseCase(authClient, calendarClient, tokenRepo);
+    const processAccountDeletionUseCase = new ProcessAccountDeletionUseCase_1.ProcessAccountDeletionUseCase(tenantRepo, authClient, calendarClient, db);
     _dependencies = {
         db,
         birthdayRepo,
@@ -110,7 +112,8 @@ function createDependencies() {
         calculateHebrewDataUseCase,
         cleanupOrphanEventsUseCase,
         manageCalendarUseCase,
-        googleOAuthUseCase
+        googleOAuthUseCase,
+        processAccountDeletionUseCase
     };
     return _dependencies;
 }

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { X, Sunset } from 'lucide-react';
+import { useFocusTrap, useFocusReturn } from '../../hooks/useAccessibility';
 
 interface SunsetVerificationModalProps {
   isOpen: boolean;
@@ -15,25 +16,30 @@ export const SunsetVerificationModal: React.FC<SunsetVerificationModalProps> = (
 }) => {
   const { t } = useTranslation();
 
+  // Accessibility: Focus management
+  const modalFocusRef = useFocusTrap(isOpen, onClose);
+  useFocusReturn(isOpen);
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+      <div ref={modalFocusRef} className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[calc(100vh-2rem)] overflow-y-auto p-6" role="dialog" aria-modal="true" aria-labelledby="sunset-modal-title">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
               <Sunset className="w-6 h-6 text-orange-600" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900">
+            <h2 id="sunset-modal-title" className="text-xl font-bold text-gray-900">
               {t('modals.sunsetVerification.title')}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-3 text-gray-500 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            aria-label={t('common.close')}
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 

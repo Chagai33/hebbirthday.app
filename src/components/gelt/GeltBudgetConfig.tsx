@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BudgetConfig } from '../../types/gelt';
-import { roundToFive, handleInputBlur, handleArrowKey } from '../../utils/geltCalculations';
+import { handleInputBlur, handleArrowKey } from '../../utils/geltCalculations';
 
 interface GeltBudgetConfigProps {
   config: BudgetConfig;
@@ -66,10 +66,11 @@ export const GeltBudgetConfig: React.FC<GeltBudgetConfigProps> = ({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="participants-config-input" className="block text-sm font-medium text-gray-700 mb-2">
           {t('gelt.participants')}
         </label>
         <input
+          id="participants-config-input"
           type="number"
           value={participants}
           onChange={(e) => setParticipants(e.target.value)}
@@ -78,13 +79,15 @@ export const GeltBudgetConfig: React.FC<GeltBudgetConfigProps> = ({
           min="1"
           max="1000"
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          aria-label={t('gelt.participants')}
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="overflow-config-input" className="block text-sm font-medium text-gray-700 mb-2">
           {t('gelt.allowedOverflow')} (%)
         </label>
         <input
+          id="overflow-config-input"
           type="number"
           value={overflow}
           onChange={(e) => setOverflow(e.target.value)}
@@ -94,6 +97,7 @@ export const GeltBudgetConfig: React.FC<GeltBudgetConfigProps> = ({
           max="100"
           step="1"
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          aria-label={t('gelt.allowedOverflow')}
         />
       </div>
     </div>

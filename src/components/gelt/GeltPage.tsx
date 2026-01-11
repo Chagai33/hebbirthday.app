@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Layout } from '../layout/Layout';
+import { useTenant } from '../../contexts/TenantContext';
 import { useGelt, useUpdateGelt, useResetGelt } from '../../hooks/useGelt';
 import { useSaveGeltTemplate, useDefaultGeltTemplate, useGeltTemplates } from '../../hooks/useGeltTemplates';
 import { GeltTemplate } from '../../types/gelt';
@@ -28,6 +29,8 @@ import { Download, Upload, RotateCcw, Users, Settings, Calculator, ChevronDown, 
 import { useToast } from '../../contexts/ToastContext';
 import { DEFAULT_AGE_GROUPS, DEFAULT_BUDGET_CONFIG } from '../../utils/geltConstants';
 import { FloatingBackButton } from '../common/FloatingBackButton';
+import { useFocusTrap } from '../../hooks/useAccessibility';
+import { formatCurrency } from '../../utils/currencyUtils';
 
 export const GeltPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -35,9 +38,10 @@ export const GeltPage: React.FC = () => {
   const updateGelt = useUpdateGelt();
   const resetGelt = useResetGelt();
   const { data: birthdays = [] } = useBirthdays();
-  const { success, error: showError } = useToast();
+  const { success, error: showError, warning } = useToast();
   const { data: defaultTemplate, isLoading: isLoadingDefaultTemplate } = useDefaultGeltTemplate();
   const { data: existingTemplates = [] } = useGeltTemplates();
+  const { currentTenant } = useTenant();
 
   const [localState, setLocalState] = useState<GeltState | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -253,6 +257,9 @@ export const GeltPage: React.FC = () => {
     return () => clearTimeout(timeoutId);
   }, [localState, isLoading, updateGelt, showError, t]);
 
+  // Focus trap for modal
+  const focusTrapRef = useFocusTrap(showHowItWorksModal);
+
   if (isLoading || isLoadingDefaultTemplate || !localState) {
     return (
       <Layout>
@@ -454,7 +461,10 @@ export const GeltPage: React.FC = () => {
     is_default?: boolean;
   }) => {
     try {
-      await saveTemplate.mutateAsync(template);
+      await saveTemplate.mutateAsync({
+        ...template,
+        currency: currentTenant?.currency,
+      });
       success(t('gelt.profileSaved'));
     } catch {
       showError(t('gelt.profileSaveError'));
@@ -462,6 +472,14 @@ export const GeltPage: React.FC = () => {
   };
 
   const handleLoadTemplate = (template: GeltTemplate) => {
+    // Check if template currency differs from current tenant currency
+    if (template.currency && currentTenant?.currency && template.currency !== currentTenant.currency) {
+      warning(t('gelt.templateCurrencyWarning', {
+        templateCurrency: template.currency,
+        default: 'התבנית נשמרה במטבע אחר ({templateCurrency}). המספרים נטענו ללא המרה.'
+      }));
+    }
+
     // Prepare budgetConfig - only include customBudget if it exists in the template
     const budgetConfigToLoad: BudgetConfig = {
       participants: template.budgetConfig.participants,
@@ -517,9 +535,9 @@ export const GeltPage: React.FC = () => {
               <button
                 onClick={() => setShowHowItWorksModal(true)}
                 className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-                title={t('gelt.howItWorks')}
+                aria-label={t('gelt.howItWorksLabel')}
               >
-                <Info className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Info className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
               </button>
             </div>
             {defaultTemplate && (
@@ -544,7 +562,7 @@ export const GeltPage: React.FC = () => {
           {/* Warning about modified ages */}
           {localState && localState.children.some(child => child.originalAge !== undefined) && (
             <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
-              <Info className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <Info className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div className="flex-1 min-w-0">
                 <p className="text-xs sm:text-sm text-yellow-800 font-medium">
                   {t('gelt.modifiedAgesWarning')}
@@ -563,7 +581,7 @@ export const GeltPage: React.FC = () => {
             <Button
               variant="primary"
               onClick={() => setShowImportModal(true)}
-              icon={<Upload className="w-4 h-4" />}
+              icon={<Upload className="w-4 h-4" aria-hidden="true" />}
               fullWidth
             >
               {t('gelt.importFromBirthdays')}
@@ -574,7 +592,7 @@ export const GeltPage: React.FC = () => {
             <Button
               variant="outline"
               onClick={() => setShowBudgetConfigModal(true)}
-              icon={<Settings className="w-4 h-4" />}
+              icon={<Settings className="w-4 h-4" aria-hidden="true" />}
               fullWidth
             >
               {t('gelt.budgetConfig')}
@@ -582,7 +600,7 @@ export const GeltPage: React.FC = () => {
                 {localState.budgetConfig.participants} / {localState.budgetConfig.allowedOverflowPercentage}%
                 {localState.budgetConfig.customBudget && (
                   <span className="ml-1 font-semibold">
-                    • {localState.budgetConfig.customBudget}₪
+                    • {formatCurrency(localState.budgetConfig.customBudget || 0, currentTenant?.currency)}
                   </span>
                 )}
               </span>
@@ -592,7 +610,7 @@ export const GeltPage: React.FC = () => {
           <Button
             variant="outline"
             onClick={() => setShowLoadTemplateModal(true)}
-            icon={<FolderOpen className="w-4 h-4" />}
+            icon={<FolderOpen className="w-4 h-4" aria-hidden="true" />}
             className="col-span-1 sm:w-auto px-0 sm:px-4"
             title={t('gelt.loadProfile')}
           >
@@ -602,7 +620,7 @@ export const GeltPage: React.FC = () => {
           <Button
             variant="outline"
             onClick={() => setShowSaveTemplateModal(true)}
-            icon={<Save className="w-4 h-4" />}
+            icon={<Save className="w-4 h-4" aria-hidden="true" />}
             className="col-span-1 sm:w-auto px-0 sm:px-4"
             title={t('gelt.saveProfile')}
           >
@@ -612,7 +630,7 @@ export const GeltPage: React.FC = () => {
           <Button
             variant="outline"
             onClick={handleExport}
-            icon={<Download className="w-4 h-4" />}
+            icon={<Download className="w-4 h-4" aria-hidden="true" />}
             className="col-span-1 sm:w-auto px-0 sm:px-4"
             title={t('gelt.export')}
           >
@@ -622,7 +640,7 @@ export const GeltPage: React.FC = () => {
           <Button
             variant="danger"
             onClick={handleReset}
-            icon={<RotateCcw className="w-4 h-4" />}
+            icon={<RotateCcw className="w-4 h-4" aria-hidden="true" />}
             className="col-span-1 sm:w-auto px-0 sm:px-4"
             title={t('gelt.reset')}
           >
@@ -637,36 +655,41 @@ export const GeltPage: React.FC = () => {
             <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6">
               <button
                 onClick={() => setShowChildrenList(!showChildrenList)}
-                className="w-full flex items-center justify-between gap-2 mb-3 sm:mb-4 hover:opacity-80 transition-opacity"
+                className="w-full flex items-center justify-between gap-2 mb-3 sm:mb-4 hover:opacity-80 transition-opacity focus:ring-2 focus:ring-blue-500 focus:outline-none rounded-lg"
+                aria-expanded={showChildrenList}
+                aria-controls="children-list-section"
+                aria-label={showChildrenList ? t('gelt.collapseSection') : t('gelt.expandSection')}
               >
                 <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" aria-hidden="true" />
                   <h2 className="text-base sm:text-lg lg:text-xl font-semibold">{t('gelt.children')}</h2>
                   <span className="text-xs sm:text-sm text-gray-500">
                     ({localState.children.length})
                   </span>
                 </div>
                 {showChildrenList ? (
-                  <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                  <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" aria-hidden="true" />
                 ) : (
-                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" aria-hidden="true" />
                 )}
               </button>
               {showChildrenList && (
-                <GeltChildrenList
+                <div id="children-list-section">
+                  <GeltChildrenList
                   children={localState.children}
                   includedChildren={includedChildrenSet}
                   onUpdateChild={handleUpdateChild}
                   onToggleInclude={handleToggleInclude}
                   onResetAge={handleResetAge}
                 />
+                </div>
               )}
             </div>
 
             {/* Age Groups List */}
             <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6">
               <div className="flex items-center gap-2 mb-3 sm:mb-4">
-                <Calculator className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                <Calculator className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" aria-hidden="true" />
                 <h2 className="text-base sm:text-lg lg:text-xl font-semibold">{t('gelt.ageGroups')}</h2>
               </div>
               <GeltAgeGroupsList
@@ -676,6 +699,7 @@ export const GeltPage: React.FC = () => {
                 onToggleInclude={handleToggleGroupInclude}
                 onShowGroupChildren={handleShowGroupChildren}
                 children={localState.children}
+                tenant={currentTenant}
               />
             </div>
           </div>
@@ -685,20 +709,25 @@ export const GeltPage: React.FC = () => {
             <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6">
               <button
                 onClick={() => setShowCalculationResults(!showCalculationResults)}
-                className="w-full flex items-center justify-between gap-2 mb-3 sm:mb-4 hover:opacity-80 transition-opacity"
+                className="w-full flex items-center justify-between gap-2 mb-3 sm:mb-4 hover:opacity-80 transition-opacity focus:ring-2 focus:ring-blue-500 focus:outline-none rounded-lg"
+                aria-expanded={showCalculationResults}
+                aria-controls="calculation-results-section"
+                aria-label={showCalculationResults ? t('gelt.collapseSection') : t('gelt.expandSection')}
               >
                 <div className="flex items-center gap-2">
-                  <Calculator className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                  <Calculator className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" aria-hidden="true" />
                   <h2 className="text-base sm:text-lg lg:text-xl font-semibold">{t('gelt.calculationResults')}</h2>
                 </div>
                 {showCalculationResults ? (
-                  <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                  <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" aria-hidden="true" />
                 ) : (
-                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" aria-hidden="true" />
                 )}
               </button>
               {showCalculationResults && (
-                <GeltCalculationResults calculation={calculation} />
+                <div id="calculation-results-section">
+                  <GeltCalculationResults calculation={calculation} tenant={currentTenant} />
+                </div>
               )}
             </div>
           </div>
@@ -762,22 +791,27 @@ export const GeltPage: React.FC = () => {
       {/* How It Works Modal */}
       {showHowItWorksModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowHowItWorksModal(false)}>
-          <div 
+          <div
+            ref={focusTrapRef}
             className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col animate-slide-in"
             onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="how-it-works-title"
+            aria-describedby="how-it-works-content"
           >
             <div className="flex items-center justify-between p-6 border-b">
-              <h2 className="text-xl font-bold text-gray-900">{t('gelt.howItWorksTitle')}</h2>
+              <h2 id="how-it-works-title" className="text-xl font-bold text-gray-900">{t('gelt.howItWorksTitle')}</h2>
               <button
                 onClick={() => setShowHowItWorksModal(false)}
                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6">
-              <div className="space-y-4">
+              <div id="how-it-works-content" className="space-y-4">
                 <p className="text-gray-700 whitespace-pre-line leading-relaxed text-sm">
                   {t('gelt.howItWorksContent')}
                 </p>

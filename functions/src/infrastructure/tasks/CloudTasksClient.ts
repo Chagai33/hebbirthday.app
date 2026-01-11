@@ -8,7 +8,8 @@ export class TasksClient {
   constructor(
     private projectId: string,
     private location: string,
-    private queue: string
+    private queue: string,
+    private deletionQueue: string
   ) {
     this.client = new GoogleCloudTasksClient();
   }
@@ -40,7 +41,7 @@ export class TasksClient {
   async createDeletionTask(
     payload: { userId: string; tenantId: string }
   ): Promise<void> {
-    const parent = this.client.queuePath(this.projectId, this.location, this.queue);
+    const parent = this.client.queuePath(this.projectId, this.location, this.deletionQueue);
     
     const task = {
       httpRequest: {

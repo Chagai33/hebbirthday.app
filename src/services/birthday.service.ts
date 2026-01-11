@@ -408,7 +408,7 @@ export const birthdayService = {
         birthdays: data.birthdays || [],
         count: data.count || 0,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching guest birthdays:', error);
       throw new Error(error.message || 'Failed to fetch birthdays for guest');
     }
@@ -445,7 +445,7 @@ export const birthdayService = {
       return {
         group: data.group,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error verifying guest token:', error);
       throw new Error(error.message || 'Invalid or expired token');
     }
