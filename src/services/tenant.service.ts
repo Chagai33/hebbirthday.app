@@ -16,7 +16,7 @@ import { groupService } from './group.service';
 import { logger } from '../utils/logger';
 
 export const tenantService = {
-  async createTenant(name: string, ownerId: string, language: 'he' | 'en' = 'he'): Promise<string> {
+  async createTenant(name: string, ownerId: string, language: 'he' | 'en' | 'es' = 'he'): Promise<string> {
     const tenantRef = await addDoc(collection(db, 'tenants'), {
       name,
       owner_id: ownerId,

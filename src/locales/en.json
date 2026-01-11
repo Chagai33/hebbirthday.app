@@ -701,7 +701,14 @@
     "deleteAccountConfirmTitle": "Are you absolutely sure?",
     "deleteAccountConfirmDescription": "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
     "summaryOfData": "Summary of data to be deleted:",
-    "confirmDelete": "Yes, delete account"
+    "confirmDelete": "Yes, delete account",
+    "currency": "Primary Currency",
+    "currencyHint": "The currency in which amounts will be displayed throughout the application.",
+    "currencies": {
+      "ILS": "₪ Shekel (ILS)",
+      "USD": "$ Dollar (USD)",
+      "EUR": "€ Euro (EUR)"
+    }
   },
   "help": {
     "title": "The Quick Guide",

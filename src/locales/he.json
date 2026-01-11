@@ -438,7 +438,14 @@
     "deleteAccountConfirmTitle": "האם אתה בטוח לחלוטין?",
     "deleteAccountConfirmDescription": "פעולה זו אינה הפיכה. היא תמחק לצמיתות את חשבונך ותסיר את הנתונים שלך מהשרתים שלנו.",
     "summaryOfData": "סיכום הנתונים שיימחקו:",
-    "confirmDelete": "כן, מחק חשבון"
+    "confirmDelete": "כן, מחק חשבון",
+    "currency": "מטבע ראשי",
+    "currencyHint": "המטבע שבו יוצגו הסכומים בכל האפליקציה.",
+    "currencies": {
+      "ILS": "₪ שקל (ILS)",
+      "USD": "$ דולר (USD)",
+      "EUR": "€ אירו (EUR)"
+    }
   },
   "sort": {
     "upcomingSoonest": "יום הולדת (לועזי - הקרוב ביותר)",

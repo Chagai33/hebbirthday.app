@@ -27,7 +27,7 @@ const ROOT_GROUPS = [
 export const groupService = {
   isInitializing: false,
 
-  async initializeRootGroups(tenantId: string, userId: string, language: 'he' | 'en' = 'he'): Promise<void> {
+  async initializeRootGroups(tenantId: string, userId: string, language: 'he' | 'en' | 'es' = 'he'): Promise<void> {
     if (this.isInitializing) {
       logger.log('Already initializing root groups, skipping...');
       return;

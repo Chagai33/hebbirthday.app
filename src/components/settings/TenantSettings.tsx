@@ -198,9 +198,9 @@ export const TenantSettings: React.FC<TenantSettingsProps> = ({ onClose }) => {
                                 onChange={(e) => setCurrency(e.target.value as Currency)}
                                 className="w-full px-3 py-2 text-sm border border-green-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white"
                             >
-                                <option value="ILS">₪ שקל (ILS)</option>
-                                <option value="USD">$ דולר (USD)</option>
-                                <option value="EUR">€ אירו (EUR)</option>
+                                <option value="ILS">{t('settings.currencies.ILS')}</option>
+                                <option value="USD">{t('settings.currencies.USD')}</option>
+                                <option value="EUR">{t('settings.currencies.EUR')}</option>
                             </select>
 
                             <div className="flex items-start gap-1.5 text-xs text-green-700 bg-green-100 rounded-md p-2">

@@ -12,7 +12,7 @@ export interface Tenant {
   id: string;
   name: string;
   owner_id: string;
-  default_language?: 'he' | 'en';
+  default_language?: 'he' | 'en' | 'es';
   timezone?: string;
   default_calendar_preference?: CalendarPreference;
   currency?: 'ILS' | 'USD' | 'EUR';

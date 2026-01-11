@@ -43,7 +43,7 @@ export function formatDateForGoogleCalendar(date: Date, allDay: boolean = false)
 
 export function createBirthdayCalendarEvent(
   birthday: Birthday,
-  language: 'he' | 'en' = 'he',
+  language: 'he' | 'en' | 'es' = 'he',
   wishlist?: WishlistItem[],
   groupInfo?: { parentName?: string; groupName: string }
 ): GoogleCalendarEvent {
@@ -124,7 +124,7 @@ export function createBirthdayCalendarEvent(
 
 export function openGoogleCalendarForBirthday(
   birthday: Birthday,
-  language: 'he' | 'en' = 'he',
+  language: 'he' | 'en' | 'es' = 'he',
   wishlist?: WishlistItem[],
   groupInfo?: { parentName?: string; groupName: string }
 ): void {

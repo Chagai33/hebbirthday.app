@@ -16,7 +16,7 @@ export const CalendarPreferenceSelector: React.FC<CalendarPreferenceSelectorProp
   label,
 }) => {
   const { i18n } = useTranslation();
-  const currentLang = i18n.language as 'he' | 'en';
+  const currentLang = (i18n.language as 'he' | 'en' | 'es') || 'en';
 
 
   const options: CalendarPreference[] = ['gregorian', 'hebrew', 'both'];
@@ -31,8 +31,10 @@ export const CalendarPreferenceSelector: React.FC<CalendarPreferenceSelectorProp
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
         {options.map((option) => {
-          const optionLabel = calendarPreferenceService.getPreferenceLabel(option)[currentLang];
-          const optionDesc = calendarPreferenceService.getPreferenceDescription(option)[currentLang];
+          const preferenceData = calendarPreferenceService.getPreferenceLabel(option);
+          const descriptionData = calendarPreferenceService.getPreferenceDescription(option);
+          const optionLabel = preferenceData[currentLang] || preferenceData.en;
+          const optionDesc = descriptionData[currentLang] || descriptionData.en;
           const isSelected = value === option;
 
           return (

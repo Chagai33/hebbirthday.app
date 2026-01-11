@@ -702,7 +702,14 @@
     "deleteAccountConfirmTitle": "¿Estás absolutamente seguro?",
     "deleteAccountConfirmDescription": "Esta acción no se puede deshacer. Esto eliminará permanentemente tu cuenta y removerá tus datos de nuestros servidores.",
     "summaryOfData": "Resumen de datos a eliminar:",
-    "confirmDelete": "Sí, eliminar cuenta"
+    "confirmDelete": "Sí, eliminar cuenta",
+    "currency": "Moneda Principal",
+    "currencyHint": "La moneda en la que se mostrarán los montos en toda la aplicación.",
+    "currencies": {
+      "ILS": "₪ Shekel (ILS)",
+      "USD": "$ Dólar (USD)",
+      "EUR": "€ Euro (EUR)"
+    }
   },
   "help": {
     "title": "La Guía Rápida",

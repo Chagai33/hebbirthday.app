@@ -88,29 +88,32 @@ export const calendarPreferenceService = {
     return calculations.daysUntilHebrewBirthday ?? calculations.daysUntilGregorianBirthday;
   },
 
-  getPreferenceLabel(preference: CalendarPreference): { he: string; en: string } {
+  getPreferenceLabel(preference: CalendarPreference): { he: string; en: string; es: string } {
     const labels = {
-      gregorian: { he: 'לועזי בלבד', en: 'Gregorian Only' },
-      hebrew: { he: 'עברי בלבד', en: 'Hebrew Only' },
-      both: { he: 'שניהם', en: 'Both' },
+      gregorian: { he: 'לועזי בלבד', en: 'Gregorian Only', es: 'Solo Gregoriano' },
+      hebrew: { he: 'עברי בלבד', en: 'Hebrew Only', es: 'Solo Hebreo' },
+      both: { he: 'שניהם', en: 'Both', es: 'Ambos' },
     };
 
     return labels[preference];
   },
 
-  getPreferenceDescription(preference: CalendarPreference): { he: string; en: string } {
+  getPreferenceDescription(preference: CalendarPreference): { he: string; en: string; es: string } {
     const descriptions = {
       gregorian: {
         he: 'הצגת גילאים ותאריכים לועזיים בלבד',
         en: 'Display Gregorian ages and dates only',
+        es: 'Mostrar solo edades y fechas gregorianas',
       },
       hebrew: {
         he: 'הצגת גילאים ותאריכים עבריים בלבד',
         en: 'Display Hebrew ages and dates only',
+        es: 'Mostrar solo edades y fechas hebreas',
       },
       both: {
         he: 'הצגת גילאים ותאריכים לועזיים ועבריים',
         en: 'Display both Gregorian and Hebrew ages and dates',
+        es: 'Mostrar edades y fechas gregorianas y hebreas',
       },
     };
 

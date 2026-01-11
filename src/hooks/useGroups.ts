@@ -182,7 +182,7 @@ export const useInitializeRootGroups = () => {
   const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async (language: 'he' | 'en' = 'he') => {
+    mutationFn: async (language: 'he' | 'en' | 'es' = 'he') => {
       if (!currentTenant || !user) {
         throw new Error('No tenant or user found');
       }
