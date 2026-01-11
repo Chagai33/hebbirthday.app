@@ -34,7 +34,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.previewDeletionFn = exports.resetSyncDataFn = exports.refreshHebrewDataFn = exports.cleanupOrphanFn = exports.removeBirthdayFn = exports.syncMultipleFn = exports.syncBirthdayFn = void 0;
+exports.deleteGoogleCalendar = exports.updateGoogleCalendarSelection = exports.createGoogleCalendar = exports.previewDeletionFn = exports.resetSyncDataFn = exports.refreshHebrewDataFn = exports.cleanupOrphanFn = exports.removeBirthdayFn = exports.syncMultipleFn = exports.syncBirthdayFn = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 const dependencies_1 = require("../dependencies");
@@ -183,5 +183,52 @@ exports.previewDeletionFn = functions.https.onCall(async (data, context) => {
     catch (e) {
         throw new functions.https.HttpsError('internal', 'Preview failed');
     }
+});
+// Create a new calendar and save ID to Tenant
+exports.createGoogleCalendar = functions.https.onCall(async (data, context) => {
+    if (!context.auth) {
+        throw new functions.https.HttpsError('unauthenticated', 'Auth required');
+    }
+    const { tenantId } = data;
+    if (!tenantId) {
+        throw new functions.https.HttpsError('invalid-argument', 'Tenant ID is required');
+    }
+    // Use the Strict UseCase logic (Get-or-Create)
+    const calendarId = await deps.manageCalendarUseCase.getOrCreateCalendar(context.auth.uid, tenantId);
+    // Get the calendar name from the created/found calendar
+    const calendarInfo = await deps.calendarClient.getCalendar(context.auth.uid, calendarId);
+    const calendarName = calendarInfo?.summary || '';
+    return {
+        calendarId,
+        calendarName
+    };
+});
+// Update calendar selection (rename/switch)
+exports.updateGoogleCalendarSelection = functions.https.onCall(async (data, context) => {
+    if (!context.auth)
+        throw new functions.https.HttpsError('unauthenticated', 'Auth required');
+    const { calendarId, calendarName, tenantId } = data;
+    // Logic to update tenant DB
+    await deps.tenantRepo.setCalendarId(tenantId, calendarId);
+    if (calendarName) {
+        // Assuming we want to update the name in Google too if needed, or just DB flag
+        await deps.tenantRepo.setCustomCalendarNameFlag(tenantId, true);
+    }
+    return {
+        calendarId,
+        calendarName: calendarName || ''
+    };
+});
+// Delete/Disconnect calendar
+exports.deleteGoogleCalendar = functions.https.onCall(async (data, context) => {
+    if (!context.auth)
+        throw new functions.https.HttpsError('unauthenticated', 'Auth required');
+    const { calendarId, tenantId } = data;
+    if (!tenantId)
+        throw new functions.https.HttpsError('invalid-argument', 'Tenant ID required');
+    // This should trigger the Hard Delete logic in UseCase if implemented, or at least clear DB
+    await deps.calendarClient.deleteCalendar(context.auth.uid, calendarId).catch(() => { }); // Ignore 404
+    await deps.tenantRepo.clearCalendarId(tenantId);
+    return { success: true };
 });
 //# sourceMappingURL=calendar-functions.js.map

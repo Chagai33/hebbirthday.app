@@ -66,11 +66,11 @@ export const createGoogleCalendarFn = functions.https.onCall(async (data, contex
     throw new functions.https.HttpsError('unauthenticated', 'Auth required');
   }
 
-  const result = await deps.manageCalendarUseCase.createCalendar(
+  const calendarId = await deps.manageCalendarUseCase.getOrCreateCalendar(
     context.auth.uid,
-    data.name
+    data.tenantId
   );
-  return { success: true, ...result };
+  return { calendarId, calendarName: '' };
 });
 
 // Delete Google Calendar

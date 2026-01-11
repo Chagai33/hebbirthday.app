@@ -3,6 +3,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useTranslation } from 'react-i18next';
 import { googleCalendarService } from '../services/googleCalendar.service';
 import { useAuth } from './AuthContext';
+import { useTenant } from './TenantContext';
 import { GoogleCalendarContextType, SyncResult, BulkSyncResult, CleanupOrphansResult, PreviewDeletionResult, SyncHistoryItem } from '../types';
 import { logger } from '../utils/logger';
 import { analyticsService } from '../services/analytics.service';
@@ -27,6 +28,7 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ children }) => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { currentTenant } = useTenant();
   const { showToast } = useToast();
   const [isConnected, setIsConnected] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
@@ -174,6 +176,14 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       return result;
     } catch (error: unknown) {
       logger.error('Error syncing birthday:', error);
+
+      // Handle ghost calendar deletion
+      if (error.message === 'CALENDAR_DELETED') {
+        showToast(t('googleCalendar.calendarDeleted', 'היומן נמחק. אנא הגדר יומן חדש.'), 'warning');
+        await refreshStatus(); // This will detect the ghost calendar and clean up the state
+        throw new Error('CALENDAR_DELETED');
+      }
+
       showToast(error.message || t('googleCalendar.syncError'), 'error');
       throw error;
     } finally {
@@ -224,6 +234,14 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       return result;
     } catch (error: unknown) {
       logger.error('Error syncing multiple birthdays:', error);
+
+      // Handle ghost calendar deletion
+      if (error.message === 'CALENDAR_DELETED') {
+        showToast(t('googleCalendar.calendarDeleted', 'היומן נמחק. אנא הגדר יומן חדש.'), 'warning');
+        await refreshStatus(); // This will detect the ghost calendar and clean up the state
+        throw new Error('CALENDAR_DELETED');
+      }
+
       showToast(error.message || t('googleCalendar.syncError'), 'error');
       throw error;
     } finally {
@@ -339,16 +357,21 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       throw new Error('Not connected to Google Calendar');
     }
 
+    if (!currentTenant?.id) {
+      showToast(t('common.error'), 'error');
+      throw new Error('No tenant selected');
+    }
+
     try {
       setIsSyncing(true);
-      const result = await googleCalendarService.createCalendar(name);
-      
+      const result = await googleCalendarService.createCalendar(name, currentTenant.id);
+
       setCalendarId(result.calendarId);
       setCalendarName(result.calendarName);
-      
+
       // A newly created calendar is never primary
       setIsPrimaryCalendar(false);
-      
+
       showToast(t('googleCalendar.createdSuccess'), 'success');
       return result;
     } catch (error: unknown) {
@@ -366,6 +389,11 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       throw new Error('Not connected to Google Calendar');
     }
 
+    if (!currentTenant?.id) {
+      showToast(t('common.error'), 'error');
+      throw new Error('No tenant selected');
+    }
+
     // Save previous state for potential rollback
     const prevId = calendarId;
     const prevName = calendarName;
@@ -375,14 +403,14 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       // Optimistic Update
       setCalendarId(selectedCalendarId);
       setCalendarName(selectedCalendarName);
-      
+
       // Update isPrimaryCalendar based on selection
       // We assume if it's not explicitly 'primary' (or the user's email), it's a secondary calendar
       const isPrimary = selectedCalendarId === 'primary' || (userEmail && selectedCalendarId === userEmail);
       setIsPrimaryCalendar(!!isPrimary);
 
       setIsSyncing(true);
-      await googleCalendarService.updateCalendarSelection(selectedCalendarId, selectedCalendarName);
+      await googleCalendarService.updateCalendarSelection(selectedCalendarId, selectedCalendarName, currentTenant.id);
       
       showToast(t('googleCalendar.calendarSelectionUpdated'), 'success');
     } catch (error: unknown) {
@@ -424,11 +452,16 @@ export const GoogleCalendarProvider: React.FC<GoogleCalendarProviderProps> = ({ 
       throw new Error('Not connected to Google Calendar');
     }
 
+    if (!currentTenant?.id) {
+      showToast(t('common.error'), 'error');
+      throw new Error('No tenant selected');
+    }
+
     try {
       setIsSyncing(true);
-      await googleCalendarService.deleteCalendar(calendarIdToDelete);
+      await googleCalendarService.deleteCalendar(calendarIdToDelete, currentTenant.id);
       showToast(t('googleCalendar.deletedSuccess'), 'success');
-      
+
       // רענון רשימת היומנים אחרי מחיקה
       await listCalendars();
     } catch (error: unknown) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Calendar, Check, Loader, Trash2, User, LogOut, Plus, Settings, ChevronDown, ShieldAlert, RefreshCw, History, X } from 'lucide-react';
 import { useFocusTrap } from '../../hooks/useAccessibility';
@@ -36,6 +36,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
     syncStatus,
     recentActivity,
     statusAnnouncement,
+    needsCalendarSetup,
     connectToGoogle,
     deleteAllSyncedEvents,
     disconnect,
@@ -46,7 +47,7 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
     cleanupOrphanEvents,
     previewDeletion
   } = useGoogleCalendar();
-  const { currentTenant } = useTenant();
+  const { currentTenant, updateTenantLocally } = useTenant();
   const { user } = useAuth();
   const [showConfirm, setShowConfirm] = useState(false);
   const [showCreateCalendar, setShowCreateCalendar] = useState(false);
@@ -139,6 +140,17 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
       }
   }, [isConnected, isSyncing, calendarId, hasShownStrictMode, initialStrictMode]);
 
+  // Track previous connection state to detect "Just Connected" event
+  const prevIsConnected = useRef(isConnected);
+
+  useEffect(() => {
+    // If we just connected AND we need setup -> Open Create Modal immediately
+    if (!prevIsConnected.current && isConnected && needsCalendarSetup) {
+      setShowCreateCalendar(true);
+    }
+    prevIsConnected.current = isConnected;
+  }, [isConnected, needsCalendarSetup]);
+
 
   const handleConnect = async () => {
     try {
@@ -218,34 +230,38 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
   };
 
   const handleCreateCalendar = async () => {
-    if (!newCalendarName.trim()) {
+    if (!newCalendarName.trim() || !currentTenant?.id) {
       return;
     }
 
     // שמירת השם זמנית לפני הניקוי
     const nameToCreate = newCalendarName.trim();
-    
+
     // סגירת המודל מיד לתחושת תגובתיות
     setShowCreateCalendar(false);
     setNewCalendarName('');
 
     try {
-      // 1. יצירת היומן - הפונקציה ב-Context כבר מעדכנת את ה-State הגלובלי (calendarId/Name)
-      const result = await createCalendar(nameToCreate);
-      
-      // 2. וידוא בחירה (למקרה שה-Context לא תפס)
+      // 1. Server Call
+      const result = await createCalendar(nameToCreate, currentTenant.id);
+
+      // 2. Immediate Local Update (No network fetch!)
+      updateTenantLocally(currentTenant.id, {
+        googleCalendarId: result.calendarId,
+        hasCustomCalendarName: false // default
+      });
+
+      // 3. Update calendar context (optional, for consistency)
       if (result?.calendarId) {
-          // זה יעדכן את ה-State ב-Context שוב ויבטיח שה-UI מתרנדר
-          await updateCalendarSelection(result.calendarId, result.calendarName);
+        await updateCalendarSelection(result.calendarId, result.calendarName, currentTenant.id);
       }
-      
-      // 3. רענון הרשימה ברקע כדי שהיומן יופיע ב-Dropdown בפעם הבאה
-      // אנחנו לא מחכים לזה כדי לא לעכב את ה-UI
+
+      // 4. Background refresh of calendar list
       loadAvailableCalendars();
-      
+
     } catch (error) {
       console.error('Error creating calendar:', error);
-      // במקרה שגיאה נפתח שוב את המודל (אופציונלי, אבל עדיף למשתמש)
+      // במקרה שגיאה נפתח שוב את המודל
       setNewCalendarName(nameToCreate);
       setShowCreateCalendar(true);
     }
@@ -279,8 +295,10 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
   }, [createdCalendars.length, isConnected]);
 
   const handleSelectCalendar = async (selectedCalendar: CalendarOption) => {
+    if (!currentTenant?.id) return;
+
     try {
-      await updateCalendarSelection(selectedCalendar.id, selectedCalendar.summary);
+      await updateCalendarSelection(selectedCalendar.id, selectedCalendar.summary, currentTenant.id);
       setShowCalendarSelector(false);
     } catch (error) {
       console.error('Error selecting calendar:', error);
@@ -317,10 +335,10 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
   }, [user, isConnected, showCalendarSelector]);
 
   const handleDeleteCalendar = async () => {
-    if (!calendarToDelete) return;
+    if (!calendarToDelete || !currentTenant?.id) return;
 
     try {
-      await deleteCalendar(calendarToDelete);
+      await deleteCalendar(calendarToDelete, currentTenant.id);
       setShowDeleteConfirm(false);
       setCalendarToDelete(null);
       setCalendarToDeleteName(null);
@@ -356,23 +374,36 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
 
   if (isConnected) {
     if (isCompact) {
+      const isSetupRequired = needsCalendarSetup;
       return (
         <button
           onClick={onManageClick}
-          className="flex items-center gap-3 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition-colors duration-200 text-sm group h-[38px]"
+          className={`flex items-center gap-3 px-3 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-sm group h-[38px] ${
+            isSetupRequired
+              ? 'bg-amber-50 border border-amber-200 hover:bg-amber-100'
+              : 'bg-white border border-gray-200 hover:bg-gray-50'
+          }`}
           title={t('googleCalendar.title')}
           aria-label={t('googleCalendar.compactStatus', {
-            status: isConnected ? t('googleCalendar.connected') : t('googleCalendar.notConnected'),
+            status: isSetupRequired ? t('googleCalendar.setupRequired') : t('googleCalendar.connected'),
             calendar: calendarName || t('googleCalendar.primaryCalendar'),
             email: userEmail || ''
           })}
         >
           {/* Icon & Status */}
           <div className="relative">
-            <Calendar className="w-4 h-4 text-gray-600 group-hover:text-blue-600 transition-colors" />
+            {isSetupRequired ? (
+              <ShieldAlert className="w-4 h-4 text-amber-600 group-hover:text-amber-700 transition-colors" />
+            ) : (
+              <Calendar className="w-4 h-4 text-gray-600 group-hover:text-blue-600 transition-colors" />
+            )}
             <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500 border border-white"></span>
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                isSetupRequired ? 'bg-amber-400' : 'bg-green-400'
+              }`}></span>
+              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 border border-white ${
+                isSetupRequired ? 'bg-amber-500' : 'bg-green-500'
+              }`}></span>
             </span>
           </div>
 
@@ -381,10 +412,18 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
 
           {/* Info */}
           <div className="flex items-center gap-2 text-xs">
-            <span className="font-medium text-gray-900 hidden xl:inline">{t('googleCalendar.connected')}</span>
+            <span className={`font-medium hidden xl:inline ${
+              isSetupRequired ? 'text-amber-900' : 'text-gray-900'
+            }`}>
+              {isSetupRequired ? t('googleCalendar.setupRequired') : t('googleCalendar.connected')}
+            </span>
             <span className="text-gray-500 hidden lg:inline">{userEmail}</span>
             <span className="text-gray-500 hidden lg:inline">•</span>
-            <span className="text-blue-700 font-medium">{calendarName || t('googleCalendar.primaryCalendar')}</span>
+            <span className={`font-medium ${
+              isSetupRequired ? 'text-amber-700' : 'text-blue-700'
+            }`}>
+              {calendarName || t('googleCalendar.primaryCalendar')}
+            </span>
           </div>
         </button>
       );
@@ -403,14 +442,22 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
           {/* Header Section */}
           <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-white border border-gray-200 rounded-lg flex items-center justify-center shadow-sm text-green-600">
-                <Calendar className="w-5 h-5" />
+              <div className={`w-8 h-8 bg-white border border-gray-200 rounded-lg flex items-center justify-center shadow-sm ${
+                needsCalendarSetup ? 'text-amber-600' : 'text-green-600'
+              }`}>
+                {needsCalendarSetup ? <ShieldAlert className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900 text-sm">{t('googleCalendar.title')}</h3>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-xs text-green-700 font-medium">{t('googleCalendar.connected')}</span>
+                  <div className={`w-2 h-2 rounded-full animate-pulse ${
+                    needsCalendarSetup ? 'bg-amber-500' : 'bg-green-500'
+                  }`} />
+                  <span className={`text-xs font-medium ${
+                    needsCalendarSetup ? 'text-amber-700' : 'text-green-700'
+                  }`}>
+                    {needsCalendarSetup ? t('googleCalendar.setupRequired') : t('googleCalendar.connected')}
+                  </span>
                 </div>
               </div>
             </div>
@@ -448,29 +495,50 @@ export const GoogleCalendarButton: React.FC<GoogleCalendarButtonProps> = ({ init
               </div>
             </div>
 
-            {/* Calendar Selection Row */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-11">
-                {t('googleCalendar.currentCalendar')}
-              </label>
-              <div className="flex items-center gap-3">
-                <div className="w-8 flex justify-center text-gray-500">
-                  <Calendar className="w-4 h-4" aria-hidden="true" />
+            {/* Calendar Selection Row or Create Button */}
+            {needsCalendarSetup ? (
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-amber-600 uppercase tracking-wider ml-11">
+                  {t('googleCalendar.setupRequired')}
+                </label>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 flex justify-center text-amber-500">
+                    <ShieldAlert className="w-4 h-4" aria-hidden="true" />
+                  </div>
+                  <button
+                    onClick={() => setShowCreateCalendar(true)}
+                    disabled={isSyncing}
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 hover:border-amber-300 transition-colors duration-200 text-sm font-medium text-amber-900"
+                  >
+                    <Plus className="w-4 h-4" />
+                    {t('googleCalendar.createDedicatedCalendar')}
+                  </button>
                 </div>
-                <button
-                  onClick={() => setShowCalendarSelector(!showCalendarSelector)}
-                  disabled={isSyncing}
-                  className="flex-1 flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg hover:border-blue-500 hover:ring-1 hover:ring-blue-500 transition-colors duration-200 text-sm group text-right"
-                  aria-expanded={showCalendarSelector}
-                  aria-haspopup="listbox"
-                >
-                  <span className="font-medium text-gray-900 truncate">
-                    {calendarName || t('googleCalendar.primaryCalendar')}
-                  </span>
-                  <ChevronDown className="w-4 h-4 text-gray-500 group-hover:text-blue-500 transition-colors" aria-hidden="true" />
-                </button>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-11">
+                  {t('googleCalendar.currentCalendar')}
+                </label>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 flex justify-center text-gray-500">
+                    <Calendar className="w-4 h-4" aria-hidden="true" />
+                  </div>
+                  <button
+                    onClick={() => setShowCalendarSelector(!showCalendarSelector)}
+                    disabled={isSyncing}
+                    className="flex-1 flex items-center justify-between px-3 py-2 bg-white border border-gray-300 rounded-lg hover:border-blue-500 hover:ring-1 hover:ring-blue-500 transition-colors duration-200 text-sm group text-right"
+                    aria-expanded={showCalendarSelector}
+                    aria-haspopup="listbox"
+                  >
+                    <span className="font-medium text-gray-900 truncate">
+                      {calendarName || t('googleCalendar.primaryCalendar')}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-gray-500 group-hover:text-blue-500 transition-colors" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Last Sync Info */}
             <div className="flex items-center gap-3 text-xs text-gray-500">

@@ -93,8 +93,8 @@ exports.createGoogleCalendarFn = functions.https.onCall(async (data, context) =>
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'Auth required');
     }
-    const result = await deps.manageCalendarUseCase.createCalendar(context.auth.uid, data.name);
-    return { success: true, ...result };
+    const calendarId = await deps.manageCalendarUseCase.getOrCreateCalendar(context.auth.uid, data.tenantId);
+    return { calendarId, calendarName: '' };
 });
 // Delete Google Calendar
 exports.deleteGoogleCalendarFn = functions.https.onCall(async (data, context) => {

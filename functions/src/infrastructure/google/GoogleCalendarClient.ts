@@ -103,6 +103,28 @@ export class GoogleCalendarClient {
     return list.data.items || [];
   }
 
+  async getCalendar(userId: string, calendarId: string): Promise<{ id: string; summary: string } | null> {
+    const calendar = await this.getCalendarInstance(userId);
+    try {
+      const res = await calendar.calendars.get({ calendarId });
+      return {
+        id: res.data.id!,
+        summary: res.data.summary || ''
+      };
+    } catch (error: any) {
+      if (error.code === 404 || error.code === 410) return null; // Calendar deleted or gone
+      throw error;
+    }
+  }
+
+  async updateCalendar(userId: string, calendarId: string, summary: string): Promise<void> {
+    const calendar = await this.getCalendarInstance(userId);
+    await calendar.calendars.patch({
+      calendarId,
+      requestBody: { summary }
+    });
+  }
+
   async getUserInfo(userId: string): Promise<{ email: string; name: string; picture: string }> {
     const accessToken = await this.authClient.getValidAccessToken(userId);
     const oauth2Client = new google.auth.OAuth2();

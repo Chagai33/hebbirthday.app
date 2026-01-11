@@ -19,6 +19,23 @@ export class TenantRepository {
   getDocRef(id: string): admin.firestore.DocumentReference {
     return this.db.collection('tenants').doc(id);
   }
+
+  async setCalendarId(id: string, calendarId: string): Promise<void> {
+    await this.update(id, { googleCalendarId: calendarId });
+  }
+
+  async getCalendarId(id: string): Promise<string | null> {
+    const tenant = await this.findById(id);
+    return tenant?.googleCalendarId || null;
+  }
+
+  async clearCalendarId(id: string): Promise<void> {
+    await this.update(id, { googleCalendarId: null, hasCustomCalendarName: false });
+  }
+
+  async setCustomCalendarNameFlag(id: string, isCustom: boolean): Promise<void> {
+    await this.update(id, { hasCustomCalendarName: isCustom });
+  }
 }
 
 

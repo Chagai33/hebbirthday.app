@@ -77,6 +77,10 @@ export interface TenantData {
   is_guest_portal_enabled?: boolean;
   deletionStatus?: string;
   deletionStartedAt?: any;
+
+  // NEW FIELDS
+  googleCalendarId?: string | null; // Single Source of Truth
+  hasCustomCalendarName?: boolean;  // If true, we won't translate the calendar name on language change
 }
 
 export interface GroupData {
@@ -104,8 +108,8 @@ export interface TokenData {
   refreshToken?: string;
   expiresAt: number;
   scope?: string;
-  calendarId?: string;
-  calendarName?: string;
+  calendarId?: string | null;
+  calendarName?: string | null;
   syncStatus?: string;
   createdCalendars?: Array<{ calendarId: string; calendarName: string; createdAt: string }>;
   lastSyncStart?: any;

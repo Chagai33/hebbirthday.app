@@ -69,10 +69,20 @@ export class SyncBirthdayUseCase {
 
     if (!accessToken) return;
 
-    // C. Get calendar ID and validate
-    const calendarId = await this.authClient.getCalendarId(ownerId);
-    if (calendarId === 'primary') {
-      functions.logger.error('Strict Mode: Syncing to Primary Calendar is not allowed.');
+    // C. Get calendar ID from tenant (Source of Truth)
+    const calendarId = tenant?.googleCalendarId;
+    if (!calendarId) {
+      functions.logger.error('Strict Mode: No calendar configured for tenant. Cannot sync.');
+      await this.birthdayRepo.update(birthdayId, {
+        syncMetadata: {
+          status: 'ERROR',
+          lastAttemptAt: new Date().toISOString(),
+          failedKeys: [],
+          lastErrorMessage: 'לא הוגדר יומן Google. אנא הגדר יומן ייעודי בהגדרות.',
+          retryCount: 999, // Don't retry
+          dataHash: ''
+        }
+      });
       return;
     }
 
@@ -188,6 +198,12 @@ export class SyncBirthdayUseCase {
           );
           currentMap[item.key] = eventId;
         } catch (e: any) {
+          // Handle ghost calendar: if createEvent fails with 404, the calendar itself is missing
+          if (e.code === 404 || e.code === 410) {
+            functions.logger.error(`Calendar ${calendarId} not found. Cannot create event.`);
+            throw new Error('CALENDAR_NOT_FOUND');
+          }
+
           if (e.code === 409) {
             functions.logger.log(`Event ${item.key} exists (409). Reconciling state...`);
             const uniqueStr = `${birthdayId}_${item.key}`;

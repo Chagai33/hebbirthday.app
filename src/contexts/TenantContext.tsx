@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { tenantService } from '../services/tenant.service';
 import { Tenant, TenantContextType, UserRole } from '../types';
 import { useAuth } from './AuthContext';
@@ -25,61 +25,45 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
   const [userTenants, setUserTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadUserTenants = async () => {
+  // Fix the Infinite Render Bug
+  const refreshTenants = useCallback(async () => {
       if (!user) {
         setUserTenants([]);
         setCurrentTenant(null);
-        setLoading(false);
         return;
       }
-
-      setLoading(true);
-
       try {
-        let tenants = await tenantService.getUserTenants(user.id);
-        let retries = 0;
-        const maxRetries = 10;
-
-        while (tenants.length === 0 && retries < maxRetries) {
-          logger.warn(`Waiting for tenant data (${retries + 1}/${maxRetries})...`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          tenants = await tenantService.getUserTenants(user.id);
-          retries++;
-        }
-
-        if (tenants.length === 0) {
-          logger.error('No tenants found after multiple retries');
-          setUserTenants([]);
-          setCurrentTenant(null);
-          setLoading(false);
-          return;
-        }
-
+        const tenants = await tenantService.getUserTenants(user.id);
         setUserTenants(tenants);
-
-        const savedTenantId = localStorage.getItem('currentTenantId');
-
-        if (savedTenantId && tenants.some(t => t.id === savedTenantId)) {
-          const tenant = tenants.find(t => t.id === savedTenantId);
-          setCurrentTenant(tenant || null);
-        } else if (tenants.length > 0) {
-          setCurrentTenant(tenants[0]);
-          localStorage.setItem('currentTenantId', tenants[0].id);
-        } else {
-          setCurrentTenant(null);
-        }
+        // Preserve current selection logic
+        setCurrentTenant(prev => tenants.find(t => t.id === prev?.id) || tenants[0] || null);
       } catch (error) {
-        logger.error('Error loading tenants:', error);
+        logger.error('Failed to refresh tenants', error);
         setUserTenants([]);
         setCurrentTenant(null);
+      }
+  }, [user]);
+
+  // NEW: Allow updating local state immediately after an action
+  const updateTenantLocally = (tenantId: string, updates: Partial<Tenant>) => {
+      setUserTenants(prev => prev.map(t => t.id === tenantId ? { ...t, ...updates } : t));
+      if (currentTenant?.id === tenantId) {
+          setCurrentTenant(prev => prev ? { ...prev, ...updates } : null);
+      }
+  };
+
+  useEffect(() => {
+    const loadTenants = async () => {
+      setLoading(true);
+      try {
+        await refreshTenants();
       } finally {
         setLoading(false);
       }
     };
 
-    loadUserTenants();
-  }, [user]);
+    loadTenants();
+  }, [user, refreshTenants]);
 
   const switchTenant = (tenantId: string) => {
     const tenant = userTenants.find(t => t.id === tenantId);
@@ -141,6 +125,8 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({ children }) => {
     createTenant,
     updateTenant,
     inviteUserToTenant,
+    refreshTenants,
+    updateTenantLocally,
   };
 
   return <TenantContext.Provider value={value}>{children}</TenantContext.Provider>;

@@ -67,6 +67,28 @@ class GoogleCalendarClient {
         const list = await calendar.calendarList.list({ minAccessRole: 'writer' });
         return list.data.items || [];
     }
+    async getCalendar(userId, calendarId) {
+        const calendar = await this.getCalendarInstance(userId);
+        try {
+            const res = await calendar.calendars.get({ calendarId });
+            return {
+                id: res.data.id,
+                summary: res.data.summary || ''
+            };
+        }
+        catch (error) {
+            if (error.code === 404 || error.code === 410)
+                return null; // Calendar deleted or gone
+            throw error;
+        }
+    }
+    async updateCalendar(userId, calendarId, summary) {
+        const calendar = await this.getCalendarInstance(userId);
+        await calendar.calendars.patch({
+            calendarId,
+            requestBody: { summary }
+        });
+    }
     async getUserInfo(userId) {
         const accessToken = await this.authClient.getValidAccessToken(userId);
         const oauth2Client = new googleapis_1.google.auth.OAuth2();

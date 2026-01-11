@@ -33,15 +33,31 @@ class GoogleOAuthUseCase {
         catch (e) {
             // Ignore
         }
-        const currentCalId = tokenData.calendarId || 'primary';
-        const isPrimary = currentCalId === 'primary' || (email && currentCalId === email);
+        let currentCalId = tokenData.calendarId || 'primary';
+        let currentCalName = tokenData.calendarName || 'Primary Calendar';
+        let isPrimary = currentCalId === 'primary' || (email && currentCalId === email);
+        // Validate calendar existence if we have a non-primary calendar
+        if (currentCalId && currentCalId !== 'primary' && (!email || currentCalId !== email)) {
+            const calendarInfo = await this.calendarClient.getCalendar(userId, currentCalId);
+            if (!calendarInfo) {
+                // Ghost calendar detected - clean up the DB
+                await this.tokenRepo.update(userId, {
+                    calendarId: null,
+                    calendarName: null
+                });
+                // Return status indicating setup is needed
+                currentCalId = null;
+                currentCalName = null;
+                isPrimary = false;
+            }
+        }
         return {
             isConnected: true,
             email,
             name,
             picture,
             calendarId: currentCalId,
-            calendarName: tokenData.calendarName || 'Primary Calendar',
+            calendarName: currentCalName,
             isPrimary,
             syncStatus: tokenData.syncStatus || 'IDLE',
             lastSyncStart: tokenData.lastSyncStart || 0

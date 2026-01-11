@@ -44,14 +44,34 @@ class GoogleCalendarService {
 
     async syncBirthdayToCalendar(birthdayId: string): Promise<SyncResult> {
         const syncFn = httpsCallable<{birthdayId: string}, SyncResult>(functions, 'syncBirthdayToGoogleCalendar');
-        const result = await syncFn({ birthdayId });
-        return result.data;
+        try {
+            const result = await syncFn({ birthdayId });
+            return result.data;
+        } catch (error: any) {
+            // Handle ghost calendar errors
+            if (error.code === 'functions/not-found' ||
+                error.message?.includes('404') ||
+                error.message?.includes('Resource has been deleted')) {
+                throw new Error('CALENDAR_DELETED');
+            }
+            throw error;
+        }
     }
 
     async syncMultipleBirthdays(birthdayIds: string[]): Promise<BulkSyncResult> {
         const syncFn = httpsCallable<{birthdayIds: string[]}, BulkSyncResult>(functions, 'syncMultipleBirthdaysToGoogleCalendar');
-        const result = await syncFn({ birthdayIds });
-        return result.data;
+        try {
+            const result = await syncFn({ birthdayIds });
+            return result.data;
+        } catch (error: any) {
+            // Handle ghost calendar errors
+            if (error.code === 'functions/not-found' ||
+                error.message?.includes('404') ||
+                error.message?.includes('Resource has been deleted')) {
+                throw new Error('CALENDAR_DELETED');
+            }
+            throw error;
+        }
     }
 
     async removeBirthdayFromCalendar(birthdayId: string): Promise<void> {
@@ -82,15 +102,16 @@ class GoogleCalendarService {
         await fn();
     }
 
-    async createCalendar(name: string): Promise<{ calendarId: string; calendarName: string }> {
-        const fn = httpsCallable<{name: string}, { calendarId: string; calendarName: string }>(functions, 'createGoogleCalendar');
-        const res = await fn({ name });
+    async createCalendar(name: string, tenantId: string): Promise<{ calendarId: string; calendarName: string }> {
+        const fn = httpsCallable<{name: string, tenantId: string}, { calendarId: string; calendarName: string }>(functions, 'createGoogleCalendar');
+        const res = await fn({ name, tenantId });
         return res.data;
     }
 
-    async updateCalendarSelection(calendarId: string, calendarName: string): Promise<void> {
-        const fn = httpsCallable<{calendarId: string; calendarName: string}, void>(functions, 'updateGoogleCalendarSelection');
-        await fn({ calendarId, calendarName });
+    async updateCalendarSelection(calendarId: string, calendarName: string, tenantId: string): Promise<{ calendarId: string; calendarName: string }> {
+        const fn = httpsCallable<{calendarId: string; calendarName: string; tenantId: string}, { calendarId: string; calendarName: string }>(functions, 'updateGoogleCalendarSelection');
+        const res = await fn({ calendarId, calendarName, tenantId });
+        return res.data;
     }
 
     async listCalendars(): Promise<Array<{ id: string; summary: string; description: string; primary: boolean }>> {
@@ -99,9 +120,9 @@ class GoogleCalendarService {
         return res.data.calendars;
     }
 
-    async deleteCalendar(calendarId: string): Promise<void> {
-        const fn = httpsCallable<{calendarId: string}, void>(functions, 'deleteGoogleCalendar');
-        await fn({ calendarId });
+    async deleteCalendar(calendarId: string, tenantId: string): Promise<void> {
+        const fn = httpsCallable<{calendarId: string, tenantId: string}, void>(functions, 'deleteGoogleCalendar');
+        await fn({ calendarId, tenantId });
     }
 
     async resetBirthdaySyncData(birthdayId: string): Promise<void> {

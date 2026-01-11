@@ -52,6 +52,7 @@ const ActionUrlHandler = () => {
   return null;
 };
 
+
 function App() {
   const { t, i18n } = useTranslation();
 

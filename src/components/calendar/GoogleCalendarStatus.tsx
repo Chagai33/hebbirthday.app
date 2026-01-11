@@ -1,19 +1,21 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle, Circle, Loader } from 'lucide-react';
+import { CheckCircle, Circle, Loader, AlertTriangle } from 'lucide-react';
 
 interface GoogleCalendarStatusProps {
   isSynced: boolean;
   onSync?: () => void;
   onRemove?: () => void;
   isLoading?: boolean;
+  needsSetup?: boolean;
 }
 
 export const GoogleCalendarStatus: React.FC<GoogleCalendarStatusProps> = ({
   isSynced,
   onSync,
   onRemove,
-  isLoading = false
+  isLoading = false,
+  needsSetup = false
 }) => {
   const { t } = useTranslation();
 
@@ -38,6 +40,24 @@ export const GoogleCalendarStatus: React.FC<GoogleCalendarStatusProps> = ({
             aria-label={t('googleCalendar.remove')}
           >
             {t('googleCalendar.remove')}
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (needsSetup) {
+    return (
+      <div className="flex items-center gap-1">
+        <AlertTriangle className="w-4 h-4 text-amber-600" aria-hidden="true" />
+        <span className="text-xs text-amber-700">{t('googleCalendar.setupRequired')}</span>
+        {onSync && (
+          <button
+            onClick={onSync}
+            className="text-xs text-amber-600 hover:text-amber-800 underline ml-2 p-1"
+            aria-label={t('googleCalendar.setup')}
+          >
+            {t('googleCalendar.setup')}
           </button>
         )}
       </div>

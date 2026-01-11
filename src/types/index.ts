@@ -24,6 +24,10 @@ export interface Tenant {
   last_birthday_process_date?: string; // Track last midnight processing (format: 'YYYY-MM-DD')
   created_at: string;
   updated_at: string;
+
+  // NEW FIELDS
+  googleCalendarId?: string | null;
+  hasCustomCalendarName?: boolean;
 }
 
 export interface UserTenantMembership {
@@ -156,6 +160,8 @@ export interface TenantContextType {
   createTenant: (name: string) => Promise<string>;
   updateTenant: (tenantId: string, data: Partial<Tenant>) => Promise<void>;
   inviteUserToTenant: (email: string, role: UserRole) => Promise<void>;
+  refreshTenants: () => Promise<void>;
+  updateTenantLocally: (tenantId: string, updates: Partial<Tenant>) => void;
 }
 
 export interface DashboardStats {

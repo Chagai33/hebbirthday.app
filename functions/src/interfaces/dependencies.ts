@@ -131,7 +131,8 @@ export function createDependencies(): Dependencies {
 
   const manageCalendarUseCase = new ManageCalendarUseCase(
     calendarClient,
-    tokenRepo
+    tokenRepo,
+    tenantRepo
   );
 
   const googleOAuthUseCase = new GoogleOAuthUseCase(

@@ -3,28 +3,59 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ManageCalendarUseCase = void 0;
 class ManageCalendarUseCase {
-    constructor(calendarClient, tokenRepo) {
+    constructor(calendarClient, tokenRepo, tenantRepo) {
         this.calendarClient = calendarClient;
         this.tokenRepo = tokenRepo;
+        this.tenantRepo = tenantRepo;
     }
-    async createCalendar(userId, name) {
-        const calendarId = await this.calendarClient.createCalendar(userId, name);
-        // Update token document
-        const tokenData = await this.tokenRepo.findByUserId(userId);
-        const createdCalendars = tokenData?.createdCalendars || [];
-        await this.tokenRepo.update(userId, {
-            calendarId,
-            calendarName: name,
-            createdCalendars: [
-                ...createdCalendars,
-                {
-                    calendarId,
-                    calendarName: name,
-                    createdAt: new Date().toISOString()
+    getExpectedCalendarName(language) {
+        const calendarNames = {
+            he: 'יום הולדת עברי/לועזי',
+            en: 'Hebrew/Gregorian Birthday',
+            es: 'Cumpleaños Hebreo/Gregoriano'
+        };
+        return calendarNames[language] || calendarNames.he;
+    }
+    async getOrCreateCalendar(userId, tenantId) {
+        // Check DB for existing calendar ID
+        const existingCalendarId = await this.tenantRepo.getCalendarId(tenantId);
+        if (existingCalendarId) {
+            // Check if calendar still exists
+            const calendarInfo = await this.calendarClient.getCalendar(userId, existingCalendarId);
+            if (calendarInfo) {
+                // Calendar exists, check if name needs updating
+                const tenant = await this.tenantRepo.findById(tenantId);
+                const hasCustomName = tenant?.hasCustomCalendarName || false;
+                if (!hasCustomName) {
+                    const expectedName = this.getExpectedCalendarName(tenant?.default_language || 'he');
+                    if (calendarInfo.summary !== expectedName) {
+                        // Update calendar name to match current language
+                        await this.calendarClient.updateCalendar(userId, existingCalendarId, expectedName);
+                    }
                 }
-            ]
-        });
-        return { calendarId, calendarName: name };
+                return existingCalendarId; // In this case, we just return the ID since the calendar already exists
+            }
+            else {
+                // Calendar was manually deleted, clear from DB and proceed to create
+                await this.tenantRepo.clearCalendarId(tenantId);
+            }
+        }
+        // No existing calendar or it was cleared, create new one
+        const tenant = await this.tenantRepo.findById(tenantId);
+        const calendarName = this.getExpectedCalendarName(tenant?.default_language || 'he');
+        try {
+            const newCalendarId = await this.calendarClient.createCalendar(userId, calendarName);
+            await this.tenantRepo.setCalendarId(tenantId, newCalendarId);
+            await this.tenantRepo.setCustomCalendarNameFlag(tenantId, false);
+            return newCalendarId;
+        }
+        catch (error) {
+            // Handle 401/403 errors (auth issues) distinctly from 404
+            if (error.code === 401 || error.code === 403) {
+                throw new Error(`Authentication error: ${error.message}`);
+            }
+            throw error;
+        }
     }
     async deleteCalendar(userId, calendarId) {
         await this.calendarClient.deleteCalendar(userId, calendarId);

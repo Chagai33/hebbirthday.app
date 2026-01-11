@@ -18,6 +18,19 @@ class TenantRepository {
     getDocRef(id) {
         return this.db.collection('tenants').doc(id);
     }
+    async setCalendarId(id, calendarId) {
+        await this.update(id, { googleCalendarId: calendarId });
+    }
+    async getCalendarId(id) {
+        const tenant = await this.findById(id);
+        return tenant?.googleCalendarId || null;
+    }
+    async clearCalendarId(id) {
+        await this.update(id, { googleCalendarId: null, hasCustomCalendarName: false });
+    }
+    async setCustomCalendarNameFlag(id, isCustom) {
+        await this.update(id, { hasCustomCalendarName: isCustom });
+    }
 }
 exports.TenantRepository = TenantRepository;
 //# sourceMappingURL=TenantRepository.js.map
