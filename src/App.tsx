@@ -21,6 +21,7 @@ import { PrivacyPolicy } from './components/pages/PrivacyPolicy';
 import { Accessibility } from './components/pages/Accessibility';
 import { UserGuide } from './components/pages/UserGuide';
 import { LandingPage } from './components/pages/LandingPage';
+import { ForceEnglish } from './components/ForceEnglish';
 import { GuestPortal } from './components/guest/GuestPortal';
 import { GuestAccessPage } from './components/guest/GuestAccessPage';
 import { AnalyticsTracker } from './components/common/AnalyticsTracker';
@@ -123,6 +124,22 @@ function App() {
                       <Route path="/reset-password" element={<ResetPassword />} />
                       <Route path="/terms" element={<TermsOfUse />} />
                       <Route path="/privacy" element={<PrivacyPolicy />} />
+                      <Route
+                        path="/terms-en"
+                        element={
+                          <ForceEnglish>
+                            <TermsOfUse />
+                          </ForceEnglish>
+                        }
+                      />
+                      <Route
+                        path="/privacy-en"
+                        element={
+                          <ForceEnglish>
+                            <PrivacyPolicy />
+                          </ForceEnglish>
+                        }
+                      />
                       <Route path="/accessibility" element={<Accessibility />} />
                       <Route path="/guide" element={<UserGuide />} />
                       <Route path="/portal" element={<GuestPortal />} />
