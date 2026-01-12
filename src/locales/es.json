@@ -6,6 +6,32 @@
     "taglineOr": "o",
     "taglineGregorian": "Gregoriana"
   },
+  "landing": {
+    "hero": {
+      "title": "Gestión de Cumpleaños - Inteligente, Simple, Sincronizado",
+      "subtitle": "Nunca pierdas una fecha hebrea o gregoriana. Sincronización a Google Calendar, listas de deseos de regalos y calculadora de Hanukkah gelt todo en un lugar.",
+      "ctaLogin": "Iniciar Sesión",
+      "ctaRegister": "Registrarse Gratis",
+      "ctaDashboard": "Ir al Panel de Control"
+    },
+    "features": {
+      "title": "¿Por Qué Elegir HebBirthday?",
+      "syncTitle": "Sincronización con Google Calendar",
+      "syncDesc": "Crea un calendario dedicado para cumpleaños hebreos y gregorianos, actualizado por 10 años hacia adelante.",
+      "geltTitle": "Calculadora de Hanukkah Gelt",
+      "geltDesc": "Gestión inteligente del presupuesto y distribución por grupos de edad para niños y nietos.",
+      "wishlistTitle": "Listas de Deseos de Regalos",
+      "wishlistDesc": "Gestiona listas de deseos sin necesidad de iniciar sesión en el sistema."
+    },
+    "transparency": {
+      "title": "Tu Privacidad Ante Todo",
+      "desc": "Solicitamos acceso a Google Calendar únicamente para crear y gestionar tu calendario de cumpleaños. La información se almacena en servidores seguros y no se comparte con terceros.",
+      "guaranteeTitle": "Tu Garantía de Privacidad",
+      "guarantee1": "Calendario dedicado y separado - no tocaremos tu calendario personal",
+      "guarantee2": "Acceso limitado para crear solo eventos de cumpleaños",
+      "guarantee3": "Opción de eliminar el calendario en cualquier momento"
+    }
+  },
   "guest": {
     "portalTitle": "Portal de Lista de Deseos",
     "welcome": "Bienvenido Invitado",

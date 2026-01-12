@@ -6,6 +6,32 @@
     "taglineOr": "or",
     "taglineGregorian": "Gregorian"
   },
+  "landing": {
+    "hero": {
+      "title": "Birthday Management - Smart, Simple, Synchronized",
+      "subtitle": "Never miss a Hebrew or Gregorian date. Sync to Google Calendar, gift wishlists, and Hanukkah gelt calculator all in one place.",
+      "ctaLogin": "Login",
+      "ctaRegister": "Sign Up Free",
+      "ctaDashboard": "Go to Dashboard"
+    },
+    "features": {
+      "title": "Why Choose HebBirthday?",
+      "syncTitle": "Google Calendar Sync",
+      "syncDesc": "Create a dedicated calendar for Hebrew and Gregorian birthdays, updated for 10 years ahead.",
+      "geltTitle": "Hanukkah Gelt Calculator",
+      "geltDesc": "Smart budget management and age group distribution for children and grandchildren.",
+      "wishlistTitle": "Gift Wishlists",
+      "wishlistDesc": "Manage wishlists without needing to log into the system."
+    },
+    "transparency": {
+      "title": "Your Privacy Above All",
+      "desc": "We request Google Calendar access solely to create and manage your birthday calendar. Information is stored on secure servers and is not shared with any third parties.",
+      "guaranteeTitle": "Your Privacy Guarantee",
+      "guarantee1": "Dedicated and separate calendar - we won't touch your personal calendar",
+      "guarantee2": "Limited access to create birthday events only",
+      "guarantee3": "Option to delete the calendar at any time"
+    }
+  },
   "guest": {
     "portalTitle": "Wishlist Portal",
     "welcome": "Welcome Guest",

@@ -116,7 +116,13 @@ export const Header: React.FC = () => {
                 aria-label={t('common.home', 'HebBirthday.app - Home')}
               >
                 <h1>
-                  <Logo variant="app-header" />
+                  <button
+                    onClick={() => navigate(user ? '/dashboard' : '/')}
+                    className="hover:opacity-80 transition-opacity flex-shrink min-w-0"
+                    aria-label="HebBirthday Home"
+                  >
+                    <Logo variant="app-header" />
+                  </button>
                 </h1>
               </button>
             </div>
