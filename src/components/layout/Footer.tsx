@@ -15,12 +15,12 @@ export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
     window.open('https://docs.google.com/forms/d/e/1FAIpQLSf4M-3ytbYRAOIh9B7Bavgaw2WyGgDFP3PT7zgTmTMnUFXMrg/viewform', '_blank', 'noopener,noreferrer');
   };
 
-  // Subtle English links for Google Verification
+  // UPDATED: More visible English links for Google Verification (Removed opacity, darker color)
   const EnglishLinks = () => (
-    <div className="flex justify-center gap-3 text-[10px] text-gray-300 mt-4 font-sans opacity-60 hover:opacity-100 transition-opacity">
-      <Link to="/privacy" className="hover:text-gray-500">Privacy Policy</Link>
-      <span>•</span>
-      <Link to="/terms" className="hover:text-gray-500">Terms of Use</Link>
+    <div className="flex justify-center gap-3 text-xs text-gray-500 mt-4 font-sans border-t border-gray-100 pt-4 w-full">
+      <Link to="/privacy" className="hover:text-gray-900 underline decoration-gray-300 underline-offset-2">Privacy Policy</Link>
+      <span className="text-gray-300">•</span>
+      <Link to="/terms" className="hover:text-gray-900 underline decoration-gray-300 underline-offset-2">Terms of Use</Link>
     </div>
   );
 
@@ -30,32 +30,21 @@ export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
         <nav className="flex justify-center items-center gap-2" aria-label="Legal links">
           <Link
             to="/privacy"
-            className="text-xs text-gray-600 hover:text-gray-900 transition-colors p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 rounded"
+            className="text-xs text-gray-600 hover:text-gray-900 transition-colors p-2 rounded"
           >
             {t('footer.privacyPolicy', 'מדיניות פרטיות')}
           </Link>
-
           <span aria-hidden="true" className="text-gray-400 select-none">•</span>
-
           <Link
             to="/terms"
-            className="text-xs text-gray-600 hover:text-gray-900 transition-colors p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 rounded"
+            className="text-xs text-gray-600 hover:text-gray-900 transition-colors p-2 rounded"
           >
             {t('footer.termsOfUse', 'תנאי שימוש')}
           </Link>
-
-          <span aria-hidden="true" className="text-gray-400 select-none">•</span>
-
-          <Link
-            to="/accessibility"
-            className="text-xs text-gray-600 hover:text-gray-900 transition-colors p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 rounded"
-          >
-            {t('footer.accessibility', 'הצהרת נגישות')}
-          </Link>
         </nav>
-
-        {/* English links for Google Verification */}
-        <EnglishLinks />
+        <div className="mt-4 px-4">
+            <EnglishLinks />
+        </div>
       </footer>
     );
   }
@@ -66,26 +55,17 @@ export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
         <div className="flex flex-col items-center gap-4 text-center">
           <ul className="flex flex-wrap justify-center gap-4 sm:gap-6 text-sm" role="list">
             <li>
-              <Link
-                to="/terms"
-                className="text-gray-800 hover:text-gray-900 transition-colors"
-              >
+              <Link to="/terms" className="text-gray-800 hover:text-gray-900 transition-colors">
                 {t('footer.termsOfUse', 'תנאי שימוש')}
               </Link>
             </li>
             <li>
-              <Link
-                to="/privacy"
-                className="text-gray-800 hover:text-gray-900 transition-colors"
-              >
+              <Link to="/privacy" className="text-gray-800 hover:text-gray-900 transition-colors">
                 {t('footer.privacyPolicy', 'מדיניות פרטיות')}
               </Link>
             </li>
             <li>
-              <Link
-                to="/accessibility"
-                className="text-gray-800 hover:text-gray-900 transition-colors"
-              >
+              <Link to="/accessibility" className="text-gray-800 hover:text-gray-900 transition-colors">
                 {t('footer.accessibility', 'הצהרת נגישות')}
               </Link>
             </li>
@@ -105,7 +85,6 @@ export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
             © {new Date().getFullYear()} HebBirthday.App. {t('footer.allRightsReserved', 'כל הזכויות שמורות')}
           </div>
 
-          {/* English links for Google Verification */}
           <EnglishLinks />
         </div>
       </div>
