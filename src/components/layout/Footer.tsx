@@ -15,6 +15,15 @@ export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
     window.open('https://docs.google.com/forms/d/e/1FAIpQLSf4M-3ytbYRAOIh9B7Bavgaw2WyGgDFP3PT7zgTmTMnUFXMrg/viewform', '_blank', 'noopener,noreferrer');
   };
 
+  // Subtle English links for Google Verification
+  const EnglishLinks = () => (
+    <div className="flex justify-center gap-3 text-[10px] text-gray-300 mt-4 font-sans opacity-60 hover:opacity-100 transition-opacity">
+      <Link to="/privacy" className="hover:text-gray-500">Privacy Policy</Link>
+      <span>•</span>
+      <Link to="/terms" className="hover:text-gray-500">Terms of Use</Link>
+    </div>
+  );
+
   if (variant === 'minimal') {
     return (
       <footer className="w-full py-6 text-center mt-auto" role="contentinfo">
@@ -44,6 +53,9 @@ export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
             {t('footer.accessibility', 'הצהרת נגישות')}
           </Link>
         </nav>
+
+        {/* English links for Google Verification */}
+        <EnglishLinks />
       </footer>
     );
   }
@@ -92,6 +104,9 @@ export const Footer: React.FC<FooterProps> = ({ variant = 'default' }) => {
           <div className="text-xs text-gray-800">
             © {new Date().getFullYear()} HebBirthday.App. {t('footer.allRightsReserved', 'כל הזכויות שמורות')}
           </div>
+
+          {/* English links for Google Verification */}
+          <EnglishLinks />
         </div>
       </div>
     </footer>

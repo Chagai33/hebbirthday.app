@@ -160,10 +160,17 @@ export const LandingPage: React.FC = () => {
                 </div>
               </div>
             </section>
+            {/* Hidden/Subtle English Description for Google Verification */}
+            <div className="mt-8 pt-8 border-t border-gray-50 text-center">
+               <p className="text-[10px] text-gray-300 leading-tight max-w-2xl mx-auto select-none">
+                 HebBirthday is a calendar synchronization app. It allows users to sync Hebrew and Gregorian birthdays to a dedicated Google Calendar.
+               </p>
+            </div>
+
           </div>
 
           {/* Footer */}
-          <div className="mt-16">
+          <div className="mt-0">
             <Footer variant="default" />
           </div>
         </main>
