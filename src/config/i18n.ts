@@ -4,7 +4,7 @@ import en from '../locales/en.json';
 import he from '../locales/he.json';
 import es from '../locales/es.json';
 
-const savedLanguage = localStorage.getItem('language') || 'he';
+const savedLanguage = localStorage.getItem('language') || 'en';
 
 i18n
   .use(initReactI18next)
@@ -28,6 +28,6 @@ i18n.on('languageChanged', (lng) => {
 });
 
 document.documentElement.dir = savedLanguage === 'he' ? 'rtl' : 'ltr';
-document.documentElement.lang = savedLanguage;
+document.documentElement.lang = savedLanguage || 'en';
 
 export default i18n;
