@@ -1,6 +1,6 @@
-// EventBuilderService - בניית אירועי לוח שנה
-// מקור: calculateExpectedEvents שורות 179-281 מ-index.ts
-// הלוגיקה נשארת זהה, אבל מקבלת נתונים מעובדים כפרמטרים
+// EventBuilderService - Building calendar events
+// Source: calculateExpectedEvents lines 179-281 from index.ts
+// The logic remains the same, but receives processed data as parameters
 
 import { SyncEvent, BirthdayData, TenantData, GroupData, WishlistItem } from '../entities/types';
 import { ZodiacService } from './ZodiacService';
@@ -17,7 +17,7 @@ export class EventBuilderService {
     const events: SyncEvent[] = [];
     const language = (tenant?.default_language || 'he') as 'he' | 'en';
     
-    // Description Construction - העתקה מדויקת
+    // Description Construction - Exact copy
     let description = '';
     let wishlistText = '';
     
@@ -57,7 +57,7 @@ export class EventBuilderService {
       } 
     };
     
-    // Zodiacs - שימוש ב-ZodiacService
+    // Zodiacs - Using ZodiacService
     const gregSign = this.zodiacService.getGregorianZodiacSign(new Date(birthday.birth_date_gregorian));
     const hebSign = birthday.birth_date_hebrew_month ? 
       this.zodiacService.getHebrewZodiacSign(birthday.birth_date_hebrew_month) : null;

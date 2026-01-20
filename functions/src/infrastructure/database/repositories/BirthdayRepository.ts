@@ -1,4 +1,4 @@
-// BirthdayRepository - גישה לנתוני birthdays ב-Firestore
+// BirthdayRepository - Access to birthday data in Firestore
 
 import * as admin from 'firebase-admin';
 import { BirthdayData } from '../../../domain/entities/types';

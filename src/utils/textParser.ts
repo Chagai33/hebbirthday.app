@@ -71,7 +71,7 @@ const AFTER_SUNSET_KEYWORDS = [
   'לילה',
   'אחרי השקיעה',
   'בערב',
-  'כן', // "כן" מתייחס ל-afterSunset
+  'כן', // "כן" refers to afterSunset
   'yes',
   'si',
   'sí',

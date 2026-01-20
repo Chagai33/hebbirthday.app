@@ -3,43 +3,43 @@ export interface Child {
   firstName: string;
   lastName: string;
   age: number;
-  originalAge?: number; // שמירת הגיל המקורי כשמשנים גיל ידנית
+  originalAge?: number; // Store the original age when changing age manually
 }
 
 export interface AgeGroup {
   id: string;
-  name: string;           // למשל "18-21"
-  minAge: number;         // גיל מינימלי (כולל)
-  maxAge: number;         // גיל מקסימלי (כולל)
-  amountPerChild: number;  // סכום לכל ילד בקבוצה
-  isIncluded: boolean;    // האם הקבוצה כלולה בחישוב
+  name: string;           // For example "18-21"
+  minAge: number;         // Minimum age (inclusive)
+  maxAge: number;         // Maximum age (inclusive)
+  amountPerChild: number;  // Amount per child in the group
+  isIncluded: boolean;    // Whether the group is included in the calculation
 }
 
 export interface BudgetConfig {
-  participants: number;              // מספר המשתתפים
-  allowedOverflowPercentage: number; // אחוז חריגה מותרת (למשל 10%)
-  customBudget?: number;              // תקציב מותאם אישית (אופציונלי)
+  participants: number;              // Number of participants
+  allowedOverflowPercentage: number; // Allowed overflow percentage (e.g., 10%)
+  customBudget?: number;              // Custom budget (optional)
 }
 
 export interface BudgetCalculation {
-  totalRequired: number;          // התקציב הכולל הדרוש
-  amountPerParticipant: number;    // הסכום לכל משתתף (מעוגל למעלה)
-  maxAllowed: number;              // התקציב המקסימלי המותר (כולל חריגה)
-  groupTotals: Record<string, {    // סיכום לכל קבוצת גיל
-    childrenCount: number;          // מספר הילדים בקבוצה
-    total: number;                 // סכום כולל לקבוצה
-    calculatedAmountPerChild?: number; // סכום לכל ילד מחושב (למקרה של תקציב מותאם)
+  totalRequired: number;          // Total budget required
+  amountPerParticipant: number;    // Amount per participant (rounded up)
+  maxAllowed: number;              // Maximum allowed budget (including overflow)
+  groupTotals: Record<string, {    // Summary for each age group
+    childrenCount: number;          // Number of children in the group
+    total: number;                 // Total amount for the group
+    calculatedAmountPerChild?: number; // Calculated amount per child (in case of custom budget)
   }>;
-  isCustomBudget?: boolean;        // האם משתמשים בתקציב מותאם
+  isCustomBudget?: boolean;        // Whether using custom budget
 }
 
 export interface GeltState {
-  children: Child[];                    // רשימת כל הילדים
-  ageGroups: AgeGroup[];                // קבוצות הגיל
-  budgetConfig: BudgetConfig;           // הגדרות תקציב
-  calculation: BudgetCalculation;       // תוצאות החישוב
-  customGroupSettings: AgeGroup[] | null; // הגדרות מותאמות אישית (לשמירה)
-  includedChildren: string[];           // Array של ID-ים של ילדים שכלולים בחישוב (ב-Firestore)
+  children: Child[];                    // List of all children
+  ageGroups: AgeGroup[];                // Age groups
+  budgetConfig: BudgetConfig;           // Budget settings
+  calculation: BudgetCalculation;       // Calculation results
+  customGroupSettings: AgeGroup[] | null; // Custom settings (for saving)
+  includedChildren: string[];           // Array of IDs of children included in calculation (in Firestore)
 }
 
 export interface ExportData {
@@ -61,19 +61,19 @@ export interface ExportData {
   }[];
 }
 
-// פרופיל תקציב - קבוצות גיל והגדרות תקציב
+// Budget profile - age groups and budget settings
 export interface GeltTemplate {
   id: string;
   tenant_id: string;
-  name: string;                    // שם הפרופיל
-  description?: string;             // תיאור (אופציונלי)
-  ageGroups: AgeGroup[];           // קבוצות הגיל
-  budgetConfig: BudgetConfig;      // הגדרות תקציב
-  customGroupSettings: AgeGroup[] | null; // הגדרות מותאמות אישית (אם יש תקציב מותאם)
-  currency?: 'ILS' | 'USD' | 'EUR'; // מטבע התבנית (לתיעוד בלבד)
+  name: string;                    // Profile name
+  description?: string;             // Description (optional)
+  ageGroups: AgeGroup[];           // Age groups
+  budgetConfig: BudgetConfig;      // Budget settings
+  customGroupSettings: AgeGroup[] | null; // Custom settings (if custom budget exists)
+  currency?: 'ILS' | 'USD' | 'EUR'; // Template currency (for documentation only)
   created_at: string;
   updated_at: string;
   created_by: string;
   updated_by: string;
-  is_default?: boolean;            // האם זה הפרופיל ברירת המחדל
+  is_default?: boolean;            // Whether this is the default profile
 }

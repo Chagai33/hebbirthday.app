@@ -13,7 +13,7 @@ export const retryFailedSyncsFn = functions.pubsub
       .collection('birthdays')
       .where('archived', '==', false)
       .where('syncMetadata.status', 'in', ['PARTIAL_SYNC', 'ERROR'])
-      .limit(50)  // ✅ שינוי 3: הגבלת כמות למניעת עומס
+      .limit(50)  // Change 3: Limit amount to prevent overload
       .get();
 
     const tasks = snap.docs

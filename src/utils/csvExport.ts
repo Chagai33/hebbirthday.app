@@ -3,7 +3,7 @@ import { wishlistService } from '../services/wishlist.service';
 import { zodiacService } from '../services/zodiac.service';
 import { birthdayCalculationsService } from '../services/birthdayCalculations.service';
 
-// פונקציות תרגום מזלות
+// Zodiac translation functions
 function getZodiacSignNameEn(sign: string): string {
   const signNames: { [key: string]: string } = {
     'aries': 'Aries',
@@ -116,7 +116,7 @@ export async function exportBirthdaysToCSV(
     'Wishlist'
   ];
 
-  // טעינת wishlist items לכל הרשומות (מקבילית)
+  // Load wishlist items for all records (in parallel)
   const wishlistPromises = birthdays.map(birthday =>
     wishlistService.getItemsForBirthday(birthday.id, tenantId).catch(() => [])
   );
@@ -126,18 +126,18 @@ export async function exportBirthdaysToCSV(
     wishlistsMap.set(birthday.id, wishlistsArray[index]);
   });
 
-  // יצירת מפה של groups לפי ID
+  // Create groups map by ID
   const groupsMap = new Map<string, Group>();
   groups.forEach(group => {
     groupsMap.set(group.id, group);
   });
 
   const rows = await Promise.all(birthdays.map(async (birthday) => {
-    // חישוב מזלות - נסה להשתמש ב-calculations אם קיים, אחרת חשב ישירות
+    // Calculate zodiac signs - try to use calculations if available, otherwise calculate directly
     let gregorianSign = '';
     let hebrewSign = '';
 
-    // בדיקה אם יש enriched birthday עם calculations
+    // Check if there's enriched birthday with calculations
     const enrichedBirthday = birthday as any;
     if (enrichedBirthday.calculations) {
       const calculations = enrichedBirthday.calculations as BirthdayCalculations;
@@ -145,7 +145,7 @@ export async function exportBirthdaysToCSV(
       hebrewSign = calculations.hebrewSign || '';
     }
 
-    // אם אין calculations, חשב ישירות
+    // If no calculations, calculate directly
     if (!gregorianSign) {
       try {
         gregorianSign = zodiacService.getGregorianSign(new Date(birthday.birth_date_gregorian));
@@ -158,7 +158,7 @@ export async function exportBirthdaysToCSV(
       hebrewSign = zodiacService.getHebrewSign(birthday.hebrew_month);
     }
 
-    // תרגום מזלות לפי שפה
+    // Translate zodiac signs by language
     const gregorianSignName = gregorianSign
       ? (language === 'he' ? getZodiacSignNameHe(gregorianSign) : getZodiacSignNameEn(gregorianSign))
       : '';
@@ -166,7 +166,7 @@ export async function exportBirthdaysToCSV(
       ? (language === 'he' ? getZodiacSignNameHe(hebrewSign) : getZodiacSignNameEn(hebrewSign))
       : '';
 
-    // חישוב יום הולדת לועזי הבא
+    // Calculate next Gregorian birthday
     let nextGregorianStr = '';
     if (enrichedBirthday.calculations?.nextGregorianBirthday) {
       const date = enrichedBirthday.calculations.nextGregorianBirthday;
@@ -176,14 +176,14 @@ export async function exportBirthdaysToCSV(
         nextGregorianStr = date.split('T')[0];
       }
     } else {
-      // חישוב ישיר אם אין calculations
+      // Direct calculation if no calculations
       const calculations = birthdayCalculationsService.calculateAll(birthday, 'Asia/Jerusalem', new Date());
       if (calculations.nextGregorianBirthday) {
         nextGregorianStr = calculations.nextGregorianBirthday.toISOString().split('T')[0];
       }
     }
 
-    // מציאת כל הקבוצות
+    // Find all groups
     const groupIds = birthday.group_ids || (birthday.group_id ? [birthday.group_id] : []);
     const groupNames: string[] = [];
     let groupCalendarPreference = '';
@@ -201,11 +201,11 @@ export async function exportBirthdaysToCSV(
 
     const groupName = groupNames.join(', '); // Join multiple group names
 
-    // קבלת wishlist
+    // Get wishlist
     const wishlistItems = wishlistsMap.get(birthday.id) || [];
     const wishlistStr = formatWishlist(wishlistItems, language);
 
-    // תרגום העדפת לוח שנה
+    // Translate calendar preference
     const translateCalendarPreference = (pref: string | null | undefined): string => {
       if (!pref) return '';
       if (language === 'he') {

@@ -1,6 +1,6 @@
-// HebcalService - חישובי תאריכים עבריים
-// מקור: שורות 79-129 מ-index.ts
-// CRITICAL: שורה 90 - renderGematriya() לא render('he')!
+// HebcalService - Hebrew date calculations
+// Source: lines 79-129 from index.ts
+// CRITICAL: line 90 - renderGematriya() not render('he')!
 
 import { HDate } from '@hebcal/core';
 import { HebcalData, NextHebrewBirthday } from '../entities/types';
@@ -20,8 +20,8 @@ export class HebcalService {
     }
 
     return {
-      // CRITICAL: render('he') במקור שורה 90 - renderGematriya()
-      // מחזיר מחרוזת עברית מלאה כמו "כ״ו בכסלו תשע״ו"
+      // CRITICAL: render('he') in original line 90 - renderGematriya()
+      // Returns full Hebrew string like "כ״ו בכסלו תשע״ו"
       hebrew: hDate.renderGematriya(),
       hy: hDate.getFullYear(),
       hm: hDate.getMonthName(),

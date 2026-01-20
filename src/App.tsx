@@ -86,17 +86,17 @@ function App() {
     document.documentElement.dir = i18n.language === 'he' ? 'rtl' : 'ltr';
   }, [i18n.language]);
 
-  // טיפול ב-Google OAuth callback אם יש טוקן ב-URL hash
+  // Handle Google OAuth callback if there's a token in the URL hash
   useEffect(() => {
     if (window.google && window.google.accounts && window.google.accounts.oauth2) {
-      // Google Identity Services מטפל אוטומטית ב-hash אם יש callback
-      // אבל נוודא שהדף נטען כראוי
+      // Google Identity Services handles the hash automatically if there's a callback
+      // But ensure the page loads properly
       const hash = window.location.hash;
       if (hash && hash.includes('access_token')) {
-        // Google GSI אמור לטפל בזה אוטומטית, אבל נוודא שהדף לא תקוע
+        // Google GSI should handle this automatically, but ensure the page doesn't get stuck
         setTimeout(() => {
-          // אם יש טוקן ב-hash, Google אמור לקרוא ל-callback
-          // אם לא, ננקה את ה-hash
+          // If there's a token in the hash, Google should call the callback
+          // If not, clear the hash
           if (window.location.hash) {
             window.history.replaceState(null, '', window.location.pathname + window.location.search);
           }

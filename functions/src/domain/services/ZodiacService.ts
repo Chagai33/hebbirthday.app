@@ -1,5 +1,5 @@
-// ZodiacService - לוגיקה טהורה ללא תלויות חיצוניות
-// מקור: שורות 30-75 מ-index.ts
+// ZodiacService - Pure logic without external dependencies
+// Source: lines 30-75 from index.ts
 
 export class ZodiacService {
   getGregorianZodiacSign(date: Date): string | null {

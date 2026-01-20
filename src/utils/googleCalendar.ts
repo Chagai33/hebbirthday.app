@@ -101,7 +101,7 @@ export function createBirthdayCalendarEvent(
     description += language === 'he' ? '\n⚠️ לאחר השקיעה' : '\n⚠️ After Sunset';
   }
 
-  // הוספת מידע על הקבוצה
+  // Add group information
   if (groupInfo) {
     if (groupInfo.parentName) {
       description += `\n(${groupInfo.parentName}: ${groupInfo.groupName})`;

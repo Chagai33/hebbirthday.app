@@ -1,4 +1,4 @@
-// GoogleCalendarClient - wrapper ל-Google Calendar API
+// GoogleCalendarClient - wrapper for Google Calendar API
 
 import { google } from 'googleapis';
 import { SyncEvent } from '../../domain/entities/types';

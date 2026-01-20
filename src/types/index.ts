@@ -322,9 +322,9 @@ export interface GoogleCalendarContextType {
   isPrimaryCalendar: boolean;
   syncStatus: 'IDLE' | 'IN_PROGRESS' | 'DELETING';
   recentActivity: SyncHistoryItem[];
-  needsCalendarSetup: boolean; // Added - מציין שהמשתמש צריך לבחור יומן ייעודי
+  needsCalendarSetup: boolean; // Added - Indicates that the user needs to choose a dedicated calendar
   statusAnnouncement: string;
-  isInitializing: boolean; // Added - מציין האם אנחנו בבדיקה ראשונית
+  isInitializing: boolean; // Added - Indicates whether we are in initial verification
   connectToGoogle: () => Promise<void>;
   syncSingleBirthday: (birthdayId: string) => Promise<SyncResult>;
   syncMultipleBirthdays: (birthdayIds: string[]) => Promise<BulkSyncResult>;

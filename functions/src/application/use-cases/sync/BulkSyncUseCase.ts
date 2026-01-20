@@ -1,5 +1,5 @@
-// BulkSyncUseCase - סנכרון מרובה של ימי הולדת
-// מקור: syncMultipleBirthdaysToGoogleCalendar + processCalendarSyncJob
+// BulkSyncUseCase - Bulk sync of birthdays
+// Source: syncMultipleBirthdaysToGoogleCalendar + processCalendarSyncJob
 
 import * as admin from 'firebase-admin';
 import { TasksClient } from '../../../infrastructure/tasks/CloudTasksClient';
@@ -32,7 +32,7 @@ export class BulkSyncUseCase {
     });
 
     // Update token status
-    // ✅ תיקון: לא מעדכנים accessToken/expiresAt - merge ישמור את הערכים הקיימים
+    // Fix: Don't update accessToken/expiresAt - merge will preserve existing values
     await this.tokenRepo.save(userId, {
       userId,
       syncStatus: 'IN_PROGRESS',
@@ -76,7 +76,7 @@ export class BulkSyncUseCase {
             bid,
             { ...birthday, isSynced: true },
             birthday.tenant_id,
-            false // ✅ שינוי: false כדי לכבד hash checking
+            false // Change: false to respect hash checking
           );
         }
         successes++;

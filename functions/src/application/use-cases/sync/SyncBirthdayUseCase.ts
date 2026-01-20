@@ -1,6 +1,6 @@
-// SyncBirthdayUseCase - סנכרון יום הולדת ל-Google Calendar
-// מקור: processBirthdaySync שורות 285-474 מ-index.ts
-// העתקה מדויקת של הלוגיקה עם DI
+// SyncBirthdayUseCase - Sync birthday to Google Calendar
+// Source: processBirthdaySync lines 285-474 from index.ts
+// Exact copy of the logic with DI
 
 import * as functions from 'firebase-functions';
 import * as crypto from 'crypto';
@@ -49,7 +49,7 @@ export class SyncBirthdayUseCase {
     } catch (e: any) {
       functions.logger.error(`Auth error for ${ownerId}:`, e);
       
-      // ✅ שינוי 1+4: No Silent Failure + זיהוי טוקן מת
+      // Change 1+4: No Silent Failure + Dead token identification
       const isTokenRevoked = e.message === 'TOKEN_REVOKED';
       
       await this.birthdayRepo.update(birthdayId, {
@@ -86,7 +86,7 @@ export class SyncBirthdayUseCase {
       archived: currentData.archived,
       notes: currentData.notes,
       groups: currentData.group_ids || [],
-      calendarId: calendarId // ✅ הוספת מזהה היומן לחתימה - פותר את הדילוג במעבר יומן
+      calendarId: calendarId // Added calendar ID to signature - fixes skipping when switching calendars
     };
     const currentDataHash = crypto.createHash('sha256')
       .update(JSON.stringify(dataToHash))
@@ -169,7 +169,7 @@ export class SyncBirthdayUseCase {
     // G. Execution
     const tasks: (() => Promise<any>)[] = [];
     const failedKeys: string[] = [];
-    const failedReasons: string[] = []; // ✅ מערך חדש לשמירת סיבות הכישלון
+    const failedReasons: string[] = []; // New array to store failure reasons
 
     // Create Tasks with Deterministic IDs
     creates.forEach(item => {
@@ -207,11 +207,11 @@ export class SyncBirthdayUseCase {
             } catch (updateErr: any) {
               functions.logger.error(`Failed to reconcile event ${deterministicId}`, updateErr);
               failedKeys.push(item.key);
-              failedReasons.push(updateErr.message); // ✅ שמירת השגיאה
+              failedReasons.push(updateErr.message); // Store the error
             }
           } else {
             failedKeys.push(item.key);
-            failedReasons.push(e.message); // ✅ שמירת השגיאה
+            failedReasons.push(e.message); // Store the error
             throw e;
           }
         }
@@ -246,12 +246,12 @@ export class SyncBirthdayUseCase {
               currentMap[item.key] = eventId;
             } catch (e2: any) {
               failedKeys.push(item.key);
-              failedReasons.push(e2.message); // ✅ שמירת השגיאה
+              failedReasons.push(e2.message); // Store the error
               throw e2;
             }
           } else {
             failedKeys.push(item.key);
-            failedReasons.push(e.message); // ✅ שמירת השגיאה
+            failedReasons.push(e.message); // Store the error
             throw e;
           }
         }
@@ -269,7 +269,7 @@ export class SyncBirthdayUseCase {
             delete currentMap[item.key];
           } else {
             failedKeys.push(item.key);
-            failedReasons.push(e.message); // ✅ שמירת השגיאה
+            failedReasons.push(e.message); // Store the error
             throw e;
           }
         }
@@ -306,7 +306,7 @@ export class SyncBirthdayUseCase {
         dataHash: currentDataHash
       },
       lastSyncedAt: new Date() as any,
-      _systemUpdate: true  // ✅ מניעת לולאה אינסופית
+      _systemUpdate: true  // Prevent infinite loop
     });
   }
 }

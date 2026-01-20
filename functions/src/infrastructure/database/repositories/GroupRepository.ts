@@ -1,4 +1,4 @@
-// GroupRepository - גישה לנתוני groups ב-Firestore
+// GroupRepository - Access to group data in Firestore
 
 import * as admin from 'firebase-admin';
 import { GroupData } from '../../../domain/entities/types';

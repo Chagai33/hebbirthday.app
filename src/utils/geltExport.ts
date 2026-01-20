@@ -1,6 +1,6 @@
 import { BudgetCalculation, BudgetConfig, AgeGroup, Child, ExportData } from '../types/gelt';
 
-// הכנת נתונים לייצוא
+// Prepare data for export
 export function prepareExportData(
   calculation: BudgetCalculation,
   budgetConfig: BudgetConfig,
@@ -28,7 +28,7 @@ export function prepareExportData(
   };
 }
 
-// ייצוא ל-CSV
+// Export to CSV
 export function exportToCSV(exportData: ExportData): string {
   const lines: string[] = [];
 

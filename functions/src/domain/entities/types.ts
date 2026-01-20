@@ -1,4 +1,4 @@
-// Domain Types - העתקה מדויקת מהקוד המקורי
+// Domain Types - Exact copy from the original code
 
 export interface CalendarEventsMap {
   [key: string]: string; // e.g., "gregorian_2025": "eventId123"
@@ -63,7 +63,7 @@ export interface BirthdayData {
   created_by?: string;
   updated_at?: any;
   updated_by?: string;
-  _systemUpdate?: boolean;  // ✅ דגל למניעת לולאה אינסופית ב-triggers
+  _systemUpdate?: boolean;  // Flag to prevent infinite loop in triggers
 }
 
 export interface TenantData {

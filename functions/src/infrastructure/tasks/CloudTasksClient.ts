@@ -1,4 +1,4 @@
-// CloudTasksClient - wrapper ל-Google Cloud Tasks
+// CloudTasksClient - wrapper for Google Cloud Tasks
 
 import { CloudTasksClient as GoogleCloudTasksClient } from '@google-cloud/tasks';
 

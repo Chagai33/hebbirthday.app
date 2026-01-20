@@ -1,5 +1,5 @@
 // DI Container - Manual Dependency Injection
-// יצירת כל התלויות והקישור ביניהן
+// Creating all dependencies and linking between them
 
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';

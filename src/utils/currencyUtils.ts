@@ -26,7 +26,7 @@ export function formatCurrency(
       maximumFractionDigits: 0,
     }).format(amount);
   } catch {
-    // Fallback למקרה ש-Intl לא זמין
+    // Fallback in case Intl is not available
     return `${amount.toFixed(0)} ${CURRENCY_SYMBOLS[currency]}`;
   }
 }

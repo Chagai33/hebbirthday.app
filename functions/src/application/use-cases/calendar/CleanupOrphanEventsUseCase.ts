@@ -1,4 +1,4 @@
-// CleanupOrphanEventsUseCase - ניקוי אירועים יתומים מ-Google Calendar
+// CleanupOrphanEventsUseCase - Clean up orphan events from Google Calendar
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';

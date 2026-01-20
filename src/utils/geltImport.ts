@@ -2,7 +2,7 @@
 import { Child } from '../types/gelt';
 import { Birthday } from '../types';
 
-// ייבוא מרשימת ימי הולדת
+// Import from birthday list
 export function importFromBirthdays(
   birthdays: Array<{
     id: string;
@@ -14,7 +14,7 @@ export function importFromBirthdays(
   const currentYear = new Date().getFullYear();
 
   return birthdays.map((birthday) => {
-    // חישוב גיל פשוט (שנה נוכחית - שנת לידה)
+    // Simple age calculation (current year - birth year)
     const birthYear = new Date(birthday.birthDate).getFullYear();
     const age = currentYear - birthYear;
 
@@ -27,11 +27,11 @@ export function importFromBirthdays(
   });
 }
 
-// ייבוא מ-CSV
+// Import from CSV
 export function parseCSVToChildren(csvData: any[]): Child[] {
   return csvData
     .map((row: any) => {
-      // תמיכה בשני פורמטים:
+      // Support for two formats:
       // 1. "First Name", "Last Name", "Age"
       // 2. "Full Name", "Age"
 
@@ -39,7 +39,7 @@ export function parseCSVToChildren(csvData: any[]): Child[] {
       let lastName = '';
 
       if (row['Full Name']) {
-        // פיצול שם מלא
+        // Split full name
         const nameParts = row['Full Name'].trim().split(' ');
         firstName = nameParts[0] || '';
         lastName = nameParts.slice(1).join(' ') || '';
@@ -51,7 +51,7 @@ export function parseCSVToChildren(csvData: any[]): Child[] {
       const age = parseInt(row['Age'], 10);
 
       return {
-        id: crypto.randomUUID(), // או ID אחר
+        id: crypto.randomUUID(), // Or another ID
         firstName,
         lastName,
         age,

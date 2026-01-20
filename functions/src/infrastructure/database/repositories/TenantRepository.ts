@@ -1,4 +1,4 @@
-// TenantRepository - גישה לנתוני tenants ב-Firestore
+// TenantRepository - Access to tenant data in Firestore
 
 import * as admin from 'firebase-admin';
 import { TenantData } from '../../../domain/entities/types';

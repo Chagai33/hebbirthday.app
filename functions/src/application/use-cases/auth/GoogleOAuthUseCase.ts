@@ -1,4 +1,4 @@
-// GoogleOAuthUseCase - אימות Google OAuth
+// GoogleOAuthUseCase - Google OAuth authentication
 
 import { GoogleAuthClient } from '../../../infrastructure/google/GoogleAuthClient';
 import { GoogleCalendarClient } from '../../../infrastructure/google/GoogleCalendarClient';

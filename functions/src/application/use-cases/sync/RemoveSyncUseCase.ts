@@ -1,4 +1,4 @@
-// RemoveSyncUseCase - הסרת סנכרון של יום הולדת מ-Google Calendar
+// RemoveSyncUseCase - Remove birthday sync from Google Calendar
 
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';

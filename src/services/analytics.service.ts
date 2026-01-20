@@ -61,20 +61,13 @@ class GoogleAnalytics {
 
     // Only initialize if user has consented
     if (!this.hasConsent()) {
-      if (this.isDev) {
-        console.log('[GA4] No consent - Analytics not initialized');
-      }
       return;
     }
 
-    if (this.isDev) {
-      console.log('[GA4] Development mode - Analytics initialized (tracking enabled but logging)');
-    }
 
     try {
       ReactGA.initialize(GA_MEASUREMENT_ID);
       this.isInitialized = true;
-      console.log('[GA4] Google Analytics 4 initialized with ID:', GA_MEASUREMENT_ID);
     } catch (error) {
       console.warn('[GA4] Failed to initialize Google Analytics 4:', error);
     }
@@ -92,10 +85,6 @@ class GoogleAnalytics {
       return;
     }
 
-    if (this.isDev) {
-      console.log('[GA4] Page View:', path);
-    }
-
     try {
       ReactGA.send({ hitType: 'pageview', page: path });
     } catch (error) {
@@ -106,10 +95,6 @@ class GoogleAnalytics {
   trackEvent(category: string, action: string, label?: string, options?: TrackEventOptions): void {
     if (!this.isInitialized) {
       return;
-    }
-
-    if (this.isDev) {
-      console.log('[GA4] Event:', { category, action, label, options });
     }
 
     try {

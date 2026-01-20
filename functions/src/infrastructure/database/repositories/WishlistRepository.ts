@@ -1,4 +1,4 @@
-// WishlistRepository - גישה לנתוני wishlist items ב-Firestore
+// WishlistRepository - Access to wishlist item data in Firestore
 
 import * as admin from 'firebase-admin';
 import { WishlistItem } from '../../../domain/entities/types';

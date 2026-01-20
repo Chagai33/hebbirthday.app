@@ -1,5 +1,5 @@
-// GoogleAuthClient - ניהול אימות ו-tokens עבור Google Calendar
-// מקור: שורות 133-176 מ-index.ts
+// GoogleAuthClient - Manage authentication and tokens for Google Calendar
+// Source: lines 133-176 from index.ts
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
@@ -52,13 +52,13 @@ export class GoogleAuthClient {
     } catch (error: any) {
       functions.logger.error(`Failed to refresh token for user ${userId}:`, error);
       
-      // ✅ שינוי 4: הבחנה בין טוקן מת לשגיאה זמנית
+      // Change 4: Distinguish between dead token and temporary error
       const isTokenRevoked = error.message?.includes('invalid_grant') || 
                              error.response?.data?.error === 'invalid_grant';
       
       if (isTokenRevoked) {
         functions.logger.warn(`Token revoked for user ${userId} - marking as disconnected`);
-        // מחק את הטוכן כדי לאלץ חיבור מחדש
+        // Delete the token to force reconnection
         await this.tokenRepo.update(userId, {
           accessToken: '',
           refreshToken: ''
@@ -66,7 +66,7 @@ export class GoogleAuthClient {
         throw new functions.https.HttpsError('permission-denied', 'TOKEN_REVOKED');
       }
       
-      // שגיאה זמנית (רשת/שרת)
+      // Temporary error (network/server)
       throw new functions.https.HttpsError('unavailable', 'TEMPORARY_ERROR');
     }
   }

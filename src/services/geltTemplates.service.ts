@@ -51,7 +51,7 @@ interface GeltTemplateDocument {
 }
 
 export const geltTemplatesService = {
-  // קבלת כל פרופילי התקציב של tenant
+  // Get all budget templates for tenant
   async getTemplates(tenantId: string): Promise<GeltTemplate[]> {
     return retryFirestoreOperation(async () => {
       const templatesRef = collection(db, 'gelt_templates');
@@ -104,7 +104,7 @@ export const geltTemplatesService = {
     });
   },
 
-  // קבלת פרופיל תקציב ספציפי
+  // Get specific budget template
   async getTemplate(templateId: string): Promise<GeltTemplate | null> {
     return retryFirestoreOperation(async () => {
       const docRef = doc(db, 'gelt_templates', templateId);
@@ -150,7 +150,7 @@ export const geltTemplatesService = {
     });
   },
 
-  // שמירת פרופיל תקציב חדש
+  // Save new budget template
   async saveTemplate(
     tenantId: string,
     template: Omit<GeltTemplate, 'id' | 'tenant_id' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by'>,
@@ -192,7 +192,7 @@ export const geltTemplatesService = {
 
       await setDoc(docRef, templateData);
 
-      // אם זה פרופיל ברירת מחדל, נסיר את הסימון מפרופילים אחרים
+      // If this is default template, remove default flag from other templates
       if (template.is_default) {
         await this.unsetOtherDefaults(tenantId, docRef.id);
       }
@@ -201,7 +201,7 @@ export const geltTemplatesService = {
     });
   },
 
-  // עדכון פרופיל תקציב קיים
+  // Update existing budget template
   async updateTemplate(
     templateId: string,
     template: Partial<Omit<GeltTemplate, 'id' | 'tenant_id' | 'created_at' | 'created_by'>>,
@@ -222,12 +222,12 @@ export const geltTemplatesService = {
 
       if (template.name !== undefined) updateData.name = template.name;
       if (template.description !== undefined) {
-        // אם description הוא null או מחרוזת ריקה, לא נכלול אותו (Firestore לא מאפשר undefined)
+        // If description is null or empty string, don't include it (Firestore doesn't allow undefined)
         if (template.description !== null && template.description.trim() !== '') {
           updateData.description = template.description.trim();
         }
-        // אם description הוא null או ריק, נשאיר את ה-field הקיים (לא נמחק אותו)
-        // אם רוצים למחוק אותו, צריך להשתמש ב-deleteField() - אבל זה לא נדרש כרגע
+        // If description is null or empty, leave the existing field (don't delete it)
+        // If we want to delete it, need to use deleteField() - but not needed currently
       }
       if (template.ageGroups !== undefined) updateData.ageGroups = template.ageGroups;
       if (template.budgetConfig !== undefined) {
@@ -244,7 +244,7 @@ export const geltTemplatesService = {
         updateData.budgetConfig = budgetConfigToSave;
       }
       if (template.customGroupSettings !== undefined) {
-        // אם customGroupSettings הוא null, לא נכלול אותו (Firestore לא מאפשר null עבור מערכים)
+        // If customGroupSettings is null, don't include it (Firestore doesn't allow null for arrays)
         if (template.customGroupSettings !== null) {
           updateData.customGroupSettings = template.customGroupSettings;
         }
@@ -253,14 +253,14 @@ export const geltTemplatesService = {
 
       await setDoc(docRef, updateData, { merge: true });
 
-      // אם זה פרופיל ברירת מחדל, נסיר את הסימון מפרופילים אחרים
+      // If this is default template, remove default flag from other templates
       if (template.is_default) {
         await this.unsetOtherDefaults((docSnap.data() as GeltTemplateDocument).tenant_id, templateId);
       }
     });
   },
 
-  // מחיקת פרופיל תקציב
+  // Delete budget template
   async deleteTemplate(templateId: string): Promise<void> {
     return retryFirestoreOperation(async () => {
       const docRef = doc(db, 'gelt_templates', templateId);
@@ -268,7 +268,7 @@ export const geltTemplatesService = {
     });
   },
 
-  // הסרת סימון ברירת מחדל מתבניות אחרות
+  // Remove default flag from other templates
   async unsetOtherDefaults(tenantId: string, currentTemplateId: string): Promise<void> {
     return retryFirestoreOperation(async () => {
       const templatesRef = collection(db, 'gelt_templates');
@@ -294,7 +294,7 @@ export const geltTemplatesService = {
     });
   },
 
-  // קבלת פרופיל תקציב ברירת מחדל
+  // Get default budget template
   async getDefaultTemplate(tenantId: string): Promise<GeltTemplate | null> {
     return retryFirestoreOperation(async () => {
       const templatesRef = collection(db, 'gelt_templates');

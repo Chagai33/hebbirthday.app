@@ -105,12 +105,12 @@ export const birthdayService = {
     if (data.firstName !== undefined) updateData.first_name = data.firstName;
     if (data.lastName !== undefined) updateData.last_name = data.lastName;
     
-    // בדיקה אם התאריך או afterSunset השתנו - אם כן, צריך לאפס את הנתונים העבריים
+    // Check if date or afterSunset changed - if so, need to reset Hebrew data
     let shouldResetHebrewData = false;
     let currentData: any = null;
     
     if (data.birthDateGregorian !== undefined || data.afterSunset !== undefined) {
-      // קוראים את המסמך הנוכחי פעם אחת לבדיקת שני השדות
+      // Read current document once to check both fields
       const currentDoc = await getDoc(doc(db, 'birthdays', birthdayId));
       currentData = currentDoc.data();
     }
@@ -125,7 +125,7 @@ export const birthdayService = {
         newBirthDateString = data.birthDateGregorian.toISOString().split('T')[0];
       }
 
-      // אם התאריך השתנה, עדכן ואפס את הנתונים העבריים
+      // If date changed, update and reset Hebrew data
       if (currentBirthDate !== newBirthDateString) {
         const birthDate = data.birthDateGregorian;
 
@@ -146,23 +146,23 @@ export const birthdayService = {
 
         shouldResetHebrewData = true;
       }
-      // אם התאריך לא השתנה, לא נעשה כלום - הנתונים העבריים נשמרים
+      // If date didn't change, do nothing - Hebrew data is preserved
     }
     
     if (data.afterSunset !== undefined) {
       const currentAfterSunset = currentData?.after_sunset ?? false;
       const newAfterSunset = data.afterSunset ?? false;
       
-      // תמיד שלח את הערך המנורמל (כדי למנוע undefined)
+      // Always send normalized value (to prevent undefined)
       updateData.after_sunset = newAfterSunset;
       
-      // אם afterSunset השתנה, צריך לאפס את הנתונים העבריים
+      // If afterSunset changed, need to reset Hebrew data
       if (currentAfterSunset !== newAfterSunset) {
         shouldResetHebrewData = true;
       }
     }
     
-    // אם אחד מהשדות הרלוונטיים השתנה, אפס את הנתונים העבריים
+    // If any relevant field changed, reset Hebrew data
     if (shouldResetHebrewData) {
       updateData.birth_date_hebrew_string = null;
       updateData.next_upcoming_hebrew_birthday = null;

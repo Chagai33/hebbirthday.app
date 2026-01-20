@@ -1,5 +1,5 @@
 // Birthday Triggers - Firebase Firestore Triggers
-// מקור: onBirthdayWrite מ-index.ts
+// Source: onBirthdayWrite from index.ts
 
 import * as functions from 'firebase-functions';
 import { createDependencies, Dependencies } from '../dependencies';
@@ -9,7 +9,7 @@ let deps: Dependencies | null = null;
 export const onBirthdayWriteFn = functions.firestore
   .document('birthdays/{birthdayId}')
   .onWrite(async (change, context) => {
-    // Lazy initialization - רק בפעם הראשונה
+    // Lazy initialization - only on first time
     if (!deps) deps = createDependencies();
     const beforeData = change.before.exists ? change.before.data() : null;
     const afterData = change.after.exists ? change.after.data() : null;
@@ -58,7 +58,7 @@ export const onBirthdayWriteFn = functions.firestore
     // 3. Smart Sync
     const finalData = { ...afterData, ...updateData };
 
-    // ✅ דלג על system updates כדי למנוע לולאה אינסופית
+    // Skip system updates to prevent infinite loop
     if (afterData._systemUpdate) {
       functions.logger.log('Skipping sync - system update detected');
       return null;

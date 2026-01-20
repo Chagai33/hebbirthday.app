@@ -5,13 +5,13 @@ import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBBqfTUaYPcxono_V_db1IaRRtPsu5kSdc",
-  authDomain: "hebbirthday2026.firebaseapp.com",
-  projectId: "hebbirthday2026",
-  storageBucket: "hebbirthday2026.firebasestorage.app",
-  messagingSenderId: "971070020927",
-  appId: "1:971070020927:web:a698918fbe5974e384078a",
-  measurementId: "G-WLLEGR9S71"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 const app = initializeApp(firebaseConfig);
@@ -26,7 +26,6 @@ if (import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true'
   connectAuthEmulator(auth, 'http://localhost:9099');
   connectFirestoreEmulator(db, 'localhost', 8080);
   connectFunctionsEmulator(functions, 'localhost', 5001);
-  console.log('🔧 Connected to Firebase Emulators');
 }
 
 export default app;

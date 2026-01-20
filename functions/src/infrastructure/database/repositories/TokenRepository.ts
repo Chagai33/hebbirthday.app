@@ -1,4 +1,4 @@
-// TokenRepository - גישה לנתוני Google Calendar tokens ב-Firestore
+// TokenRepository - Access to Google Calendar token data in Firestore
 
 import * as admin from 'firebase-admin';
 import { TokenData } from '../../../domain/entities/types';

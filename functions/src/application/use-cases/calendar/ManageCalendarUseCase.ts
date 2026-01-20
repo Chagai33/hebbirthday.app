@@ -1,4 +1,4 @@
-// ManageCalendarUseCase - ניהול Google Calendars (יצירה, מחיקה, רשימה)
+// ManageCalendarUseCase - Manage Google Calendars (create, delete, list)
 
 import { GoogleCalendarClient } from '../../../infrastructure/google/GoogleCalendarClient';
 import { TokenRepository } from '../../../infrastructure/database/repositories/TokenRepository';

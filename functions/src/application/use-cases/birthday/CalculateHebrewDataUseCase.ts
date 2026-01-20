@@ -1,5 +1,5 @@
-// CalculateHebrewDataUseCase - חישוב נתונים עבריים ליום הולדת
-// מקור: לוגיקת Hebcal מתוך onBirthdayWrite שורות 505-549
+// CalculateHebrewDataUseCase - Calculate Hebrew data for birthday
+// Source: Hebcal logic from onBirthdayWrite lines 505-549
 
 import * as functions from 'firebase-functions';
 import { HebcalService } from '../../../domain/services/HebcalService';
@@ -89,30 +89,30 @@ export class CalculateHebrewDataUseCase {
   }
 
   shouldCalculate(beforeData: any, afterData: any): boolean {
-    // אם זה system update שזה עתה בוצע (הדגל קיים עכשיו אבל לא היה קודם) - דלג
-    // כך נמנע לופ אינסופי, אבל נאפשר עדכונים עתידיים של המשתמש
+    // If this is a system update that was just performed (flag exists now but didn't exist before) - skip
+    // This prevents infinite loop, but allows future user updates
     if (afterData._systemUpdate && !beforeData?._systemUpdate) {
       return false;
     }
 
     const hasHebrew = afterData.birth_date_hebrew_string && afterData.future_hebrew_birthdays?.length;
 
-    // אם זה יום הולדת חדש לגמרי (אין beforeData)
+    // If this is a completely new birthday (no beforeData)
     if (!beforeData) {
       return !hasHebrew;
     }
 
-    // אם זה עדכון - בדוק אם התאריך השתנה
+    // If this is an update - check if the date changed
     const gregorianChanged = beforeData.birth_date_gregorian !== afterData.birth_date_gregorian;
     const sunsetChanged = beforeData.after_sunset !== afterData.after_sunset;
     const dateChanged = gregorianChanged || sunsetChanged;
 
     if (dateChanged) {
-      // התאריך השתנה - חייב לחשב מחדש!
+      // The date changed - must recalculate!
       return true;
     }
 
-    // בדיקה חדשה: אם יום ההולדת העברי הקרוב עבר - חייבים לחשב מחדש
+    // New check: if the next upcoming Hebrew birthday has passed - must recalculate
     // Note: We can't actullay do a perfect check here without fetching the tenant timezone
     // which effectively makes 'shouldCalculate' dependent on DB which we usually want to avoid in triggers pre-checks.
     // However, the 'next_upcoming_hebrew_birthday' is stored as YYYY-MM-DD.
