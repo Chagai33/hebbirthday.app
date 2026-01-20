@@ -1,6 +1,5 @@
 // Entry Point - Export all Cloud Functions
 // כל ה-exports נשארים זהים לחלוטין, רק הלוגיקה עברה למודולים
-
 import * as admin from 'firebase-admin';
 
 // Initialize Firebase Admin (once)
