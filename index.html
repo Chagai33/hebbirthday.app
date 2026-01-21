@@ -1,59 +1,67 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
-    <title>HebBirthday | Hebrew & Gregorian Calendar</title>
-    <meta name="description" content="HebBirthday - Never forget a Hebrew birthday. Sync Hebrew and Gregorian dates to Google Calendar seamlessly. Manage gift wishlists and calculate Hanukkah gelt budgets." />
 
-    <!-- Open Graph / Social Sharing -->
-    <meta property="og:title" content="HebBirthday - ניהול ימי הולדת עבריים" />
-    <meta property="og:description" content="אפליקציה לסנכרון ימי הולדת עבריים ליומן Google, חישוב דמי חנוכה וניהול מתנות" />
-    <meta property="og:image" content="https://hebbirthday.app/assets/LogoHB.jpg" />
-    <meta property="og:url" content="https://hebbirthday.app" />
-    <meta property="og:type" content="website" />
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="HebBirthday - ניהול ימי הולדת עבריים" />
-    <meta name="twitter:description" content="אפליקציה לסנכרון ימי הולדת עבריים ליומן Google" />
-    <meta name="twitter:image" content="https://hebbirthday.app/assets/LogoHB.jpg" />
-    
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-  </head>
-  <body>
-    <a href="#main-content" class="skip-link">
-  דלג לתוכן המרכזי / Skip to content
-</a>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+  <title>HebBirthday | Hebrew & Gregorian Calendar</title>
+  <meta name="description"
+    content="HebBirthday - Never forget a Hebrew birthday. Sync Hebrew and Gregorian dates to Google Calendar seamlessly. Manage gift wishlists and calculate Hanukkah gelt budgets." />
 
-    <!-- Static fallback for crawlers that don't execute JavaScript -->
-    <noscript>
-      <div style="max-width: 800px; margin: 2rem auto; padding: 2rem; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6;">
-        <h1>HebBirthday App</h1>
-        <p>HebBirthday is a comprehensive Hebrew birthday management application that helps you never forget important dates. The app synchronizes Hebrew and Gregorian birthdays to your Google Calendar, manages gift wishlists, and calculates Hanukkah gelt budgets.</p>
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:title" content="HebBirthday - ניהול ימי הולדת עבריים" />
+  <meta property="og:description"
+    content="אפליקציה לסנכרון ימי הולדת עבריים ליומן Google, חישוב דמי חנוכה וניהול מתנות" />
+  <meta property="og:image" content="https://hebbirthday.app/assets/LogoHB.jpg" />
+  <meta property="og:url" content="https://hebbirthday.app" />
+  <meta property="og:type" content="website" />
 
-        <p>Key features:</p>
-        <ul>
-          <li>Automatic synchronization of Hebrew and Gregorian birthdays to Google Calendar</li>
-          <li>Gift wishlist management for all family members</li>
-          <li>Smart Hanukkah gelt budget calculation</li>
-          <li>Guest portal for wishlist management without login</li>
-        </ul>
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="HebBirthday - ניהול ימי הולדת עבריים" />
+  <meta name="twitter:description" content="אפליקציה לסנכרון ימי הולדת עבריים ליומן Google" />
+  <meta name="twitter:image" content="https://hebbirthday.app/assets/LogoHB.jpg" />
 
-        <p>Privacy and data protection are our top priorities. We only request access to Google Calendar to create and manage your dedicated birthday calendar.</p>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
 
-        <p>
-          <a href="/privacy-en" style="color: #2563eb; text-decoration: underline;">Privacy Policy</a> |
-          <a href="/terms-en" style="color: #2563eb; text-decoration: underline;">Terms of Use</a>
-        </p>
-      </div>
-    </noscript>
+<body>
+  <a href="#main-content" class="skip-link">
+    דלג לתוכן המרכזי / Skip to content
+  </a>
 
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+  <!-- Static fallback for crawlers that don't execute JavaScript -->
+  <noscript>
+    <div
+      style="max-width: 800px; margin: 2rem auto; padding: 2rem; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6;">
+      <h1>HebBirthday App</h1>
+      <p>HebBirthday is a comprehensive Hebrew birthday management application that helps you never forget important
+        dates. The app synchronizes Hebrew and Gregorian birthdays to your Google Calendar, manages gift wishlists, and
+        calculates Hanukkah gelt budgets.</p>
+
+      <p>Key features:</p>
+      <ul>
+        <li>Automatic synchronization of Hebrew and Gregorian birthdays to Google Calendar</li>
+        <li>Gift wishlist management for all family members</li>
+        <li>Smart Hanukkah gelt budget calculation</li>
+        <li>Guest portal for wishlist management without login</li>
+      </ul>
+
+      <p>Privacy and data protection are our top priorities. We only request access to Google Calendar to create and
+        manage your dedicated birthday calendar.</p>
+
+      <p>
+        <a href="/privacy" style="color: #2563eb; text-decoration: underline;">Privacy Policy (מדיניות פרטיות)</a> |
+        <a href="/terms" style="color: #2563eb; text-decoration: underline;">Terms of Use (תנאי שימוש)</a>
+      </p>
+    </div>
+  </noscript>
+
+  <div id="root">
+    <a href="/privacy" style="visibility:hidden; height:0; width:0; overflow:hidden;">Privacy Policy</a>
+  </div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>
-
-
-
