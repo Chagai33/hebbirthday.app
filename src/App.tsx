@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useSearchParams, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { HelmetProvider } from 'react-helmet-async';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -26,6 +27,7 @@ import { GuestPortal } from './components/guest/GuestPortal';
 import { GuestAccessPage } from './components/guest/GuestAccessPage';
 import { AnalyticsTracker } from './components/common/AnalyticsTracker';
 import { CookieConsentBanner } from './components/common/CookieConsentBanner';
+import { SEO } from './components/common/SEO';
 import './config/i18n';
 
 // Guest Guard - Redirect authenticated users away from landing page
@@ -104,88 +106,91 @@ function App() {
       }
     }
   }, []);
- 
+
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <ToastProvider>
-          <AuthProvider>
-            <TenantProvider>
-              <GuestNotificationsProvider>
-                <GoogleCalendarProvider>
-                  <GroupFilterProvider>
-                    <BrowserRouter>
-                    <ActionUrlHandler />
-                    <AnalyticsTracker />
-                    <CookieConsentBanner />
-                    <Routes>
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/register" element={<Register />} />
-                      <Route path="/reset-password" element={<ResetPassword />} />
-                      <Route path="/terms" element={<TermsOfUse />} />
-                      <Route path="/privacy" element={<PrivacyPolicy />} />
-                      <Route
-                        path="/terms-en"
-                        element={
-                          <ForceEnglish>
-                            <TermsOfUse />
-                          </ForceEnglish>
-                        }
-                      />
-                      <Route
-                        path="/privacy-en"
-                        element={
-                          <ForceEnglish>
-                            <PrivacyPolicy />
-                          </ForceEnglish>
-                        }
-                      />
-                      <Route path="/accessibility" element={<Accessibility />} />
-                      <Route path="/guide" element={<UserGuide />} />
-                      <Route path="/portal" element={<GuestPortal />} />
-                      <Route path="/guest/:groupId/:token" element={<GuestAccessPage />} />
-                      <Route
-                        path="/"
-                        element={
-                          <RedirectIfAuthenticated>
-                            <LandingPage />
-                          </RedirectIfAuthenticated>
-                        }
-                      />
-                      <Route
-                        path="/dashboard"
-                        element={
-                          <ProtectedRoute>
-                            <Dashboard />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/groups"
-                        element={
-                          <ProtectedRoute>
-                            <GroupsPanel />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/gelt"
-                        element={
-                          <ProtectedRoute>
-                            <GeltPage />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route path="*" element={<Navigate to="/" replace />} />
-                    </Routes>
-                    </BrowserRouter>
-                  </GroupFilterProvider>
-                </GoogleCalendarProvider>
-              </GuestNotificationsProvider>
-            </TenantProvider>
-          </AuthProvider>
-        </ToastProvider>
-      </TooltipProvider>
+      <HelmetProvider>
+        <TooltipProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <TenantProvider>
+                <GuestNotificationsProvider>
+                  <GoogleCalendarProvider>
+                    <GroupFilterProvider>
+                      <BrowserRouter>
+                        <SEO />
+                        <ActionUrlHandler />
+                        <AnalyticsTracker />
+                        <CookieConsentBanner />
+                        <Routes>
+                          <Route path="/login" element={<Login />} />
+                          <Route path="/register" element={<Register />} />
+                          <Route path="/reset-password" element={<ResetPassword />} />
+                          <Route path="/terms" element={<TermsOfUse />} />
+                          <Route path="/privacy" element={<PrivacyPolicy />} />
+                          <Route
+                            path="/terms-en"
+                            element={
+                              <ForceEnglish>
+                                <TermsOfUse />
+                              </ForceEnglish>
+                            }
+                          />
+                          <Route
+                            path="/privacy-en"
+                            element={
+                              <ForceEnglish>
+                                <PrivacyPolicy />
+                              </ForceEnglish>
+                            }
+                          />
+                          <Route path="/accessibility" element={<Accessibility />} />
+                          <Route path="/guide" element={<UserGuide />} />
+                          <Route path="/portal" element={<GuestPortal />} />
+                          <Route path="/guest/:groupId/:token" element={<GuestAccessPage />} />
+                          <Route
+                            path="/"
+                            element={
+                              <RedirectIfAuthenticated>
+                                <LandingPage />
+                              </RedirectIfAuthenticated>
+                            }
+                          />
+                          <Route
+                            path="/dashboard"
+                            element={
+                              <ProtectedRoute>
+                                <Dashboard />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/groups"
+                            element={
+                              <ProtectedRoute>
+                                <GroupsPanel />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/gelt"
+                            element={
+                              <ProtectedRoute>
+                                <GeltPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route path="*" element={<Navigate to="/" replace />} />
+                        </Routes>
+                      </BrowserRouter>
+                    </GroupFilterProvider>
+                  </GoogleCalendarProvider>
+                </GuestNotificationsProvider>
+              </TenantProvider>
+            </AuthProvider>
+          </ToastProvider>
+        </TooltipProvider>
+      </HelmetProvider>
     </QueryClientProvider>
   );
 }
