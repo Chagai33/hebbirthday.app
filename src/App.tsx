@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import { TenantProvider } from './contexts/TenantContext';
 import { GroupFilterProvider } from './contexts/GroupFilterContext';
 import { GoogleCalendarProvider } from './contexts/GoogleCalendarContext';
@@ -30,24 +30,7 @@ import { CookieConsentBanner } from './components/common/CookieConsentBanner';
 import { SEO } from './components/common/SEO';
 import './config/i18n';
 
-// Guest Guard - Redirect authenticated users away from landing page
-const RedirectIfAuthenticated = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-10">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  return <>{children}</>;
-};
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -151,9 +134,7 @@ function App() {
                           <Route
                             path="/"
                             element={
-                              <RedirectIfAuthenticated>
-                                <LandingPage />
-                              </RedirectIfAuthenticated>
+                              <LandingPage />
                             }
                           />
                           <Route
